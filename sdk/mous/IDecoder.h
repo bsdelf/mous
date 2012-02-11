@@ -19,7 +19,7 @@ class IDecoder
 public:
     virtual ~IDecoder() { }
 
-    virtual const std::vector<std::string> GetFileSuffix() const = 0;
+    virtual void GetFileSuffix(std::vector<std::string>& list) const = 0;
 
     virtual ErrorCode Open(const std::string& url) = 0;
     virtual void Close() = 0;

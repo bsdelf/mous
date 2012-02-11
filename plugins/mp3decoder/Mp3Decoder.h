@@ -12,7 +12,7 @@ public:
     Mp3Decoder();
     virtual ~Mp3Decoder();
 
-    virtual const std::vector<std::string> GetFileSuffix() const;
+    virtual void GetFileSuffix(std::vector<std::string>& list) const;
 
     virtual ErrorCode Open(const std::string& url);
     virtual void Close();

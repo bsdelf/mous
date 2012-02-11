@@ -23,13 +23,12 @@ Mp3Decoder::~Mp3Decoder()
     mpg123_exit();
 }
 
-const std::vector<std::string> Mp3Decoder::GetFileSuffix() const
+void Mp3Decoder::GetFileSuffix(vector<string>& list) const
 {
-    vector<string> suffix;
-    suffix.push_back("mp3");
-    suffix.push_back("MP3");
-    suffix.push_back("Mp3");
-    return suffix;
+    list.clear();
+    list.push_back("mp3");
+    list.push_back("MP3");
+    list.push_back("Mp3");
 }
 
 ErrorCode Mp3Decoder::Open(const std::string& url)
