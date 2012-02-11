@@ -49,6 +49,11 @@ target_link_libraries(mous-cli MousCore)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/plugins)
 
+# oss plugin
+file(GLOB SRC_OSS_RENDERER plugins/oss/*.cpp)
+add_library(OssRenderer SHARED ${SRC_OSS_RENDERER})
+target_link_libraries(OssRenderer)
+
 # mp3 plugin
 file(GLOB SRC_MP3_DECODER plugins/mp3decoder/*.cpp)
 add_library(Mp3Decoder SHARED ${SRC_MP3_DECODER})

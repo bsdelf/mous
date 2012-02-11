@@ -15,13 +15,11 @@ int main(int argc, char** argv)
 
     mgr.LoadPluginDir("./plugins");
 
+    /**
+     * Dump all plugin path.
+     */
     vector<string> list;
     mgr.GetPluginPath(list);
-
-    vector<IDecoder*> decoderList;
-    mgr.GetDecoders(decoderList);
-
-    cout << "> decoders count:" << decoderList.size() << endl;
     for (size_t i = 0; i < list.size(); ++i) {
 	cout << ">> " << list[i] << endl;
 	const PluginInfo* info = mgr.GetPluginInfo(list[i]);
@@ -30,7 +28,23 @@ int main(int argc, char** argv)
 	cout << ">>>> " << info->description << endl;
 	cout << ">>>> " << info->version << endl;
     }
+    cout << endl;
 
+    /**
+     * Get all plugin instances.
+     */
+    vector<IDecoder*> decoderList;
+    mgr.GetDecoders(decoderList);
+    cout << ">> decoders count:" << decoderList.size() << endl;
+
+    vector<IRenderer*> rendererList;
+    mgr.GetRenderers(rendererList);
+    cout << ">> renderers count:" << rendererList.size() << endl;
+    cout << endl;
+
+    /**
+     * Check args
+     */
     if (argc < 2) {
 	cout << "Usage:" << endl;
 	cout << "mous-cli [-r] [file]" << endl;

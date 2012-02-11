@@ -14,6 +14,11 @@ enum ErrorCode {
     MousDecoderFailedToOpen,
     MousDecoderOutOfRange,
 
+    MousRendererFailedToSetup,
+    MousRendererFailedToWrite,
+    MousRendererBadChannels,
+    MousRendererBadSampleRate,
+    MousRendererBadBitsPerSample,
     MousRendererIsNotSupported,
 
     MousBadFormat,

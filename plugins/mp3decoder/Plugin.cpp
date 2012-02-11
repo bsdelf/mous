@@ -3,8 +3,8 @@
 
 static const PluginInfo info = {
     "Yanhui Shen",
-    "mpg123 decoder",
-    "decoder for mp3",
+    "MPG123 Decoder",
+    "Decoder for MPG layer 1/2/3 audio.",
     1
 };
 
