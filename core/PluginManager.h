@@ -4,14 +4,17 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <mous/IDecoder.h>
-#include <mous/IRenderer.h>
-#include <mous/IMediaList.h>
-#include "PluginAgent.h"
-
+#include <mous/ErrorCode.h>
+#include <mous/PluginHelper.h>
 struct stat;
 
 namespace mous {
+
+class PluginInfo;
+class IPluginAgent;
+class IDecoder;
+class IRenderer;
+class IMediaList;
 
 class PluginManager
 {
@@ -24,25 +27,24 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadAllPlugins();
 
-    std::vector<std::string> GetPluginPath(const PluginType& type);
+    void GetPluginPath(std::vector<std::string>& list);
     const PluginInfo* GetPluginInfo(const std::string& path);
-    std::vector<IDecoder*> GetDecoders();
-    std::vector<IRenderer*> GetRenderers();
-    std::vector<IMediaList*> GetMediaLists();
+
+    void GetDecoders(std::vector<IDecoder*>& list);
+    void GetRenderers(std::vector<IRenderer*>& list);
+    void GetMediaLists(std::vector<IMediaList*>& list);
 
 private:
     static std::vector<std::string>* pFtwFiles;
     static int OnFtw(const char* file, const struct stat* s, int);
 
 private:
-    std::map<std::string, PluginAgent<IDecoder>*> m_decoderMap;
-    //std::map<std::string, PluginAgent<IEncoder>*> m_encoderMap;
-    std::map<std::string, PluginAgent<IRenderer>*> m_rendererMap;
-    std::map<std::string, PluginAgent<IMediaList>*> m_medialistMap;
+    template<typename Super>
+    void GetPluginsByType(std::vector<Super*>& list, PluginType);
 
-    typedef std::map<std::string, PluginAgent<IDecoder>*>::iterator DecoderMapIter;
-    typedef std::map<std::string, PluginAgent<IRenderer>*>::iterator RendererMapIter;
-    typedef std::map<std::string, PluginAgent<IMediaList>*>::iterator MediaListMapIter;
+private:
+    std::map<std::string, IPluginAgent*> m_pluginMap;
+    typedef std::map<std::string, IPluginAgent*>::iterator PluginMapIter;
 };
 
 }

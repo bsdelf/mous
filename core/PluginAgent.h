@@ -6,15 +6,41 @@
 #include <mous/PluginHelper.h>
 namespace mous {
 
+class IPluginAgent
+{
+public:
+    virtual ~IPluginAgent() { }
+
+    virtual PluginType GetType() const = 0;
+    virtual ErrorCode Open(const std::string& path) = 0;
+    virtual void Close() = 0;
+    virtual const PluginInfo* GetInfo() = 0;
+};
+
 template<typename PluginSuperClass>
-class PluginAgent
+class PluginAgent: public IPluginAgent
 {
     typedef const PluginInfo* (*FnGetPluginInfo)(void);
     typedef PluginSuperClass* (*FnCreatePlugin)(void);
     typedef void (*FnReleasePlugin)(PluginSuperClass*);
 
 public:
-    ErrorCode Open(const std::string& path)
+    explicit PluginAgent(PluginType type):
+	m_type(type) 
+    {
+
+    }
+
+    virtual ~PluginAgent() {
+
+    }
+
+    virtual PluginType GetType() const
+    {
+	return m_type;
+    }
+
+    virtual ErrorCode Open(const std::string& path)
     {
 	m_pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 	if (m_pHandle == NULL)
@@ -39,7 +65,7 @@ public:
 	return MousOk;
     }
 
-    void Close()
+    virtual void Close()
     {
 	if (m_fnRelease != NULL)
 	    m_fnRelease(m_pPlugin);
@@ -48,17 +74,19 @@ public:
 	    dlclose(m_pHandle);
     }
 
-    const PluginInfo* GetInfo()
+    virtual const PluginInfo* GetInfo()
     {
 	return (m_fnGetInfo != NULL) ? m_fnGetInfo() : NULL;
     }
 
-    const PluginSuperClass* GetPlugin()
+    PluginSuperClass* GetPlugin()
     {
 	return m_pPlugin;
     }
 
 private:
+    PluginType m_type;
+
     void* m_pHandle;
 
     FnGetPluginInfo m_fnGetInfo;

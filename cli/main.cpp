@@ -16,8 +16,12 @@ int main(int argc, char** argv)
     mgr.LoadPluginDir("./plugins");
 
     vector<string> list;
-    list = mgr.GetPluginPath(MousDecoder);
-    cout << "# Decoders:" << endl;
+    mgr.GetPluginPath(list);
+
+    vector<IDecoder*> decoderList;
+    mgr.GetDecoders(decoderList);
+
+    cout << "> decoders count:" << decoderList.size() << endl;
     for (size_t i = 0; i < list.size(); ++i) {
 	cout << ">> " << list[i] << endl;
 	const PluginInfo* info = mgr.GetPluginInfo(list[i]);
