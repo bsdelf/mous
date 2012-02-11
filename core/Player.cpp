@@ -11,16 +11,16 @@ Player::Player():
     m_Status(MousStopped),
     m_StopDecoder(false),
     m_SuspendDecoder(true),
-    m_IsDecoding(false),
     m_pDecoder(NULL),
     m_SemWakeDecoder(0, 0),
     m_SemDecoderSuspended(0, 0),
     m_StopRenderer(false),
     m_SuspendRenderer(true),
-    m_IsRendering(false),
     m_pRenderer(NULL),
     m_SemWakeRenderer(0, 0),
-    m_SemRendererSuspended(0, 0)
+    m_SemRendererSuspended(0, 0),
+    m_rangeBeg(0),
+    m_rangeEnd(0)
 {
     m_FrameBuffer.AllocBuffer(5);
 
@@ -59,18 +59,14 @@ void Player::RemoveAllDecoders()
 
 }
 
-void Player::AddRenderer(IRenderer* pRenderer)
+void Player::SetRenderer(IRenderer* pRenderer)
 {
+    m_pRenderer = pRenderer;
 }
 
-void Player::RemoveRenderer(IRenderer* pRenderer)
+void Player::UnsetRenderer()
 {
-
-}
-
-void Player::RemoveAllRenderers()
-{
-
+    m_pRenderer = NULL;
 }
 
 ErrorCode Player::Open(const string& path)
@@ -163,16 +159,14 @@ void Player::WorkForDecoder()
 	if (m_StopDecoder)
 	    break;
 
-	m_IsDecoding = true;
-	while (true) {
-	    FrameBuffer* item = m_FrameBuffer.TakeFree();
-
-	    m_FrameBuffer.RecycleFree(item);
+	for (FrameBuffer* buf = NULL; ; ) {
+	    buf = m_FrameBuffer.TakeFree();
+	    m_pDecoder->ReadUnit(buf->data, buf->used);
+	    m_FrameBuffer.RecycleFree(buf);
 
 	    if (m_SuspendDecoder)
 		break;
 	}
-	m_IsDecoding = false;
 
 	m_SemDecoderSuspended.Post();
     }
@@ -185,20 +179,14 @@ void Player::WorkForRenderer()
 	if (m_StopRenderer)
 	    break;
 
-	int a = 0;
-	m_IsRendering = true;
-	while (true) {
-	    FrameBuffer* item = m_FrameBuffer.TakeData();
-
-	    usleep(1000);
-	    cout << a++ << '\r' << flush;
-
-	    m_FrameBuffer.RecycleData(item);
+	for (FrameBuffer* buf = NULL; ; ) {
+	    buf = m_FrameBuffer.TakeData();
+	    m_pRenderer->WriteDevice(buf->data, buf->used);
+	    m_FrameBuffer.RecycleData(buf);
 
 	    if (m_SuspendRenderer)
 		break;
 	}
-	m_IsRendering = false;
 
 	m_SemRendererSuspended.Post();
     }

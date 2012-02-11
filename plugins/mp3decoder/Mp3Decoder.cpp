@@ -11,7 +11,7 @@ Mp3Decoder::Mp3Decoder()
 
     mpg123_param(m_pHandle, MPG123_FLAGS, MPG123_QUIET, 0);
 
-    m_msPerUnit = mpg123_outblock(m_pHandle);
+    m_MaxBytesPerUnit = mpg123_outblock(m_pHandle);
 }
 
 Mp3Decoder::~Mp3Decoder()
@@ -41,19 +41,25 @@ ErrorCode Mp3Decoder::Open(const std::string& url)
 
     mpg123_scan(m_pHandle);
     mpg123_seek_frame(m_pHandle, 0, SEEK_END);
-    m_unitCount = mpg123_tellframe(m_pHandle);
+    m_UnitCount = mpg123_tellframe(m_pHandle);
     mpg123_seek_frame(m_pHandle, 0, SEEK_SET);
 
-    if (m_unitCount <= 0)
+    if (m_UnitCount <= 0)
 	return MousDecoderFailedToOpen;
 
-    long rate;
+    long sampleRate;
     int channels;
     int encoding;
-    mpg123_getformat(m_pHandle, &rate, &channels, &encoding);
+    mpg123_getformat(m_pHandle, &sampleRate, &channels, &encoding);
 
-    m_duration = mpg123_tpf(m_pHandle) * 1000.f * m_unitCount;
-    m_unitIndex = 0;
+    m_Channels = channels;
+    m_SampleRate = sampleRate;
+    m_BitRate = (encoding == MPG123_ENC_SIGNED_16) || 
+	(encoding = MPG123_ENC_UNSIGNED_16) || 
+	(encoding == MPG123_ENC_16) ? 16: 8;
+
+    m_Duration = mpg123_tpf(m_pHandle) * 1000.f * m_UnitCount;
+    m_UnitIndex = 0;
 
     return MousOk;
 }
@@ -69,31 +75,46 @@ bool Mp3Decoder::IsFormatVaild() const
     return true;
 }
 
-ErrorCode Mp3Decoder::ReadUnit()
+ErrorCode Mp3Decoder::ReadUnit(char* data, uint32_t& used)
 {
-    ++m_unitIndex;
-    return MousOk;
+    if (m_UnitIndex < m_UnitCount) {
+	unsigned char* _data;
+	size_t _len;
+	mpg123_decode_frame(m_pHandle, (off_t*)&m_UnitIndex, &_data, &_len);
+	memcpy(data, _data, _len);
+	used = _len;
+	++m_UnitIndex;
+	return MousOk;
+    } else {
+	used = 0;
+	return MousDecoderOutOfRange;
+    }
 }
 
-ErrorCode Mp3Decoder::SetUnitIndex(uint32_t index)
+ErrorCode Mp3Decoder::SetUnitIndex(uint64_t index)
 {
-    m_unitIndex = index;
-    return MousOk;
+    if (index < m_UnitCount) {
+	m_UnitIndex = index;
+	mpg123_seek_frame(m_pHandle, m_UnitIndex, SEEK_SET);
+	return MousOk;
+    } else {
+	return MousDecoderOutOfRange;
+    }
 }
 
-uint32_t Mp3Decoder::GetUnitIndex() const
+uint32_t Mp3Decoder::GetMaxBytesPerUnit() const
 {
-    return 0;
+    return m_MaxBytesPerUnit;
 }
 
-uint32_t Mp3Decoder::GetUnitCount() const
+uint64_t Mp3Decoder::GetUnitIndex() const
 {
-    return 0;
+    return m_UnitIndex;
 }
 
-uint32_t Mp3Decoder::GetMsPerUnit() const
+uint64_t Mp3Decoder::GetUnitCount() const
 {
-    return 0;
+    return m_UnitCount;
 }
 
 AudioMode Mp3Decoder::GetAudioMode() const
@@ -101,17 +122,22 @@ AudioMode Mp3Decoder::GetAudioMode() const
     return MousStereo;
 }
 
+uint32_t Mp3Decoder::GetChannels() const
+{
+    return m_Channels;
+}
+
 uint32_t Mp3Decoder::GetBitRate() const
 {
-    return 0;
+    return m_BitRate;
 }
 
 uint32_t Mp3Decoder::GetSampleRate() const
 {
-    return 0;
+    return m_SampleRate;
 }
 
 uint64_t Mp3Decoder::GetDuration() const
 {
-    return 0;
+    return m_Duration;
 }

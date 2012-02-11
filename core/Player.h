@@ -34,9 +34,8 @@ public:
     void RemoveDecoder(IDecoder* pDecoder);
     void RemoveAllDecoders();
 
-    void AddRenderer(IRenderer* pRenderer);
-    void RemoveRenderer(IRenderer* pRenderer);
-    void RemoveAllRenderers();
+    void SetRenderer(IRenderer* pRenderer);
+    void UnsetRenderer();
 
     ErrorCode Open(const string& path);
     void Close();
@@ -54,19 +53,33 @@ private:
     void WorkForRenderer();
 
 private:
-    struct FrameBuffer {
+    struct FrameBuffer
+    {
 	char* data;
-	int32_t length;
+	uint32_t used;
+	uint32_t max;
 
-	FrameBuffer(): data(NULL), length(0) {
-
+	FrameBuffer(): 
+	    data(NULL),
+	    used(0),
+	    max(0)
+	{
 	}
 
-	~FrameBuffer() {
+	FrameBuffer(uint32_t size):
+	    data(new char[size]),
+	    used(0),
+	    max(size)
+	{
+	}
+
+	~FrameBuffer()
+	{
 	    if (data != NULL)
 		delete[] data;
 	    data = NULL;
-	    length = 0;
+	    used = 0;
+	    max = 0;
 	}
     };
 
@@ -90,6 +103,9 @@ private:
     scx::SemVar m_SemRendererSuspended;
 
     scx::PVBuffer<FrameBuffer> m_FrameBuffer;
+
+    uint64_t m_rangeBeg;
+    uint64_t m_rangeEnd;
 };
 
 }

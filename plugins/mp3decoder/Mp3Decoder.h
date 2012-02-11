@@ -19,23 +19,29 @@ public:
 
     virtual bool IsFormatVaild() const;
 
-    virtual ErrorCode ReadUnit();
-    virtual ErrorCode SetUnitIndex(uint32_t index);
-    virtual uint32_t GetUnitIndex() const;
-    virtual uint32_t GetUnitCount() const;
-    virtual uint32_t GetMsPerUnit() const;
+    virtual ErrorCode ReadUnit(char* data, uint32_t& used);
+    virtual ErrorCode SetUnitIndex(uint64_t index);
+    virtual uint32_t GetMaxBytesPerUnit() const;
+    virtual uint64_t GetUnitIndex() const;
+    virtual uint64_t GetUnitCount() const;
 
     virtual AudioMode GetAudioMode() const;
+    virtual uint32_t GetChannels() const;
     virtual uint32_t GetBitRate() const;
     virtual uint32_t GetSampleRate() const;
     virtual uint64_t GetDuration() const;
 
 private:
     mpg123_handle* m_pHandle;
-    uint32_t m_unitIndex;
-    uint32_t m_unitCount;
-    uint32_t m_msPerUnit;
-    uint64_t m_duration;
+
+    uint32_t m_MaxBytesPerUnit;
+    uint64_t m_UnitIndex;
+    uint64_t m_UnitCount;
+
+    uint32_t m_Channels;
+    uint32_t m_BitRate;
+    uint32_t m_SampleRate;
+    uint64_t m_Duration;
 };
 
 #endif
