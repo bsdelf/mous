@@ -20,7 +20,7 @@ ErrorCode OssRenderer::OpenDevice(const std::string& path)
 {
     m_fd = open(path.c_str(), O_WRONLY);
     m_isOpened = (m_fd == -1) ? false : true;
-    return MousOk;
+    return (m_fd >= 0 && m_isOpened) ? MousOk : MousRendererFailedToOpen;
 }
 
 void OssRenderer::CloseDevice()

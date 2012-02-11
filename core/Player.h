@@ -4,10 +4,6 @@
 #include <string>
 #include <map>
 #include <mous/ErrorCode.h>
-#include <mous/IDecoder.h>
-#include <mous/IFilter.h>
-#include <mous/IRenderer.h>
-#include <PluginAgent.h>
 #include <scx/Thread.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/PVBuffer.hpp>
@@ -22,6 +18,9 @@ enum PlayerStatus
     MousPaused
 };
 
+class IDecoder;
+class IRenderer;
+
 class Player
 {
 public:
@@ -31,13 +30,13 @@ public:
 public:
     PlayerStatus GetStatus() const;
 
-    ErrorCode LoadDecoder(PluginAgent<IDecoder>* agent);
-    void UnloadDecoder(PluginAgent<IDecoder>* agent);
-    void UnloadAllDecoders();
+    void AddDecoder(IDecoder* pDecoder);
+    void RemoveDecoder(IDecoder* pDecoder);
+    void RemoveAllDecoders();
 
-    ErrorCode LoadRenderer(PluginAgent<IRenderer>* agent);
-    void UnloadRenderer(PluginAgent<IRenderer>* agent);
-    void UnloadAllRenderers();
+    void AddRenderer(IRenderer* pRenderer);
+    void RemoveRenderer(IRenderer* pRenderer);
+    void RemoveAllRenderers();
 
     ErrorCode Open(const string& path);
     void Close();

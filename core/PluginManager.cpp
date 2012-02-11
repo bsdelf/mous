@@ -141,6 +141,18 @@ void PluginManager::GetMediaLists(std::vector<IMediaList*>& list)
     return GetPluginsByType(list, MousMediaList);
 }
 
+void* PluginManager::GetVpPlugin(const std::string& path, PluginType& type)
+{
+    PluginMapIter iter = m_pluginMap.find(path);
+    if (iter != m_pluginMap.end()) {
+	IPluginAgent* pAgent = iter->second;
+	type = pAgent->GetType();
+	return pAgent->GetVpPlugin();
+    } else {
+	return NULL;
+    }
+}
+
 template<typename Super>
 void PluginManager::GetPluginsByType(vector<Super*>& list, PluginType type)
 {

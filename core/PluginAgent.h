@@ -15,6 +15,7 @@ public:
     virtual ErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
     virtual const PluginInfo* GetInfo() = 0;
+    virtual void* GetVpPlugin() = 0;
 };
 
 template<typename PluginSuperClass>
@@ -77,6 +78,11 @@ public:
     virtual const PluginInfo* GetInfo()
     {
 	return (m_fnGetInfo != NULL) ? m_fnGetInfo() : NULL;
+    }
+
+    virtual void* GetVpPlugin()
+    {
+	return m_pPlugin;
     }
 
     PluginSuperClass* GetPlugin()

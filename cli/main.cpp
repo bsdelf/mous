@@ -53,6 +53,10 @@ int main(int argc, char** argv)
     }
 
     Player player;
+
+    /**
+     * Setup player.
+     */
     player.Open(argv[1]);
     player.Play();
 

@@ -7,7 +7,8 @@
 namespace mous {
 
 enum PluginType {
-    MousDecoder = 1,
+    MousNone = 0,
+    MousDecoder,
     MousEncoder,
     MousRenderer,
     MousMediaList,

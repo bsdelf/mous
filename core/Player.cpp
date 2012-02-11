@@ -1,5 +1,7 @@
 #include "Player.h"
 #include <scx/Function.hpp>
+#include <mous/IDecoder.h>
+#include <mous/IRenderer.h>
 using namespace scx;
 using namespace mous;
 
@@ -44,31 +46,29 @@ PlayerStatus Player::GetStatus() const
     return m_Status;
 }
 
-ErrorCode Player::LoadDecoder(PluginAgent<IDecoder>* agent)
-{
-    return MousOk;
-}
-
-void Player::UnloadDecoder(PluginAgent<IDecoder>* agent)
+void Player::AddDecoder(IDecoder* pDecoder)
 {
 }
 
-void Player::UnloadAllDecoders()
+void Player::RemoveDecoder(IDecoder* pDecoder)
 {
-
 }
 
-ErrorCode Player::LoadRenderer(PluginAgent<IRenderer>* agent)
-{
-    return MousOk;
-}
-
-void Player::UnloadRenderer(PluginAgent<IRenderer>* agent)
+void Player::RemoveAllDecoders()
 {
 
 }
 
-void Player::UnloadAllRenderers()
+void Player::AddRenderer(IRenderer* pRenderer)
+{
+}
+
+void Player::RemoveRenderer(IRenderer* pRenderer)
+{
+
+}
+
+void Player::RemoveAllRenderers()
 {
 
 }

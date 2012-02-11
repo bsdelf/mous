@@ -34,6 +34,8 @@ public:
     void GetRenderers(std::vector<IRenderer*>& list);
     void GetMediaLists(std::vector<IMediaList*>& list);
 
+    void* GetVpPlugin(const std::string& path, PluginType& type);
+
 private:
     static std::vector<std::string>* pFtwFiles;
     static int OnFtw(const char* file, const struct stat* s, int);
