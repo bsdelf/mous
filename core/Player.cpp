@@ -213,6 +213,8 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
     m_pDecoder->SetUnitIndex(m_UnitBeg);
 
+    m_FrameBuffer.ResetPV();
+
     m_SuspendRenderer = false;
     m_SuspendDecoder = false;
     m_SemWakeDecoder.Post();
@@ -221,19 +223,19 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
 void Player::Pause()
 {
-    cout << "Pause()" << endl;
-    if (m_IsRendering) {
+    if (!m_SuspendRenderer) {
 	m_SuspendRenderer = true;
+	m_FrameBuffer.RecycleFree(NULL);
 	m_SemRendererSuspended.Wait();
     }
 
-    cout << "Pause()1" << endl;
-    if (m_IsDecoding) {
+    if (!m_SuspendDecoder) {
 	m_SuspendDecoder = true;
+	m_FrameBuffer.RecycleData(NULL);
 	m_SemDecoderSuspended.Wait();
     }
 
-    cout << "Pause() done" << endl;
+    m_FrameBuffer.ResetPV();
 }
 
 void Player::Resume()
@@ -246,23 +248,7 @@ void Player::Resume()
 
 void Player::Stop()
 {
-    cout << "Stop()" << endl;
-    if (m_IsRendering) {
-	m_SuspendRenderer = true;
-	m_FrameBuffer.RecycleFree(NULL);
-	m_SemRendererSuspended.Wait();
-    }
-
-    cout << "Stop() 1" << endl;
-    if (m_IsDecoding) {
-	m_SuspendDecoder = true;
-	m_FrameBuffer.RecycleData(NULL);
-	m_SemDecoderSuspended.Wait();
-    }
-
-    m_FrameBuffer.ResetPV();
-
-    cout << "Stop() done" << endl;
+    Pause();
 }
 
 void Player::Seek(uint64_t msPos)
@@ -289,13 +275,13 @@ void Player::WorkForDecoder()
 
 	for (FrameBuffer* buf = NULL; ; ) {
 	    buf = m_FrameBuffer.TakeFree();
-	    m_pDecoder->ReadUnit(buf->data, buf->used);
-	    m_FrameBuffer.RecycleFree(buf);
-	    ++m_DecoderIndex;
-	    if (m_DecoderIndex >= m_UnitEnd)
+	    if (m_SuspendDecoder)
 		break;
 
-	    if (m_SuspendDecoder)
+	    m_pDecoder->ReadUnit(buf->data, buf->used);
+	    m_FrameBuffer.RecycleFree(buf);
+
+	    if (++m_DecoderIndex >= m_UnitEnd)
 		break;
 	}
 
@@ -311,18 +297,20 @@ void Player::WorkForRenderer()
 	    break;
 
 	for (FrameBuffer* buf = NULL; ; ) {
-	    cout << m_FrameBuffer.GetDataCount() << flush;
 	    buf = m_FrameBuffer.TakeData();
-	    m_pRenderer->WriteDevice(buf->data, buf->used);
-	    m_FrameBuffer.RecycleData(buf);
-	    ++m_RendererIndex;
-	    if (m_RendererIndex >= m_UnitEnd)
+	    if (m_SuspendRenderer)
 		break;
 
-	    if (m_SuspendRenderer)
+	    m_pRenderer->WriteDevice(buf->data, buf->used);
+	    m_FrameBuffer.RecycleData(buf);
+
+	    if (++m_RendererIndex >= m_UnitEnd)
 		break;
 	}
 
 	m_SemRendererSuspended.Post();
+
+	if (m_RendererIndex >= m_UnitEnd)
+	    SigFinished();
     }
 }

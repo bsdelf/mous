@@ -7,6 +7,11 @@
 using namespace std;
 using namespace mous;
 
+void OnFinished()
+{
+    cout << "Finished!" << endl;
+}
+
 int main(int argc, char** argv)
 {
     char ch = ' ';
@@ -62,6 +67,7 @@ int main(int argc, char** argv)
      * Setup player.
      */
     Player player;
+    player.SigFinished.Connect(&OnFinished);
     player.SetRenderer(rendererList[0]);
     for (size_t i = 0; i < decoderList.size(); ++i) {
 	player.AddDecoder(decoderList[i]);
@@ -82,11 +88,8 @@ int main(int argc, char** argv)
 		break;
 
 	    case 's':
+		paused = false;
 		player.Stop();
-		cout << "done" << endl;
-		player.Stop();
-		cout << "done" << endl;
-		player.Close();
 		break;
 
 	    case 'p':

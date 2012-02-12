@@ -94,7 +94,6 @@ private:
 
     bool m_StopDecoder;
     bool m_SuspendDecoder;
-    bool m_IsDecoding;
     IDecoder* m_pDecoder;
     scx::Thread m_ThreadForDecoder;
     scx::SemVar m_SemWakeDecoder;
@@ -102,7 +101,6 @@ private:
 
     bool m_StopRenderer;
     bool m_SuspendRenderer;
-    bool m_IsRendering;
     IRenderer* m_pRenderer;
     scx::Thread m_ThreadForRenderer;
     scx::SemVar m_SemWakeRenderer;
