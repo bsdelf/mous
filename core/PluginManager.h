@@ -29,6 +29,7 @@ public:
 
     void GetPluginPath(std::vector<std::string>& list);
     const PluginInfo* GetPluginInfo(const std::string& path);
+    const PluginInfo* GetPluginInfo(const void* vp);
 
     void GetDecoders(std::vector<IDecoder*>& list);
     void GetRenderers(std::vector<IRenderer*>& list);

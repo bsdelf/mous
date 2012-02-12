@@ -126,6 +126,16 @@ const PluginInfo* PluginManager::GetPluginInfo(const std::string& path)
 	iter->second->GetInfo() : NULL;
 }
 
+const PluginInfo* PluginManager::GetPluginInfo(const void* vp)
+{
+    for (PluginMapIter iter = m_PluginMap.begin();
+	iter != m_PluginMap.end(); ++iter) {
+	if (iter->second->GetVpPlugin() == vp)
+	    return iter->second->GetInfo();
+    }
+    return NULL;
+}
+
 void PluginManager::GetDecoders(std::vector<IDecoder*>& list)
 {
     return GetPluginsByType(list, MousDecoder);

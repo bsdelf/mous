@@ -22,8 +22,8 @@ enum ErrorCode {
     MousRendererBadBitsPerSample,
     MousRendererIsNotSupported,
 
-    MousBadFormat,
-    MousFormatIsNotSupported,
+    MousPlayerNoDecoder,
+    MousPlayerNoRenderer
 };
 
 /*

@@ -1,5 +1,7 @@
 #include "Player.h"
 #include <scx/Function.hpp>
+#include <scx/FileHelp.hpp>
+#include <scx/Conv.hpp>
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
 using namespace std;
@@ -20,10 +22,11 @@ Player::Player():
     m_pRenderer(NULL),
     m_SemWakeRenderer(0, 0),
     m_SemRendererSuspended(0, 0),
-    m_RangeBeg(0),
-    m_RangeEnd(0),
+    m_UnitBeg(0),
+    m_UnitEnd(0),
     m_DecoderIndex(0),
-    m_RendererIndex(0)
+    m_RendererIndex(0),
+    m_UnitPerMs(0)
 {
     m_FrameBuffer.AllocBuffer(5);
 
@@ -54,11 +57,12 @@ void Player::AddDecoder(IDecoder* pDecoder)
     vector<string> list;
     pDecoder->GetFileSuffix(list);
     for (size_t i = 0; i < list.size(); ++i) {
-	DecoderMapIter iter = m_DecoderMap.find(list[i]);
+	string suffix = ToLower(list[i]);
+	DecoderMapIter iter = m_DecoderMap.find(suffix);
 	if (iter == m_DecoderMap.end()) {
 	    vector<IDecoder*>* dlist = new vector<IDecoder*>();
 	    dlist->push_back(pDecoder);
-	    m_DecoderMap.insert(DecoderMapPair(list[i], dlist));
+	    m_DecoderMap.insert(DecoderMapPair(suffix, dlist));
 	} else {
 	    vector<IDecoder*>* dlist = iter->second;
 	    dlist->push_back(pDecoder);
@@ -78,7 +82,8 @@ void Player::RemoveDecoder(IDecoder* pDecoder)
     vector<string> list;
     pDecoder->GetFileSuffix(list);
     for (size_t i = 0; i < list.size(); ++i) {
-	DecoderMapIter iter = m_DecoderMap.find(list[i]);
+	string suffix = ToLower(list[i]);
+	DecoderMapIter iter = m_DecoderMap.find(suffix);
 	if (iter != m_DecoderMap.end()) {
 	    vector<IDecoder*>* dlist = iter->second;
 	    for (size_t i = 0; i < dlist->size(); ++i) {
@@ -111,6 +116,11 @@ void Player::RemoveAllDecoders()
     m_DecoderMap.clear();
 }
 
+void SpecifyDecoder(const string& suffix, IDecoder* pDecoder)
+{
+
+}
+
 void Player::SetRenderer(IRenderer* pRenderer)
 {
     m_pRenderer = pRenderer;
@@ -126,32 +136,63 @@ void Player::UnsetRenderer()
 
 ErrorCode Player::Open(const string& path)
 {
-    if (m_pDecoder == NULL)
-	return MousFormatIsNotSupported;
+    string suffix = ToLower(FileSuffix(path));
+    DecoderMapIter iter = m_DecoderMap.find(suffix);
+    if (iter != m_DecoderMap.end()) {
+	m_pDecoder = (*(iter->second))[0];
+    } else {
+	return MousPlayerNoDecoder;
+    }
 
     if (m_pRenderer == NULL)
-	return MousRendererIsNotSupported;
+	return MousPlayerNoRenderer;
 
-    return MousOk;
+    m_UnitPerMs = (double)m_pDecoder->GetUnitCount() / m_pDecoder->GetDuration();
+
+    return m_pDecoder->Open(path);
 }
 
 void Player::Close()
 {
+    m_pDecoder->Close();
 }
 
 void Player::Play()
 {
-    m_DecoderIndex = 0;
-    m_RendererIndex = 0;
+    uint64_t beg = 0;
+    uint64_t end = m_pDecoder->GetUnitCount();
+    PlayRange(beg, end);
+}
+
+void Player::Play(uint64_t msBegin, uint64_t msEnd)
+{
+    const uint64_t total = m_pDecoder->GetUnitCount();
+
+    uint64_t beg = m_UnitPerMs * msBegin;
+    if (beg > total)
+	beg = total;
+
+    uint64_t end = m_UnitPerMs * msEnd;
+    if (end > total)
+	end = total;
+
+    PlayRange(beg, end);
+}
+
+void Player::PlayRange(uint64_t beg, uint64_t end)
+{
+    m_UnitBeg = beg;
+    m_UnitEnd = end;
+
+    m_DecoderIndex = m_UnitBeg;
+    m_RendererIndex = m_UnitBeg;
+
+    m_pDecoder->SetUnitIndex(m_UnitBeg);
 
     m_SuspendRenderer = false;
     m_SuspendDecoder = false;
     m_SemWakeDecoder.Post();
     m_SemWakeRenderer.Post();
-}
-
-void Player::Play(uint64_t msBegin, uint64_t msEnd)
-{
 }
 
 void Player::Pause()
@@ -200,14 +241,19 @@ void Player::Stop()
     cout << "Stop() done" << endl;
 }
 
-ErrorCode Player::Seek(uint64_t msPos)
+void Player::Seek(uint64_t msPos)
 {
-    return MousOk;
+    uint64_t unitPos = m_UnitPerMs * msPos;
+    if (unitPos > m_pDecoder->GetUnitCount())
+	unitPos = m_pDecoder->GetUnitCount();
+    m_pDecoder->SetUnitIndex(unitPos);
+    m_DecoderIndex = unitPos;
+    m_RendererIndex = unitPos;
 }
 
 uint64_t Player::GetDuration() const
 {
-    return 0;
+    return m_pDecoder->GetDuration();
 }
 
 void Player::WorkForDecoder()
@@ -221,6 +267,9 @@ void Player::WorkForDecoder()
 	    buf = m_FrameBuffer.TakeFree();
 	    m_pDecoder->ReadUnit(buf->data, buf->used);
 	    m_FrameBuffer.RecycleFree(buf);
+	    ++m_DecoderIndex;
+	    if (m_DecoderIndex >= m_UnitEnd)
+		break;
 
 	    if (m_SuspendDecoder)
 		break;
@@ -241,6 +290,9 @@ void Player::WorkForRenderer()
 	    buf = m_FrameBuffer.TakeData();
 	    m_pRenderer->WriteDevice(buf->data, buf->used);
 	    m_FrameBuffer.RecycleData(buf);
+	    ++m_RendererIndex;
+	    if (m_RendererIndex >= m_UnitEnd)
+		break;
 
 	    if (m_SuspendRenderer)
 		break;

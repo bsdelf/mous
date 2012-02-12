@@ -8,6 +8,7 @@
 #include <scx/Thread.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/PVBuffer.hpp>
+#include <scx/Signal.hpp>
 
 namespace mous {
 
@@ -33,6 +34,7 @@ public:
     void AddDecoder(IDecoder* pDecoder);
     void RemoveDecoder(IDecoder* pDecoder);
     void RemoveAllDecoders();
+    void SpecifyDecoder(const string& suffix, IDecoder* pDecoder);
 
     void SetRenderer(IRenderer* pRenderer);
     void UnsetRenderer();
@@ -45,10 +47,14 @@ public:
     void Pause();
     void Resume();
     void Stop();
-    ErrorCode Seek(uint64_t msPos);
+    void Seek(uint64_t msPos);
     uint64_t GetDuration() const;
 
+public:
+    scx::Signal<void (void)> SigFinished;
+
 private:
+    void PlayRange(uint64_t beg, uint64_t end);
     void WorkForDecoder();
     void WorkForRenderer();
 
@@ -104,11 +110,13 @@ private:
 
     scx::PVBuffer<FrameBuffer> m_FrameBuffer;
 
-    uint64_t m_RangeBeg;
-    uint64_t m_RangeEnd;
+    uint64_t m_UnitBeg;
+    uint64_t m_UnitEnd;
 
     uint64_t m_DecoderIndex;
     uint64_t m_RendererIndex;
+
+    double m_UnitPerMs;
 
     std::map<std::string, std::vector<IDecoder*>*> m_DecoderMap;
     typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;

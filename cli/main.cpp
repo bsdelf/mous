@@ -9,24 +9,20 @@ using namespace mous;
 
 int main(int argc, char** argv)
 {
-    string foo = "a.test.mp3.APE";
-    size_t pos = foo.find_last_of('.');
-    cout << foo.substr(pos+1, foo.size()) << endl;
-
     char ch = ' ';
     bool paused = false;
-    PluginManager mgr;
 
+    PluginManager mgr;
     mgr.LoadPluginDir("./plugins");
 
     /**
      * Dump all plugin path.
      */
-    vector<string> list;
-    mgr.GetPluginPath(list);
-    for (size_t i = 0; i < list.size(); ++i) {
-	cout << ">> " << list[i] << endl;
-	const PluginInfo* info = mgr.GetPluginInfo(list[i]);
+    vector<string> pathList;
+    mgr.GetPluginPath(pathList);
+    for (size_t i = 0; i < pathList.size(); ++i) {
+	cout << ">> " << pathList[i] << endl;
+	const PluginInfo* info = mgr.GetPluginInfo(pathList[i]);
 	cout << ">>>> " << info->author << endl;
 	cout << ">>>> " << info->name << endl;
 	cout << ">>>> " << info->description << endl;
@@ -47,7 +43,7 @@ int main(int argc, char** argv)
     cout << endl;
 
     /**
-     * Check args
+     * Check args enough.
      */
     if (argc < 2) {
 	cout << "Usage:" << endl;
@@ -56,10 +52,23 @@ int main(int argc, char** argv)
 	return -1;
     }
 
-    Player player;
+    /**
+     * Check plugins enough.
+     */
+    if (decoderList.empty() || rendererList.empty())
+	return -2;
 
     /**
      * Setup player.
+     */
+    Player player;
+    player.SetRenderer(rendererList[0]);
+    for (size_t i = 0; i < decoderList.size(); ++i) {
+	player.AddDecoder(decoderList[i]);
+    }
+
+    /**
+     * Begin to play.
      */
     player.Open(argv[1]);
     player.Play();

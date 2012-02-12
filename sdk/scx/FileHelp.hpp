@@ -25,10 +25,10 @@ static inline bool CreateFile(const char* path, long size)
     return (FileSize(path) == size) ? true : false;
 }
 
-static inline string GetNameSuffix(const string& name, char ch = '.')
+static inline string FileSuffix(const string& name, char ch = '.')
 {
     size_t pos = name.find_last_of(ch);
-    return name.substr(pos+1, foo.size());
+    return name.substr(pos+1, name.size());
 }
 
 }
