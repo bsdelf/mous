@@ -45,7 +45,7 @@ private:
     void GetPluginsByType(std::vector<Super*>& list, PluginType);
 
 private:
-    std::map<std::string, IPluginAgent*> m_pluginMap;
+    std::map<std::string, IPluginAgent*> m_PluginMap;
     typedef std::map<std::string, IPluginAgent*>::iterator PluginMapIter;
 };
 

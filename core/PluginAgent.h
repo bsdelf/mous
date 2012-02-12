@@ -27,7 +27,7 @@ class PluginAgent: public IPluginAgent
 
 public:
     explicit PluginAgent(PluginType type):
-	m_type(type) 
+	m_Type(type) 
     {
 
     }
@@ -38,7 +38,7 @@ public:
 
     virtual PluginType GetType() const
     {
-	return m_type;
+	return m_Type;
     }
 
     virtual ErrorCode Open(const std::string& path)
@@ -91,7 +91,7 @@ public:
     }
 
 private:
-    PluginType m_type;
+    PluginType m_Type;
 
     void* m_pHandle;
 

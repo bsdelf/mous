@@ -76,7 +76,7 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
     }
 
     if (pAgent->Open(path) == MousOk) {
-	m_pluginMap.insert(pair<string, IPluginAgent*>(path, pAgent));
+	m_PluginMap.insert(pair<string, IPluginAgent*>(path, pAgent));
     } else {
 	pAgent->Close();
 	delete pAgent;
@@ -89,40 +89,40 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
 
 void PluginManager::UnloadPlugin(const string& path)
 {
-    PluginMapIter iter = m_pluginMap.find(path);
-    if (iter != m_pluginMap.end()) {
+    PluginMapIter iter = m_PluginMap.find(path);
+    if (iter != m_PluginMap.end()) {
 	IPluginAgent* pAgent = iter->second;
 	pAgent->Close();
 	delete pAgent;
-	m_pluginMap.erase(iter);
+	m_PluginMap.erase(iter);
     }
 }
 
 void PluginManager::UnloadAllPlugins()
 {
-    for (PluginMapIter iter = m_pluginMap.begin();
-	    iter != m_pluginMap.end(); ++iter) {
+    for (PluginMapIter iter = m_PluginMap.begin();
+	    iter != m_PluginMap.end(); ++iter) {
 	IPluginAgent* pAgent = iter->second;
 	pAgent->Close();
 	delete pAgent;
     }
-    m_pluginMap.clear();
+    m_PluginMap.clear();
 }
 
 void PluginManager::GetPluginPath(vector<string>& list)
 {
     list.clear();
-    list.reserve(m_pluginMap.size());
-    for (PluginMapIter iter = m_pluginMap.begin();
-	    iter != m_pluginMap.end(); ++iter) {
+    list.reserve(m_PluginMap.size());
+    for (PluginMapIter iter = m_PluginMap.begin();
+	    iter != m_PluginMap.end(); ++iter) {
 	list.push_back(iter->first);
     }
 }
 
 const PluginInfo* PluginManager::GetPluginInfo(const std::string& path)
 {
-    PluginMapIter iter = m_pluginMap.find(path);
-    return (iter != m_pluginMap.end()) ?
+    PluginMapIter iter = m_PluginMap.find(path);
+    return (iter != m_PluginMap.end()) ?
 	iter->second->GetInfo() : NULL;
 }
 
@@ -143,8 +143,8 @@ void PluginManager::GetMediaLists(std::vector<IMediaList*>& list)
 
 void* PluginManager::GetVpPlugin(const std::string& path, PluginType& type)
 {
-    PluginMapIter iter = m_pluginMap.find(path);
-    if (iter != m_pluginMap.end()) {
+    PluginMapIter iter = m_PluginMap.find(path);
+    if (iter != m_PluginMap.end()) {
 	IPluginAgent* pAgent = iter->second;
 	type = pAgent->GetType();
 	return pAgent->GetVpPlugin();
@@ -157,8 +157,8 @@ template<typename Super>
 void PluginManager::GetPluginsByType(vector<Super*>& list, PluginType type)
 {
     list.clear();
-    for (PluginMapIter iter = m_pluginMap.begin();
-	    iter != m_pluginMap.end(); ++iter) {
+    for (PluginMapIter iter = m_PluginMap.begin();
+	    iter != m_PluginMap.end(); ++iter) {
 	IPluginAgent* pAgent = iter->second;
 	if (pAgent->GetType() == type) {
 	    PluginAgent<Super>* pd = 

@@ -2,12 +2,12 @@
 #define MOUS_PLAYER_H
 
 #include <string>
+#include <vector>
 #include <map>
 #include <mous/ErrorCode.h>
 #include <scx/Thread.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/PVBuffer.hpp>
-using namespace std;
 
 namespace mous {
 
@@ -104,8 +104,15 @@ private:
 
     scx::PVBuffer<FrameBuffer> m_FrameBuffer;
 
-    uint64_t m_rangeBeg;
-    uint64_t m_rangeEnd;
+    uint64_t m_RangeBeg;
+    uint64_t m_RangeEnd;
+
+    uint64_t m_DecoderIndex;
+    uint64_t m_RendererIndex;
+
+    std::map<std::string, std::vector<IDecoder*>*> m_DecoderMap;
+    typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
+    typedef std::pair<std::string, std::vector<IDecoder*>*> DecoderMapPair;
 };
 
 }

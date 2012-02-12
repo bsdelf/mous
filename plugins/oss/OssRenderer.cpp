@@ -5,8 +5,8 @@
 #include <sys/soundcard.h>
 
 OssRenderer::OssRenderer():
-    m_fd(-1),
-    m_isOpened(false)
+    m_Fd(-1),
+    m_IsOpened(false)
 {
 
 }
@@ -18,26 +18,26 @@ OssRenderer::~OssRenderer()
 
 ErrorCode OssRenderer::OpenDevice(const std::string& path)
 {
-    m_fd = open(path.c_str(), O_WRONLY);
-    m_isOpened = (m_fd == -1) ? false : true;
-    return (m_fd >= 0 && m_isOpened) ? MousOk : MousRendererFailedToOpen;
+    m_Fd = open(path.c_str(), O_WRONLY);
+    m_IsOpened = (m_Fd == -1) ? false : true;
+    return (m_Fd >= 0 && m_IsOpened) ? MousOk : MousRendererFailedToOpen;
 }
 
 void OssRenderer::CloseDevice()
 {
-    if (!m_isOpened || m_fd == -1)
+    if (!m_IsOpened || m_Fd == -1)
 	return;
 
-    ioctl(m_fd, SNDCTL_DSP_SYNC);
-    close(m_fd);
+    ioctl(m_Fd, SNDCTL_DSP_SYNC);
+    close(m_Fd);
 
-    m_fd = -1;
-    m_isOpened = false;
+    m_Fd = -1;
+    m_IsOpened = false;
 }
 
 ErrorCode OssRenderer::SetupDevice(uint32_t channels, uint32_t sampleRate, uint32_t bitsPerSample)
 {
-    if (!m_isOpened)
+    if (!m_IsOpened)
 	return MousRendererFailedToSetup;
 
     int err = 0;
@@ -45,16 +45,16 @@ ErrorCode OssRenderer::SetupDevice(uint32_t channels, uint32_t sampleRate, uint3
     int _sampleRate = sampleRate;
     int _bitsPerSample = bitsPerSample;
 
-    err = ioctl(m_fd, SOUND_PCM_WRITE_CHANNELS, &_channels);
+    err = ioctl(m_Fd, SOUND_PCM_WRITE_CHANNELS, &_channels);
 
     if (err < 0 || _channels != channels)
 	return MousRendererBadChannels;
 
-    err = ioctl(m_fd, SOUND_PCM_WRITE_RATE, &_sampleRate);
+    err = ioctl(m_Fd, SOUND_PCM_WRITE_RATE, &_sampleRate);
     if (err < 0 || _sampleRate != sampleRate)
 	return MousRendererBadSampleRate;
 
-    err = ioctl(m_fd, SOUND_PCM_WRITE_BITS, &_bitsPerSample);
+    err = ioctl(m_Fd, SOUND_PCM_WRITE_BITS, &_bitsPerSample);
     if (err < 0 || _bitsPerSample != bitsPerSample)
 	return MousRendererBadBitsPerSample;
 
@@ -64,7 +64,7 @@ ErrorCode OssRenderer::SetupDevice(uint32_t channels, uint32_t sampleRate, uint3
 ErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
 {
     for (int off = 0, nw = 0, left = len; left >= 0; left -=nw, off += nw) {
-	nw = write(m_fd, buf+off, left);
+	nw = write(m_Fd, buf+off, left);
 	if (nw <= 0)
 	    return MousRendererFailedToWrite;
     }

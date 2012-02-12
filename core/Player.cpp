@@ -2,6 +2,7 @@
 #include <scx/Function.hpp>
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
+using namespace std;
 using namespace scx;
 using namespace mous;
 
@@ -19,8 +20,10 @@ Player::Player():
     m_pRenderer(NULL),
     m_SemWakeRenderer(0, 0),
     m_SemRendererSuspended(0, 0),
-    m_rangeBeg(0),
-    m_rangeEnd(0)
+    m_RangeBeg(0),
+    m_RangeEnd(0),
+    m_DecoderIndex(0),
+    m_RendererIndex(0)
 {
     m_FrameBuffer.AllocBuffer(5);
 
@@ -48,15 +51,64 @@ PlayerStatus Player::GetStatus() const
 
 void Player::AddDecoder(IDecoder* pDecoder)
 {
+    vector<string> list;
+    pDecoder->GetFileSuffix(list);
+    for (size_t i = 0; i < list.size(); ++i) {
+	DecoderMapIter iter = m_DecoderMap.find(list[i]);
+	if (iter == m_DecoderMap.end()) {
+	    vector<IDecoder*>* dlist = new vector<IDecoder*>();
+	    dlist->push_back(pDecoder);
+	    m_DecoderMap.insert(DecoderMapPair(list[i], dlist));
+	} else {
+	    vector<IDecoder*>* dlist = iter->second;
+	    dlist->push_back(pDecoder);
+	}
+    }
 }
 
 void Player::RemoveDecoder(IDecoder* pDecoder)
 {
+    /**
+     * Stop in use.
+     */
+
+    /**
+     * Remove it from map.
+     */
+    vector<string> list;
+    pDecoder->GetFileSuffix(list);
+    for (size_t i = 0; i < list.size(); ++i) {
+	DecoderMapIter iter = m_DecoderMap.find(list[i]);
+	if (iter != m_DecoderMap.end()) {
+	    vector<IDecoder*>* dlist = iter->second;
+	    for (size_t i = 0; i < dlist->size(); ++i) {
+		if ((*dlist)[i] == pDecoder) {
+		    dlist->erase(dlist->begin()+i);
+		    break;
+		}
+	    }
+	    if (dlist->empty()) {
+		delete dlist;
+		m_DecoderMap.erase(iter);
+	    }
+	}
+    }
 }
 
 void Player::RemoveAllDecoders()
 {
+    /**
+     * Stop in use.
+     */
 
+    /**
+     * Clear all.
+     */
+    for(DecoderMapIter iter = m_DecoderMap.begin();
+	iter != m_DecoderMap.end(); ++iter) {
+	delete iter->second;
+    }
+    m_DecoderMap.clear();
 }
 
 void Player::SetRenderer(IRenderer* pRenderer)
@@ -66,6 +118,9 @@ void Player::SetRenderer(IRenderer* pRenderer)
 
 void Player::UnsetRenderer()
 {
+    /**
+     * Stop renderer.
+     */
     m_pRenderer = NULL;
 }
 
@@ -86,6 +141,9 @@ void Player::Close()
 
 void Player::Play()
 {
+    m_DecoderIndex = 0;
+    m_RendererIndex = 0;
+
     m_SuspendRenderer = false;
     m_SuspendDecoder = false;
     m_SemWakeDecoder.Post();

@@ -18,8 +18,8 @@ public:
     virtual ErrorCode WriteDevice(const char* buf, uint32_t len);
 
 private:
-    int m_fd;
-    bool m_isOpened;
+    int m_Fd;
+    bool m_IsOpened;
 };
 
 #endif

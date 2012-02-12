@@ -9,6 +9,10 @@ using namespace mous;
 
 int main(int argc, char** argv)
 {
+    string foo = "a.test.mp3.APE";
+    size_t pos = foo.find_last_of('.');
+    cout << foo.substr(pos+1, foo.size()) << endl;
+
     char ch = ' ';
     bool paused = false;
     PluginManager mgr;
