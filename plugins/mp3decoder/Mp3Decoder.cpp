@@ -27,8 +27,6 @@ void Mp3Decoder::GetFileSuffix(vector<string>& list) const
 {
     list.clear();
     list.push_back("mp3");
-    list.push_back("MP3");
-    list.push_back("Mp3");
 }
 
 ErrorCode Mp3Decoder::Open(const std::string& url)

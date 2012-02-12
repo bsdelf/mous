@@ -101,6 +101,14 @@ public:
 	return m_pDataListSemVar->GetValue();
     }
 
+    /**
+     * This method can be used for initialize buffer.
+     */
+    item_t* GetRawItem(size_t i)
+    {
+	return m_BufferQueue[i];
+    }
+
     item_t* TakeFree()
     {
 	m_pFreeListSemVar->Wait(); 

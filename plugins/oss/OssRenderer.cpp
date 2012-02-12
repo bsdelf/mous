@@ -63,9 +63,9 @@ ErrorCode OssRenderer::SetupDevice(uint32_t channels, uint32_t sampleRate, uint3
 
 ErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
 {
-    for (int off = 0, nw = 0, left = len; left >= 0; left -=nw, off += nw) {
+    for (int off = 0, nw = 0, left = len; left > 0; left -= nw, off += nw) {
 	nw = write(m_Fd, buf+off, left);
-	if (nw <= 0)
+	if (nw < 0)
 	    return MousRendererFailedToWrite;
     }
     return MousOk;

@@ -124,6 +124,7 @@ void SpecifyDecoder(const string& suffix, IDecoder* pDecoder)
 void Player::SetRenderer(IRenderer* pRenderer)
 {
     m_pRenderer = pRenderer;
+    pRenderer->OpenDevice("/dev/dsp");
 }
 
 void Player::UnsetRenderer()
@@ -149,7 +150,30 @@ ErrorCode Player::Open(const string& path)
 
     m_UnitPerMs = (double)m_pDecoder->GetUnitCount() / m_pDecoder->GetDuration();
 
-    return m_pDecoder->Open(path);
+    uint32_t maxBytesPerUnit = m_pDecoder->GetMaxBytesPerUnit();
+    for (size_t i = 0; i < m_FrameBuffer.GetBufferCount(); ++i) {
+	FrameBuffer* buf = m_FrameBuffer.GetRawItem(i);
+	if (buf->max < maxBytesPerUnit) {
+	    if (buf->data != NULL)
+		delete[] buf->data;
+	    buf->data = new char[maxBytesPerUnit];
+	    buf->used = 0;
+	    buf->max = maxBytesPerUnit;
+	}
+    }
+
+    ErrorCode err = m_pDecoder->Open(path);
+    if (err != MousOk)
+	return err;
+
+    int32_t channels = m_pDecoder->GetChannels();
+    int32_t sampleRate = m_pDecoder->GetSampleRate();
+    int32_t bitsPerSample = m_pDecoder->GetBitRate();
+    err = m_pRenderer->SetupDevice(channels, sampleRate, bitsPerSample);
+    if (err != MousOk)
+	return err;
+
+    return MousOk;
 }
 
 void Player::Close()
@@ -287,6 +311,7 @@ void Player::WorkForRenderer()
 	    break;
 
 	for (FrameBuffer* buf = NULL; ; ) {
+	    cout << m_FrameBuffer.GetDataCount() << flush;
 	    buf = m_FrameBuffer.TakeData();
 	    m_pRenderer->WriteDevice(buf->data, buf->used);
 	    m_FrameBuffer.RecycleData(buf);
