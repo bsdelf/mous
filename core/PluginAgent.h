@@ -45,23 +45,23 @@ public:
     {
 	m_pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 	if (m_pHandle == NULL)
-	    return MousPluginInvaild;
+	    return MousMgrBadFormat;
 
 	m_fnGetInfo = (FnGetPluginInfo)dlsym(m_pHandle, StrGetPluginInfo);
 	if (m_fnGetInfo == NULL)
-	    return MousPluginInvaild;
+	    return MousMgrBadFormat;
 
 	m_fnCreate = (FnCreatePlugin)dlsym(m_pHandle, StrCreatePlugin);
 	if (m_fnCreate == NULL)
-	    return MousPluginInvaild;
+	    return MousMgrBadFormat;
 
 	m_fnRelease = (FnReleasePlugin)dlsym(m_pHandle, StrReleasePlugin);
 	if (m_fnCreate == NULL)
-	    return MousPluginInvaild;
+	    return MousMgrBadFormat;
 
 	m_pPlugin = m_fnCreate();
 	if (m_pPlugin == NULL)
-	    return MousPluginInvaild;
+	    return MousMgrBadFormat;
 
 	return MousOk;
     }

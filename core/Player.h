@@ -65,17 +65,21 @@ private:
 	uint32_t used;
 	uint32_t max;
 
+	uint32_t unitCount;
+
 	FrameBuffer(): 
 	    data(NULL),
 	    used(0),
-	    max(0)
+	    max(0),
+	    unitCount(0)
 	{
 	}
 
 	FrameBuffer(uint32_t size):
 	    data(new char[size]),
 	    used(0),
-	    max(size)
+	    max(size),
+	    unitCount(0)
 	{
 	}
 
@@ -86,6 +90,7 @@ private:
 	    data = NULL;
 	    used = 0;
 	    max = 0;
+	    unitCount = 1;
 	}
     };
 

@@ -1,0 +1,4 @@
+1.Requirements(FreeBSD ports)
+audio/mpg123	mp3
+audio/mac	ape
+audio/flac	flac

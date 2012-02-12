@@ -8,7 +8,8 @@ enum ErrorCode {
 
     MousFileNotFound,
 
-    MousPluginInvaild,
+    MousMgrFailedToOpen,
+    MousMgrBadFormat,
 
     MousDecoderFailedToInit,
     MousDecoderFailedToOpen,

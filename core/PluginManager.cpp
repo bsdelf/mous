@@ -41,12 +41,12 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
 
     pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (pHandle == NULL)
-	return MousPluginInvaild;
+	return MousMgrFailedToOpen;
 
     fnGetPluginType = (FnGetPluginType)dlsym(pHandle, StrGetPluginType);
     if (fnGetPluginType == NULL) {
 	dlclose(pHandle);
-	return MousPluginInvaild;
+	return MousMgrBadFormat;
     }
     PluginType type = fnGetPluginType();
 

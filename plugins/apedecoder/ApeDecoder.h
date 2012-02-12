@@ -1,20 +1,22 @@
-#ifndef MP3DECODER_H
-#define MP3DECODER_H
+#ifndef APEDECODER_H
+#define APEDECODER_H
 
 #include <mous/IDecoder.h>
-#include "mpg123.h"
-using namespace std;
+#include <mac/All.h>
+#include <mac/NoWindows.h>
+#include <mac/APEDecompress.h>
 using namespace mous;
+using namespace std;
 
-class Mp3Decoder: public IDecoder
+class ApeDecoder: public IDecoder
 {
 public:
-    Mp3Decoder();
-    virtual ~Mp3Decoder();
+    ApeDecoder();
+    virtual ~ApeDecoder();
 
-    virtual void GetFileSuffix(std::vector<std::string>& list) const;
+    virtual void GetFileSuffix(vector<string>& list) const;
 
-    virtual ErrorCode Open(const std::string& url);
+    virtual ErrorCode Open(const string& url);
     virtual void Close();
 
     virtual bool IsFormatVaild() const;
@@ -32,11 +34,14 @@ public:
     virtual uint64_t GetDuration() const;
 
 private:
-    mpg123_handle* m_pHandle;
+    IAPEDecompress* m_pDecompress;
 
     uint32_t m_MaxBytesPerUnit;
-    uint64_t m_UnitIndex;
-    uint64_t m_UnitCount;
+    uint64_t m_BlockIndex;
+    uint64_t m_BlockCount;
+
+    uint32_t m_BlockAlign;
+    uint32_t m_BlocksPerFrame;
 
     uint32_t m_Channels;
     uint32_t m_BitsPerSample;

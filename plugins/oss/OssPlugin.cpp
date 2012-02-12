@@ -1,7 +1,5 @@
 #include "OssRenderer.h"
 #include <mous/PluginHelper.h>
-using namespace mous;
-using namespace std;
 
 static const PluginInfo info = {
     "Yanhui Shen",

@@ -150,6 +150,10 @@ ErrorCode Player::Open(const string& path)
 
     m_UnitPerMs = (double)m_pDecoder->GetUnitCount() / m_pDecoder->GetDuration();
 
+    ErrorCode err = m_pDecoder->Open(path);
+    if (err != MousOk)
+	return err;
+
     uint32_t maxBytesPerUnit = m_pDecoder->GetMaxBytesPerUnit();
     for (size_t i = 0; i < m_FrameBuffer.GetBufferCount(); ++i) {
 	FrameBuffer* buf = m_FrameBuffer.GetRawItem(i);
@@ -162,13 +166,9 @@ ErrorCode Player::Open(const string& path)
 	}
     }
 
-    ErrorCode err = m_pDecoder->Open(path);
-    if (err != MousOk)
-	return err;
-
     int32_t channels = m_pDecoder->GetChannels();
     int32_t sampleRate = m_pDecoder->GetSampleRate();
-    int32_t bitsPerSample = m_pDecoder->GetBitRate();
+    int32_t bitsPerSample = m_pDecoder->GetBitsPerSample();
     err = m_pRenderer->SetupDevice(channels, sampleRate, bitsPerSample);
     if (err != MousOk)
 	return err;
@@ -216,9 +216,10 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
     m_FrameBuffer.ResetPV();
 
     m_SuspendRenderer = false;
+    m_SemWakeRenderer.Post();
+
     m_SuspendDecoder = false;
     m_SemWakeDecoder.Post();
-    m_SemWakeRenderer.Post();
 }
 
 void Player::Pause()
@@ -240,10 +241,13 @@ void Player::Pause()
 
 void Player::Resume()
 {
+    m_DecoderIndex = m_RendererIndex;
+    m_pDecoder->SetUnitIndex(m_DecoderIndex);
+
     m_SuspendRenderer = false;
     m_SuspendDecoder = false;
-    m_SemWakeDecoder.Post();
     m_SemWakeRenderer.Post();
+    m_SemWakeDecoder.Post();
 }
 
 void Player::Stop()
@@ -278,10 +282,11 @@ void Player::WorkForDecoder()
 	    if (m_SuspendDecoder)
 		break;
 
-	    m_pDecoder->ReadUnit(buf->data, buf->used);
+	    m_pDecoder->ReadUnit(buf->data, buf->used, buf->unitCount);
 	    m_FrameBuffer.RecycleFree(buf);
 
-	    if (++m_DecoderIndex >= m_UnitEnd)
+	    m_DecoderIndex += buf->unitCount;
+	    if (m_DecoderIndex >= m_UnitEnd)
 		break;
 	}
 
@@ -297,6 +302,7 @@ void Player::WorkForRenderer()
 	    break;
 
 	for (FrameBuffer* buf = NULL; ; ) {
+	    cout << m_FrameBuffer.GetDataCount() << flush;
 	    buf = m_FrameBuffer.TakeData();
 	    if (m_SuspendRenderer)
 		break;
@@ -304,7 +310,8 @@ void Player::WorkForRenderer()
 	    m_pRenderer->WriteDevice(buf->data, buf->used);
 	    m_FrameBuffer.RecycleData(buf);
 
-	    if (++m_RendererIndex >= m_UnitEnd)
+	    m_RendererIndex += buf->unitCount;
+	    if (m_RendererIndex >= m_UnitEnd)
 		break;
 	}
 

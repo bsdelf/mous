@@ -52,7 +52,7 @@ ErrorCode Mp3Decoder::Open(const std::string& url)
 
     m_Channels = channels;
     m_SampleRate = sampleRate;
-    m_BitRate = (encoding == MPG123_ENC_SIGNED_16) || 
+    m_BitsPerSample = (encoding == MPG123_ENC_SIGNED_16) || 
 	(encoding = MPG123_ENC_UNSIGNED_16) || 
 	(encoding == MPG123_ENC_16) ? 16: 8;
 
@@ -73,7 +73,7 @@ bool Mp3Decoder::IsFormatVaild() const
     return true;
 }
 
-ErrorCode Mp3Decoder::ReadUnit(char* data, uint32_t& used)
+ErrorCode Mp3Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_UnitIndex < m_UnitCount) {
 	unsigned char* _data;
@@ -81,6 +81,7 @@ ErrorCode Mp3Decoder::ReadUnit(char* data, uint32_t& used)
 	mpg123_decode_frame(m_pHandle, (off_t*)&m_UnitIndex, &_data, &_len);
 	memcpy(data, _data, _len);
 	used = _len;
+	unitCount = 1;
 	++m_UnitIndex;
 	return MousOk;
     } else {
@@ -125,9 +126,9 @@ uint32_t Mp3Decoder::GetChannels() const
     return m_Channels;
 }
 
-uint32_t Mp3Decoder::GetBitRate() const
+uint32_t Mp3Decoder::GetBitsPerSample() const
 {
-    return m_BitRate;
+    return m_BitsPerSample;
 }
 
 uint32_t Mp3Decoder::GetSampleRate() const

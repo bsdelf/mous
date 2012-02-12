@@ -59,6 +59,11 @@ file(GLOB SRC_MP3_DECODER plugins/mp3decoder/*.cpp)
 add_library(Mp3Decoder SHARED ${SRC_MP3_DECODER})
 target_link_libraries(Mp3Decoder -lmpg123)
 
+# ape plugin
+file(GLOB SRC_APE_DECODER plugins/apedecoder/*.cpp)
+add_library(ApeDecoder SHARED ${SRC_APE_DECODER})
+target_link_libraries(ApeDecoder -lmac)
+
 # messages
 message("CMake:		" ${CMAKE_VERSION})
 message("OS Name:	" ${CMAKE_SYSTEM_NAME})

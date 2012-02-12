@@ -26,7 +26,7 @@ public:
 
     virtual bool IsFormatVaild() const = 0;
 
-    virtual ErrorCode ReadUnit(char* data, uint32_t& used) = 0;
+    virtual ErrorCode ReadUnit(char* data, uint32_t& used, uint32_t& unitCount) = 0;
     virtual ErrorCode SetUnitIndex(uint64_t index) = 0;
     virtual uint32_t GetMaxBytesPerUnit() const = 0;
     virtual uint64_t GetUnitIndex() const = 0;
@@ -34,7 +34,7 @@ public:
 
     virtual AudioMode GetAudioMode() const = 0;
     virtual uint32_t GetChannels() const = 0;
-    virtual uint32_t GetBitRate() const = 0;
+    virtual uint32_t GetBitsPerSample() const = 0;
     virtual uint32_t GetSampleRate() const = 0;
     virtual uint64_t GetDuration() const = 0;
 };
