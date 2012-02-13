@@ -1,4 +1,5 @@
 #include "Mp3Decoder.h"
+#include <string.h>
 
 Mp3Decoder::Mp3Decoder()
 {

@@ -1,6 +1,7 @@
 #ifndef MOUS_IRENDERER_H
 #define MOUS_IRENDERER_H
 
+#include <inttypes.h>
 #include <string>
 #include <mous/ErrorCode.h>
 

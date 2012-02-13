@@ -9,6 +9,7 @@ FlacDecoder::FlacDecoder()
 
 FlacDecoder::~FlacDecoder()
 {
+    Close();
     FLAC__stream_decoder_delete(m_pDecoder);
 }
 
@@ -43,18 +44,13 @@ ErrorCode FlacDecoder::Open(const string& url)
     m_Duration = m_SampleCount / FLAC__stream_decoder_get_sample_rate(m_pDecoder) * 1000.f;
     m_SampleIndex = 0;
 
-    cout << m_SampleCount << endl;
-    cout << m_Duration << endl;
-
-    cout << m_Channels << endl;
-    cout << m_SampleRate << endl;
-    cout << m_BitsPerSample << endl;
-
     return MousOk;
 }
 
 void FlacDecoder::Close()
 {
+    if (m_pDecoder != NULL)
+	FLAC__stream_decoder_finish(m_pDecoder);
 }
 
 bool FlacDecoder::IsFormatVaild() const

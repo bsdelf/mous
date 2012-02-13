@@ -1,6 +1,7 @@
 #ifndef MOUS_IDECODER_H
 #define MOUS_IDECODER_H
 
+#include <inttypes.h>
 #include <string>
 #include <vector>
 #include "ErrorCode.h"
