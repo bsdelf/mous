@@ -9,9 +9,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -g -Wall")
 
 # os check
-set(IS_FREEBSD "${CMAKE_SYSTEM}" MATCHES "FreeBSD")
-set(IS_LINUX "${CMAKE_SYSTEM}" MATCHES "Linux")
-set(IS_APPLE "APPLE")
+if (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+    set(IS_FREEBSD true)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(IS_LINUX true)
+endif()
+#set(IS_APPLE "APPLE")
 
 # options
 option(EnableCompileClang "Use Clang C compiler" off)
