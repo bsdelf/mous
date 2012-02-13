@@ -57,7 +57,13 @@ endif()
 # mous-cli
 file(GLOB_RECURSE EXE_MOUS_CLI cli/*.cpp)
 add_executable(mous-cli ${EXE_MOUS_CLI})
-target_link_libraries(mous-cli MousCore)
+if (IS_FREEBSD)
+    target_link_libraries(mous-cli MousCore)
+elseif (IS_LINUX)
+    target_link_libraries(mous-cli MousCore -ldl)
+else()
+    target_link_libraries(mous-cli MousCore)
+endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/plugins)
 
