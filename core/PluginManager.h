@@ -1,6 +1,7 @@
 #ifndef MOUS_PLUGINMANAGER_H
 #define MOUS_PLUGINMANAGER_H
 
+#include <inttypes.h>
 #include <map>
 #include <vector>
 #include <string>
