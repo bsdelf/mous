@@ -132,6 +132,9 @@ void Player::UnsetRenderer()
     /**
      * Stop renderer.
      */
+    Stop();
+    SigStopped();
+    m_pRenderer->CloseDevice();
     m_pRenderer = NULL;
 }
 
@@ -148,8 +151,6 @@ ErrorCode Player::Open(const string& path)
     if (m_pRenderer == NULL)
 	return MousPlayerNoRenderer;
 
-    m_UnitPerMs = (double)m_pDecoder->GetUnitCount() / m_pDecoder->GetDuration();
-
     ErrorCode err = m_pDecoder->Open(path);
     if (err != MousOk)
 	return err;
@@ -165,6 +166,8 @@ ErrorCode Player::Open(const string& path)
 	    buf->max = maxBytesPerUnit;
 	}
     }
+
+    m_UnitPerMs = (double)m_pDecoder->GetUnitCount() / m_pDecoder->GetDuration();
 
     int32_t channels = m_pDecoder->GetChannels();
     int32_t sampleRate = m_pDecoder->GetSampleRate();
@@ -270,6 +273,11 @@ uint64_t Player::GetDuration() const
     return m_pDecoder->GetDuration();
 }
 
+uint64_t Player::GetCurrentMs() const
+{
+    return m_RendererIndex / m_UnitPerMs;
+}
+
 void Player::WorkForDecoder()
 {
     while (true) {
@@ -302,7 +310,6 @@ void Player::WorkForRenderer()
 	    break;
 
 	for (FrameBuffer* buf = NULL; ; ) {
-	    cout << m_FrameBuffer.GetDataCount() << flush;
 	    buf = m_FrameBuffer.TakeData();
 	    if (m_SuspendRenderer)
 		break;

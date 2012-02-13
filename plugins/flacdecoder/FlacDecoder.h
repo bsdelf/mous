@@ -1,18 +1,16 @@
-#ifndef APEDECODER_H
-#define APEDECODER_H
+#ifndef FLAC_DECODER_H
+#define FLAC_DECODER_H
 
 #include <mous/IDecoder.h>
-#include <mac/All.h>
-#include <mac/NoWindows.h>
-#include <mac/APEDecompress.h>
-using namespace mous;
+#include <FLAC/stream_decoder.h>
 using namespace std;
+using namespace mous;
 
-class ApeDecoder: public IDecoder
+class FlacDecoder: public IDecoder
 {
 public:
-    ApeDecoder();
-    virtual ~ApeDecoder();
+    FlacDecoder();
+    virtual ~FlacDecoder();
 
     virtual void GetFileSuffix(vector<string>& list) const;
 
@@ -34,15 +32,27 @@ public:
     virtual uint64_t GetDuration() const;
 
 private:
-    IAPEDecompress* m_pDecompress;
+    static FLAC__StreamDecoderWriteStatus WriteCallback(
+	    const FLAC__StreamDecoder *decoder, 
+	    const FLAC__Frame *frame, 
+	    const FLAC__int32 * const buffer[], 
+	    void *client_data);
+
+    static void ErrorCallback(
+	    const FLAC__StreamDecoder *decoder, 
+	    FLAC__StreamDecoderErrorStatus status, 
+	    void *client_data);
+
+    static char* gBuf;
+    static int32_t gBufLen;
+    static int32_t gSamplesRead;
+
+private:
+    FLAC__StreamDecoder* m_pDecoder;
 
     uint32_t m_MaxBytesPerUnit;
-    uint64_t m_BlockIndex;
-    uint64_t m_BlockCount;
-
-    uint32_t m_BlockAlign;
-    uint32_t m_BlocksPerFrame;
-    uint32_t m_BlocksPerRead;
+    uint64_t m_SampleIndex;
+    uint64_t m_SampleCount;
 
     uint32_t m_Channels;
     uint32_t m_BitsPerSample;

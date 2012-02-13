@@ -49,9 +49,13 @@ public:
     void Stop();
     void Seek(uint64_t msPos);
     uint64_t GetDuration() const;
+    uint64_t GetCurrentMs() const;
 
 public:
     scx::Signal<void (void)> SigFinished;
+    scx::Signal<void (void)> SigStopped;
+    scx::Signal<void (void)> SigPaused;
+    scx::Signal<void (void)> SigResumed;
 
 private:
     void PlayRange(uint64_t beg, uint64_t end);

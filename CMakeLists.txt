@@ -64,6 +64,11 @@ file(GLOB SRC_APE_DECODER plugins/apedecoder/*.cpp)
 add_library(ApeDecoder SHARED ${SRC_APE_DECODER})
 target_link_libraries(ApeDecoder -lmac)
 
+# flac plugin
+file(GLOB SRC_FLAC_DECODER plugins/flacdecoder/*.cpp)
+add_library(FlacDecoder SHARED ${SRC_FLAC_DECODER})
+target_link_libraries(FlacDecoder -lFLAC)
+
 # messages
 message("CMake:		" ${CMAKE_VERSION})
 message("OS Name:	" ${CMAKE_SYSTEM_NAME})

@@ -7,6 +7,7 @@
 #include <mous/IMediaList.h>
 #include "PluginAgent.h"
 using namespace std;
+#include <iostream>
 using namespace mous;
 
 PluginManager::PluginManager()
@@ -40,8 +41,10 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
     void* pHandle = NULL;
 
     pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-    if (pHandle == NULL)
+    if (pHandle == NULL) {
+	cout << dlerror() << endl;
 	return MousMgrFailedToOpen;
+    }
 
     fnGetPluginType = (FnGetPluginType)dlsym(pHandle, StrGetPluginType);
     if (fnGetPluginType == NULL) {

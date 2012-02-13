@@ -4,12 +4,26 @@
 #include <PluginManager.h>
 #include <Player.h>
 #include <PlayList.h>
+#include <scx/Thread.hpp>
 using namespace std;
+using namespace scx;
 using namespace mous;
 
 void OnFinished()
 {
     cout << "Finished!" << endl;
+}
+
+Player* gPlayer;
+void OnPlaying()
+{
+    while (true) {
+	if (gPlayer == NULL)
+	    break;
+	uint64_t ms = gPlayer->GetCurrentMs();
+	cout << ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
+	usleep(2*1000);
+    }
 }
 
 int main(int argc, char** argv)
@@ -78,6 +92,9 @@ int main(int argc, char** argv)
      */
     player.Open(argv[1]);
     player.Play();
+    Thread th;
+    gPlayer = &player;
+    th.Run(Function<void (void)>(&OnPlaying));
 
     while (ch != 'q') {
 	cin >> ch;
@@ -108,6 +125,8 @@ int main(int argc, char** argv)
 	}
     }
 
+    gPlayer = NULL;
+    th.Join();
     mgr.UnloadAllPlugins();
 
     return 0;

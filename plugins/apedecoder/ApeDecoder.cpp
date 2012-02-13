@@ -39,6 +39,7 @@ ErrorCode ApeDecoder::Open(const string& url)
     m_BlockAlign = m_pDecompress->GetInfo(APE_INFO_BLOCK_ALIGN);
     m_BlocksPerFrame = m_pDecompress->GetInfo(APE_INFO_BLOCKS_PER_FRAME);
     m_BlockCount = m_pDecompress->GetInfo(APE_INFO_TOTAL_BLOCKS);
+    m_BlocksPerRead = m_BlocksPerFrame / 16;
 
     m_BlockIndex = 0;
 
@@ -47,7 +48,8 @@ ErrorCode ApeDecoder::Open(const string& url)
 
 void ApeDecoder::Close()
 {
-
+    delete m_pDecompress; 
+    m_pDecompress = NULL;
 }
 
 bool ApeDecoder::IsFormatVaild() const
@@ -59,9 +61,9 @@ ErrorCode ApeDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     int blocksRecv = 0;
 
-    if (m_pDecompress->GetData(data, m_BlocksPerFrame/16, &blocksRecv) == ERROR_SUCCESS) {
-	used = blocksRecv * m_BlockAlign;
+    if (m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv) == ERROR_SUCCESS) {
 	m_BlockIndex += blocksRecv;
+	used = blocksRecv * m_BlockAlign;
 	unitCount = blocksRecv;
     } else {
 	used = 0;
@@ -78,7 +80,7 @@ ErrorCode ApeDecoder::SetUnitIndex(uint64_t index)
 
 uint32_t ApeDecoder::GetMaxBytesPerUnit() const
 {
-    return m_BlocksPerFrame/16 * m_BlockAlign;
+    return m_BlocksPerRead * m_BlockAlign;
 }
 
 uint64_t ApeDecoder::GetUnitIndex() const
