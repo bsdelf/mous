@@ -4,7 +4,7 @@
 #include <mous/PluginHelper.h>
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
-#include <mous/IMediaList.h>
+#include <mous/IMediaUnpacker.h>
 #include "PluginAgent.h"
 using namespace std;
 #include <iostream>
@@ -69,8 +69,8 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
 	case MousFilter:
 	    break;
 
-	case MousMediaList:
-	    pAgent = new PluginAgent<IMediaList>(type);
+	case MousMediaUnpacker:
+	    pAgent = new PluginAgent<IMediaUnpacker>(type);
 	    break;
 
 	default:
@@ -149,9 +149,9 @@ void PluginManager::GetRenderers(std::vector<IRenderer*>& list)
     return GetPluginsByType(list, MousRenderer);
 }
 
-void PluginManager::GetMediaLists(std::vector<IMediaList*>& list)
+void PluginManager::GetMediaUnpackers(std::vector<IMediaUnpacker*>& list)
 {
-    return GetPluginsByType(list, MousMediaList);
+    return GetPluginsByType(list, MousMediaUnpacker);
 }
 
 void* PluginManager::GetVpPlugin(const std::string& path, PluginType& type)

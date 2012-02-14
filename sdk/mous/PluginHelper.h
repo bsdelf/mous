@@ -11,7 +11,7 @@ enum PluginType {
     MousDecoder,
     MousEncoder,
     MousRenderer,
-    MousMediaList,
+    MousMediaUnpacker,
     MousFilter
 };
 

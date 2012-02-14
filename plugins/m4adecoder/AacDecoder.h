@@ -2,7 +2,6 @@
 #define AACDECODER_H
 
 #include <mous/IDecoder.h>
-#include <faad.h>
 #include <neaacdec.h>
 #include <mp4ff.h>
 using namespace mous;

@@ -15,7 +15,7 @@ class PluginInfo;
 class IPluginAgent;
 class IDecoder;
 class IRenderer;
-class IMediaList;
+class IMediaUnpacker;
 
 class PluginManager
 {
@@ -34,7 +34,7 @@ public:
 
     void GetDecoders(std::vector<IDecoder*>& list);
     void GetRenderers(std::vector<IRenderer*>& list);
-    void GetMediaLists(std::vector<IMediaList*>& list);
+    void GetMediaUnpackers(std::vector<IMediaUnpacker*>& list);
 
     void* GetVpPlugin(const std::string& path, PluginType& type);
 
