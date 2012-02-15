@@ -122,17 +122,17 @@ AudioMode Mp3Decoder::GetAudioMode() const
     return MousStereo;
 }
 
-uint32_t Mp3Decoder::GetChannels() const
+int32_t Mp3Decoder::GetChannels() const
 {
     return m_Channels;
 }
 
-uint32_t Mp3Decoder::GetBitsPerSample() const
+int32_t Mp3Decoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-uint32_t Mp3Decoder::GetSampleRate() const
+int32_t Mp3Decoder::GetSampleRate() const
 {
     return m_SampleRate;
 }

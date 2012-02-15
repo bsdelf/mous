@@ -98,17 +98,17 @@ AudioMode ApeDecoder::GetAudioMode() const
     return MousStereo;
 }
 
-uint32_t ApeDecoder::GetChannels() const
+int32_t ApeDecoder::GetChannels() const
 {
     return m_Channels;
 }
 
-uint32_t ApeDecoder::GetBitsPerSample() const
+int32_t ApeDecoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-uint32_t ApeDecoder::GetSampleRate() const
+int32_t ApeDecoder::GetSampleRate() const
 {
     return m_SampleRate;
 }

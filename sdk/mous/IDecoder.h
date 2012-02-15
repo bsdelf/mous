@@ -34,9 +34,9 @@ public:
     virtual uint64_t GetUnitCount() const = 0;
 
     virtual AudioMode GetAudioMode() const = 0;
-    virtual uint32_t GetChannels() const = 0;
-    virtual uint32_t GetBitsPerSample() const = 0;
-    virtual uint32_t GetSampleRate() const = 0;
+    virtual int32_t GetChannels() const = 0;
+    virtual int32_t GetBitsPerSample() const = 0;
+    virtual int32_t GetSampleRate() const = 0;
     virtual uint64_t GetDuration() const = 0;
 };
 

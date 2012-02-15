@@ -13,6 +13,7 @@ enum ErrorCode {
 
     MousDecoderFailedToInit,
     MousDecoderFailedToOpen,
+    MousDecoderFailedToRead,
     MousDecoderOutOfRange,
 
     MousRendererFailedToOpen,

@@ -100,17 +100,17 @@ AudioMode FlacDecoder::GetAudioMode() const
     return MousStereo;
 }
 
-uint32_t FlacDecoder::GetChannels() const
+int32_t FlacDecoder::GetChannels() const
 {
     return m_Channels;
 }
 
-uint32_t FlacDecoder::GetBitsPerSample() const
+int32_t FlacDecoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-uint32_t FlacDecoder::GetSampleRate() const
+int32_t FlacDecoder::GetSampleRate() const
 {
     return m_SampleRate;
 }

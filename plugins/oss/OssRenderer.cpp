@@ -35,7 +35,7 @@ void OssRenderer::CloseDevice()
     m_IsOpened = false;
 }
 
-ErrorCode OssRenderer::SetupDevice(uint32_t channels, uint32_t sampleRate, uint32_t bitsPerSample)
+ErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32_t bitsPerSample)
 {
     if (!m_IsOpened)
 	return MousRendererFailedToSetup;

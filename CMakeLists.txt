@@ -3,8 +3,10 @@ cmake_minimum_required(VERSION 2.8)
 project(MOUS)
 
 # compile flags
+set(CMAKE_C_FLAGS "$ENV{CFLAGS} -O2 -Wall")
 set(CMAKE_C_FLAGS_RELEASE "$ENV{CFLAGS} -O2 -Wall")
 set(CMAKE_C_FLAGS_DEBUG "$ENV{CFLAGS} -g -Wall")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O2 -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -g -Wall")
 
@@ -100,9 +102,9 @@ endif()
 
 # aac plugin
 if (EnablePluginAacDecoder)
-    file(GLOB SRC_FAAD_DECODER plugins/m4adecoder/*.cpp)
+    file(GLOB SRC_FAAD_DECODER plugins/m4adecoder/*)
     add_library(FaadDecoder SHARED ${SRC_FAAD_DECODER})
-    target_link_libraries(FaadDecoder -lfaad)
+    target_link_libraries(FaadDecoder -lfaad -lmp4ff)
 endif()
 
 # messages
