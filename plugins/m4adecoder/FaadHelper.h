@@ -28,8 +28,8 @@
 ** $Id: audio.h,v 1.19 2007/11/01 12:33:29 menno Exp $
 **/
 
-#ifndef AUDIO_H_INCLUDED
-#define AUDIO_H_INCLUDED
+#ifndef FAADHELPER_H
+#define FAADHELPER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,8 +53,7 @@ typedef struct
     long channelMask;
 } audio_file;
 
-int write_audio_file(audio_file *aufile, void *sample_buffer, 
-			    int samples, int offset);
+int write_audio_file(audio_file *aufile, void *sample_buffer, int samples, int offset);
 
 
 #ifdef __cplusplus

@@ -11,7 +11,7 @@ struct stat;
 
 namespace mous {
 
-class PluginInfo;
+struct PluginInfo;
 class IPluginAgent;
 class IDecoder;
 class IRenderer;

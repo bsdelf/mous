@@ -37,7 +37,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <neaacdec.h>
-#include "audio.h"
+#include "FaadHelper.h"
 
 static int write_audio_16bit(audio_file *aufile, void *sample_buffer,
                              unsigned int samples);

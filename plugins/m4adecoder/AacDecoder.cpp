@@ -1,5 +1,5 @@
 #include "AacDecoder.h"
-#include "audio.h"
+#include "FaadHelper.h"
 #include <iostream>
 using namespace std;
 
@@ -53,9 +53,12 @@ ErrorCode AacDecoder::OpenMp4(const string& url)
     m_UseAacLength = 1;
 
     m_File = fopen(url.c_str(), "rb");
-    mp4Callback.read = &ReadCallback;
-    mp4Callback.seek = &SeekCallback;
-    mp4Callback.user_data = m_File;
+    if (m_File == NULL)
+	return MousDecoderFailedToOpen;
+
+    m_Mp4Callback.read = &ReadCallback;
+    m_Mp4Callback.seek = &SeekCallback;
+    m_Mp4Callback.user_data = m_File;
 
     m_pDecoder = NeAACDecOpen();
     config = NeAACDecGetCurrentConfiguration(m_pDecoder);
@@ -63,11 +66,9 @@ ErrorCode AacDecoder::OpenMp4(const string& url)
     config->downMatrix = 0;//downMatrix;
     NeAACDecSetConfiguration(m_pDecoder, config);
 
-    m_Infile = mp4ff_open_read(&mp4Callback);
-    if (m_Infile == NULL) {
-	cout << "bad infile" << endl;
+    m_Infile = mp4ff_open_read(&m_Mp4Callback);
+    if (m_Infile == NULL)
 	return MousDecoderFailedToOpen;
-    }
 
     m_Track = GetAACTrack(m_Infile);
     if (m_Track < 0) {
@@ -77,13 +78,13 @@ ErrorCode AacDecoder::OpenMp4(const string& url)
 	return MousDecoderFailedToInit;
     }
 
-    unsigned char* buffer = NULL;
-    unsigned int bufferSize = 0;
-    mp4ff_get_decoder_config(m_Infile, m_Track, &buffer, &bufferSize);
+    unsigned char* confBuf = NULL;
+    unsigned int confBufSize = 0;
+    mp4ff_get_decoder_config(m_Infile, m_Track, &confBuf , &confBufSize);
 
     unsigned long sampleRate;
     unsigned char channels;
-    if (NeAACDecInit2(m_pDecoder, buffer, bufferSize, &sampleRate, &channels) < 0) {
+    if (NeAACDecInit2(m_pDecoder, confBuf, confBufSize, &sampleRate, &channels) < 0) {
 	NeAACDecClose(m_pDecoder);
 	mp4ff_close(m_Infile);
 	fclose(m_File);
@@ -93,33 +94,28 @@ ErrorCode AacDecoder::OpenMp4(const string& url)
     m_Channels = channels;
     m_BitsPerSample = 16;
 
-    cout << "channels" << m_Channels << endl;
-    cout << "sampleRate" << sampleRate << endl;
-    cout << "bufferSize" << bufferSize << endl;
-
     m_TimeScale = mp4ff_time_scale(m_Infile, m_Track);
     m_FrameSize = 1024;
     m_UseAacLength = 0;
 
-    if (buffer != NULL) {
-	if (NeAACDecAudioSpecificConfig(buffer, bufferSize, &mp4Asc) >= 0) {
+    if (confBuf != NULL) {
+	if (NeAACDecAudioSpecificConfig(confBuf, confBufSize, &mp4Asc) >= 0) {
 	    if (mp4Asc.frameLengthFlag == 1)
 		m_FrameSize = 960;
 	    if (mp4Asc.sbr_present_flag == 1)
 		m_FrameSize *= 2;
 	}
-	free(buffer);
+	free(confBuf);
     }
 
-    m_SampleIndex = 0;
     m_SampleCount = mp4ff_num_samples(m_Infile, m_Track);
-    cout << "SampleCount" << m_SampleCount << endl;
+    m_SampleIndex = 0;
+
     float f = 1024.0;
     if (mp4Asc.sbr_present_flag == 1) {
 	f *= 2.0;
     }
     m_Duration = (float)m_SampleCount*(float)(f-1.0)/(float)mp4Asc.samplingFrequency * 1000;
-    cout << "Duration" << m_Duration << endl;
 
     return MousOk;
 }
@@ -131,11 +127,19 @@ ErrorCode AacDecoder::OpenAac(const string& url)
 
 void AacDecoder::Close()
 {
+    if (m_pDecoder != NULL)
+	NeAACDecClose(m_pDecoder);
+
+    if (m_Infile != NULL)
+	mp4ff_close(m_Infile);
+
+    if (m_File != NULL)
+	fclose(m_File);
 }
 
 bool AacDecoder::IsFormatVaild() const
 {
-    return true;
+    return false;
 }
 
 ErrorCode AacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
@@ -149,7 +153,6 @@ ErrorCode AacDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCoun
     unsigned char* buffer = NULL;
     unsigned int bufferSize = 0;
 
-    cout << ">index:" << m_SampleIndex << endl;
     long duration = mp4ff_get_sample_duration(m_Infile, m_Track, m_SampleIndex);
     int rc = mp4ff_read_sample(m_Infile, m_Track, m_SampleIndex, &buffer,  &bufferSize);
 
@@ -167,20 +170,21 @@ ErrorCode AacDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCoun
 
     unsigned int sampleCount;
     unsigned int delay = 0;
-    
+
     // gapless
     {
 	if (m_SampleIndex == 0)
 	    duration = 0;
 
-	if (m_UseAacLength || (m_TimeScale != m_SampleRate))
+	if (m_UseAacLength || (m_TimeScale != m_SampleRate)) {
 	    sampleCount = frameInfo.samples;
-	else {
+	} else {
 	    sampleCount = (unsigned int)(duration * frameInfo.channels);
 	    if (sampleCount > frameInfo.samples)
 		sampleCount = frameInfo.samples;
 
 	    if (!m_UseAacLength && 
+		(m_SampleIndex != 0) &&
 		(m_SampleIndex < m_SampleCount/2) &&
 		(sampleCount != frameInfo.samples)) {
 		m_UseAacLength = 1;
@@ -188,9 +192,11 @@ ErrorCode AacDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCoun
 	    }
 	}
 
-	if ((sampleCount < (unsigned int)m_FrameSize*frameInfo.channels) && 
-	    (frameInfo.samples > sampleCount))
+	if ((m_SampleIndex == 0) &&
+	    (sampleCount < (unsigned int)m_FrameSize*frameInfo.channels) && 
+	    (frameInfo.samples > sampleCount)) {
 	    delay = frameInfo.samples - sampleCount;
+	}
 
 	if ((frameInfo.error == 0) && (sampleCount > 0)) {
 	    audio_file aufile = {
@@ -198,8 +204,8 @@ ErrorCode AacDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCoun
 		NULL,
 		0, 
 		0,
-		16,
-		2,
+		16, // bits/sample
+		2,  // channels
 		0,
 		0
 	    };
@@ -207,12 +213,10 @@ ErrorCode AacDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCoun
 	    aufile.samplerate = m_SampleRate;
 	    aufile.channelMask = aacChannelConfig2wavexChannelMask(&frameInfo);
 	    used = write_audio_file(&aufile, sampleBuf, sampleCount, delay);
-	    cout<< "a" << aufile.bits_per_sample << endl;
-	    cout << "b" << aufile.total_samples << endl;
 	}
     }
-    unitCount = 1;//sampleCount;
-    m_SampleIndex+=1;//sampleCount;
+    unitCount = 1;
+    m_SampleIndex += 1;
 
     return MousOk;
 }
@@ -224,6 +228,7 @@ ErrorCode AacDecoder::ReadUnitAac(char* data, uint32_t& used, uint32_t& unitCoun
 
 ErrorCode AacDecoder::SetUnitIndex(uint64_t index)
 {
+    m_SampleIndex = index;
     return MousOk;
 }
 
@@ -269,7 +274,7 @@ uint64_t AacDecoder::GetDuration() const
 
 int AacDecoder::GetAACTrack(mp4ff_t* infile)
 {
-    /* find AAC m_Track */
+    /* find AAC track */
     int i, rc;
     int numTracks = mp4ff_total_tracks(infile);
 
@@ -335,28 +340,3 @@ long AacDecoder::aacChannelConfig2wavexChannelMask(NeAACDecFrameInfo *hInfo)
 	return 0;
     }
 }
-/*
-void AacDecoder::FormatDecodedBuffer(AudioFile* file, void* sampleBuffer, int samples, int offset)
-{
-}
-
-void AacDecoder::FormatDecodedBuffer16(AudioFile* file, void* sampleBuffer, int samples, int offset)
-{
-
-}
-
-void AacDecoder::FormatDecodedBuffer24(AudioFile* file, void* sampleBuffer, int samples, int offset)
-{
-
-}
-
-void AacDecoder::FormatDecodedBuffer32(AudioFile* file, void* sampleBuffer, int samples, int offset)
-{
-
-}
-
-void AacDecoder::FormatDecodedBufferFloat(AudioFile* file, void* sampleBuffer, int samples, int offset)
-{
-
-}
-*/

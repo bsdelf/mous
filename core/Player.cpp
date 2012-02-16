@@ -294,8 +294,10 @@ void Player::WorkForDecoder()
 	    m_FrameBuffer.RecycleFree(buf);
 
 	    m_DecoderIndex += buf->unitCount;
-	    if (m_DecoderIndex >= m_UnitEnd)
+	    if (m_DecoderIndex >= m_UnitEnd) {
+		m_SuspendDecoder = true;
 		break;
+	    }
 	}
 
 	m_SemDecoderSuspended.Post();
@@ -310,6 +312,7 @@ void Player::WorkForRenderer()
 	    break;
 
 	for (FrameBuffer* buf = NULL; ; ) {
+	    //cout << "(" << m_FrameBuffer.GetDataCount() << ")" << endl;
 	    buf = m_FrameBuffer.TakeData();
 	    if (m_SuspendRenderer)
 		break;
@@ -318,8 +321,10 @@ void Player::WorkForRenderer()
 	    m_FrameBuffer.RecycleData(buf);
 
 	    m_RendererIndex += buf->unitCount;
-	    if (m_RendererIndex >= m_UnitEnd)
+	    if (m_RendererIndex >= m_UnitEnd) {
+		m_SuspendRenderer = true;
 		break;
+	    }
 	}
 
 	m_SemRendererSuspended.Post();

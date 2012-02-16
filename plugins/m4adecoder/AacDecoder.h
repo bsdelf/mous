@@ -61,13 +61,6 @@ private:
     static uint32_t SeekCallback(void* userData, uint64_t pos);
 
     static long aacChannelConfig2wavexChannelMask(NeAACDecFrameInfo *hInfo);
-    /*
-    static void FormatDecodedBuffer(AudioFile* file, void* sampleBuffer, int samples, int offset);
-    static void FormatDecodedBuffer16(AudioFile* file, void* sampleBuffer, int samples, int offset);
-    static void FormatDecodedBuffer24(AudioFile* file, void* sampleBuffer, int samples, int offset);
-    static void FormatDecodedBuffer32(AudioFile* file, void* sampleBuffer, int samples, int offset);
-    static void FormatDecodedBufferFloat(AudioFile* file, void* sampleBuffer, int samples, int offset);
-    */
 
 private:
     FILE* m_File;
@@ -80,7 +73,7 @@ private:
 
     int m_Track;
 
-    mp4ff_callback_t mp4Callback;
+    mp4ff_callback_t m_Mp4Callback;
     unsigned int m_UseAacLength;
 
     int64_t m_TimeScale;
