@@ -6,11 +6,11 @@
 using namespace std;
 using namespace mous;
 
-class Mp3Decoder: public IDecoder
+class Mpg123Decoder: public IDecoder
 {
 public:
-    Mp3Decoder();
-    virtual ~Mp3Decoder();
+    Mpg123Decoder();
+    virtual ~Mpg123Decoder();
 
     virtual void GetFileSuffix(std::vector<std::string>& list) const;
 

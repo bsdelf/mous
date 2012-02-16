@@ -1,7 +1,7 @@
-#include "Mp3Decoder.h"
+#include "Mpg123Decoder.h"
 #include <string.h>
 
-Mp3Decoder::Mp3Decoder()
+Mpg123Decoder::Mpg123Decoder()
 {
     int ret = mpg123_init();
     mpg123_pars* pars = mpg123_new_pars(&ret);
@@ -15,7 +15,7 @@ Mp3Decoder::Mp3Decoder()
     m_MaxBytesPerUnit = mpg123_outblock(m_pHandle);
 }
 
-Mp3Decoder::~Mp3Decoder()
+Mpg123Decoder::~Mpg123Decoder()
 {
     if (m_pHandle != NULL) {
 	mpg123_close(m_pHandle);
@@ -24,13 +24,13 @@ Mp3Decoder::~Mp3Decoder()
     mpg123_exit();
 }
 
-void Mp3Decoder::GetFileSuffix(vector<string>& list) const
+void Mpg123Decoder::GetFileSuffix(vector<string>& list) const
 {
     list.clear();
     list.push_back("mp3");
 }
 
-ErrorCode Mp3Decoder::Open(const std::string& url)
+ErrorCode Mpg123Decoder::Open(const std::string& url)
 {
     if (m_pHandle == NULL)
 	return MousDecoderFailedToInit;
@@ -63,18 +63,18 @@ ErrorCode Mp3Decoder::Open(const std::string& url)
     return MousOk;
 }
 
-void Mp3Decoder::Close()
+void Mpg123Decoder::Close()
 {
     if (m_pHandle != NULL)
 	mpg123_close(m_pHandle);
 }
 
-bool Mp3Decoder::IsFormatVaild() const
+bool Mpg123Decoder::IsFormatVaild() const
 {
     return true;
 }
 
-ErrorCode Mp3Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode Mpg123Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_UnitIndex < m_UnitCount) {
 	unsigned char* _data;
@@ -91,7 +91,7 @@ ErrorCode Mp3Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
     }
 }
 
-ErrorCode Mp3Decoder::SetUnitIndex(uint64_t index)
+ErrorCode Mpg123Decoder::SetUnitIndex(uint64_t index)
 {
     if (index < m_UnitCount) {
 	m_UnitIndex = index;
@@ -102,42 +102,42 @@ ErrorCode Mp3Decoder::SetUnitIndex(uint64_t index)
     }
 }
 
-uint32_t Mp3Decoder::GetMaxBytesPerUnit() const
+uint32_t Mpg123Decoder::GetMaxBytesPerUnit() const
 {
     return m_MaxBytesPerUnit;
 }
 
-uint64_t Mp3Decoder::GetUnitIndex() const
+uint64_t Mpg123Decoder::GetUnitIndex() const
 {
     return m_UnitIndex;
 }
 
-uint64_t Mp3Decoder::GetUnitCount() const
+uint64_t Mpg123Decoder::GetUnitCount() const
 {
     return m_UnitCount;
 }
 
-AudioMode Mp3Decoder::GetAudioMode() const
+AudioMode Mpg123Decoder::GetAudioMode() const
 {
     return MousStereo;
 }
 
-int32_t Mp3Decoder::GetChannels() const
+int32_t Mpg123Decoder::GetChannels() const
 {
     return m_Channels;
 }
 
-int32_t Mp3Decoder::GetBitsPerSample() const
+int32_t Mpg123Decoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t Mp3Decoder::GetSampleRate() const
+int32_t Mpg123Decoder::GetSampleRate() const
 {
     return m_SampleRate;
 }
 
-uint64_t Mp3Decoder::GetDuration() const
+uint64_t Mpg123Decoder::GetDuration() const
 {
     return m_Duration;
 }

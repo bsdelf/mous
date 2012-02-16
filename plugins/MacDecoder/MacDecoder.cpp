@@ -1,12 +1,12 @@
-#include "ApeDecoder.h"
+#include "MacDecoder.h"
 #include <mac/CharacterHelper.h>
 
-ApeDecoder::ApeDecoder()
+MacDecoder::MacDecoder()
 {
 
 }
 
-ApeDecoder::~ApeDecoder()
+MacDecoder::~MacDecoder()
 {
     if (m_pDecompress != NULL) {
 	delete m_pDecompress;
@@ -14,13 +14,13 @@ ApeDecoder::~ApeDecoder()
     }
 }
 
-void ApeDecoder::GetFileSuffix(vector<string>& list) const
+void MacDecoder::GetFileSuffix(vector<string>& list) const
 {
     list.clear();
     list.push_back("ape");
 }
 
-ErrorCode ApeDecoder::Open(const string& url)
+ErrorCode MacDecoder::Open(const string& url)
 {
     int err;
     str_utf16* pFileName = GetUTF16FromANSI(url.c_str());
@@ -46,18 +46,18 @@ ErrorCode ApeDecoder::Open(const string& url)
     return MousOk;
 }
 
-void ApeDecoder::Close()
+void MacDecoder::Close()
 {
     delete m_pDecompress; 
     m_pDecompress = NULL;
 }
 
-bool ApeDecoder::IsFormatVaild() const
+bool MacDecoder::IsFormatVaild() const
 {
     return true;
 }
 
-ErrorCode ApeDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode MacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     int blocksRecv = 0;
 
@@ -71,49 +71,49 @@ ErrorCode ApeDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
     return MousOk;
 }
 
-ErrorCode ApeDecoder::SetUnitIndex(uint64_t index)
+ErrorCode MacDecoder::SetUnitIndex(uint64_t index)
 {
     m_pDecompress->Seek(index);
     m_BlockIndex = index;
     return MousOk;
 }
 
-uint32_t ApeDecoder::GetMaxBytesPerUnit() const
+uint32_t MacDecoder::GetMaxBytesPerUnit() const
 {
     return m_BlocksPerRead * m_BlockAlign;
 }
 
-uint64_t ApeDecoder::GetUnitIndex() const
+uint64_t MacDecoder::GetUnitIndex() const
 {
     return m_BlockIndex;
 }
 
-uint64_t ApeDecoder::GetUnitCount() const
+uint64_t MacDecoder::GetUnitCount() const
 {
     return m_BlockCount;
 }
 
-AudioMode ApeDecoder::GetAudioMode() const
+AudioMode MacDecoder::GetAudioMode() const
 {
     return MousStereo;
 }
 
-int32_t ApeDecoder::GetChannels() const
+int32_t MacDecoder::GetChannels() const
 {
     return m_Channels;
 }
 
-int32_t ApeDecoder::GetBitsPerSample() const
+int32_t MacDecoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t ApeDecoder::GetSampleRate() const
+int32_t MacDecoder::GetSampleRate() const
 {
     return m_SampleRate;
 }
 
-uint64_t ApeDecoder::GetDuration() const
+uint64_t MacDecoder::GetDuration() const
 {
     return m_Duration;
 }

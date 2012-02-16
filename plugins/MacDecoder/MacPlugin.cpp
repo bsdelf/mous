@@ -1,4 +1,4 @@
-#include "ApeDecoder.h"
+#include "MacDecoder.h"
 #include <mous/PluginHelper.h>
 
 static const PluginInfo info = {
@@ -8,4 +8,4 @@ static const PluginInfo info = {
     1
 };
 
-MOUS_DEF_PLUGIN(MousDecoder, &info, IDecoder, ApeDecoder);
+MOUS_DEF_PLUGIN(MousDecoder, &info, IDecoder, MacDecoder);

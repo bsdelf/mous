@@ -1,18 +1,18 @@
-#ifndef APEDECODER_H
-#define APEDECODER_H
+#ifndef MACDECODER_H
+#define MACDECODER_H
 
 #include <mous/IDecoder.h>
 #include <mac/All.h>
 #include <mac/NoWindows.h>
 #include <mac/APEDecompress.h>
-using namespace mous;
 using namespace std;
+using namespace mous;
 
-class ApeDecoder: public IDecoder
+class MacDecoder: public IDecoder
 {
 public:
-    ApeDecoder();
-    virtual ~ApeDecoder();
+    MacDecoder();
+    virtual ~MacDecoder();
 
     virtual void GetFileSuffix(vector<string>& list) const;
 

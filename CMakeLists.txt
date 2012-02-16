@@ -22,11 +22,11 @@ endif()
 option(EnableCompileClang "Use Clang C compiler" off)
 option(EnableCompileGCC46 "Use GCC46 compiler" off)
 
-option(EnablePluginOssRenderer "OSS output" on)
-option(EnablePluginApeDecoder "APE Decoder" on)
-option(EnablePluginMp3Decoder "MP3 Decoder" on)
+option(EnablePluginOssRenderer "OSS Output" on)
+option(EnablePluginMacDecoder "MAC Decoder" on)
+option(EnablePluginMpg123Decoder "MPG123 Decoder" on)
 option(EnablePluginFlacDecoder "FLAC Decoder" on)
-option(EnablePluginAacDecoder "AAC Decoder" on)
+option(EnablePluginFaadDecoder "FAAD Decoder" on)
 
 if (EnableCompileClang)
     set(CMAKE_C_COMPILER "clang")
@@ -72,37 +72,37 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/plugins)
 
-# oss plugin
+# Oss plugin
 if (EnablePluginOssRenderer)
-    file(GLOB SRC_OSS_RENDERER plugins/oss/*.cpp)
+    file(GLOB SRC_OSS_RENDERER plugins/OssRenderer/*.cpp)
     add_library(OssRenderer SHARED ${SRC_OSS_RENDERER})
     target_link_libraries(OssRenderer)
 endif()
 
-# mp3 plugin
-if (EnablePluginMp3Decoder)
-    file(GLOB SRC_MP3_DECODER plugins/mp3decoder/*.cpp)
-    add_library(Mp3Decoder SHARED ${SRC_MP3_DECODER})
-    target_link_libraries(Mp3Decoder -lmpg123)
+# Mpg123 plugin
+if (EnablePluginMpg123Decoder)
+    file(GLOB SRC_MPG123_DECODER plugins/Mpg123Decoder/*.cpp)
+    add_library(Mpg123Decoder SHARED ${SRC_MPG123_DECODER})
+    target_link_libraries(Mpg123Decoder -lmpg123)
 endif()
 
-# ape plugin
-if (EnablePluginApeDecoder)
-    file(GLOB SRC_APE_DECODER plugins/apedecoder/*.cpp)
-    add_library(ApeDecoder SHARED ${SRC_APE_DECODER})
-    target_link_libraries(ApeDecoder -lmac)
+# Mac plugin
+if (EnablePluginMacDecoder)
+    file(GLOB SRC_MAC_DECODER plugins/MacDecoder/*.cpp)
+    add_library(MacDecoder SHARED ${SRC_MAC_DECODER})
+    target_link_libraries(MacDecoder -lmac)
 endif()
 
-# flac plugin
+# Flac plugin
 if (EnablePluginFlacDecoder)
-    file(GLOB SRC_FLAC_DECODER plugins/flacdecoder/*.cpp)
+    file(GLOB SRC_FLAC_DECODER plugins/FlacDecoder/*.cpp)
     add_library(FlacDecoder SHARED ${SRC_FLAC_DECODER})
     target_link_libraries(FlacDecoder -lFLAC)
 endif()
 
-# aac plugin
-if (EnablePluginAacDecoder)
-    file(GLOB SRC_FAAD_DECODER plugins/m4adecoder/*)
+# Faad plugin
+if (EnablePluginFaadDecoder)
+    file(GLOB SRC_FAAD_DECODER plugins/FaadDecoder/*)
     add_library(FaadDecoder SHARED ${SRC_FAAD_DECODER})
     target_link_libraries(FaadDecoder -lfaad -lmp4ff)
 endif()

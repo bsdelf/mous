@@ -1,4 +1,4 @@
-#include "Mp3Decoder.h"
+#include "Mpg123Decoder.h"
 #include <mous/PluginHelper.h>
 
 static const PluginInfo info = {
@@ -8,4 +8,4 @@ static const PluginInfo info = {
     1
 };
 
-MOUS_DEF_PLUGIN(MousDecoder, &info, IDecoder, Mp3Decoder);
+MOUS_DEF_PLUGIN(MousDecoder, &info, IDecoder, Mpg123Decoder);

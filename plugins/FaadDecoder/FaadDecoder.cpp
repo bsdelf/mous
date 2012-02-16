@@ -1,18 +1,18 @@
-#include "AacDecoder.h"
+#include "FaadDecoder.h"
 #include "FaadHelper.h"
 #include <iostream>
 using namespace std;
 
-AacDecoder::AacDecoder()
+FaadDecoder::FaadDecoder()
 {
 
 }
 
-AacDecoder::~AacDecoder()
+FaadDecoder::~FaadDecoder()
 {
 }
 
-void AacDecoder::GetFileSuffix(vector<string>& list) const
+void FaadDecoder::GetFileSuffix(vector<string>& list) const
 {
     list.clear();
     list.push_back("m4a");
@@ -20,7 +20,7 @@ void AacDecoder::GetFileSuffix(vector<string>& list) const
     list.push_back("mp4");
 }
 
-ErrorCode AacDecoder::Open(const string& url)
+ErrorCode FaadDecoder::Open(const string& url)
 {
     /**
      * Check for mp4 file
@@ -42,7 +42,7 @@ ErrorCode AacDecoder::Open(const string& url)
     return m_IsMp4File ? OpenMp4(url) : OpenAac(url);
 }
 
-ErrorCode AacDecoder::OpenMp4(const string& url)
+ErrorCode FaadDecoder::OpenMp4(const string& url)
 {
     NeAACDecConfigurationPtr config;
     mp4AudioSpecificConfig mp4Asc;
@@ -120,12 +120,12 @@ ErrorCode AacDecoder::OpenMp4(const string& url)
     return MousOk;
 }
 
-ErrorCode AacDecoder::OpenAac(const string& url)
+ErrorCode FaadDecoder::OpenAac(const string& url)
 {
     return MousDecoderFailedToOpen;
 }
 
-void AacDecoder::Close()
+void FaadDecoder::Close()
 {
     if (m_pDecoder != NULL)
 	NeAACDecClose(m_pDecoder);
@@ -137,18 +137,18 @@ void AacDecoder::Close()
 	fclose(m_File);
 }
 
-bool AacDecoder::IsFormatVaild() const
+bool FaadDecoder::IsFormatVaild() const
 {
     return false;
 }
 
-ErrorCode AacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode FaadDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return m_IsMp4File ? 
 	ReadUnitMp4(data, used, unitCount) : ReadUnitAac(data, used, unitCount);
 }
 
-ErrorCode AacDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCount)
 {
     unsigned char* buffer = NULL;
     unsigned int bufferSize = 0;
@@ -221,58 +221,58 @@ ErrorCode AacDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCoun
     return MousOk;
 }
 
-ErrorCode AacDecoder::ReadUnitAac(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode FaadDecoder::ReadUnitAac(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return MousOk;
 }
 
-ErrorCode AacDecoder::SetUnitIndex(uint64_t index)
+ErrorCode FaadDecoder::SetUnitIndex(uint64_t index)
 {
     m_SampleIndex = index;
     return MousOk;
 }
 
-uint32_t AacDecoder::GetMaxBytesPerUnit() const
+uint32_t FaadDecoder::GetMaxBytesPerUnit() const
 {
     return 10240;//m_BlocksPerRead * m_BlockAlign;
 }
 
-uint64_t AacDecoder::GetUnitIndex() const
+uint64_t FaadDecoder::GetUnitIndex() const
 {
     return m_SampleIndex;
 }
 
-uint64_t AacDecoder::GetUnitCount() const
+uint64_t FaadDecoder::GetUnitCount() const
 {
     return m_SampleCount;
 }
 
-AudioMode AacDecoder::GetAudioMode() const
+AudioMode FaadDecoder::GetAudioMode() const
 {
     return MousStereo;
 }
 
-int32_t AacDecoder::GetChannels() const
+int32_t FaadDecoder::GetChannels() const
 {
     return m_Channels;
 }
 
-int32_t AacDecoder::GetBitsPerSample() const
+int32_t FaadDecoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t AacDecoder::GetSampleRate() const
+int32_t FaadDecoder::GetSampleRate() const
 {
     return m_SampleRate;
 }
 
-uint64_t AacDecoder::GetDuration() const
+uint64_t FaadDecoder::GetDuration() const
 {
     return m_Duration;
 }
 
-int AacDecoder::GetAACTrack(mp4ff_t* infile)
+int FaadDecoder::GetAACTrack(mp4ff_t* infile)
 {
     /* find AAC track */
     int i, rc;
@@ -300,12 +300,12 @@ int AacDecoder::GetAACTrack(mp4ff_t* infile)
     return -1;
 }
 
-uint32_t AacDecoder::ReadCallback(void* userData, void* buffer, uint32_t length)
+uint32_t FaadDecoder::ReadCallback(void* userData, void* buffer, uint32_t length)
 {
     return fread(buffer, 1, length, (FILE*)userData);
 }
 
-uint32_t AacDecoder::SeekCallback(void* userData, uint64_t pos)
+uint32_t FaadDecoder::SeekCallback(void* userData, uint64_t pos)
 {
     return fseek((FILE*)userData, pos, SEEK_SET);
 }
@@ -330,7 +330,7 @@ uint32_t AacDecoder::SeekCallback(void* userData, uint64_t pos)
 #define SPEAKER_TOP_BACK_RIGHT         0x20000
 #define SPEAKER_RESERVED               0x80000000
 
-long AacDecoder::aacChannelConfig2wavexChannelMask(NeAACDecFrameInfo *hInfo)
+long FaadDecoder::aacChannelConfig2wavexChannelMask(NeAACDecFrameInfo *hInfo)
 {
     if (hInfo->channels == 6 && hInfo->num_lfe_channels) {
 	return SPEAKER_FRONT_LEFT + SPEAKER_FRONT_RIGHT +

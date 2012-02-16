@@ -1,5 +1,5 @@
-#ifndef AACDECODER_H
-#define AACDECODER_H
+#ifndef FAADDECODER_H
+#define FAADDECODER_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,11 +9,11 @@
 using namespace mous;
 using namespace std;
 
-class AacDecoder: public IDecoder
+class FaadDecoder: public IDecoder
 {
 public:
-    AacDecoder();
-    virtual ~AacDecoder();
+    FaadDecoder();
+    virtual ~FaadDecoder();
 
     virtual void GetFileSuffix(vector<string>& list) const;
 

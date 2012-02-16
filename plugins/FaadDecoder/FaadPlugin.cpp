@@ -1,4 +1,4 @@
-#include "AacDecoder.h"
+#include "FaadDecoder.h"
 #include <mous/PluginHelper.h>
 
 static const PluginInfo info = {
@@ -8,4 +8,4 @@ static const PluginInfo info = {
     1
 };
 
-MOUS_DEF_PLUGIN(MousDecoder, &info, IDecoder, AacDecoder);
+MOUS_DEF_PLUGIN(MousDecoder, &info, IDecoder, FaadDecoder);
