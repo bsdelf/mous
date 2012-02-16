@@ -4,16 +4,10 @@
 #include <inttypes.h>
 #include <string>
 #include <vector>
+#include "AudioMode.h"
 #include "ErrorCode.h"
 
 namespace mous {
-
-enum AudioMode {
-    MousMono,
-    MousStereo,
-    MousJointStero,
-    MousDualChannel
-};
 
 class IDecoder 
 {
@@ -37,6 +31,7 @@ public:
     virtual int32_t GetChannels() const = 0;
     virtual int32_t GetBitsPerSample() const = 0;
     virtual int32_t GetSampleRate() const = 0;
+    virtual int32_t GetBitRate() const = 0;
     virtual uint64_t GetDuration() const = 0;
 };
 

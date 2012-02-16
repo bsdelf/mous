@@ -157,7 +157,7 @@ ErrorCode Player::Open(const string& path)
 
     uint32_t maxBytesPerUnit = m_pDecoder->GetMaxBytesPerUnit();
     for (size_t i = 0; i < m_FrameBuffer.GetBufferCount(); ++i) {
-	FrameBuffer* buf = m_FrameBuffer.GetRawItem(i);
+	UnitBuffer* buf = m_FrameBuffer.GetRawItem(i);
 	if (buf->max < maxBytesPerUnit) {
 	    if (buf->data != NULL)
 		delete[] buf->data;
@@ -268,6 +268,21 @@ void Player::Seek(uint64_t msPos)
     m_RendererIndex = unitPos;
 }
 
+int32_t Player::GetBitRate() const
+{
+    return (m_pDecoder != NULL) ? m_pDecoder->GetBitRate() : -1;
+}
+
+int32_t Player::GetSampleRate() const
+{
+    return (m_pDecoder != NULL) ? m_pDecoder->GetSampleRate() : -1;
+}
+
+AudioMode Player::GetAudioMode() const
+{
+    return (m_pDecoder != NULL) ? m_pDecoder->GetAudioMode() : MousAudioModeNone;
+}
+
 uint64_t Player::GetDuration() const
 {
     return m_pDecoder->GetDuration();
@@ -285,7 +300,7 @@ void Player::WorkForDecoder()
 	if (m_StopDecoder)
 	    break;
 
-	for (FrameBuffer* buf = NULL; ; ) {
+	for (UnitBuffer* buf = NULL; ; ) {
 	    buf = m_FrameBuffer.TakeFree();
 	    if (m_SuspendDecoder)
 		break;
@@ -311,7 +326,7 @@ void Player::WorkForRenderer()
 	if (m_StopRenderer)
 	    break;
 
-	for (FrameBuffer* buf = NULL; ; ) {
+	for (UnitBuffer* buf = NULL; ; ) {
 	    //cout << "(" << m_FrameBuffer.GetDataCount() << ")" << endl;
 	    buf = m_FrameBuffer.TakeData();
 	    if (m_SuspendRenderer)

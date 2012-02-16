@@ -267,6 +267,11 @@ int32_t FaadDecoder::GetSampleRate() const
     return m_SampleRate;
 }
 
+int32_t FaadDecoder::GetBitRate() const
+{
+
+}
+
 uint64_t FaadDecoder::GetDuration() const
 {
     return m_Duration;

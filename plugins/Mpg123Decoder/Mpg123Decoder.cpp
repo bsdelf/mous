@@ -137,6 +137,11 @@ int32_t Mpg123Decoder::GetSampleRate() const
     return m_SampleRate;
 }
 
+int32_t Mpg123Decoder::GetBitRate() const
+{
+
+}
+
 uint64_t Mpg123Decoder::GetDuration() const
 {
     return m_Duration;

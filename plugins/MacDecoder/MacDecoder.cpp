@@ -113,6 +113,11 @@ int32_t MacDecoder::GetSampleRate() const
     return m_SampleRate;
 }
 
+int32_t MacDecoder::GetBitRate() const
+{
+
+}
+
 uint64_t MacDecoder::GetDuration() const
 {
     return m_Duration;

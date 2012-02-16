@@ -10,6 +10,7 @@
 #include <scx/SemVar.hpp>
 #include <scx/PVBuffer.hpp>
 #include <scx/Signal.hpp>
+#include "AudioMode.h"
 
 namespace mous {
 
@@ -49,8 +50,12 @@ public:
     void Resume();
     void Stop();
     void Seek(uint64_t msPos);
+
+    int32_t GetBitRate() const;
+    int32_t GetSampleRate() const;
     uint64_t GetDuration() const;
     uint64_t GetCurrentMs() const;
+    AudioMode GetAudioMode() const;
 
 public:
     scx::Signal<void (void)> SigFinished;
@@ -64,7 +69,7 @@ private:
     void WorkForRenderer();
 
 private:
-    struct FrameBuffer
+    struct UnitBuffer
     {
 	char* data;
 	uint32_t used;
@@ -72,7 +77,7 @@ private:
 
 	uint32_t unitCount;
 
-	FrameBuffer(): 
+	UnitBuffer(): 
 	    data(NULL),
 	    used(0),
 	    max(0),
@@ -80,22 +85,14 @@ private:
 	{
 	}
 
-	FrameBuffer(uint32_t size):
-	    data(new char[size]),
-	    used(0),
-	    max(size),
-	    unitCount(0)
-	{
-	}
-
-	~FrameBuffer()
+	~UnitBuffer()
 	{
 	    if (data != NULL)
 		delete[] data;
 	    data = NULL;
 	    used = 0;
 	    max = 0;
-	    unitCount = 1;
+	    unitCount = 0;
 	}
     };
 
@@ -116,7 +113,7 @@ private:
     scx::SemVar m_SemWakeRenderer;
     scx::SemVar m_SemRendererSuspended;
 
-    scx::PVBuffer<FrameBuffer> m_FrameBuffer;
+    scx::PVBuffer<UnitBuffer> m_FrameBuffer;
 
     uint64_t m_UnitBeg;
     uint64_t m_UnitEnd;

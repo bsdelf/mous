@@ -115,6 +115,11 @@ int32_t FlacDecoder::GetSampleRate() const
     return m_SampleRate;
 }
 
+int32_t FlacDecoder::GetBitRate() const
+{
+
+}
+
 uint64_t FlacDecoder::GetDuration() const
 {
     return m_Duration;

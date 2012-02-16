@@ -32,6 +32,7 @@ public:
     virtual int32_t GetChannels() const;
     virtual int32_t GetBitsPerSample() const;
     virtual int32_t GetSampleRate() const;
+    virtual int32_t GetBitRate() const;
     virtual uint64_t GetDuration() const;
 
 private:
