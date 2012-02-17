@@ -16,6 +16,7 @@ class IPluginAgent;
 class IDecoder;
 class IRenderer;
 class IMediaUnpacker;
+class ITagParser;
 
 class PluginManager
 {
@@ -35,8 +36,9 @@ public:
     void GetDecoders(std::vector<IDecoder*>& list);
     void GetRenderers(std::vector<IRenderer*>& list);
     void GetMediaUnpackers(std::vector<IMediaUnpacker*>& list);
+    void GetTagParsers(std::vector<ITagParser*>& list);
 
-    void* GetVpPlugin(const std::string& path, PluginType& type);
+    void* GetVpPlugin(const std::string& path, EmPluginType& type);
 
 private:
     static std::vector<std::string>* pFtwFiles;
@@ -44,7 +46,7 @@ private:
 
 private:
     template<typename Super>
-    void GetPluginsByType(std::vector<Super*>& list, PluginType);
+    void GetPluginsByType(std::vector<Super*>& list, EmPluginType);
 
 private:
     std::map<std::string, IPluginAgent*> m_PluginMap;

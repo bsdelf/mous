@@ -1,4 +1,5 @@
 #include "MediaLoader.h"
+#include <mous/ITagParser.h>
 using namespace std;
 using namespace mous;
 

@@ -6,14 +6,19 @@
  */
 namespace mous {
 
-enum PluginType {
-    MousNone = 0,
-    MousDecoder,
-    MousEncoder,
-    MousRenderer,
-    MousMediaUnpacker,
-    MousFilter
+namespace PluginType {
+enum e
+{
+    None = 0,
+    Decoder,
+    Encoder,
+    Renderer,
+    MediaUnpacker,
+    TagParser,
+    Filter
 };
+}
+typedef PluginType::e EmPluginType;
 
 struct PluginInfo {
     const char* author;
@@ -34,7 +39,7 @@ const char* const StrReleasePlugin = "ReleasePlugin";
  */
 #define MOUS_DEF_PLUGIN(type, pInfo, Super, Sub)	\
 extern "C" {						\
-    PluginType GetPluginType() {			\
+    EmPluginType GetPluginType() {			\
 	return type;					\
     }							\
     \

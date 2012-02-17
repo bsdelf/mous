@@ -36,7 +36,7 @@ EmErrorCode PluginManager::LoadPluginDir(const string& dir)
 
 EmErrorCode PluginManager::LoadPlugin(const string& path)
 {
-    typedef PluginType (*FnGetPluginType)();
+    typedef EmPluginType (*FnGetPluginType)();
     FnGetPluginType fnGetPluginType;
     void* pHandle = NULL;
 
@@ -51,26 +51,26 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
 	dlclose(pHandle);
 	return ErrorCode::MgrBadFormat;
     }
-    PluginType type = fnGetPluginType();
+    EmPluginType type = fnGetPluginType();
 
     IPluginAgent* pAgent = NULL;
     switch (type) {
-	case MousDecoder:
+	case PluginType::Decoder:
 	    pAgent = new PluginAgent<IDecoder>(type);
 	    break;
 
-	case MousEncoder:
+	case PluginType::Encoder:
 	    break;
 
-	case MousRenderer:
+	case PluginType::Renderer:
 	    pAgent = new PluginAgent<IRenderer>(type);
 	    break;
 
-	case MousFilter:
+	case PluginType::MediaUnpacker:
+	    pAgent = new PluginAgent<IMediaUnpacker>(type);
 	    break;
 
-	case MousMediaUnpacker:
-	    pAgent = new PluginAgent<IMediaUnpacker>(type);
+	case PluginType::Filter:
 	    break;
 
 	default:
@@ -141,20 +141,25 @@ const PluginInfo* PluginManager::GetPluginInfo(const void* vp)
 
 void PluginManager::GetDecoders(std::vector<IDecoder*>& list)
 {
-    return GetPluginsByType(list, MousDecoder);
+    return GetPluginsByType(list, PluginType::Decoder);
 }
 
 void PluginManager::GetRenderers(std::vector<IRenderer*>& list)
 {
-    return GetPluginsByType(list, MousRenderer);
+    return GetPluginsByType(list, PluginType::Renderer);
 }
 
 void PluginManager::GetMediaUnpackers(std::vector<IMediaUnpacker*>& list)
 {
-    return GetPluginsByType(list, MousMediaUnpacker);
+    return GetPluginsByType(list, PluginType::MediaUnpacker);
 }
 
-void* PluginManager::GetVpPlugin(const std::string& path, PluginType& type)
+void PluginManager::GetTagParsers(std::vector<ITagParser*>& list)
+{
+    return GetPluginsByType(list, PluginType::TagParser);
+}
+
+void* PluginManager::GetVpPlugin(const std::string& path, EmPluginType& type)
 {
     PluginMapIter iter = m_PluginMap.find(path);
     if (iter != m_PluginMap.end()) {
@@ -167,7 +172,7 @@ void* PluginManager::GetVpPlugin(const std::string& path, PluginType& type)
 }
 
 template<typename Super>
-void PluginManager::GetPluginsByType(vector<Super*>& list, PluginType type)
+void PluginManager::GetPluginsByType(vector<Super*>& list, EmPluginType type)
 {
     list.clear();
     for (PluginMapIter iter = m_PluginMap.begin();

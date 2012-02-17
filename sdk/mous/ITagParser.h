@@ -30,6 +30,8 @@ public:
     virtual EmErrorCode SetGenre(const std::string& genre) = 0; 
     virtual EmErrorCode SetYear(int32_t year) = 0;
     virtual EmErrorCode SetTrack(int32_t track) = 0;
+
+    virtual bool IsEmpty() = 0;
 };
 
 }

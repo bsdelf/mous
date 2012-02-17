@@ -12,7 +12,7 @@ class IPluginAgent
 public:
     virtual ~IPluginAgent() { }
 
-    virtual PluginType GetType() const = 0;
+    virtual EmPluginType GetType() const = 0;
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
     virtual const PluginInfo* GetInfo() = 0;
@@ -27,7 +27,7 @@ class PluginAgent: public IPluginAgent
     typedef void (*FnReleasePlugin)(PluginSuperClass*);
 
 public:
-    explicit PluginAgent(PluginType type):
+    explicit PluginAgent(EmPluginType type):
 	m_Type(type) 
     {
 
@@ -37,7 +37,7 @@ public:
 
     }
 
-    virtual PluginType GetType() const
+    virtual EmPluginType GetType() const
     {
 	return m_Type;
     }
@@ -92,7 +92,7 @@ public:
     }
 
 private:
-    PluginType m_Type;
+    EmPluginType m_Type;
 
     void* m_pHandle;
 

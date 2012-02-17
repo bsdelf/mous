@@ -8,4 +8,4 @@ static const PluginInfo info = {
     1
 };
 
-MOUS_DEF_PLUGIN(MousDecoder, &info, IDecoder, FaadDecoder);
+MOUS_DEF_PLUGIN(PluginType::Decoder, &info, IDecoder, FaadDecoder);
