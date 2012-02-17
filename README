@@ -1,6 +1,6 @@
 1.Plugin Dependence(FreeBSD ports)
 You can use ccmake to turn ON/OFF the following plugins.
-All plugins will be dynamically loaded on runtime.
+All plugins will be dynamically loaded at runtime.
 Even NONE of them are built, mous will still be able to launch,
 but of course it will be useless!
 
