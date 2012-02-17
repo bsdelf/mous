@@ -61,6 +61,8 @@ ErrorCode MacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     int blocksRecv = 0;
 
+    m_BitRate = m_pDecompress->GetInfo(APE_DECOMPRESS_CURRENT_BITRATE);
+
     if (m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv) == ERROR_SUCCESS) {
 	m_BlockIndex += blocksRecv;
 	used = blocksRecv * m_BlockAlign;
@@ -115,7 +117,7 @@ int32_t MacDecoder::GetSampleRate() const
 
 int32_t MacDecoder::GetBitRate() const
 {
-
+    return m_BitRate;
 }
 
 uint64_t MacDecoder::GetDuration() const

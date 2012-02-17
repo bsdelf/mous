@@ -28,7 +28,7 @@ Player::Player():
     m_RendererIndex(0),
     m_UnitPerMs(0)
 {
-    m_FrameBuffer.AllocBuffer(5);
+    m_UnitBuffers.AllocBuffer(5);
 
     m_ThreadForDecoder.Run(Function<void (void)>(&Player::WorkForDecoder, this));
 
@@ -156,8 +156,8 @@ ErrorCode Player::Open(const string& path)
 	return err;
 
     uint32_t maxBytesPerUnit = m_pDecoder->GetMaxBytesPerUnit();
-    for (size_t i = 0; i < m_FrameBuffer.GetBufferCount(); ++i) {
-	UnitBuffer* buf = m_FrameBuffer.GetRawItem(i);
+    for (size_t i = 0; i < m_UnitBuffers.GetBufferCount(); ++i) {
+	UnitBuffer* buf = m_UnitBuffers.GetRawItem(i);
 	if (buf->max < maxBytesPerUnit) {
 	    if (buf->data != NULL)
 		delete[] buf->data;
@@ -216,7 +216,7 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
     m_pDecoder->SetUnitIndex(m_UnitBeg);
 
-    m_FrameBuffer.ResetPV();
+    m_UnitBuffers.ResetPV();
 
     m_SuspendRenderer = false;
     m_SemWakeRenderer.Post();
@@ -229,17 +229,17 @@ void Player::Pause()
 {
     if (!m_SuspendRenderer) {
 	m_SuspendRenderer = true;
-	m_FrameBuffer.RecycleFree(NULL);
+	m_UnitBuffers.RecycleFree(NULL);
 	m_SemRendererSuspended.Wait();
     }
 
     if (!m_SuspendDecoder) {
 	m_SuspendDecoder = true;
-	m_FrameBuffer.RecycleData(NULL);
+	m_UnitBuffers.RecycleData(NULL);
 	m_SemDecoderSuspended.Wait();
     }
 
-    m_FrameBuffer.ResetPV();
+    m_UnitBuffers.ResetPV();
 }
 
 void Player::Resume()
@@ -301,12 +301,12 @@ void Player::WorkForDecoder()
 	    break;
 
 	for (UnitBuffer* buf = NULL; ; ) {
-	    buf = m_FrameBuffer.TakeFree();
+	    buf = m_UnitBuffers.TakeFree();
 	    if (m_SuspendDecoder)
 		break;
 
 	    m_pDecoder->ReadUnit(buf->data, buf->used, buf->unitCount);
-	    m_FrameBuffer.RecycleFree(buf);
+	    m_UnitBuffers.RecycleFree(buf);
 
 	    m_DecoderIndex += buf->unitCount;
 	    if (m_DecoderIndex >= m_UnitEnd) {
@@ -327,13 +327,13 @@ void Player::WorkForRenderer()
 	    break;
 
 	for (UnitBuffer* buf = NULL; ; ) {
-	    //cout << "(" << m_FrameBuffer.GetDataCount() << ")" << endl;
-	    buf = m_FrameBuffer.TakeData();
+	    //cout << "(" << m_UnitBuffers.GetDataCount() << ")" << endl;
+	    buf = m_UnitBuffers.TakeData();
 	    if (m_SuspendRenderer)
 		break;
 
 	    m_pRenderer->WriteDevice(buf->data, buf->used);
-	    m_FrameBuffer.RecycleData(buf);
+	    m_UnitBuffers.RecycleData(buf);
 
 	    m_RendererIndex += buf->unitCount;
 	    if (m_RendererIndex >= m_UnitEnd) {

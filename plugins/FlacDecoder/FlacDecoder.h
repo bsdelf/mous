@@ -55,9 +55,10 @@ private:
     uint64_t m_SampleIndex;
     uint64_t m_SampleCount;
 
-    uint32_t m_Channels;
-    uint32_t m_BitsPerSample;
-    uint32_t m_SampleRate;
+    int32_t m_Channels;
+    int32_t m_BitsPerSample;
+    int32_t m_SampleRate;
+    int32_t m_BitRate;
     uint64_t m_Duration;
 };
 

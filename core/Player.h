@@ -64,9 +64,9 @@ public:
     scx::Signal<void (void)> SigResumed;
 
 private:
-    void PlayRange(uint64_t beg, uint64_t end);
-    void WorkForDecoder();
-    void WorkForRenderer();
+    inline void PlayRange(uint64_t beg, uint64_t end);
+    inline void WorkForDecoder();
+    inline void WorkForRenderer();
 
 private:
     struct UnitBuffer
@@ -113,7 +113,7 @@ private:
     scx::SemVar m_SemWakeRenderer;
     scx::SemVar m_SemRendererSuspended;
 
-    scx::PVBuffer<UnitBuffer> m_FrameBuffer;
+    scx::PVBuffer<UnitBuffer> m_UnitBuffers;
 
     uint64_t m_UnitBeg;
     uint64_t m_UnitEnd;

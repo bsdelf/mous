@@ -9,26 +9,27 @@ using namespace std;
 using namespace scx;
 using namespace mous;
 
+Player* gPlayer = NULL;
+
 void OnFinished()
 {
     cout << "Finished!" << endl;
 }
 
-Player* gPlayer;
 void OnPlaying()
 {
     while (true) {
 	if (gPlayer == NULL)
 	    break;
 	uint64_t ms = gPlayer->GetCurrentMs();
-	cout << ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
-	usleep(2*1000);
+	cout << gPlayer->GetBitRate() << " kbps " <<
+	    ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
+	usleep(200*1000);
     }
 }
 
 int main(int argc, char** argv)
 {
-    char ch = ' ';
     bool paused = false;
 
     PluginManager mgr;
@@ -96,6 +97,7 @@ int main(int argc, char** argv)
     gPlayer = &player;
     th.Run(Function<void (void)>(&OnPlaying));
 
+    char ch = ' ';
     while (ch != 'q') {
 	cin >> ch;
 	switch (ch) {
@@ -125,7 +127,6 @@ int main(int argc, char** argv)
 	}
     }
 
-    gPlayer = NULL;
     th.Join();
     mgr.UnloadAllPlugins();
 

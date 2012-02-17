@@ -76,6 +76,10 @@ bool Mpg123Decoder::IsFormatVaild() const
 
 ErrorCode Mpg123Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
+    mpg123_frameinfo info;
+    mpg123_info(m_pHandle, &info);
+    m_BitRate = info.bitrate;
+
     if (m_UnitIndex < m_UnitCount) {
 	unsigned char* _data;
 	size_t _len;
@@ -139,7 +143,7 @@ int32_t Mpg123Decoder::GetSampleRate() const
 
 int32_t Mpg123Decoder::GetBitRate() const
 {
-
+    return m_BitRate; 
 }
 
 uint64_t Mpg123Decoder::GetDuration() const

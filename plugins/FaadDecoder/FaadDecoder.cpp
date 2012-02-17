@@ -153,6 +153,8 @@ ErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCou
     unsigned char* buffer = NULL;
     unsigned int bufferSize = 0;
 
+    m_BitRate = mp4ff_get_avg_bitrate(m_Infile, m_Track);
+
     long duration = mp4ff_get_sample_duration(m_Infile, m_Track, m_SampleIndex);
     int rc = mp4ff_read_sample(m_Infile, m_Track, m_SampleIndex, &buffer,  &bufferSize);
 
@@ -269,7 +271,7 @@ int32_t FaadDecoder::GetSampleRate() const
 
 int32_t FaadDecoder::GetBitRate() const
 {
-
+    return m_BitRate / 1000;
 }
 
 uint64_t FaadDecoder::GetDuration() const
