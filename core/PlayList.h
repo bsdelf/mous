@@ -3,9 +3,8 @@
 
 namespace mous {
 
-namespace PlayListMode {
-
-enum PlayListMode
+namespace PlayMode {
+enum e
 {
     Normal,
     Repeat,
@@ -13,8 +12,8 @@ enum PlayListMode
     RandomRepeat,
     SingleRepeat
 };
-
 }
+typedef PlayMode::e EmPlayMode;
 
 class PlayList
 {
@@ -22,7 +21,13 @@ public:
     PlayList();
     ~PlayList();
 
+    void SetPlayMode(EmPlayMode mode);
+    EmPlayMode GetPlayMode() const;
+
     void DumpCover();
+
+private:
+    EmPlayMode m_PlayMode;
 };
 
 }

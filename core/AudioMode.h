@@ -4,7 +4,6 @@
 namespace mous {
 
 namespace AudioMode {
-    
 enum e
 {
     None,
@@ -13,9 +12,7 @@ enum e
     JointStero,
     DualChannel
 };
-
 }
-
 typedef AudioMode::e EmAudioMode;
 
 }

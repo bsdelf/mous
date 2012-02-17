@@ -30,8 +30,6 @@ void OnPlaying()
 
 int main(int argc, char** argv)
 {
-    cout << PlayListMode::Random << endl;
-
     bool paused = false;
 
     PluginManager mgr;

@@ -4,7 +4,6 @@
 namespace mous {
 
 namespace ErrorCode {
-
 enum e
 {
     Ok = 0,
@@ -30,10 +29,7 @@ enum e
     PlayerNoDecoder,
     PlayerNoRenderer
 };
-
-
 }
-
 typedef ErrorCode::e EmErrorCode;
 
 /*
