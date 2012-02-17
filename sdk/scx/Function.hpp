@@ -8,11 +8,13 @@ using namespace std;
 
 namespace scx {
 
-enum FunctionType 
-{
-    FunctionType_Ptr,
-    FunctionType_Mem
+namespace FunctionType {
+enum e{
+    Ptr,
+    Mem
 };
+}
+typedef FunctionType::e EmFunctionType;
 
 /* Function base class */
 template<typename signature>
@@ -23,7 +25,7 @@ class FunctionBase<ret_t (void)> {
 public:
     virtual ~FunctionBase() { };
     virtual ret_t operator()(void) const = 0;
-    virtual FunctionType GetType() const = 0;
+    virtual EmFunctionType GetType() const = 0;
     virtual void* GetReceiver() const = 0;
 };
 
@@ -33,7 +35,7 @@ class FunctionBase<ret_t (arg_t)> {
 public:
     virtual ~FunctionBase() { };
     virtual ret_t operator()(arg_t) const = 0;
-    virtual FunctionType GetType() const = 0;
+    virtual EmFunctionType GetType() const = 0;
     virtual void* GetReceiver() const = 0;
 };
 
@@ -44,7 +46,7 @@ class FunctionBase<ret_t (arg1_t, arg2_t)> {
 public:
     virtual ~FunctionBase() { };
     virtual ret_t operator()(arg1_t, arg2_t) const = 0;
-    virtual FunctionType GetType() const = 0;
+    virtual EmFunctionType GetType() const = 0;
     virtual void* GetReceiver() const = 0;
 };
 
@@ -56,7 +58,7 @@ class FunctionBase<ret_t (arg1_t, arg2_t, arg3_t)> {
 public:
     virtual ~FunctionBase() { };
     virtual ret_t operator()(arg1_t, arg2_t, arg3_t) const = 0;
-    virtual FunctionType GetType() const = 0;
+    virtual EmFunctionType GetType() const = 0;
     virtual void* GetReceiver() const = 0;
 };
 
@@ -69,7 +71,7 @@ class FunctionBase<ret_t (arg1_t, arg2_t, arg3_t, arg4_t)> {
 public:
     virtual ~FunctionBase() { };
     virtual ret_t operator()(arg1_t, arg2_t, arg3_t, arg4_t) const = 0;
-    virtual FunctionType GetType() const = 0;
+    virtual EmFunctionType GetType() const = 0;
     virtual void* GetReceiver() const = 0;
 };
 
@@ -83,7 +85,7 @@ class FunctionBase<ret_t (arg1_t, arg2_t, arg3_t, arg4_t, arg5_t)> {
 public:
     virtual ~FunctionBase() { };
     virtual ret_t operator()(arg1_t, arg2_t, arg3_t, arg4_t, arg5_t) const = 0;
-    virtual FunctionType GetType() const = 0;
+    virtual EmFunctionType GetType() const = 0;
     virtual void* GetReceiver() const = 0;
 };
 
@@ -104,7 +106,7 @@ public:										\
 	m_Receiver = func.m_Receiver;						\
     }										\
     \
-    FunctionType GetType() const { return FunctionType_Mem; }			\
+    EmFunctionType GetType() const { return FunctionType::Mem; }			\
     void* GetReceiver() const { return m_Receiver; }				\
     \
 private:\
@@ -201,7 +203,7 @@ class FunctionPtr;
 	{									\
 	}									\
 	\
-	FunctionType GetType() const  { return FunctionType_Ptr; }		\
+	EmFunctionType GetType() const  { return FunctionType::Ptr; }		\
 	void* GetReceiver() const { return NULL; }				\
 										\
     private:									\
@@ -377,7 +379,7 @@ public:\
 	return *this;					\
     }							\
     \
-    FunctionType GetType() const {  \
+    EmFunctionType GetType() const {  \
 	return m_PtrFn->GetType();  \
     }				    \
     \
