@@ -6,7 +6,7 @@
 
 namespace mous {
 
-class ITagPraser;
+class ITagParser;
 
 struct MediaItem {
     std::string url;
@@ -22,7 +22,7 @@ struct MediaItem {
     int32_t year;
     int32_t track;
 
-    ITagPraser* pTagPraser;
+    ITagParser* pTagParser;
 };
 
 }

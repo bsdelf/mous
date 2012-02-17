@@ -1,5 +1,5 @@
-#ifndef MOUS_TAGPARSER_H
-#define MOUS_TAGPARSER_H
+#ifndef MOUS_ITAGPARSER_H
+#define MOUS_ITAGPARSER_H
 
 #include <inttypes.h>
 #include <string>
@@ -33,3 +33,5 @@ public:
 };
 
 }
+
+#endif
