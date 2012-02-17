@@ -20,7 +20,8 @@ enum e
 }
 typedef PluginType::e EmPluginType;
 
-struct PluginInfo {
+struct PluginInfo
+{
     const char* author;
     const char* name;
     const char* description;
