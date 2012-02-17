@@ -1,5 +1,15 @@
-1.Requirements(FreeBSD ports)
-audio/mpg123	mp3
-audio/mac	ape
-audio/flac	flac
-audio/faad	m4a
+1.Plugin Dependence(FreeBSD ports)
+You can use ccmake to turn ON/OFF the following plugins.
+All plugins will be dynamically loaded on runtime.
+Even NONE of them are built, mous will still be able to launch,
+but of course it will be useless!
+
+audio/mpg123	    mp3 decoder
+audio/mac	    ape decoder
+audio/flac	    flac decoder
+audio/faad	    m4a decoder
+
+audio/taglib	    tag support
+
+textproc/libcue	    cue sheet
+
