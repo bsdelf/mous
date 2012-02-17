@@ -3,13 +3,20 @@
 
 namespace mous {
 
-enum AudioMode {
-    MousAudioModeNone,
-    MousMono,
-    MousStereo,
-    MousJointStero,
-    MousDualChannel
+namespace AudioMode {
+    
+enum e
+{
+    None,
+    Mono,
+    Stereo,
+    JointStero,
+    DualChannel
 };
+
+}
+
+typedef AudioMode::e EmAudioMode;
 
 }
 

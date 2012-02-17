@@ -138,21 +138,21 @@ void Player::UnsetRenderer()
     m_pRenderer = NULL;
 }
 
-ErrorCode Player::Open(const string& path)
+EmErrorCode Player::Open(const string& path)
 {
     string suffix = ToLower(FileSuffix(path));
     DecoderMapIter iter = m_DecoderMap.find(suffix);
     if (iter != m_DecoderMap.end()) {
 	m_pDecoder = (*(iter->second))[0];
     } else {
-	return MousPlayerNoDecoder;
+	return ErrorCode::PlayerNoDecoder;
     }
 
     if (m_pRenderer == NULL)
-	return MousPlayerNoRenderer;
+	return ErrorCode::PlayerNoRenderer;
 
-    ErrorCode err = m_pDecoder->Open(path);
-    if (err != MousOk)
+    EmErrorCode err = m_pDecoder->Open(path);
+    if (err != ErrorCode::Ok)
 	return err;
 
     uint32_t maxBytesPerUnit = m_pDecoder->GetMaxBytesPerUnit();
@@ -173,10 +173,10 @@ ErrorCode Player::Open(const string& path)
     int32_t sampleRate = m_pDecoder->GetSampleRate();
     int32_t bitsPerSample = m_pDecoder->GetBitsPerSample();
     err = m_pRenderer->SetupDevice(channels, sampleRate, bitsPerSample);
-    if (err != MousOk)
+    if (err != ErrorCode::Ok)
 	return err;
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 void Player::Close()
@@ -278,9 +278,9 @@ int32_t Player::GetSampleRate() const
     return (m_pDecoder != NULL) ? m_pDecoder->GetSampleRate() : -1;
 }
 
-AudioMode Player::GetAudioMode() const
+EmAudioMode Player::GetAudioMode() const
 {
-    return (m_pDecoder != NULL) ? m_pDecoder->GetAudioMode() : MousAudioModeNone;
+    return (m_pDecoder != NULL) ? m_pDecoder->GetAudioMode() : AudioMode::None;
 }
 
 uint64_t Player::GetDuration() const

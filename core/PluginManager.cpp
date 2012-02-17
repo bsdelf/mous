@@ -20,7 +20,7 @@ PluginManager::~PluginManager()
 
 }
 
-ErrorCode PluginManager::LoadPluginDir(const string& dir)
+EmErrorCode PluginManager::LoadPluginDir(const string& dir)
 {
     vector<string> files;
     pFtwFiles = &files;
@@ -31,10 +31,10 @@ ErrorCode PluginManager::LoadPluginDir(const string& dir)
 	LoadPlugin(files[i]);
     }
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
-ErrorCode PluginManager::LoadPlugin(const string& path)
+EmErrorCode PluginManager::LoadPlugin(const string& path)
 {
     typedef PluginType (*FnGetPluginType)();
     FnGetPluginType fnGetPluginType;
@@ -43,13 +43,13 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
     pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (pHandle == NULL) {
 	cout << dlerror() << endl;
-	return MousMgrFailedToOpen;
+	return ErrorCode::MgrFailedToOpen;
     }
 
     fnGetPluginType = (FnGetPluginType)dlsym(pHandle, StrGetPluginType);
     if (fnGetPluginType == NULL) {
 	dlclose(pHandle);
-	return MousMgrBadFormat;
+	return ErrorCode::MgrBadFormat;
     }
     PluginType type = fnGetPluginType();
 
@@ -78,7 +78,7 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
 	    break;
     }
 
-    if (pAgent->Open(path) == MousOk) {
+    if (pAgent->Open(path) == ErrorCode::Ok) {
 	m_PluginMap.insert(pair<string, IPluginAgent*>(path, pAgent));
     } else {
 	pAgent->Close();
@@ -87,7 +87,7 @@ ErrorCode PluginManager::LoadPlugin(const string& path)
 
     dlclose(pHandle);
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 void PluginManager::UnloadPlugin(const string& path)

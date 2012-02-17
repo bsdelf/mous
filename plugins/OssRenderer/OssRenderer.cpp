@@ -16,11 +16,11 @@ OssRenderer::~OssRenderer()
     CloseDevice();
 }
 
-ErrorCode OssRenderer::OpenDevice(const std::string& path)
+EmErrorCode OssRenderer::OpenDevice(const std::string& path)
 {
     m_Fd = open(path.c_str(), O_WRONLY);
     m_IsOpened = (m_Fd == -1) ? false : true;
-    return (m_Fd >= 0 && m_IsOpened) ? MousOk : MousRendererFailedToOpen;
+    return (m_Fd >= 0 && m_IsOpened) ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
 }
 
 void OssRenderer::CloseDevice()
@@ -35,10 +35,10 @@ void OssRenderer::CloseDevice()
     m_IsOpened = false;
 }
 
-ErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32_t bitsPerSample)
+EmErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32_t bitsPerSample)
 {
     if (!m_IsOpened)
-	return MousRendererFailedToSetup;
+	return ErrorCode::RendererFailedToSetup;
 
     int err = 0;
     int _channels = channels;
@@ -48,25 +48,25 @@ ErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32_t
     err = ioctl(m_Fd, SOUND_PCM_WRITE_CHANNELS, &_channels);
 
     if (err < 0 || _channels != channels)
-	return MousRendererBadChannels;
+	return ErrorCode::RendererBadChannels;
 
     err = ioctl(m_Fd, SOUND_PCM_WRITE_RATE, &_sampleRate);
     if (err < 0 || _sampleRate != sampleRate)
-	return MousRendererBadSampleRate;
+	return ErrorCode::RendererBadSampleRate;
 
     err = ioctl(m_Fd, SOUND_PCM_WRITE_BITS, &_bitsPerSample);
     if (err < 0 || _bitsPerSample != bitsPerSample)
-	return MousRendererBadBitsPerSample;
+	return ErrorCode::RendererBadBitsPerSample;
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
-ErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
+EmErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
 {
     for (int off = 0, nw = 0, left = len; left > 0; left -= nw, off += nw) {
 	nw = write(m_Fd, buf+off, left);
 	if (nw < 0)
-	    return MousRendererFailedToWrite;
+	    return ErrorCode::RendererFailedToWrite;
     }
-    return MousOk;
+    return ErrorCode::Ok;
 }

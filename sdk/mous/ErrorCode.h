@@ -3,30 +3,38 @@
 
 namespace mous {
 
-enum ErrorCode {
-    MousOk = 0,
+namespace ErrorCode {
 
-    MousFileNotFound,
+enum e
+{
+    Ok = 0,
 
-    MousMgrFailedToOpen,
-    MousMgrBadFormat,
+    FileNotFound,
 
-    MousDecoderFailedToInit,
-    MousDecoderFailedToOpen,
-    MousDecoderFailedToRead,
-    MousDecoderOutOfRange,
+    MgrFailedToOpen,
+    MgrBadFormat,
 
-    MousRendererFailedToOpen,
-    MousRendererFailedToSetup,
-    MousRendererFailedToWrite,
-    MousRendererBadChannels,
-    MousRendererBadSampleRate,
-    MousRendererBadBitsPerSample,
-    MousRendererIsNotSupported,
+    DecoderFailedToInit,
+    DecoderFailedToOpen,
+    DecoderFailedToRead,
+    DecoderOutOfRange,
 
-    MousPlayerNoDecoder,
-    MousPlayerNoRenderer
+    RendererFailedToOpen,
+    RendererFailedToSetup,
+    RendererFailedToWrite,
+    RendererBadChannels,
+    RendererBadSampleRate,
+    RendererBadBitsPerSample,
+    RendererIsNotSupported,
+
+    PlayerNoDecoder,
+    PlayerNoRenderer
 };
+
+
+}
+
+typedef ErrorCode::e EmErrorCode;
 
 /*
 const char* const ErrorMsg[] = {

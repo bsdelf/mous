@@ -23,8 +23,8 @@ public:
     PluginManager();
     ~PluginManager();
 
-    ErrorCode LoadPluginDir(const std::string& dir);
-    ErrorCode LoadPlugin(const std::string& path);
+    EmErrorCode LoadPluginDir(const std::string& dir);
+    EmErrorCode LoadPlugin(const std::string& path);
     void UnloadPlugin(const std::string& path);
     void UnloadAllPlugins();
 

@@ -20,7 +20,7 @@ void MacDecoder::GetFileSuffix(vector<string>& list) const
     list.push_back("ape");
 }
 
-ErrorCode MacDecoder::Open(const string& url)
+EmErrorCode MacDecoder::Open(const string& url)
 {
     int err;
     str_utf16* pFileName = GetUTF16FromANSI(url.c_str());
@@ -28,7 +28,7 @@ ErrorCode MacDecoder::Open(const string& url)
     delete[] pFileName;
 
     if (m_pDecompress == NULL || err != ERROR_SUCCESS)
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     m_Channels = m_pDecompress->GetInfo(APE_INFO_CHANNELS);
     m_SampleRate = m_pDecompress->GetInfo(APE_INFO_SAMPLE_RATE);
@@ -43,7 +43,7 @@ ErrorCode MacDecoder::Open(const string& url)
 
     m_BlockIndex = 0;
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 void MacDecoder::Close()
@@ -57,7 +57,7 @@ bool MacDecoder::IsFormatVaild() const
     return true;
 }
 
-ErrorCode MacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode MacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     int blocksRecv = 0;
 
@@ -70,14 +70,14 @@ ErrorCode MacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
     } else {
 	used = 0;
     }
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
-ErrorCode MacDecoder::SetUnitIndex(uint64_t index)
+EmErrorCode MacDecoder::SetUnitIndex(uint64_t index)
 {
     m_pDecompress->Seek(index);
     m_BlockIndex = index;
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 uint32_t MacDecoder::GetMaxBytesPerUnit() const
@@ -95,9 +95,9 @@ uint64_t MacDecoder::GetUnitCount() const
     return m_BlockCount;
 }
 
-AudioMode MacDecoder::GetAudioMode() const
+EmAudioMode MacDecoder::GetAudioMode() const
 {
-    return MousStereo;
+    return AudioMode::Stereo;
 }
 
 int32_t MacDecoder::GetChannels() const

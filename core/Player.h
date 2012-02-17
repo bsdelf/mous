@@ -41,7 +41,7 @@ public:
     void SetRenderer(IRenderer* pRenderer);
     void UnsetRenderer();
 
-    ErrorCode Open(const string& path);
+    EmErrorCode Open(const string& path);
     void Close();
 
     void Play();
@@ -55,7 +55,7 @@ public:
     int32_t GetSampleRate() const;
     uint64_t GetDuration() const;
     uint64_t GetCurrentMs() const;
-    AudioMode GetAudioMode() const;
+    EmAudioMode GetAudioMode() const;
 
 public:
     scx::Signal<void (void)> SigFinished;

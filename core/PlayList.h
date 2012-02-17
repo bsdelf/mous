@@ -3,11 +3,26 @@
 
 namespace mous {
 
+namespace PlayListMode {
+
+enum PlayListMode
+{
+    Normal,
+    Repeat,
+    Random,
+    RandomRepeat,
+    SingleRepeat
+};
+
+}
+
 class PlayList
 {
 public:
     PlayList();
     ~PlayList();
+
+    void DumpCover();
 };
 
 }

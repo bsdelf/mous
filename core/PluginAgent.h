@@ -3,6 +3,7 @@
 
 #include <string>
 #include <dlfcn.h>
+#include <mous/ErrorCode.h>
 #include <mous/PluginHelper.h>
 namespace mous {
 
@@ -12,7 +13,7 @@ public:
     virtual ~IPluginAgent() { }
 
     virtual PluginType GetType() const = 0;
-    virtual ErrorCode Open(const std::string& path) = 0;
+    virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
     virtual const PluginInfo* GetInfo() = 0;
     virtual void* GetVpPlugin() = 0;
@@ -41,29 +42,29 @@ public:
 	return m_Type;
     }
 
-    virtual ErrorCode Open(const std::string& path)
+    virtual EmErrorCode Open(const std::string& path)
     {
 	m_pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
 	if (m_pHandle == NULL)
-	    return MousMgrBadFormat;
+	    return ErrorCode::MgrBadFormat;
 
 	m_fnGetInfo = (FnGetPluginInfo)dlsym(m_pHandle, StrGetPluginInfo);
 	if (m_fnGetInfo == NULL)
-	    return MousMgrBadFormat;
+	    return ErrorCode::MgrBadFormat;
 
 	m_fnCreate = (FnCreatePlugin)dlsym(m_pHandle, StrCreatePlugin);
 	if (m_fnCreate == NULL)
-	    return MousMgrBadFormat;
+	    return ErrorCode::MgrBadFormat;
 
 	m_fnRelease = (FnReleasePlugin)dlsym(m_pHandle, StrReleasePlugin);
 	if (m_fnCreate == NULL)
-	    return MousMgrBadFormat;
+	    return ErrorCode::MgrBadFormat;
 
 	m_pPlugin = m_fnCreate();
 	if (m_pPlugin == NULL)
-	    return MousMgrBadFormat;
+	    return ErrorCode::MgrBadFormat;
 
-	return MousOk;
+	return ErrorCode::Ok;
     }
 
     virtual void Close()

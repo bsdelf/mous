@@ -20,7 +20,7 @@ void FaadDecoder::GetFileSuffix(vector<string>& list) const
     list.push_back("mp4");
 }
 
-ErrorCode FaadDecoder::Open(const string& url)
+EmErrorCode FaadDecoder::Open(const string& url)
 {
     /**
      * Check for mp4 file
@@ -29,7 +29,7 @@ ErrorCode FaadDecoder::Open(const string& url)
 
     FILE* file = fopen(url.c_str(), "rb");
     if (file == NULL)
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     unsigned char header[8];
     fread(header, 1, 8, file);
@@ -42,7 +42,7 @@ ErrorCode FaadDecoder::Open(const string& url)
     return m_IsMp4File ? OpenMp4(url) : OpenAac(url);
 }
 
-ErrorCode FaadDecoder::OpenMp4(const string& url)
+EmErrorCode FaadDecoder::OpenMp4(const string& url)
 {
     NeAACDecConfigurationPtr config;
     mp4AudioSpecificConfig mp4Asc;
@@ -54,7 +54,7 @@ ErrorCode FaadDecoder::OpenMp4(const string& url)
 
     m_File = fopen(url.c_str(), "rb");
     if (m_File == NULL)
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     m_Mp4Callback.read = &ReadCallback;
     m_Mp4Callback.seek = &SeekCallback;
@@ -68,14 +68,14 @@ ErrorCode FaadDecoder::OpenMp4(const string& url)
 
     m_Infile = mp4ff_open_read(&m_Mp4Callback);
     if (m_Infile == NULL)
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     m_Track = GetAACTrack(m_Infile);
     if (m_Track < 0) {
 	NeAACDecClose(m_pDecoder);
 	mp4ff_close(m_Infile);
 	fclose(m_File);
-	return MousDecoderFailedToInit;
+	return ErrorCode::DecoderFailedToInit;
     }
 
     unsigned char* confBuf = NULL;
@@ -88,7 +88,7 @@ ErrorCode FaadDecoder::OpenMp4(const string& url)
 	NeAACDecClose(m_pDecoder);
 	mp4ff_close(m_Infile);
 	fclose(m_File);
-	return MousDecoderFailedToInit;
+	return ErrorCode::DecoderFailedToInit;
     }
     m_SampleRate = sampleRate;
     m_Channels = channels;
@@ -117,12 +117,12 @@ ErrorCode FaadDecoder::OpenMp4(const string& url)
     }
     m_Duration = (float)m_SampleCount*(float)(f-1.0)/(float)mp4Asc.samplingFrequency * 1000;
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
-ErrorCode FaadDecoder::OpenAac(const string& url)
+EmErrorCode FaadDecoder::OpenAac(const string& url)
 {
-    return MousDecoderFailedToOpen;
+    return ErrorCode::DecoderFailedToOpen;
 }
 
 void FaadDecoder::Close()
@@ -142,13 +142,13 @@ bool FaadDecoder::IsFormatVaild() const
     return false;
 }
 
-ErrorCode FaadDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FaadDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return m_IsMp4File ? 
 	ReadUnitMp4(data, used, unitCount) : ReadUnitAac(data, used, unitCount);
 }
 
-ErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCount)
 {
     unsigned char* buffer = NULL;
     unsigned int bufferSize = 0;
@@ -162,7 +162,7 @@ ErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCou
 	NeAACDecClose(m_pDecoder);
 	mp4ff_close(m_Infile);
 	fclose(m_File);
-	return MousDecoderFailedToRead;
+	return ErrorCode::DecoderFailedToRead;
     }
 
     NeAACDecFrameInfo frameInfo;
@@ -220,18 +220,18 @@ ErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCou
     unitCount = 1;
     m_SampleIndex += 1;
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
-ErrorCode FaadDecoder::ReadUnitAac(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FaadDecoder::ReadUnitAac(char* data, uint32_t& used, uint32_t& unitCount)
 {
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
-ErrorCode FaadDecoder::SetUnitIndex(uint64_t index)
+EmErrorCode FaadDecoder::SetUnitIndex(uint64_t index)
 {
     m_SampleIndex = index;
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 uint32_t FaadDecoder::GetMaxBytesPerUnit() const
@@ -249,9 +249,9 @@ uint64_t FaadDecoder::GetUnitCount() const
     return m_SampleCount;
 }
 
-AudioMode FaadDecoder::GetAudioMode() const
+EmAudioMode FaadDecoder::GetAudioMode() const
 {
-    return MousStereo;
+    return AudioMode::Stereo;
 }
 
 int32_t FaadDecoder::GetChannels() const

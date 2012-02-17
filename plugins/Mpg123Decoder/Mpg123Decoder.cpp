@@ -30,13 +30,13 @@ void Mpg123Decoder::GetFileSuffix(vector<string>& list) const
     list.push_back("mp3");
 }
 
-ErrorCode Mpg123Decoder::Open(const std::string& url)
+EmErrorCode Mpg123Decoder::Open(const std::string& url)
 {
     if (m_pHandle == NULL)
-	return MousDecoderFailedToInit;
+	return ErrorCode::DecoderFailedToInit;
 
     if (mpg123_open(m_pHandle, url.c_str()) != MPG123_OK)
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     mpg123_scan(m_pHandle);
     mpg123_seek_frame(m_pHandle, 0, SEEK_END);
@@ -44,7 +44,7 @@ ErrorCode Mpg123Decoder::Open(const std::string& url)
     mpg123_seek_frame(m_pHandle, 0, SEEK_SET);
 
     if (m_UnitCount <= 0)
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     long sampleRate;
     int channels;
@@ -60,7 +60,7 @@ ErrorCode Mpg123Decoder::Open(const std::string& url)
     m_Duration = mpg123_tpf(m_pHandle) * 1000.f * m_UnitCount;
     m_UnitIndex = 0;
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 void Mpg123Decoder::Close()
@@ -74,7 +74,7 @@ bool Mpg123Decoder::IsFormatVaild() const
     return true;
 }
 
-ErrorCode Mpg123Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode Mpg123Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     mpg123_frameinfo info;
     mpg123_info(m_pHandle, &info);
@@ -88,21 +88,21 @@ ErrorCode Mpg123Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCoun
 	used = _len;
 	unitCount = 1;
 	++m_UnitIndex;
-	return MousOk;
+	return ErrorCode::Ok;
     } else {
 	used = 0;
-	return MousDecoderOutOfRange;
+	return ErrorCode::DecoderOutOfRange;
     }
 }
 
-ErrorCode Mpg123Decoder::SetUnitIndex(uint64_t index)
+EmErrorCode Mpg123Decoder::SetUnitIndex(uint64_t index)
 {
     if (index < m_UnitCount) {
 	m_UnitIndex = index;
 	mpg123_seek_frame(m_pHandle, m_UnitIndex, SEEK_SET);
-	return MousOk;
+	return ErrorCode::Ok;
     } else {
-	return MousDecoderOutOfRange;
+	return ErrorCode::DecoderOutOfRange;
     }
 }
 
@@ -121,9 +121,9 @@ uint64_t Mpg123Decoder::GetUnitCount() const
     return m_UnitCount;
 }
 
-AudioMode Mpg123Decoder::GetAudioMode() const
+EmAudioMode Mpg123Decoder::GetAudioMode() const
 {
-    return MousStereo;
+    return AudioMode::Stereo;
 }
 
 int32_t Mpg123Decoder::GetChannels() const

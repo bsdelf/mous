@@ -19,7 +19,7 @@ void FlacDecoder::GetFileSuffix(vector<string>& list) const
     list.push_back("flac");
 }
 
-ErrorCode FlacDecoder::Open(const string& url)
+EmErrorCode FlacDecoder::Open(const string& url)
 {
     FLAC__stream_decoder_set_md5_checking(m_pDecoder, false);
     FLAC__stream_decoder_init_file(
@@ -31,10 +31,10 @@ ErrorCode FlacDecoder::Open(const string& url)
 	    NULL);
 
     if (!FLAC__stream_decoder_process_until_end_of_metadata(m_pDecoder))
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     if (!FLAC__stream_decoder_process_single(m_pDecoder))
-	return MousDecoderFailedToOpen;
+	return ErrorCode::DecoderFailedToOpen;
 
     m_Channels = FLAC__stream_decoder_get_channels(m_pDecoder);
     m_SampleRate = FLAC__stream_decoder_get_sample_rate(m_pDecoder);
@@ -44,7 +44,7 @@ ErrorCode FlacDecoder::Open(const string& url)
     m_Duration = m_SampleCount / FLAC__stream_decoder_get_sample_rate(m_pDecoder) * 1000.f;
     m_SampleIndex = 0;
 
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 void FlacDecoder::Close()
@@ -58,7 +58,7 @@ bool FlacDecoder::IsFormatVaild() const
     return true;
 }
 
-ErrorCode FlacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FlacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     gBuf = data;
     if (FLAC__stream_decoder_process_single(m_pDecoder)) {
@@ -70,14 +70,14 @@ ErrorCode FlacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 	used = 0;
 	unitCount = 0;
     }
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
-ErrorCode FlacDecoder::SetUnitIndex(uint64_t index)
+EmErrorCode FlacDecoder::SetUnitIndex(uint64_t index)
 {
     m_SampleIndex = index;
     FLAC__stream_decoder_seek_absolute(m_pDecoder, index);
-    return MousOk;
+    return ErrorCode::Ok;
 }
 
 uint32_t FlacDecoder::GetMaxBytesPerUnit() const
@@ -95,9 +95,9 @@ uint64_t FlacDecoder::GetUnitCount() const
     return m_SampleCount;
 }
 
-AudioMode FlacDecoder::GetAudioMode() const
+EmAudioMode FlacDecoder::GetAudioMode() const
 {
-    return MousStereo;
+    return AudioMode::Stereo;
 }
 
 int32_t FlacDecoder::GetChannels() const
