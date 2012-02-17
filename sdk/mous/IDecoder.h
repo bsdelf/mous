@@ -16,13 +16,13 @@ public:
 
     virtual void GetFileSuffix(std::vector<std::string>& list) const = 0;
 
-    virtual ErrorCode::e Open(const std::string& url) = 0;
+    virtual EmErrorCode Open(const std::string& url) = 0;
     virtual void Close() = 0;
 
     virtual bool IsFormatVaild() const = 0;
 
-    virtual ErrorCode::e ReadUnit(char* data, uint32_t& used, uint32_t& unitCount) = 0;
-    virtual ErrorCode::e SetUnitIndex(uint64_t index) = 0;
+    virtual EmErrorCode ReadUnit(char* data, uint32_t& used, uint32_t& unitCount) = 0;
+    virtual EmErrorCode SetUnitIndex(uint64_t index) = 0;
     virtual uint32_t GetMaxBytesPerUnit() const = 0;
     virtual uint64_t GetUnitIndex() const = 0;
     virtual uint64_t GetUnitCount() const = 0;
