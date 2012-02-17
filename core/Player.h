@@ -6,11 +6,11 @@
 #include <vector>
 #include <map>
 #include <mous/ErrorCode.h>
+#include <mous/AudioMode.h>
 #include <scx/Thread.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/PVBuffer.hpp>
 #include <scx/Signal.hpp>
-#include "AudioMode.h"
 
 namespace mous {
 
