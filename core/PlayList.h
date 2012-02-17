@@ -1,6 +1,8 @@
 #ifndef MOUS_PLAYLIST_H
 #define MOUS_PLAYLIST_H
 
+#include <mous/MediaItem.h>
+
 namespace mous {
 
 namespace PlayMode {

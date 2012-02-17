@@ -27,7 +27,11 @@ enum e
     RendererIsNotSupported,
 
     PlayerNoDecoder,
-    PlayerNoRenderer
+    PlayerNoRenderer,
+
+    TagPraserFailedToWrite,
+
+    MediaLoaderFailedToLoad
 };
 }
 typedef ErrorCode::e EmErrorCode;

@@ -4,6 +4,7 @@
 #include <PluginManager.h>
 #include <Player.h>
 #include <PlayList.h>
+#include <MediaLoader.h>
 #include <scx/Thread.hpp>
 using namespace std;
 using namespace scx;
@@ -77,6 +78,11 @@ int main(int argc, char** argv)
      */
     if (decoderList.empty() || rendererList.empty())
 	return -2;
+
+    /**
+     * Setup loader.
+     */
+    MediaLoader loader;
 
     /**
      * Setup player.
