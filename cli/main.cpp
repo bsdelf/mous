@@ -127,7 +127,9 @@ int main(int argc, char** argv)
 	}
     }
 
+    gPlayer = NULL;
     th.Join();
+
     mgr.UnloadAllPlugins();
 
     return 0;
