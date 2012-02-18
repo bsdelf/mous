@@ -1,5 +1,7 @@
-#ifndef MOUS_PLUGINHELPER
-#define MOUS_PLUGINHELPER
+#ifndef MOUS_PLUGINHELPER_H
+#define MOUS_PLUGINHELPER_H
+
+#include <inttypes.h>
 
 /**
  * Plugin common definition.
@@ -13,7 +15,7 @@ enum e
     Decoder,
     Encoder,
     Renderer,
-    MediaUnpacker,
+    MediaPack,
     TagParser,
     Filter
 };

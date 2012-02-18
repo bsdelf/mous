@@ -15,7 +15,7 @@ struct PluginInfo;
 class IPluginAgent;
 class IDecoder;
 class IRenderer;
-class IMediaUnpacker;
+class IMediaPack;
 class ITagParser;
 
 class PluginManager
@@ -35,7 +35,7 @@ public:
 
     void GetDecoders(std::vector<IDecoder*>& list);
     void GetRenderers(std::vector<IRenderer*>& list);
-    void GetMediaUnpackers(std::vector<IMediaUnpacker*>& list);
+    void GetMediaPacks(std::vector<IMediaPack*>& list);
     void GetTagParsers(std::vector<ITagParser*>& list);
 
     void* GetVpPlugin(const std::string& path, EmPluginType& type);
@@ -50,6 +50,7 @@ private:
 
 private:
     std::map<std::string, IPluginAgent*> m_PluginMap;
+    typedef std::pair<std::string, IPluginAgent*> PluginMapPair;
     typedef std::map<std::string, IPluginAgent*>::iterator PluginMapIter;
 };
 

@@ -4,7 +4,7 @@
 #include <mous/PluginHelper.h>
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
-#include <mous/IMediaUnpacker.h>
+#include <mous/IMediaPack.h>
 #include "PluginAgent.h"
 using namespace std;
 #include <iostream>
@@ -66,8 +66,12 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
 	    pAgent = new PluginAgent<IRenderer>(type);
 	    break;
 
-	case PluginType::MediaUnpacker:
-	    pAgent = new PluginAgent<IMediaUnpacker>(type);
+	case PluginType::MediaPack:
+	    pAgent = new PluginAgent<IMediaPack>(type);
+	    break;
+
+	case PluginType::TagParser:
+	    pAgent = new PluginAgent<ITagParser>(type);
 	    break;
 
 	case PluginType::Filter:
@@ -79,7 +83,7 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
     }
 
     if (pAgent->Open(path) == ErrorCode::Ok) {
-	m_PluginMap.insert(pair<string, IPluginAgent*>(path, pAgent));
+	m_PluginMap.insert(PluginMapPair(path, pAgent));
     } else {
 	pAgent->Close();
 	delete pAgent;
@@ -149,9 +153,9 @@ void PluginManager::GetRenderers(std::vector<IRenderer*>& list)
     return GetPluginsByType(list, PluginType::Renderer);
 }
 
-void PluginManager::GetMediaUnpackers(std::vector<IMediaUnpacker*>& list)
+void PluginManager::GetMediaPacks(std::vector<IMediaPack*>& list)
 {
-    return GetPluginsByType(list, PluginType::MediaUnpacker);
+    return GetPluginsByType(list, PluginType::MediaPack);
 }
 
 void PluginManager::GetTagParsers(std::vector<ITagParser*>& list)

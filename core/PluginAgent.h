@@ -1,6 +1,7 @@
 #ifndef MOUS_PLUGINAGENT_H
 #define MOUS_PLUGINAGENT_H
 
+#include <set>
 #include <string>
 #include <dlfcn.h>
 #include <mous/ErrorCode.h>
@@ -22,18 +23,24 @@ public:
 template<typename PluginSuperClass>
 class PluginAgent: public IPluginAgent
 {
-    typedef const PluginInfo* (*FnGetPluginInfo)(void);
     typedef PluginSuperClass* (*FnCreatePlugin)(void);
     typedef void (*FnReleasePlugin)(PluginSuperClass*);
+    typedef const PluginInfo* (*FnGetPluginInfo)(void);
 
 public:
     explicit PluginAgent(EmPluginType type):
-	m_Type(type) 
+	m_Type(type),
+	m_pHandle(NULL),
+	m_fnCreate(NULL),
+	m_fnRelease(NULL),
+	m_fnGetInfo(NULL),
+	m_pPlugin(NULL)
     {
 
     }
 
-    virtual ~PluginAgent() {
+    virtual ~PluginAgent()
+    {
 
     }
 
@@ -69,11 +76,20 @@ public:
 
     virtual void Close()
     {
-	if (m_fnRelease != NULL)
+	if (m_fnRelease != NULL) {
 	    m_fnRelease(m_pPlugin);
+	    m_fnCreate = NULL;
+	    m_fnRelease = NULL;
+	    m_fnGetInfo = NULL;
+	    m_pPlugin = NULL;
+	}
 
-	if (m_pHandle != NULL)
+	if (m_pHandle != NULL) {
 	    dlclose(m_pHandle);
+	    m_pHandle = NULL;
+	}
+
+	m_Type = PluginType::None;
     }
 
     virtual const PluginInfo* GetInfo()
@@ -96,9 +112,9 @@ private:
 
     void* m_pHandle;
 
-    FnGetPluginInfo m_fnGetInfo;
     FnCreatePlugin m_fnCreate;
     FnReleasePlugin m_fnRelease;
+    FnGetPluginInfo m_fnGetInfo;
 
     PluginSuperClass* m_pPlugin;
 };
