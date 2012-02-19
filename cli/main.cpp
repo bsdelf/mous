@@ -36,9 +36,7 @@ int main(int argc, char** argv)
     PluginManager mgr;
     mgr.LoadPluginDir("./plugins");
 
-    /**
-     * Dump all plugin path.
-     */
+    // Dump all plugin path.
     vector<string> pathList;
     mgr.GetPluginPath(pathList);
     for (size_t i = 0; i < pathList.size(); ++i) {
@@ -51,9 +49,7 @@ int main(int argc, char** argv)
     }
     cout << endl;
 
-    /**
-     * Get all plugin instances.
-     */
+    // Get all plugin agents.
     vector<PluginAgent*> decoderAgentList;
     mgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
     cout << ">> decoders count:" << decoderAgentList.size() << endl;
@@ -63,9 +59,7 @@ int main(int argc, char** argv)
     cout << ">> renderers count:" << rendererAgentList.size() << endl;
     cout << endl;
 
-    /**
-     * Check args enough.
-     */
+    // Check args enough.
     if (argc < 2) {
 	cout << "Usage:" << endl;
 	cout << "mous-cli [-r] [file]" << endl;
@@ -73,20 +67,15 @@ int main(int argc, char** argv)
 	return -1;
     }
 
-    /**
-     * Check plugins enough.
-     */
+    // Check plugins enough.
     if (decoderAgentList.empty() || rendererAgentList.empty())
 	return -2;
 
-    /**
-     * Setup loader.
-     */
+    // Setup loader.
     MediaLoader loader;
+    PlayList playlist;
 
-    /**
-     * Setup player.
-     */
+    // Setup player.
     Player player;
     player.SetRendererDevice("/dev/dsp");
     player.SigFinished.Connect(&OnFinished);
@@ -95,9 +84,7 @@ int main(int argc, char** argv)
 	player.RegisterPluginAgent(decoderAgentList[i]);
     }
 
-    /**
-     * Begin to play.
-     */
+    // Begin to play.
     player.Open(argv[1]);
     player.Play();
     Thread th;
