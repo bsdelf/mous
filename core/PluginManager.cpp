@@ -5,7 +5,6 @@
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
 #include <mous/IMediaPack.h>
-#include "PluginAgent.h"
 using namespace std;
 #include <iostream>
 using namespace mous;
@@ -23,9 +22,9 @@ PluginManager::~PluginManager()
 EmErrorCode PluginManager::LoadPluginDir(const string& dir)
 {
     vector<string> files;
-    pFtwFiles = &files;
+    gFtwFiles = &files;
     ftw(dir.c_str(), &OnFtw, 1);
-    pFtwFiles = NULL;
+    gFtwFiles = NULL;
 
     for (size_t i = 0; i < files.size(); ++i) {
 	LoadPlugin(files[i]);
@@ -53,7 +52,8 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
     }
     EmPluginType type = fnGetPluginType();
 
-    IPluginAgent* pAgent = NULL;
+    PluginAgent* pAgent = new PluginAgent(type);
+    /*
     switch (type) {
 	case PluginType::Decoder:
 	    pAgent = new PluginAgent<IDecoder>(type);
@@ -81,6 +81,7 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
 	    pAgent = NULL;
 	    break;
     }
+    */
 
     if (pAgent->Open(path) == ErrorCode::Ok) {
 	m_PluginMap.insert(PluginMapPair(path, pAgent));
@@ -98,7 +99,7 @@ void PluginManager::UnloadPlugin(const string& path)
 {
     PluginMapIter iter = m_PluginMap.find(path);
     if (iter != m_PluginMap.end()) {
-	IPluginAgent* pAgent = iter->second;
+	PluginAgent* pAgent = iter->second;
 	pAgent->Close();
 	delete pAgent;
 	m_PluginMap.erase(iter);
@@ -109,7 +110,7 @@ void PluginManager::UnloadAllPlugins()
 {
     for (PluginMapIter iter = m_PluginMap.begin();
 	    iter != m_PluginMap.end(); ++iter) {
-	IPluginAgent* pAgent = iter->second;
+	PluginAgent* pAgent = iter->second;
 	pAgent->Close();
 	delete pAgent;
     }
@@ -132,7 +133,7 @@ const PluginInfo* PluginManager::GetPluginInfo(const std::string& path)
     return (iter != m_PluginMap.end()) ?
 	iter->second->GetInfo() : NULL;
 }
-
+/*
 const PluginInfo* PluginManager::GetPluginInfo(const void* vp)
 {
     for (PluginMapIter iter = m_PluginMap.begin();
@@ -142,13 +143,15 @@ const PluginInfo* PluginManager::GetPluginInfo(const void* vp)
     }
     return NULL;
 }
+*/
 
-void PluginManager::GetDecoders(std::vector<IDecoder*>& list)
+/*
+void PluginManager::GetDecoders(vector<IPluginAgent*>& list)
 {
     return GetPluginsByType(list, PluginType::Decoder);
 }
 
-void PluginManager::GetRenderers(std::vector<IRenderer*>& list)
+void PluginManager::GetRenderers(vector<IPluginAgent*>& list)
 {
     return GetPluginsByType(list, PluginType::Renderer);
 }
@@ -162,7 +165,9 @@ void PluginManager::GetTagParsers(std::vector<ITagParser*>& list)
 {
     return GetPluginsByType(list, PluginType::TagParser);
 }
+*/
 
+/*
 void* PluginManager::GetVpPlugin(const std::string& path, EmPluginType& type)
 {
     PluginMapIter iter = m_PluginMap.find(path);
@@ -174,29 +179,25 @@ void* PluginManager::GetVpPlugin(const std::string& path, EmPluginType& type)
 	return NULL;
     }
 }
+*/
 
-template<typename Super>
-void PluginManager::GetPluginsByType(vector<Super*>& list, EmPluginType type)
+void PluginManager::GetPluginAgents(vector<PluginAgent*>& list, EmPluginType type)
 {
     list.clear();
     for (PluginMapIter iter = m_PluginMap.begin();
 	    iter != m_PluginMap.end(); ++iter) {
-	IPluginAgent* pAgent = iter->second;
+	PluginAgent* pAgent = iter->second;
 	if (pAgent->GetType() == type) {
-	    PluginAgent<Super>* pd = 
-		dynamic_cast<PluginAgent<Super>*>(pAgent);
-	    if (pd != NULL) {
-		list.push_back(pd->GetPlugin());
-	    }
+	    list.push_back(pAgent);
 	}
     }
 }
 
-std::vector<std::string>* PluginManager::pFtwFiles = NULL;
+vector<string>* PluginManager::gFtwFiles = NULL;
 
 int PluginManager::OnFtw(const char* file, const struct stat* s, int)
 {
     if (!(s->st_mode & S_IFDIR))
-	pFtwFiles->push_back(file);
+	gFtwFiles->push_back(file);
     return 0;
 }

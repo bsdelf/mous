@@ -52,8 +52,45 @@ PlayerStatus Player::GetStatus() const
     return m_Status;
 }
 
-void Player::AddDecoder(IDecoder* pDecoder)
+void Player::RegisterPluginAgent(const PluginAgent* pAgent)
 {
+    switch (pAgent->GetType()) {
+	case PluginType::Decoder:
+	    AddDecoder(pAgent);
+	    break;
+	
+	case PluginType::Renderer:
+	    SetRenderer(pAgent);
+	    break;
+
+	default:
+	    break;
+    }
+}
+
+void Player::UnregisterPluginAgent(const PluginAgent* pAgent)
+{
+    switch (pAgent->GetType()) {
+	case PluginType::Decoder:
+	    RemoveDecoder(pAgent);
+	    break;
+	
+	case PluginType::Renderer:
+	    UnsetRenderer(pAgent);
+	    break;
+
+	default:
+	    break;
+    }
+}
+
+void Player::AddDecoder(const PluginAgent* pAgent)
+{
+    // Register agent.
+    IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
+    m_AgentMap.insert(AgentMapPair(pAgent, pDecoder));
+
+    // Register decoder.
     vector<string> list;
     pDecoder->GetFileSuffix(list);
     for (size_t i = 0; i < list.size(); ++i) {
@@ -70,72 +107,74 @@ void Player::AddDecoder(IDecoder* pDecoder)
     }
 }
 
-void Player::RemoveDecoder(IDecoder* pDecoder)
+void Player::RemoveDecoder(const PluginAgent* pAgent)
 {
-    /**
-     * Stop in use.
-     */
-
-    /**
-     * Remove it from map.
-     */
-    vector<string> list;
-    pDecoder->GetFileSuffix(list);
-    for (size_t i = 0; i < list.size(); ++i) {
-	string suffix = ToLower(list[i]);
-	DecoderMapIter iter = m_DecoderMap.find(suffix);
-	if (iter != m_DecoderMap.end()) {
-	    vector<IDecoder*>* dlist = iter->second;
-	    for (size_t i = 0; i < dlist->size(); ++i) {
-		if ((*dlist)[i] == pDecoder) {
-		    dlist->erase(dlist->begin()+i);
-		    break;
+    AgentMapIter iter = m_AgentMap.find(pAgent);
+    if (iter != m_AgentMap.end()) {
+	// Unregister decoder.
+	vector<string> list;
+	IDecoder* pDecoder = (IDecoder*)iter->second;
+	pDecoder->GetFileSuffix(list);
+	for (size_t i = 0; i < list.size(); ++i) {
+	    string suffix = ToLower(list[i]);
+	    DecoderMapIter iter = m_DecoderMap.find(suffix);
+	    if (iter != m_DecoderMap.end()) {
+		vector<IDecoder*>* dlist = iter->second;
+		for (size_t i = 0; i < dlist->size(); ++i) {
+		    if ((*dlist)[i] == pDecoder) {
+			dlist->erase(dlist->begin()+i);
+			break;
+		    }
+		}
+		if (dlist->empty()) {
+		    delete dlist;
+		    m_DecoderMap.erase(iter);
 		}
 	    }
-	    if (dlist->empty()) {
-		delete dlist;
-		m_DecoderMap.erase(iter);
-	    }
+	}
+
+	// Unregister agent.
+	pAgent->ReleaseObject(pDecoder);
+	m_AgentMap.erase(iter);
+    }
+}
+
+void Player::SetRenderer(const PluginAgent* pAgent)
+{
+    m_pRenderer = (IRenderer*)pAgent->CreateObject();
+    m_AgentMap.insert(AgentMapPair(pAgent, m_pRenderer));
+
+    m_pRenderer->OpenDevice(m_RendererDevice);
+}
+
+void Player::UnsetRenderer(const PluginAgent* pAgent)
+{
+    Stop();
+    SigStopped();
+
+    AgentMapIter iter = m_AgentMap.find(pAgent);
+    if (iter != m_AgentMap.end()) {
+	m_AgentMap.erase(iter);
+
+	if (m_pRenderer != NULL) {
+	    m_pRenderer->CloseDevice();
+	    pAgent->ReleaseObject(m_pRenderer);
+	    m_pRenderer = NULL;
 	}
     }
 }
 
-void Player::RemoveAllDecoders()
+void Player::UnregisterAll()
 {
-    /**
-     * Stop in use.
-     */
-
-    /**
-     * Clear all.
-     */
-    for(DecoderMapIter iter = m_DecoderMap.begin();
-	iter != m_DecoderMap.end(); ++iter) {
-	delete iter->second;
+    while (!m_AgentMap.empty()) {
+	AgentMapIter iter = m_AgentMap.begin();
+	UnregisterPluginAgent(iter->first);
     }
-    m_DecoderMap.clear();
 }
 
-void SpecifyDecoder(const string& suffix, IDecoder* pDecoder)
+void Player::SetRendererDevice(const string& path)
 {
-
-}
-
-void Player::SetRenderer(IRenderer* pRenderer)
-{
-    m_pRenderer = pRenderer;
-    pRenderer->OpenDevice("/dev/dsp");
-}
-
-void Player::UnsetRenderer()
-{
-    /**
-     * Stop renderer.
-     */
-    Stop();
-    SigStopped();
-    m_pRenderer->CloseDevice();
-    m_pRenderer = NULL;
+    m_RendererDevice = path;
 }
 
 EmErrorCode Player::Open(const string& path)

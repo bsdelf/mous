@@ -54,13 +54,13 @@ int main(int argc, char** argv)
     /**
      * Get all plugin instances.
      */
-    vector<IDecoder*> decoderList;
-    mgr.GetDecoders(decoderList);
-    cout << ">> decoders count:" << decoderList.size() << endl;
+    vector<PluginAgent*> decoderAgentList;
+    mgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
+    cout << ">> decoders count:" << decoderAgentList.size() << endl;
 
-    vector<IRenderer*> rendererList;
-    mgr.GetRenderers(rendererList);
-    cout << ">> renderers count:" << rendererList.size() << endl;
+    vector<PluginAgent*> rendererAgentList;
+    mgr.GetPluginAgents(rendererAgentList, PluginType::Renderer);
+    cout << ">> renderers count:" << rendererAgentList.size() << endl;
     cout << endl;
 
     /**
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     /**
      * Check plugins enough.
      */
-    if (decoderList.empty() || rendererList.empty())
+    if (decoderAgentList.empty() || rendererAgentList.empty())
 	return -2;
 
     /**
@@ -88,10 +88,11 @@ int main(int argc, char** argv)
      * Setup player.
      */
     Player player;
+    player.SetRendererDevice("/dev/dsp");
     player.SigFinished.Connect(&OnFinished);
-    player.SetRenderer(rendererList[0]);
-    for (size_t i = 0; i < decoderList.size(); ++i) {
-	player.AddDecoder(decoderList[i]);
+    player.RegisterPluginAgent(rendererAgentList[0]);
+    for (size_t i = 0; i < decoderAgentList.size(); ++i) {
+	player.RegisterPluginAgent(decoderAgentList[i]);
     }
 
     /**
@@ -136,6 +137,7 @@ int main(int argc, char** argv)
     gPlayer = NULL;
     th.Join();
 
+    player.UnregisterAll();
     mgr.UnloadAllPlugins();
 
     return 0;

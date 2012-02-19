@@ -6,13 +6,13 @@
 #include <vector>
 #include <string>
 #include <mous/ErrorCode.h>
-#include <mous/PluginHelper.h>
+#include "PluginAgent.h"
+
 struct stat;
 
 namespace mous {
 
 struct PluginInfo;
-class IPluginAgent;
 class IDecoder;
 class IRenderer;
 class IMediaPack;
@@ -30,28 +30,25 @@ public:
     void UnloadAllPlugins();
 
     void GetPluginPath(std::vector<std::string>& list);
+    void GetPluginAgents(std::vector<PluginAgent*>& list, EmPluginType);
     const PluginInfo* GetPluginInfo(const std::string& path);
-    const PluginInfo* GetPluginInfo(const void* vp);
+    //const PluginInfo* GetPluginInfo(const void* vp);
 
-    void GetDecoders(std::vector<IDecoder*>& list);
-    void GetRenderers(std::vector<IRenderer*>& list);
-    void GetMediaPacks(std::vector<IMediaPack*>& list);
-    void GetTagParsers(std::vector<ITagParser*>& list);
-
-    void* GetVpPlugin(const std::string& path, EmPluginType& type);
+    //void GetDecoders(std::vector<IPluginAgent*>& list);
+    //void GetRenderers(std::vector<IPluginAgent*>& list);
+    //void GetMediaPacks(std::vector<IMediaPack*>& list);
+    //void GetTagParsers(std::vector<ITagParser*>& list);
 
 private:
-    static std::vector<std::string>* pFtwFiles;
+    static std::vector<std::string>* gFtwFiles;
     static int OnFtw(const char* file, const struct stat* s, int);
 
 private:
-    template<typename Super>
-    void GetPluginsByType(std::vector<Super*>& list, EmPluginType);
 
 private:
-    std::map<std::string, IPluginAgent*> m_PluginMap;
-    typedef std::pair<std::string, IPluginAgent*> PluginMapPair;
-    typedef std::map<std::string, IPluginAgent*>::iterator PluginMapIter;
+    std::map<std::string, PluginAgent*> m_PluginMap;
+    typedef std::pair<std::string, PluginAgent*> PluginMapPair;
+    typedef std::map<std::string, PluginAgent*>::iterator PluginMapIter;
 };
 
 }

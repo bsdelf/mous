@@ -11,6 +11,18 @@
 #include <scx/SemVar.hpp>
 #include <scx/PVBuffer.hpp>
 #include <scx/Signal.hpp>
+#include "PluginAgent.h"
+
+/*
+namespace scx {
+
+class Thread;
+class SemVar;
+class PVBuffer;
+class Signal;
+
+}
+*/
 
 namespace mous {
 
@@ -21,6 +33,7 @@ enum PlayerStatus
     MousPaused
 };
 
+class IPluginAgent;
 class IDecoder;
 class IRenderer;
 
@@ -33,13 +46,11 @@ public:
 public:
     PlayerStatus GetStatus() const;
 
-    void AddDecoder(IDecoder* pDecoder);
-    void RemoveDecoder(IDecoder* pDecoder);
-    void RemoveAllDecoders();
-    void SpecifyDecoder(const string& suffix, IDecoder* pDecoder);
+    void RegisterPluginAgent(const PluginAgent* pAgent);
+    void UnregisterPluginAgent(const PluginAgent* pAgent);
+    void UnregisterAll();
 
-    void SetRenderer(IRenderer* pRenderer);
-    void UnsetRenderer();
+    void SetRendererDevice(const string& path);
 
     EmErrorCode Open(const string& path);
     void Close();
@@ -64,9 +75,14 @@ public:
     scx::Signal<void (void)> SigResumed;
 
 private:
-    inline void PlayRange(uint64_t beg, uint64_t end);
-    inline void WorkForDecoder();
-    inline void WorkForRenderer();
+    void AddDecoder(const PluginAgent* pAgent);
+    void RemoveDecoder(const PluginAgent* pAgent);
+    void SetRenderer(const PluginAgent* pAgent);
+    void UnsetRenderer(const PluginAgent* pAgent);
+
+    void PlayRange(uint64_t beg, uint64_t end);
+    void WorkForDecoder();
+    void WorkForRenderer();
 
 private:
     struct UnitBuffer
@@ -99,6 +115,8 @@ private:
 private:
     PlayerStatus m_Status;
 
+    std::string m_RendererDevice;
+
     bool m_StopDecoder;
     bool m_SuspendDecoder;
     IDecoder* m_pDecoder;
@@ -123,9 +141,13 @@ private:
 
     double m_UnitPerMs;
 
+    std::map<const PluginAgent*, void*> m_AgentMap;
+    typedef std::pair<const PluginAgent*, void*> AgentMapPair;
+    typedef std::map<const PluginAgent*, void*>::iterator AgentMapIter;
+
     std::map<std::string, std::vector<IDecoder*>*> m_DecoderMap;
-    typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
     typedef std::pair<std::string, std::vector<IDecoder*>*> DecoderMapPair;
+    typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
 };
 
 }
