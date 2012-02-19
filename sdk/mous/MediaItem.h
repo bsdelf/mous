@@ -6,9 +6,8 @@
 
 namespace mous {
 
-class ITagParser;
-
-struct MediaItem {
+struct MediaItem
+{
     std::string url;
     bool hasRange;
     uint64_t msBeg;
@@ -21,8 +20,6 @@ struct MediaItem {
     std::string genre;
     int32_t year;
     int32_t track;
-
-    ITagParser* pTagParser;
 };
 
 }
