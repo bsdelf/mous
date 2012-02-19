@@ -13,17 +13,6 @@
 #include <scx/Signal.hpp>
 #include "PluginAgent.h"
 
-/*
-namespace scx {
-
-class Thread;
-class SemVar;
-class PVBuffer;
-class Signal;
-
-}
-*/
-
 namespace mous {
 
 enum PlayerStatus
