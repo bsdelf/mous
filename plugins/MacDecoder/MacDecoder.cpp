@@ -1,7 +1,8 @@
 #include "MacDecoder.h"
 #include <mac/CharacterHelper.h>
 
-MacDecoder::MacDecoder()
+MacDecoder::MacDecoder():
+    m_pDecompress(NULL)
 {
 
 }
