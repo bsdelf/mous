@@ -90,8 +90,8 @@ int main(int argc, char** argv)
     cout << "album:" << mediaList[0]->album << endl;
     cout << "comment:" << mediaList[0]->comment << endl;
     cout << "genre:" << mediaList[0]->genre << endl;
-    cout << "year:" << mediaList[0]->comment << endl;
-    cout << "track:" << mediaList[0]->comment << endl;
+    cout << "year:" << mediaList[0]->year << endl;
+    cout << "track:" << mediaList[0]->track << endl;
 
     // Setup player.
     Player player;
