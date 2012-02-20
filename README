@@ -1,21 +1,42 @@
-1.Plugin Dependence(FreeBSD ports)
+1.Sub Project
+Started	    Name	    Description
+O	    libMousCore	    mous core/sdk
+O	    mous-cli	    Only for test
+X	    QMous	    Qt based front
+X	    NMous	    ncurses based font
+X	    GMous	    Gtk based font?
+
+2.Features
+Supported   Description
+O	    Decode media
+X	    Format convert
+X	    Media management
+X	    Sound Effect
+X	    Dynamic Normalizer
+X	    FFTW
+X	    Tag/Cover edit
+X	    Auto detect charset
+
+3.Plugin Dependence(FreeBSD ports)
 You can use ccmake to turn ON/OFF the following plugins.
 All plugins will be dynamically loaded at runtime.
 Even NONE of them are built, mous will still be able to launch,
 but of course it will be useless!
 
-Dependence	    Reason
+Supported   Dependence		Reason
+X	    NONE		Alsa Renderer
+O	    NONE		Oss Renderer
+X	    NONE		Wav Decoder
 
-NONE		    alsa renderer
-NONE		    oss renderer
-NONE		    wav decoder
+O	    audio/mpg123	Mp3 Decoder
+O	    audio/mac		Ape Decoder
+O	    audio/flac		Flac Decoder
+O	    audio/faad		Mp4 Decoder
 
-audio/mpg123	    mp3 decoder
-audio/mac	    ape decoder
-audio/flac	    flac decoder
-audio/faad	    m4a decoder
+X	    audio/lame		Mp3 Encoder
+X	    audio/faac		Mp4 Encoder
+X	    audio/flac		Flac Encoder
 
-audio/taglib	    tag support
-
-textproc/libcue	    cue sheet
-
+O	    audio/taglib	Tag support
+O	    textproc/libcue	CUE sheet parser
+X	    databases/sqlite3	Media management
