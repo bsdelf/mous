@@ -2,9 +2,9 @@
 Started	    Name	    Description
 O	    libMousCore	    mous core/sdk
 O	    mous-cli	    Only for test
-X	    QMous	    Qt based front
-X	    NMous	    ncurses based font
-X	    GMous	    Gtk based font?
+X	    qmous	    Qt based front
+X	    nmous	    ncurses based font
+X	    gmous	    Gtk based font?
 
 2.Features
 Supported   Description
