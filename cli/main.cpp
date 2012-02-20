@@ -57,6 +57,10 @@ int main(int argc, char** argv)
     vector<PluginAgent*> rendererAgentList;
     mgr.GetPluginAgents(rendererAgentList, PluginType::Renderer);
     cout << ">> renderers count:" << rendererAgentList.size() << endl;
+
+    vector<PluginAgent*> tagAgentList;
+    mgr.GetPluginAgents(tagAgentList, PluginType::TagParser);
+    cout << ">> TagParser count:" << tagAgentList.size() << endl;
     cout << endl;
 
     // Check args enough.
@@ -73,7 +77,21 @@ int main(int argc, char** argv)
 
     // Setup loader.
     MediaLoader loader;
+    for (size_t i = 0; i < tagAgentList.size(); ++i) {
+	loader.RegisterPluginAgent(tagAgentList[i]);
+    }
+
     PlayList playlist;
+
+    deque<MediaItem*> mediaList;
+    loader.LoadMedia(argv[1], mediaList);
+    cout << "title:" << mediaList[0]->title << endl;
+    cout << "artist:" << mediaList[0]->artist << endl;
+    cout << "album:" << mediaList[0]->album << endl;
+    cout << "comment:" << mediaList[0]->comment << endl;
+    cout << "genre:" << mediaList[0]->genre << endl;
+    cout << "year:" << mediaList[0]->comment << endl;
+    cout << "track:" << mediaList[0]->comment << endl;
 
     // Setup player.
     Player player;

@@ -2,12 +2,15 @@
 #define MOUS_MEDIALOADER_H
 
 #include <map>
+#include <deque>
 #include <string>
 #include <mous/ErrorCode.h>
-#include "PlayList.h"
+#include "PluginAgent.h"
 
 namespace mous {
 
+struct MediaItem;
+class IMediaPack;
 class ITagParser;
 
 class MediaLoader
@@ -16,16 +19,33 @@ public:
     MediaLoader();
     ~MediaLoader();
 
-    EmErrorCode LoadMedia(const std::string& path, PlayList& list);
+    void RegisterPluginAgent(const PluginAgent* pAgent);
+    void UnregisterPluginAgent(const PluginAgent* pAgent);
+    void UnregisterAll();
+
+    EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list);
 
 private:
-    EmErrorCode TryUnpack();
-    EmErrorCode TryParseTag();
+    void AddMediaPack(const PluginAgent* pAgent);
+    void RemoveMediaPack(const PluginAgent* pAgent);
+    void AddTagParser(const PluginAgent* pAgent);
+    void RemoveTagParser(const PluginAgent* pAgent);
+ 
+    EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem*>& list);
+    EmErrorCode TryParseTag(std::deque<MediaItem*>& list);
 
 private:
+    std::map<const PluginAgent*, void*> m_AgentMap;
+    typedef std::pair<const PluginAgent*, void*> AgentMapPair;
+    typedef std::map<const PluginAgent*, void*>::iterator AgentMapIter;
+
+    std::map<std::string, IMediaPack*> m_MediaPackMap;
+    typedef std::pair<std::string, IMediaPack*> MediaPackMapPair;
+    typedef std::map<std::string, IMediaPack*>::iterator MediaPackMapIter;
+
     std::map<std::string, ITagParser*> m_TagParserMap;
-    typedef std::map<std::string, ITagParser*>::iterator TagParserMapIter;
     typedef std::pair<std::string, ITagParser*> TagParserMapPair;
+    typedef std::map<std::string, ITagParser*>::iterator TagParserMapIter;
 };
 
 }
