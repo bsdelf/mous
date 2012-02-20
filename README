@@ -4,6 +4,12 @@ All plugins will be dynamically loaded at runtime.
 Even NONE of them are built, mous will still be able to launch,
 but of course it will be useless!
 
+Dependence	    Reason
+
+NONE		    alsa renderer
+NONE		    oss renderer
+NONE		    wav decoder
+
 audio/mpg123	    mp3 decoder
 audio/mac	    ape decoder
 audio/flac	    flac decoder
