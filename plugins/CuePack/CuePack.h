@@ -6,17 +6,22 @@ extern "C" {
 using namespace std;
 using namespace mous;
 
+struct Cd;
+
 class CuePack: public IMediaPack
 {
 public:
     CuePack();
     virtual ~CuePack();
 
-    virtual void GetFileSuffix(std::vector<std::string>& list) const;
+    virtual void GetFileSuffix(vector<string>& list) const;
 
-    virtual void DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
-	    const std::map<std::string, IMediaPack*>* pMap) const;
+    virtual void DumpMedia(const string& path, deque<MediaItem*>& list,
+	    const map<string, IMediaPack*>* pMap) const;
 
-    virtual void DumpStream(const std::string& stream, std::deque<MediaItem*>& list,
-	    const std::map<std::string, IMediaPack*>* pMap) const;
+    virtual void DumpStream(const string& stream, deque<MediaItem*>& list,
+	    const map<string, IMediaPack*>* pMap) const;
+
+private:
+    void DumpCue(const string& dir, Cd* cd, deque<MediaItem*>& list) const;
 };

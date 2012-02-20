@@ -92,13 +92,6 @@ int main(int argc, char** argv)
 
     deque<MediaItem*> mediaList;
     loader.LoadMedia(argv[1], mediaList);
-    cout << "title:" << mediaList[0]->title << endl;
-    cout << "artist:" << mediaList[0]->artist << endl;
-    cout << "album:" << mediaList[0]->album << endl;
-    cout << "comment:" << mediaList[0]->comment << endl;
-    cout << "genre:" << mediaList[0]->genre << endl;
-    cout << "year:" << mediaList[0]->year << endl;
-    cout << "track:" << mediaList[0]->track << endl;
 
     // Setup player.
     Player player;
@@ -110,7 +103,17 @@ int main(int argc, char** argv)
     }
 
     // Begin to play.
-    MediaItem* item = mediaList[16];
+    MediaItem* item = mediaList[12];
+    cout << ">>>> Tag Info" << endl;
+    cout << "\ttitle:" << item->title << endl;
+    cout << "\tartist:" << item->artist << endl;
+    cout << "\talbum:" << item->album << endl;
+    cout << "\tcomment:" << item->comment << endl;
+    cout << "\tgenre:" << item->genre << endl;
+    cout << "\tyear:" << item->year << endl;
+    cout << "\ttrack:" << item->track << endl;
+
+
     player.Open(item->url);
     if (item->hasRange) {
 	player.Play(item->msBeg, item->msEnd);

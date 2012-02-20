@@ -20,6 +20,13 @@ struct MediaItem
     std::string genre;
     int32_t year;
     int32_t track;
+
+    MediaItem():
+	year(-1),
+	track(-1)
+    {
+
+    }
 };
 
 }

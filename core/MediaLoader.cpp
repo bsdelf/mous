@@ -183,13 +183,20 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list)
 	ITagParser* parser = iter->second;
 	parser->Open(item->url);
 	if (!parser->IsEmpty()) {
-	    item->title = parser->GetTitle();
-	    item->artist = parser->GetArtist();
-	    item->album = parser->GetAlbum();
-	    item->comment = parser->GetComment();
-	    item->genre = parser->GetGenre();
-	    item->year = parser->GetYear();
-	    item->track = parser->GetTrack();
+	    if (item->title.empty())
+		item->title = parser->GetTitle();
+	    if (item->artist.empty())
+		item->artist = parser->GetArtist();
+	    if (item->album.empty())
+		item->album = parser->GetAlbum();
+	    if (item->comment.empty())
+		item->comment = parser->GetComment();
+	    if (item->genre.empty())
+		item->genre = parser->GetGenre();
+	    if (item->year < 0)
+		item->year = parser->GetYear();
+	    if (item->track < 0)
+		item->track = parser->GetTrack();
 	}
 	parser->Close();
     }
