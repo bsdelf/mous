@@ -50,43 +50,61 @@ void MediaLoader::UnregisterPluginAgent(const PluginAgent* pAgent)
     }
 }
 
+void MediaLoader::UnregisterAll()
+{
+    while (!m_AgentMap.empty()) {
+	AgentMapIter iter = m_AgentMap.begin();
+	UnregisterPluginAgent(iter->first);
+    }
+}
+
 void MediaLoader::AddMediaPack(const PluginAgent* pAgent)
 {
     // Register agent.
     IMediaPack* pPack = (IMediaPack*)pAgent->CreateObject();
     m_AgentMap.insert(AgentMapPair(pAgent, pPack));
 
-    /*
     // Register MediaPack.
     vector<string> list;
-    pDecoder->GetFileSuffix(list);
+    pPack->GetFileSuffix(list);
     for (size_t i = 0; i < list.size(); ++i) {
 	string suffix = ToLower(list[i]);
-	DecoderMapIter iter = m_DecoderMap.find(suffix);
-	if (iter == m_DecoderMap.end()) {
-	    vector<IDecoder*>* dlist = new vector<IDecoder*>();
-	    dlist->push_back(pDecoder);
-	    m_DecoderMap.insert(DecoderMapPair(suffix, dlist));
-	} else {
-	    vector<IDecoder*>* dlist = iter->second;
-	    dlist->push_back(pDecoder);
+	MediaPackMapIter iter = m_MediaPackMap.find(suffix);
+	if (iter == m_MediaPackMap.end()) {
+	    m_MediaPackMap.insert(MediaPackMapPair(suffix, pPack));
 	}
     }
-    */
 }
 
 void MediaLoader::RemoveMediaPack(const PluginAgent* pAgent)
 {
+    AgentMapIter iter = m_AgentMap.find(pAgent);
+    if (iter != m_AgentMap.end()) {
+	// Unregister MediaPack.
+	vector<string> list;
+	IMediaPack* pPack = (IMediaPack*)iter->second;
+	pPack->GetFileSuffix(list);
+	for (size_t i = 0; i < list.size(); ++i) {
+	    string suffix = ToLower(list[i]);
+	    MediaPackMapIter iter = m_MediaPackMap.find(suffix);
+	    if (iter != m_MediaPackMap.end()) {
+		m_MediaPackMap.erase(iter);
+	    }
+	}
 
+	// Unregister PluginAgent.
+	pAgent->ReleaseObject(pPack);
+	m_AgentMap.erase(iter);
+    }
 }
-#include <iostream>
+
 void MediaLoader::AddTagParser(const PluginAgent* pAgent)
 {
-    // Register agent.
+    // Register PluginAgent.
     ITagParser* pParser = (ITagParser*)pAgent->CreateObject();
     m_AgentMap.insert(AgentMapPair(pAgent, pParser));
 
-    // Register TagParser
+    // Register TagParser.
     vector<string> list;
     pParser->GetFileSuffix(list);
     for (size_t i = 0; i < list.size(); ++i) {
@@ -100,46 +118,29 @@ void MediaLoader::AddTagParser(const PluginAgent* pAgent)
 
 void MediaLoader::RemoveTagParser(const PluginAgent* pAgent)
 {
-
-    /*
     AgentMapIter iter = m_AgentMap.find(pAgent);
     if (iter != m_AgentMap.end()) {
-	// Unregister decoder.
+	// Unregister TagParser.
 	vector<string> list;
-	IDecoder* pDecoder = (IDecoder*)iter->second;
-	pDecoder->GetFileSuffix(list);
+	ITagParser* pParser = (ITagParser*)iter->second;
+	pParser->GetFileSuffix(list);
 	for (size_t i = 0; i < list.size(); ++i) {
 	    string suffix = ToLower(list[i]);
-	    DecoderMapIter iter = m_DecoderMap.find(suffix);
-	    if (iter != m_DecoderMap.end()) {
-		vector<IDecoder*>* dlist = iter->second;
-		for (size_t i = 0; i < dlist->size(); ++i) {
-		    if ((*dlist)[i] == pDecoder) {
-			dlist->erase(dlist->begin()+i);
-			break;
-		    }
-		}
-		if (dlist->empty()) {
-		    delete dlist;
-		    m_DecoderMap.erase(iter);
-		}
+	    TagParserMapIter iter = m_TagParserMap.find(suffix);
+	    if (iter != m_TagParserMap.end()) {
+		m_TagParserMap.erase(iter);
 	    }
 	}
 
-	// Unregister agent.
-	pAgent->ReleaseObject(pDecoder);
+	// Unregister PluginAgent.
+	pAgent->ReleaseObject(pParser);
 	m_AgentMap.erase(iter);
     }
-    */
 }
 
 EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem*>& list)
 {
-    MediaItem* item = new MediaItem;
-    item->url = path;
-    item->hasRange = false;
-    list.push_back(item);
-
+    TryUnpack(path, list);
     TryParseTag(list);
 
     return ErrorCode::Ok;
@@ -147,14 +148,28 @@ EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem*>& list)
 
 EmErrorCode MediaLoader::TryUnpack(const string& path, deque<MediaItem*>& list)
 {
+    // Find MediaPack.
     string suffix = ToLower(FileSuffix(path));
-    //DecoderMapIter iter = m_DecoderMap.find(suffix);
+    MediaPackMapIter iter = m_MediaPackMap.find(suffix);
+    if (iter == m_MediaPackMap.end()) {
+	// General Media
+	MediaItem* item = new MediaItem;
+	item->url = path;
+	item->hasRange = false;
+	list.push_back(item);
+    } else {
+	// MediaPack
+	IMediaPack* pack = iter->second;
+	pack->DumpMedia(path, list, &m_MediaPackMap);
+    }
+
     return ErrorCode::Ok;
 }
 
 EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list)
 {
     for (size_t i = 0; i < list.size(); ++i) {
+	// Find TagParser.
 	MediaItem* item = list[i];
 	string suffix = ToLower(FileSuffix(item->url));
 	TagParserMapIter iter = m_TagParserMap.find(suffix);
@@ -164,6 +179,7 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list)
 		continue;
 	}
 
+	// Parse & Fill.
 	ITagParser* parser = iter->second;
 	parser->Open(item->url);
 	if (!parser->IsEmpty()) {

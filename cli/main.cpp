@@ -52,11 +52,15 @@ int main(int argc, char** argv)
     // Get all plugin agents.
     vector<PluginAgent*> decoderAgentList;
     mgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
-    cout << ">> decoders count:" << decoderAgentList.size() << endl;
+    cout << ">> Decoder count:" << decoderAgentList.size() << endl;
 
     vector<PluginAgent*> rendererAgentList;
     mgr.GetPluginAgents(rendererAgentList, PluginType::Renderer);
-    cout << ">> renderers count:" << rendererAgentList.size() << endl;
+    cout << ">> Renderer count:" << rendererAgentList.size() << endl;
+
+    vector<PluginAgent*> packAgentList;
+    mgr.GetPluginAgents(packAgentList, PluginType::MediaPack);
+    cout << ">> MediaPack count:" << packAgentList.size() << endl;
 
     vector<PluginAgent*> tagAgentList;
     mgr.GetPluginAgents(tagAgentList, PluginType::TagParser);
@@ -77,6 +81,9 @@ int main(int argc, char** argv)
 
     // Setup loader.
     MediaLoader loader;
+    for (size_t i = 0; i < packAgentList.size(); ++i) {
+	loader.RegisterPluginAgent(packAgentList[i]);
+    }
     for (size_t i = 0; i < tagAgentList.size(); ++i) {
 	loader.RegisterPluginAgent(tagAgentList[i]);
     }
@@ -103,8 +110,13 @@ int main(int argc, char** argv)
     }
 
     // Begin to play.
-    player.Open(argv[1]);
-    player.Play();
+    MediaItem* item = mediaList[16];
+    player.Open(item->url);
+    if (item->hasRange) {
+	player.Play(item->msBeg, item->msEnd);
+    } else {
+	player.Play();
+    }
     Thread th;
     gPlayer = &player;
     th.Run(Function<void (void)>(&OnPlaying));
@@ -134,7 +146,11 @@ int main(int argc, char** argv)
 		break;
 
 	    case 'r':
-		player.Play();
+		if (item->hasRange) {
+		    player.Play(item->msBeg, item->msEnd);
+		} else {
+		    player.Play();
+		}
 		break;
 	}
     }
@@ -142,6 +158,7 @@ int main(int argc, char** argv)
     gPlayer = NULL;
     th.Join();
 
+    loader.UnregisterAll();
     player.UnregisterAll();
     mgr.UnloadAllPlugins();
 

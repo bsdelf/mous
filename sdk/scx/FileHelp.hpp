@@ -32,6 +32,18 @@ static inline string FileSuffix(const string& name, char ch = '.')
     return name.substr(pos+1, name.size());
 }
 
+static inline string FileDir(const string& path)
+{
+    size_t pos = path.find_last_of('/');
+    if (pos == string::npos) {
+	return "./";
+    } else if (pos == path.size()-1){
+	return path.substr(0, path.size());
+    } else {
+	return path.substr(0, pos+1);
+    }
+}
+
 }
 
 #endif

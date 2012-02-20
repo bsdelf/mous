@@ -180,6 +180,7 @@ void Player::SetRendererDevice(const string& path)
 EmErrorCode Player::Open(const string& path)
 {
     string suffix = ToLower(FileSuffix(path));
+    cout << "Suffix:" << suffix << endl;
     DecoderMapIter iter = m_DecoderMap.find(suffix);
     if (iter != m_DecoderMap.end()) {
 	m_pDecoder = (*(iter->second))[0];
@@ -191,8 +192,10 @@ EmErrorCode Player::Open(const string& path)
 	return ErrorCode::PlayerNoRenderer;
 
     EmErrorCode err = m_pDecoder->Open(path);
-    if (err != ErrorCode::Ok)
+    if (err != ErrorCode::Ok) {
+	cout << "Failed to open!" << endl;
 	return err;
+    }
 
     uint32_t maxBytesPerUnit = m_pDecoder->GetMaxBytesPerUnit();
     for (size_t i = 0; i < m_UnitBuffers.GetBufferCount(); ++i) {
@@ -234,13 +237,24 @@ void Player::Play(uint64_t msBegin, uint64_t msEnd)
 {
     const uint64_t total = m_pDecoder->GetUnitCount();
 
-    uint64_t beg = m_UnitPerMs * msBegin;
+    uint64_t beg = 0;
+    uint64_t end = 0;
+
+    beg = m_UnitPerMs * msBegin;
     if (beg > total)
 	beg = total;
 
-    uint64_t end = m_UnitPerMs * msEnd;
-    if (end > total)
+    if (msEnd != (uint64_t)-1) {
+	end = m_UnitPerMs * msEnd;
+	if (end > total)
+	    end = total;
+    } else {
 	end = total;
+    }
+
+    cout << "begin:" << beg << endl;
+    cout << "end:" << end << endl;
+    cout << "total:" << total << endl;
 
     PlayRange(beg, end);
 }

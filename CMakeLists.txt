@@ -8,7 +8,7 @@ set(CMAKE_C_FLAGS_RELEASE "$ENV{CFLAGS} -O2 -Wall")
 set(CMAKE_C_FLAGS_DEBUG "$ENV{CFLAGS} -g -Wall")
 set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -O2 -Wall")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -Wall")
-set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -g -Wall")
 
 # os check
 if (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
@@ -28,6 +28,7 @@ option(EnablePluginMpg123Decoder "MPG123 Decoder" on)
 option(EnablePluginFlacDecoder "FLAC Decoder" on)
 option(EnablePluginFaadDecoder "FAAD Decoder" on)
 option(EnablePluginTagLibParser "TagLib Parser" on)
+option(EnablePluginCuePack "Cue sheet Parser" on)
 
 if (EnableCompileClang)
     set(CMAKE_C_COMPILER "clang")
@@ -113,6 +114,13 @@ if (EnablePluginTagLibParser)
     file(GLOB SRC_TAGLIB_PARSER plugins/TagLibParser/*)
     add_library(TagLibParser SHARED ${SRC_TAGLIB_PARSER})
     target_link_libraries(TagLibParser -ltag)
+endif()
+
+# CuePack plugin
+if (EnablePluginCuePack)
+    file(GLOB SRC_CUEPACK plugins/CuePack/*)
+    add_library(CuePack SHARED ${SRC_CUEPACK})
+    target_link_libraries(CuePack -lcue)
 endif()
 
 # messages

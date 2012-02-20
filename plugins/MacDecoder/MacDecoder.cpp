@@ -24,7 +24,7 @@ void MacDecoder::GetFileSuffix(vector<string>& list) const
 EmErrorCode MacDecoder::Open(const string& url)
 {
     int err;
-    str_utf16* pFileName = GetUTF16FromANSI(url.c_str());
+    str_utf16* pFileName = GetUTF16FromUTF8((const str_utf8*)url.c_str());
     m_pDecompress = CreateIAPEDecompress(pFileName, &err);
     delete[] pFileName;
 
