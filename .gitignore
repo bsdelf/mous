@@ -2,3 +2,4 @@ build
 misc
 *.session
 *.swp
+*.pro.user
