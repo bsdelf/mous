@@ -11,7 +11,6 @@ using namespace mous;
 #include <iostream>
 
 Player::Player():
-    m_Status(MousStopped),
     m_StopDecoder(false),
     m_SuspendDecoder(true),
     m_pDecoder(NULL),
@@ -45,11 +44,6 @@ Player::~Player()
     //Stop();
     m_ThreadForDecoder.Join();
     m_ThreadForRenderer.Join();
-}
-
-PlayerStatus Player::GetStatus() const
-{
-    return m_Status;
 }
 
 void Player::RegisterPluginAgent(const PluginAgent* pAgent)
@@ -339,6 +333,11 @@ EmAudioMode Player::GetAudioMode() const
 uint64_t Player::GetDuration() const
 {
     return m_pDecoder->GetDuration();
+}
+
+uint64_t Player::GetRangeDuration() const
+{
+    return (m_UnitEnd - m_UnitBeg) / m_UnitPerMs;
 }
 
 uint64_t Player::GetCurrentMs() const

@@ -15,13 +15,6 @@
 
 namespace mous {
 
-enum PlayerStatus
-{
-    MousPlaying,
-    MousStopped,
-    MousPaused
-};
-
 class IPluginAgent;
 class IDecoder;
 class IRenderer;
@@ -33,8 +26,6 @@ public:
     ~Player();
 
 public:
-    PlayerStatus GetStatus() const;
-
     void RegisterPluginAgent(const PluginAgent* pAgent);
     void UnregisterPluginAgent(const PluginAgent* pAgent);
     void UnregisterAll();
@@ -54,6 +45,7 @@ public:
     int32_t GetBitRate() const;
     int32_t GetSampleRate() const;
     uint64_t GetDuration() const;
+    uint64_t GetRangeDuration() const;
     uint64_t GetCurrentMs() const;
     EmAudioMode GetAudioMode() const;
 
@@ -102,8 +94,6 @@ private:
     };
 
 private:
-    PlayerStatus m_Status;
-
     std::string m_RendererDevice;
 
     bool m_StopDecoder;
