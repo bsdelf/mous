@@ -307,12 +307,14 @@ void Player::Stop()
 
 void Player::Seek(uint64_t msPos)
 {
+    Pause();
     uint64_t unitPos = m_UnitPerMs * msPos;
     if (unitPos > m_pDecoder->GetUnitCount())
 	unitPos = m_pDecoder->GetUnitCount();
     m_pDecoder->SetUnitIndex(unitPos);
     m_DecoderIndex = unitPos;
     m_RendererIndex = unitPos;
+    Resume();
 }
 
 int32_t Player::GetBitRate() const
@@ -335,9 +337,24 @@ uint64_t Player::GetDuration() const
     return m_pDecoder->GetDuration();
 }
 
+uint64_t Player::GetRangeBegin() const
+{
+    return m_UnitBeg / m_UnitPerMs;
+}
+
+uint64_t Player::GetRangeEnd() const
+{
+    return m_UnitEnd / m_UnitPerMs;
+}
+
 uint64_t Player::GetRangeDuration() const
 {
     return (m_UnitEnd - m_UnitBeg) / m_UnitPerMs;
+}
+
+uint64_t Player::GetOffsetMs() const
+{
+    return GetCurrentMs() - GetRangeBegin();
 }
 
 uint64_t Player::GetCurrentMs() const

@@ -45,7 +45,10 @@ public:
     int32_t GetBitRate() const;
     int32_t GetSampleRate() const;
     uint64_t GetDuration() const;
+    uint64_t GetRangeBegin() const;
+    uint64_t GetRangeEnd() const;
     uint64_t GetRangeDuration() const;
+    uint64_t GetOffsetMs() const;
     uint64_t GetCurrentMs() const;
     EmAudioMode GetAudioMode() const;
 
