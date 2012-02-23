@@ -19,6 +19,17 @@ class IPluginAgent;
 class IDecoder;
 class IRenderer;
 
+namespace PlayerStatus {
+enum e
+{
+    Closed,
+    Playing,
+    Paused,
+    Stopped
+};
+}
+typedef PlayerStatus::e EmPlayerStatus;
+
 class Player
 {
 public:
@@ -26,6 +37,8 @@ public:
     ~Player();
 
 public:
+    EmPlayerStatus GetStatus() const;
+
     void RegisterPluginAgent(const PluginAgent* pAgent);
     void UnregisterPluginAgent(const PluginAgent* pAgent);
     void UnregisterAll();
@@ -97,6 +110,8 @@ private:
     };
 
 private:
+    EmPlayerStatus m_Status;
+
     std::string m_RendererDevice;
 
     bool m_StopDecoder;

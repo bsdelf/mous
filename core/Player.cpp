@@ -11,6 +11,7 @@ using namespace mous;
 #include <iostream>
 
 Player::Player():
+    m_Status(PlayerStatus::Closed),
     m_StopDecoder(false),
     m_SuspendDecoder(true),
     m_pDecoder(NULL),
@@ -44,6 +45,11 @@ Player::~Player()
     //Stop();
     m_ThreadForDecoder.Join();
     m_ThreadForRenderer.Join();
+}
+
+EmPlayerStatus Player::GetStatus() const
+{
+    return m_Status;
 }
 
 void Player::RegisterPluginAgent(const PluginAgent* pAgent)
@@ -212,12 +218,16 @@ EmErrorCode Player::Open(const string& path)
     if (err != ErrorCode::Ok)
 	return err;
 
+    m_Status = PlayerStatus::Stopped;
+
     return ErrorCode::Ok;
 }
 
 void Player::Close()
 {
     m_pDecoder->Close();
+
+    m_Status = PlayerStatus::Closed;
 }
 
 void Player::Play()
@@ -270,6 +280,8 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
     m_SuspendDecoder = false;
     m_SemWakeDecoder.Post();
+
+    m_Status = PlayerStatus::Playing;
 }
 
 void Player::Pause()
@@ -287,6 +299,8 @@ void Player::Pause()
     }
 
     m_UnitBuffers.ResetPV();
+
+    m_Status = PlayerStatus::Paused;
 }
 
 void Player::Resume()
@@ -298,11 +312,15 @@ void Player::Resume()
     m_SuspendDecoder = false;
     m_SemWakeRenderer.Post();
     m_SemWakeDecoder.Post();
+
+    m_Status = PlayerStatus::Playing;
 }
 
 void Player::Stop()
 {
     Pause();
+
+    m_Status = PlayerStatus::Stopped;
 }
 
 void Player::Seek(uint64_t msPos)
