@@ -78,6 +78,7 @@ private:
     void UnsetRenderer(const PluginAgent* pAgent);
 
     void PlayRange(uint64_t beg, uint64_t end);
+	void DoSeek(uint64_t msPos);
     void WorkForDecoder();
     void WorkForRenderer();
 

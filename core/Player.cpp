@@ -325,14 +325,23 @@ void Player::Stop()
 
 void Player::Seek(uint64_t msPos)
 {
-    Pause();
+	if (m_Status == PlayerStatus::Playing) {
+		Pause();
+		DoSeek(msPos);
+		Resume();
+	} else {
+		DoSeek(msPos);
+	}
+}
+
+void Player::DoSeek(uint64_t msPos)
+{
     uint64_t unitPos = m_UnitPerMs * msPos;
     if (unitPos > m_pDecoder->GetUnitCount())
 	unitPos = m_pDecoder->GetUnitCount();
     m_pDecoder->SetUnitIndex(unitPos);
     m_DecoderIndex = unitPos;
     m_RendererIndex = unitPos;
-    Resume();
 }
 
 int32_t Player::GetBitRate() const
