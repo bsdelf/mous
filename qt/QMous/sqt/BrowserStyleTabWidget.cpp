@@ -6,7 +6,8 @@ using namespace sqt;
  */
 BrowserStyleTabBar::BrowserStyleTabBar(QWidget* parent):
         QTabBar(parent),
-        mLastPressed(false)
+        mLastPressed(false),
+        mDelegate(NULL)
 {
     addTab("+");
 }
@@ -16,18 +17,24 @@ BrowserStyleTabBar::~BrowserStyleTabBar()
 
 }
 
+void BrowserStyleTabBar::setDelegate(TabWidgetDelegate* dg)
+{
+    mDelegate = dg;
+}
+
 void BrowserStyleTabBar::mousePressEvent(QMouseEvent *event)
 {
     const QPoint& p = event->pos();
-    if (tabRect(count()-1).contains(p)) {
-        mLastPressed = true;
-        return;
-    } else {
-        mLastPressed = false;
+    if (event->button() == Qt::LeftButton) {
+        if (tabRect(count()-1).contains(p)) {
+            mLastPressed = true;
+            return;
+        } else {
+            mLastPressed = false;
+        }
     }
 
     QTabBar::mousePressEvent(event);
-
     mMouseTabOffset = tabRect(currentIndex()).right() - p.x();
 }
 
@@ -36,19 +43,30 @@ void BrowserStyleTabBar::mouseReleaseEvent(QMouseEvent* event)
     const QPoint& p = event->pos();
     if (event->button() == Qt::LeftButton) {
         if (mLastPressed && tabRect(count()-1).contains(p)){
-            insertTab(count()-1, "foo" + QString::number(count()-1));
-            setCurrentIndex(count()-2);
-            mLastPressed = false;
+            if (mDelegate != NULL) {
+                QWidget* relatedWidget = mDelegate->createWidget();
+                QVariant var((qlonglong)relatedWidget);
+                int index = insertTab(count()-1, "foo" + QString::number(count()-1));
+                setTabData(index, var);
+                setCurrentIndex(count()-2);
+            }
         } else {
             QTabBar::mousePressEvent(event);
         }
+        mLastPressed = false;
     } else if (event->button() == Qt::MidButton) {
         QTabBar::mousePressEvent(event);
         int tab = tabAt(p);
         if (tab >= 0 && tab < count()-1) {
             removeTab(tab);
-            if (tab == currentIndex() && tab > 0)
-                setCurrentIndex(tab-1);
+            // Keep the tab at the original index if possible.
+            if (tab == currentIndex()) {
+                if (tab == count()-1)
+                    --tab;
+                if (tab < 0)
+                    tab = 0;
+                setCurrentIndex(tab);
+            }
         }
     }
 }
@@ -63,34 +81,38 @@ void BrowserStyleTabBar::mouseMoveEvent(QMouseEvent* event)
         QTabBar::mouseMoveEvent(event);
 }
 
-void BrowserStyleTabBar::moveTab(int from, int to)
-{
-
-    QTabBar::moveTab(from, to);
-}
-
 /**
  * BrowserStyleTabWidget
  */
 BrowserStyleTabWidget::BrowserStyleTabWidget(QWidget* parent, Qt::WindowFlags f):
-        QWidget(parent, f)
+        QWidget(parent, f),
+        mLayout(NULL),
+        mTab(NULL),
+        mStack(NULL),
+        mDelegate(NULL)
 {
-    mLayout = new QVBoxLayout();
+    mLayout = new QVBoxLayout(this);
     mTab = new BrowserStyleTabBar(this);
     mStack = new QStackedWidget(this);
 
     mLayout->addWidget(mTab);
     mLayout->addWidget(mStack);
-    this->setLayout(mLayout);
+    setLayout(mLayout);
 
     mTab->setExpanding(false);
     mTab->setMovable(true);
-    //mTab->addTab("new");
 
-
+    mLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 BrowserStyleTabWidget::~BrowserStyleTabWidget()
 {
+    delete mLayout;
+    delete mTab;
+    delete mStack;
+}
 
+void BrowserStyleTabWidget::setDelegate(TabWidgetDelegate* dg)
+{
+    mDelegate = dg;
 }

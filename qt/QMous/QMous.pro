@@ -9,10 +9,17 @@ QT       += core gui
 TARGET = qmous
 TEMPLATE = app
 
+INCLUDEPATH += ../../sdk ../../core
+LIBS += -L./ -Wl,-rpath,./ -lMousCore
 
 SOURCES += main.cpp\
-        MainWindow.cpp
+        MainWindow.cpp \
+    sqt/BrowserStyleTabWidget.cpp
 
-HEADERS  += MainWindow.h
+HEADERS  += MainWindow.h \
+    sqt/BrowserStyleTabWidget.h
 
 FORMS    += MainWindow.ui
+
+RESOURCES += \
+    allres.qrc

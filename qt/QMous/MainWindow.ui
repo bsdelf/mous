@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>588</width>
-    <height>396</height>
+    <width>700</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,66 +20,293 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <property name="sizeConstraint">
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
       <item>
-       <widget class="QToolButton" name="toolButton">
+       <widget class="QToolButton" name="btnPlay">
         <property name="text">
-         <string>...</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="allres.qrc">
+          <normaloff>:/img/resource/play.png</normaloff>:/img/resource/play.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::DelayedPopup</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+        <property name="arrowType">
+         <enum>Qt::NoArrow</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_2">
+       <widget class="QToolButton" name="btnStop">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
-         <string>...</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="allres.qrc">
+          <normaloff>:/img/resource/stop.png</normaloff>:/img/resource/stop.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_3">
+       <widget class="QToolButton" name="btnPrevious">
         <property name="text">
-         <string>...</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="allres.qrc">
+          <normaloff>:/img/resource/previous.png</normaloff>:/img/resource/previous.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_4">
+       <widget class="QToolButton" name="btnNext">
         <property name="text">
-         <string>...</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="allres.qrc">
+          <normaloff>:/img/resource/next.png</normaloff>:/img/resource/next.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_5">
-        <property name="text">
-         <string>...</string>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
        <widget class="QSlider" name="horizontalSlider">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QSlider::groove:horizontal {
+border: 1px solid #bbb;
+background: white;
+height: 8px;
+border-radius: 4px;
+}
+
+QSlider::sub-page:horizontal {
+background: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,
+    stop: 0 #87CEEB, stop: 1 #4682B4);
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,
+    stop: 0 #87CEEB, stop: 1 #4682B4);
+border: 1px solid #777;
+height: 8px;
+border-radius: 4px;
+}
+
+QSlider::add-page:horizontal {
+background: #fff;
+border: 1px solid #777;
+height: 8px;
+border-radius: 4px;
+}
+
+QSlider::handle:horizontal {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #eee, stop:1 #ccc);
+border: 1px solid #777;
+width: 14px;
+
+margin-top: -4px;
+margin-bottom: -4px;
+border-radius: 8px;
+}
+
+QSlider::handle:horizontal:hover {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #fff, stop:1 #ddd);
+border: 1px solid #444;
+}
+
+QSlider::sub-page:horizontal:disabled {
+background: #bbb;
+border-color: #999;
+}
+
+QSlider::add-page:horizontal:disabled {
+background: #eee;
+border-color: #999;
+}
+
+QSlider::handle:horizontal:disabled {
+background: #eee;
+border: 1px solid #aaa;
+}
+</string>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="text">
-         <string>TextLabel</string>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QSlider" name="sliderPlaying">
+        <property name="styleSheet">
+         <string notr="true">QSlider::groove:horizontal {
+border: 1px solid #bbb;
+background: white;
+height: 8px;
+border-radius: 4px;
+}
+
+QSlider::sub-page:horizontal {
+background: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,
+    stop: 0 #87CEEB, stop: 1 #4682B4);
+background: qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,
+    stop: 0 #87CEEB, stop: 1 #4682B4);
+border: 1px solid #777;
+height: 8px;
+border-radius: 4px;
+}
+
+QSlider::add-page:horizontal {
+background: #fff;
+border: 1px solid #777;
+height: 8px;
+border-radius: 4px;
+}
+
+QSlider::handle:horizontal {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #eee, stop:1 #ccc);
+border: 1px solid #777;
+width: 14px;
+
+margin-top: -4px;
+margin-bottom: -4px;
+border-radius: 8px;
+}
+
+QSlider::handle:horizontal:hover {
+background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+    stop:0 #fff, stop:1 #ddd);
+border: 1px solid #444;
+}
+
+QSlider::sub-page:horizontal:disabled {
+background: #bbb;
+border-color: #999;
+}
+
+QSlider::add-page:horizontal:disabled {
+background: #eee;
+border-color: #999;
+}
+
+QSlider::handle:horizontal:disabled {
+background: #eee;
+border: 1px solid #aaa;
+}
+</string>
+        </property>
+        <property name="maximum">
+         <number>999</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="invertedAppearance">
+         <bool>false</bool>
+        </property>
+        <property name="invertedControls">
+         <bool>false</bool>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -96,51 +323,73 @@
       </property>
       <widget class="QWidget" name="verticalLayoutWidget_2">
        <layout class="QVBoxLayout" name="layoutInfo">
+        <property name="spacing">
+         <number>-1</number>
+        </property>
         <item>
-         <widget class="QStackedWidget" name="widgetInfo">
+         <widget class="QTabWidget" name="widgetInfo">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <widget class="QWidget" name="page_3"/>
-          <widget class="QWidget" name="page_4"/>
+          <property name="tabShape">
+           <enum>QTabWidget::Rounded</enum>
+          </property>
+          <property name="elideMode">
+           <enum>Qt::ElideNone</enum>
+          </property>
+          <property name="documentMode">
+           <bool>false</bool>
+          </property>
+          <property name="movable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="tab">
+           <attribute name="title">
+            <string>Tab 1</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QTreeView" name="treeView">
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <attribute name="headerCascadingSectionResizes">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="headerHighlightSections">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="headerShowSortIndicator" stdset="0">
+               <bool>true</bool>
+              </attribute>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_2">
+           <attribute name="title">
+            <string>Tab 2</string>
+           </attribute>
+          </widget>
          </widget>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="verticalLayoutWidget">
-       <layout class="QVBoxLayout" name="layoutPlayList">
-        <item>
-         <widget class="QStackedWidget" name="widgetPlayList">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <widget class="QWidget" name="page"/>
-          <widget class="QWidget" name="page_2"/>
-         </widget>
-        </item>
-       </layout>
+       <layout class="QVBoxLayout" name="layoutPlayList"/>
       </widget>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="barStatus"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="allres.qrc"/>
+ </resources>
  <connections/>
 </ui>
