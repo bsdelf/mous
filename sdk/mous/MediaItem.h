@@ -22,8 +22,8 @@ struct MediaItem
     int32_t track;
 
     MediaItem():
-	year(-1),
-	track(-1)
+        year(-1),
+        track(-1)
     {
 
     }

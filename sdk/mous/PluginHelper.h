@@ -40,26 +40,26 @@ const char* const StrReleasePlugin = "ReleasePlugin";
 /**
  * Simple yet helpful macro for declare a plugin.
  */
-#define MOUS_DEF_PLUGIN(type, pInfo, Derived)		\
-extern "C" {						\
-    EmPluginType GetPluginType() {			\
-	return type;					\
-    }							\
+#define MOUS_DEF_PLUGIN(type, pInfo, Derived)\
+extern "C" {\
+    EmPluginType GetPluginType() {  \
+        return type;                \
+    }                               \
     \
-    const PluginInfo* GetPluginInfo() {			\
-	return pInfo;					\
-    }							\
+    const PluginInfo* GetPluginInfo() { \
+        return pInfo;                   \
+    }                                   \
     \
-    void* CreatePlugin() {				\
-	return new Derived;				\
-    }							\
+    void* CreatePlugin() {  \
+        return new Derived; \
+    }                       \
     \
-    void ReleasePlugin(void* p) {			\
-	if (p != NULL) {				\
-	    Derived* dp = static_cast<Derived*>(p);	\
-	    delete dp;					\
-	}						\
-    }							\
+    void ReleasePlugin(void* p) {                   \
+        if (p != NULL) {                            \
+            Derived* dp = static_cast<Derived*>(p); \
+            delete dp;                              \
+        }                                           \
+    }                                               \
     \
 } struct __end__
 

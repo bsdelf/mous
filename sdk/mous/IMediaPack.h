@@ -21,10 +21,10 @@ public:
     virtual void GetFileSuffix(std::vector<std::string>& list) const = 0;
 
     virtual void DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
-	    const std::map<std::string, IMediaPack*>* pMap) const = 0;
+        const std::map<std::string, IMediaPack*>* pMap) const = 0;
 
     virtual void DumpStream(const std::string& stream, std::deque<MediaItem*>& list,
-	    const std::map<std::string, IMediaPack*>* pMap) const = 0;
+        const std::map<std::string, IMediaPack*>* pMap) const = 0;
 
 public:
     typedef std::map<std::string, IMediaPack*>::iterator MediaPackMapIter;
