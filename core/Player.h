@@ -43,9 +43,9 @@ public:
     void UnregisterPluginAgent(const PluginAgent* pAgent);
     void UnregisterAll();
 
-    void SetRendererDevice(const string& path);
+    void SetRendererDevice(const std::string& path);
 
-    EmErrorCode Open(const string& path);
+    EmErrorCode Open(const std::string& path);
     void Close();
 
     void Play();
