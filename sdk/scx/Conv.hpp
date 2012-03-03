@@ -5,63 +5,62 @@
 #include <string>
 #include <cctype>
 #include <algorithm>
-using namespace std;
 
 namespace scx {
 
 template<typename num_t>
-static inline num_t StrToNum(const string& str) 
+static inline num_t StrToNum(const std::string& str) 
 {
-    stringstream stream;
+    std::stringstream stream;
     stream << str;
     num_t num;
-    stream >> dec >> num;
+    stream >> std::dec >> num;
     return num;
 }
 
 template<typename num_t>
-static inline string NumToStr(const num_t& num, streamsize precision = 0)
+static inline std::string NumToStr(const num_t& num, std::streamsize precision = 0)
 {
-    stringstream stream;
-    stream.setf(ios::fixed, ios::floatfield);
+    std::stringstream stream;
+    stream.setf(std::ios::fixed, std::ios::floatfield);
     stream.precision(precision);
-    stream << dec << num;
+    stream << std::dec << num;
     return stream.str();
 }
 
 template<typename num_t>
-static inline string NumHToStr(const num_t& num, streamsize precision = 0)
+static inline std::string NumHToStr(const num_t& num, std::streamsize precision = 0)
 {
-    stringstream stream;
-    stream.setf(ios::fixed, ios::floatfield);
+    std::stringstream stream;
+    stream.setf(std::ios::fixed, std::ios::floatfield);
     stream.precision(precision);
-    stream << hex << num;
+    stream << std::hex << num;
     return stream.str();
 }
 
 template<typename num_t>
-static inline string NumOToStr(const num_t& num, streamsize precision = 0)
+static inline std::string NumOToStr(const num_t& num, std::streamsize precision = 0)
 {
-    stringstream stream;
-    stream.setf(ios::fixed, ios::floatfield);
+    std::stringstream stream;
+    stream.setf(std::ios::fixed, std::ios::floatfield);
     stream.precision(precision);
-    stream << oct << num;
+    stream << std::oct << num;
     return stream.str();
 }
 
-static inline string ToLower(const string& str)
+static inline std::string ToLower(const std::string& str)
 {
-    string lower;
+    std::string lower;
     lower.resize(str.size());
-    transform(str.begin(), str.end(), lower.begin(), (int (*)(int))tolower);
+    std::transform(str.begin(), str.end(), lower.begin(), (int (*)(int))tolower);
     return lower;
 }
 
-static inline string ToUpper(const string& str)
+static inline std::string ToUpper(const std::string& str)
 {
-    string upper;
+    std::string upper;
     upper.resize(str.size());
-    transform(str.begin(), str.end(), upper.begin(), (int (*)(int))toupper);
+    std::transform(str.begin(), str.end(), upper.begin(), (int (*)(int))toupper);
     return upper;
 }
 
