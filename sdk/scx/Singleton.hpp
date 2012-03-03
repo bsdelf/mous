@@ -6,16 +6,19 @@
 namespace scx {
 
 template<typename T>
-class Singleton {
+class Singleton
+{
 public:
-    static T& Instance() {
-	pthread_once(&control, &Singleton::Init);
-	return *ptrInstance;
+    static T& Instance()
+    {
+        pthread_once(&control, &Singleton::Init);
+        return *ptrInstance;
     }
 
 private:
-    static void Init() {
-	ptrInstance = new T;
+    static void Init()
+    {
+        ptrInstance = new T;
     }
 
 private:

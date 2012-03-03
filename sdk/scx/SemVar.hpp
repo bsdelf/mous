@@ -10,40 +10,40 @@ class SemVar
 public:
     explicit SemVar(int pshared, int value)
     {
-	sem_init(&m_Sem, pshared, value);
+        sem_init(&m_Sem, pshared, value);
     }
 
     ~SemVar()
     {
-	sem_destroy(&m_Sem);
+        sem_destroy(&m_Sem);
     }
 
     int Post()
     {
-	return sem_post(&m_Sem);
+        return sem_post(&m_Sem);
     }
 
     int TryWait()
     {
-	return sem_trywait(&m_Sem);
+        return sem_trywait(&m_Sem);
     }
 
     int Wait()
     {
-	return sem_wait(&m_Sem);
+        return sem_wait(&m_Sem);
     }
 
     void TimeWait()
     {
-	//return sem_timewait(&m_Sem, timeout);
+        //return sem_timewait(&m_Sem, timeout);
     }
 
 
     int GetValue()
     {
-	int sval = 0;
-	sem_getvalue(&m_Sem, &sval);
-	return sval;
+        int sval = 0;
+        sem_getvalue(&m_Sem, &sval);
+        return sval;
     }
 
 private:

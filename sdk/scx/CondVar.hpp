@@ -11,34 +11,34 @@ class CondVar
 {
 public:
     explicit CondVar(Mutex& refMutex):
-	m_refMutex(refMutex)
+    m_refMutex(refMutex)
     {
-	pthread_cond_init(&m_Cond, NULL);
+        pthread_cond_init(&m_Cond, NULL);
     }
 
     ~CondVar()
     {
-	pthread_cond_destroy(&m_Cond);
+        pthread_cond_destroy(&m_Cond);
     }
 
     int Wait()
     {
-	return pthread_cond_wait(&m_Cond, &(m_refMutex.m_Mutex));
+        return pthread_cond_wait(&m_Cond, &(m_refMutex.m_Mutex));
     }
 
     int Signal()
     {
-	return pthread_cond_signal(&m_Cond);
+        return pthread_cond_signal(&m_Cond);
     }
 
     int SignalAll()
     {
-	return pthread_cond_broadcast(&m_Cond);
+        return pthread_cond_broadcast(&m_Cond);
     }
 
     void TimeWait()
     {
-	//pthread_cond_timewait(&m_Cond, &(m_refMutex.m_Mutex));
+        //pthread_cond_timewait(&m_Cond, &(m_refMutex.m_Mutex));
     }
 
 private:
