@@ -19,5 +19,5 @@ void CustomHeadTabWidget::mouseDoubleClickEvent(QMouseEvent* evt)
     QTabWidget::mouseDoubleClickEvent(evt);
 
     if (!tabBar()->underMouse())
-        emit sigMidClick();
+        emit sigDoubleClick();
 }

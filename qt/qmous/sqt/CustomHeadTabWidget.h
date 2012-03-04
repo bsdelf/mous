@@ -14,7 +14,7 @@ public:
     void setTabBar(QTabBar* tb);
 
 signals:
-    void sigMidClick();
+    void sigDoubleClick();
 
 private:
     void mouseDoubleClickEvent(QMouseEvent* evt);
