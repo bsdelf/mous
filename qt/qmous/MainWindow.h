@@ -12,7 +12,8 @@ namespace Ui {
 }
 
 namespace sqt {
-    class BrowserStyleTabWidget;
+    class MidClickTabBar;
+    class CustomHeadTabWidget;
 }
 
 namespace mous {
@@ -36,16 +37,22 @@ private:
 
 private slots:
     void slotUpdateUi();
+
     void slotBtnPlay();
     void slotBtnStop();
+
     void slotSliderPlayingPressed();
     void slotSliderPlayingReleased();
     void slotSliderPlayingValueChanged(int);
 
+    void slotBarPlayListMidClick(int index);
+    void slotWidgetPlayListMidClick();
+
 private:
     Ui::MainWindow *ui;
 
-    sqt::BrowserStyleTabWidget* mWidgetPlayList;
+    sqt::MidClickTabBar* mBarPlayList;
+    sqt::CustomHeadTabWidget* mWidgetPlayList;
 
     QIcon mIconPlaying;
     QIcon mIconPaused;

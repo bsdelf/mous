@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "sqt/BrowserStyleTabWidget.h"
+#include "sqt/MidClickTabBar.h"
+#include "sqt/CustomHeadTabWidget.h"
 #include <mous/MediaItem.h>
 #include <iostream>
 using namespace std;
@@ -15,8 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mMediaItem(NULL),
     mSliderPlayingPreempted(false)
 {
-    ui->setupUi(this);
-    setupQtSlots();
+    ui->setupUi(this);    
 
     mIconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
     mIconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
@@ -28,8 +28,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetPlayList->setCornerWidget(btn, Qt::TopRightCorner);
     */
 
+    mBarPlayList = new MidClickTabBar();
+    mWidgetPlayList = new CustomHeadTabWidget(this);
+    mWidgetPlayList->setTabBar(mBarPlayList);
+    mWidgetPlayList->setMovable(true);
 
-    mWidgetPlayList = new BrowserStyleTabWidget(this);
+    mWidgetPlayList->addTab(new QLabel("test"), "default");
+
     ui->layoutPlayList->addWidget(mWidgetPlayList);
 
 
@@ -80,6 +85,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mMediaItem = mediaList[0];
     mPlayer.Open(mMediaItem->url);
     cout << mMediaItem->url << endl;
+
+    setupQtSlots();
 }
 
 MainWindow::~MainWindow()
@@ -111,6 +118,9 @@ void MainWindow::setupQtSlots()
     connect(ui->sliderPlaying, SIGNAL(sliderPressed()), this, SLOT(slotSliderPlayingPressed()));
     connect(ui->sliderPlaying, SIGNAL(sliderReleased()), this, SLOT(slotSliderPlayingReleased()));
     connect(ui->sliderPlaying, SIGNAL(valueChanged(int)), this, SLOT(slotSliderPlayingValueChanged(int)));
+
+    connect(mBarPlayList, SIGNAL(sigMidClick(int)), this, SLOT(slotBarPlayListMidClick(int)));
+    connect(mWidgetPlayList, SIGNAL(sigMidClick()), this, SLOT(slotWidgetPlayListMidClick()));
 }
 
 void MainWindow::slotUpdateUi()
@@ -193,6 +203,18 @@ void MainWindow::slotSliderPlayingValueChanged(int val)
 
     uint64_t ms = (double)val / ui->sliderPlaying->maximum() * mPlayer.GetRangeDuration();
     mPlayer.Seek(mPlayer.GetRangeBegin() + ms);
+}
+
+void MainWindow::slotBarPlayListMidClick(int index)
+{
+    qDebug() << "close" << index;
+    mWidgetPlayList->removeTab(index);
+}
+
+void MainWindow::slotWidgetPlayListMidClick()
+{
+    qDebug() << "new";
+    mWidgetPlayList->addTab(new QLabel(), QString::number(mWidgetPlayList->count()));
 }
 
 void MainWindow::formatTime(QString& str, int ms)

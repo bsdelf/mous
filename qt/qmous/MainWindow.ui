@@ -32,7 +32,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="allres.qrc">
+         <iconset resource="AllRes.qrc">
           <normaloff>:/img/resource/play.png</normaloff>:/img/resource/play.png</iconset>
         </property>
         <property name="iconSize">
@@ -61,7 +61,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="allres.qrc">
+         <iconset resource="AllRes.qrc">
           <normaloff>:/img/resource/stop.png</normaloff>:/img/resource/stop.png</iconset>
         </property>
         <property name="iconSize">
@@ -81,7 +81,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="allres.qrc">
+         <iconset resource="AllRes.qrc">
           <normaloff>:/img/resource/previous.png</normaloff>:/img/resource/previous.png</iconset>
         </property>
         <property name="iconSize">
@@ -101,7 +101,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="allres.qrc">
+         <iconset resource="AllRes.qrc">
           <normaloff>:/img/resource/next.png</normaloff>:/img/resource/next.png</iconset>
         </property>
         <property name="iconSize">
@@ -351,6 +351,9 @@ border: 1px solid #aaa;
             <string>Tab 1</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="margin">
+             <number>0</number>
+            </property>
             <item>
              <widget class="QTreeView" name="treeView">
               <property name="alternatingRowColors">
@@ -389,7 +392,7 @@ border: 1px solid #aaa;
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="allres.qrc"/>
+  <include location="AllRes.qrc"/>
  </resources>
  <connections/>
 </ui>

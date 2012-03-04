@@ -14,10 +14,12 @@ LIBS += -L./ -Wl,-rpath,./ -lMousCore
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    sqt/BrowserStyleTabWidget.cpp
+    sqt/CustomHeadTabWidget.cpp \
+    sqt/MidClickTabBar.cpp
 
 HEADERS  += MainWindow.h \
-    sqt/BrowserStyleTabWidget.h
+    sqt/CustomHeadTabWidget.h \
+    sqt/MidClickTabBar.h
 
 FORMS    += MainWindow.ui
 
