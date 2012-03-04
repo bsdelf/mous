@@ -3,7 +3,7 @@
 #include "sqt/MidClickTabBar.h"
 #include "sqt/CustomHeadTabWidget.h"
 #include <mous/MediaItem.h>
-#include <iostream>
+#include "SimplePlayListView.h"
 using namespace std;
 using namespace sqt;
 using namespace mous;
@@ -17,76 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
     mSliderPlayingPreempted(false)
 {
     ui->setupUi(this);    
-
-    mIconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
-    mIconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
-
-    /*
-    QPushButton* btn = new QPushButton(ui->widgetPlayList);
-    btn->setFlat(true);
-    btn->setText("+");
-    ui->widgetPlayList->setCornerWidget(btn, Qt::TopRightCorner);
-    */
-
-    mBarPlayList = new MidClickTabBar();
-    mWidgetPlayList = new CustomHeadTabWidget(this);
-    mWidgetPlayList->setTabBar(mBarPlayList);
-    mWidgetPlayList->setMovable(true);
-
-    mWidgetPlayList->addTab(new QLabel("test"), "default");
-
-    ui->layoutPlayList->addWidget(mWidgetPlayList);
-
-
-    mPluginMgr.LoadPluginDir("./plugins");
-    vector<string> pathList;
-    mPluginMgr.GetPluginPath(pathList);
-
-    for (size_t i = 0; i < pathList.size(); ++i) {
-        cout << ">> " << pathList[i] << endl;
-    }
-
-    vector<PluginAgent*> packAgentList;
-    mPluginMgr.GetPluginAgents(packAgentList, PluginType::MediaPack);
-    cout << ">> MediaPack count:" << packAgentList.size() << endl;
-
-    vector<PluginAgent*> tagAgentList;
-    mPluginMgr.GetPluginAgents(tagAgentList, PluginType::TagParser);
-    cout << ">> TagParser count:" << tagAgentList.size() << endl;
-
-    for (size_t i = 0; i < packAgentList.size(); ++i) {
-        mLoader.RegisterPluginAgent(packAgentList[i]);
-    }
-
-    for (size_t i = 0; i < tagAgentList.size(); ++i) {
-        mLoader.RegisterPluginAgent(tagAgentList[i]);
-    }
-
-    vector<PluginAgent*> decoderAgentList;
-    mPluginMgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
-    cout << ">> Decoder count:" << decoderAgentList.size() << endl;
-
-    vector<PluginAgent*> rendererAgentList;
-    mPluginMgr.GetPluginAgents(rendererAgentList, PluginType::Renderer);
-    cout << ">> Renderer count:" << rendererAgentList.size() << endl;
-
-    mPlayer.SetRendererDevice("/dev/dsp");
-
-    mPlayer.RegisterPluginAgent(rendererAgentList[0]);
-    for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-        mPlayer.RegisterPluginAgent(decoderAgentList[i]);
-    }
-
-    mPlayer.SigFinished.Connect(&MainWindow::slotPlayerStopped, this);
-
-    deque<MediaItem*> mediaList;
-    mLoader.LoadMedia("/home/shen/project/mous/build/test.mp3", mediaList);
-
-    mMediaItem = mediaList[0];
-    mPlayer.Open(mMediaItem->url);
-    cout << mMediaItem->url << endl;
-
-    setupQtSlots();
+    initMousCore();
+    initMyUi();
+    initQtSlots();
 }
 
 MainWindow::~MainWindow()
@@ -103,12 +36,84 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::slotPlayerStopped()
+void MainWindow::initMousCore()
 {
-    cout << "Stopped!" << endl;
+    mPluginMgr.LoadPluginDir("./plugins");
+    vector<string> pathList;
+    mPluginMgr.GetPluginPath(pathList);
+
+    for (size_t i = 0; i < pathList.size(); ++i) {
+        qDebug() << ">> " << pathList[i].c_str();
+    }
+
+    vector<PluginAgent*> packAgentList;
+    mPluginMgr.GetPluginAgents(packAgentList, PluginType::MediaPack);
+    qDebug() << ">> MediaPack count:" << packAgentList.size();
+
+    vector<PluginAgent*> tagAgentList;
+    mPluginMgr.GetPluginAgents(tagAgentList, PluginType::TagParser);
+    qDebug() << ">> TagParser count:" << tagAgentList.size();
+
+    for (size_t i = 0; i < packAgentList.size(); ++i) {
+        mLoader.RegisterPluginAgent(packAgentList[i]);
+    }
+
+    for (size_t i = 0; i < tagAgentList.size(); ++i) {
+        mLoader.RegisterPluginAgent(tagAgentList[i]);
+    }
+
+    vector<PluginAgent*> decoderAgentList;
+    mPluginMgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
+    qDebug() << ">> Decoder count:" << decoderAgentList.size();
+
+    vector<PluginAgent*> rendererAgentList;
+    mPluginMgr.GetPluginAgents(rendererAgentList, PluginType::Renderer);
+    qDebug() << ">> Renderer count:" << rendererAgentList.size();
+
+    mPlayer.SetRendererDevice("/dev/dsp");
+
+    mPlayer.RegisterPluginAgent(rendererAgentList[0]);
+    for (size_t i = 0; i < decoderAgentList.size(); ++i) {
+        mPlayer.RegisterPluginAgent(decoderAgentList[i]);
+    }
+
+    mPlayer.SigFinished.Connect(&MainWindow::slotPlayerStopped, this);
+
+    deque<MediaItem*> mediaList;
+    mLoader.LoadMedia("/home/shen/project/mous/build/test.mp3", mediaList);
+
+    mMediaItem = mediaList[0];
+    mPlayer.Open(mMediaItem->url);
+    qDebug() << mMediaItem->url.c_str();
 }
 
-void MainWindow::setupQtSlots()
+void MainWindow::initMyUi()
+{
+    // Playing & Paused icon
+    mIconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
+    mIconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
+
+    // Play mode button
+
+    // PlayList View
+    mBarPlayList = new MidClickTabBar();
+    mWidgetPlayList = new CustomHeadTabWidget();
+    mWidgetPlayList->setTabBar(mBarPlayList);
+    mWidgetPlayList->setMovable(true);
+    ui->layoutPlayList->addWidget(mWidgetPlayList);
+
+    mWidgetPlayList->addTab(new QLabel("test"), "default");
+
+    // Status bar buttons
+    mBtnPreference = new QToolButton(ui->barStatus);
+    mBtnPreference->setAutoRaise(true);
+    mBtnPreference->setText("P");
+    mBtnPreference->setToolTip(tr("Preference"));
+
+    ui->barStatus->addPermanentWidget(mBtnPreference, 0);
+}
+
+void MainWindow::initQtSlots()
 {
     connect(mTimerUpdateUi, SIGNAL(timeout()), this, SLOT(slotUpdateUi()));
 
@@ -120,9 +125,22 @@ void MainWindow::setupQtSlots()
     connect(ui->sliderPlaying, SIGNAL(valueChanged(int)), this, SLOT(slotSliderPlayingValueChanged(int)));
 
     connect(mBarPlayList, SIGNAL(sigMidClick(int)), this, SLOT(slotBarPlayListMidClick(int)));
-    connect(mWidgetPlayList, SIGNAL(sigMidClick()), this, SLOT(slotWidgetPlayListMidClick()));
+    connect(mWidgetPlayList, SIGNAL(sigDoubleClick()), this, SLOT(slotWidgetPlayListDoubleClick()));
 }
 
+void MainWindow::formatTime(QString& str, int ms)
+{
+    int sec = ms/1000;
+    str.sprintf("%.2d:%.2d", (int)(sec/60), (int)(sec%60));
+}
+
+/* MousCore slots */
+void MainWindow::slotPlayerStopped()
+{
+    qDebug() << "Stopped!";
+}
+
+/* Qt slots */
 void MainWindow::slotUpdateUi()
 {
     // Update statusbar.
@@ -145,7 +163,7 @@ void MainWindow::slotUpdateUi()
 
 void MainWindow::slotBtnPlay()
 {
-    cout << mPlayer.GetStatus() << endl;
+    qDebug() << mPlayer.GetStatus();
 
     switch (mPlayer.GetStatus()) {
     case PlayerStatus::Closed:
@@ -180,7 +198,7 @@ void MainWindow::slotBtnPlay()
 
 void MainWindow::slotBtnStop()
 {
-    cout << mPlayer.GetStatus() << endl;
+    qDebug() << mPlayer.GetStatus();
 
     mPlayer.Stop();
     mTimerUpdateUi->stop();
@@ -207,18 +225,16 @@ void MainWindow::slotSliderPlayingValueChanged(int val)
 
 void MainWindow::slotBarPlayListMidClick(int index)
 {
-    qDebug() << "close" << index;
+    QWidget* w = mWidgetPlayList->widget(index);
     mWidgetPlayList->removeTab(index);
+    delete w;
+    mBarPlayList->setFocus();
 }
 
-void MainWindow::slotWidgetPlayListMidClick()
+void MainWindow::slotWidgetPlayListDoubleClick()
 {
-    qDebug() << "new";
-    mWidgetPlayList->addTab(new QLabel(), QString::number(mWidgetPlayList->count()));
-}
+    SimplePlayListView* w = new SimplePlayListView(this);
 
-void MainWindow::formatTime(QString& str, int ms)
-{
-    int sec = ms/1000;
-    str.sprintf("%.2d:%.2d", (int)(sec/60), (int)(sec%60));
+    mWidgetPlayList->addTab(w, QString::number(mWidgetPlayList->count()));
+    mWidgetPlayList->setCurrentIndex(mWidgetPlayList->count()-1);
 }

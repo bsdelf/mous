@@ -29,7 +29,10 @@ public:
     ~MainWindow();
 
 private:
-    void setupQtSlots();
+    void initMyUi();
+    void initMousCore();
+    void initQtSlots();
+
     void formatTime(QString& str, int ms);
 
 private:
@@ -46,7 +49,7 @@ private slots:
     void slotSliderPlayingValueChanged(int);
 
     void slotBarPlayListMidClick(int index);
-    void slotWidgetPlayListMidClick();
+    void slotWidgetPlayListDoubleClick();
 
 private:
     Ui::MainWindow *ui;
@@ -58,6 +61,7 @@ private:
     QIcon mIconPaused;
 
     QString mStatusMsg;
+    QToolButton* mBtnPreference;
 
     QTimer* mTimerUpdateUi;
     const int mUpdateInterval;

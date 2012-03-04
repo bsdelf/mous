@@ -53,29 +53,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="btnStop">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="AllRes.qrc">
-          <normaloff>:/img/resource/stop.png</normaloff>:/img/resource/stop.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="btnPrevious">
         <property name="text">
          <string/>
@@ -103,6 +80,25 @@
         <property name="icon">
          <iconset resource="AllRes.qrc">
           <normaloff>:/img/resource/next.png</normaloff>:/img/resource/next.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="btnStop">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>NOR</string>
         </property>
         <property name="iconSize">
          <size>
@@ -388,7 +384,14 @@ border: 1px solid #aaa;
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="barStatus"/>
+  <widget class="QStatusBar" name="barStatus">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
