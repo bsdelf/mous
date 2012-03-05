@@ -322,59 +322,6 @@ border: 1px solid #aaa;
         <property name="spacing">
          <number>-1</number>
         </property>
-        <item>
-         <widget class="QTabWidget" name="widgetInfo">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="tabShape">
-           <enum>QTabWidget::Rounded</enum>
-          </property>
-          <property name="elideMode">
-           <enum>Qt::ElideNone</enum>
-          </property>
-          <property name="documentMode">
-           <bool>false</bool>
-          </property>
-          <property name="movable">
-           <bool>true</bool>
-          </property>
-          <widget class="QWidget" name="tab">
-           <attribute name="title">
-            <string>Tab 1</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <property name="margin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QTreeView" name="treeView">
-              <property name="alternatingRowColors">
-               <bool>true</bool>
-              </property>
-              <attribute name="headerCascadingSectionResizes">
-               <bool>false</bool>
-              </attribute>
-              <attribute name="headerHighlightSections">
-               <bool>false</bool>
-              </attribute>
-              <attribute name="headerShowSortIndicator" stdset="0">
-               <bool>true</bool>
-              </attribute>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="tab_2">
-           <attribute name="title">
-            <string>Tab 2</string>
-           </attribute>
-          </widget>
-         </widget>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="verticalLayoutWidget">

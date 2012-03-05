@@ -2,12 +2,15 @@
 #include <QtCore>
 #include <QtGui>
 #include <mous/MediaItem.h>
+#include <MediaLoader.h>
 #include "UiHelper.hpp"
+using namespace std;
 using namespace sqt;
 using namespace mous;
 
 SimplePlayListView::SimplePlayListView(QWidget *parent) :
-    QTreeView(parent)
+    QTreeView(parent),
+    mMediaLoader(NULL)
 {
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -23,6 +26,11 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
     // Action remove
     action = new QAction(tr("Remove"), this);
     connect(action, SIGNAL(triggered()), this, SLOT(slotRemove()));
+    actionList << action;
+
+    // Action copy
+    action = new QAction(tr("Copy"), this);
+    connect(action, SIGNAL(triggered()), this, SLOT(slotCopy()));
     actionList << action;
 
     // Action cut
@@ -72,11 +80,34 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
     menu->addAction(action);
     connect(action, SIGNAL(triggered()), this, SLOT(slotPlaylistSaveAs()));
 
+    // Style
     setActionSeparator(actionList);
     addActions(actionList);
 
     setAcceptDrops(true);
     setDragEnabled(true);
+
+    setRootIsDecorated(false);
+    setItemsExpandable(false);
+    setAlternatingRowColors(true);
+    setModel(&mModel);
+    header()->setResizeMode(QHeaderView::Stretch);
+
+    // Header
+    QStringList headList;
+    headList << tr("Artist/Album") << tr("Title") << tr("Track") << tr("Duration");
+    mModel.setHorizontalHeaderLabels(headList);
+
+    // Test
+    mModel.setRowCount(0);
+    for (int row = 0; row < mModel.rowCount(); ++row) {
+        for (int column = 0; column < mModel.columnCount(); ++column) {
+             QStandardItem *item = new QStandardItem(QString("row %0, column %1").arg(row).arg(column));
+             item->setEditable(false);
+             item->setSizeHint(QSize(-1, 25));
+             mModel.setItem(row, column, item);
+         }
+     }
 }
 
 SimplePlayListView::~SimplePlayListView()
@@ -89,10 +120,14 @@ SimplePlayListView::~SimplePlayListView()
             delete action->menu();
         delete action;
     }
-
 }
 
 /* IPlayListView interfaces */
+void SimplePlayListView::setMediaLoader(const MediaLoader* loader)
+{
+    mMediaLoader = loader;
+}
+
 const MediaItem* SimplePlayListView::getNextItem()
 {
     return NULL;
@@ -103,7 +138,7 @@ const MediaItem* SimplePlayListView::getPreviousItem()
     return NULL;
 }
 
-const size_t SimplePlayListView::getItemCount()
+size_t SimplePlayListView::getItemCount() const
 {
     return 0;
 }
@@ -111,10 +146,59 @@ const size_t SimplePlayListView::getItemCount()
 /* Action menus */
 void SimplePlayListView::slotAppend()
 {
+    // Get media path
+    QString oldPath("~");
+    if (!mOldMediaPath.isEmpty()) {
+        QFileInfo info(mOldMediaPath);
+        oldPath = info.dir().dirName();
+    }
+    mOldMediaPath = QFileDialog::getOpenFileName(this,
+         tr("Open Media"), oldPath, tr("*"));
+
+    deque<MediaItem*> itemList;
+    mMediaLoader->LoadMedia(mOldMediaPath.toUtf8().data(), itemList);
+
+    for(size_t i = 0; i < itemList.size(); ++i) {
+        const MediaItem* item = itemList[i];
+
+        // Check sec duration
+        int duration = 0;
+        if (item->hasRange) {
+            if (item->msEnd != (uint64_t)-1)
+                duration = (item->msEnd - item->msBeg)/1000;
+            else
+                duration = item->secDuration - item->msBeg/1000;
+        } else {
+            duration = item->secDuration;
+        }
+        QString strDuration;
+        strDuration.sprintf("%.2d:%.2d", duration/60, duration%60);
+
+        // Build row
+        QList<QStandardItem *> row;
+        row << new QStandardItem(QString::fromUtf8(item->artist.c_str()) + " - " + QString::fromUtf8(item->album.c_str()));
+        row << new QStandardItem(QString::fromUtf8(item->title.c_str()));
+        row << new QStandardItem(QString::number(item->track));
+        row << new QStandardItem(strDuration);
+        for (int i = 0; i < row.size(); ++i) {
+            QStandardItem* item = row[i];
+            item->setEditable(false);
+            item->setSizeHint(QSize(-1, 22));
+        }
+        mModel.appendRow(row);
+        //qDebug() << QString::fromUtf8(itemList[i]->url.c_str());
+    }
+
+    // Update view
 
 }
 
 void SimplePlayListView::slotRemove()
+{
+
+}
+
+void SimplePlayListView::slotCopy()
 {
 
 }
@@ -154,7 +238,7 @@ void SimplePlayListView::slotPlaylistRename()
 
 }
 
-void SimplePlayListView::slotPlayListSaveAs()
+void SimplePlayListView::slotPlaylistSaveAs()
 {
 
 }

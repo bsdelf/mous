@@ -71,13 +71,6 @@ void MainWindow::initMousCore()
     qDebug() << ">> TagParser count:" << tagAgentList.size();
     qDebug() << ">> Decoder count:" << decoderAgentList.size();
     qDebug() << ">> Renderer count:" << rendererAgentList.size();
-
-    deque<MediaItem*> mediaList;
-    mMediaLoader.LoadMedia("/home/shen/project/mous/build/test.mp3", mediaList);
-
-    mMediaItem = mediaList[0];
-    mPlayer.Open(mMediaItem->url);
-    qDebug() << mMediaItem->url.c_str();
 }
 
 void MainWindow::initMyUi()
@@ -95,8 +88,6 @@ void MainWindow::initMyUi()
     mWidgetPlayList->setMovable(true);
     ui->layoutPlayList->addWidget(mWidgetPlayList);
 
-    mWidgetPlayList->addTab(new QLabel("test"), "default");
-
     // Status bar buttons
     mBtnPreference = new QToolButton(ui->barStatus);
     mBtnPreference->setAutoRaise(true);
@@ -104,6 +95,9 @@ void MainWindow::initMyUi()
     mBtnPreference->setToolTip(tr("Preference"));
 
     ui->barStatus->addPermanentWidget(mBtnPreference, 0);
+
+    // Default playlist
+    slotWidgetPlayListDoubleClick();
 }
 
 void MainWindow::initQtSlots()
@@ -218,16 +212,17 @@ void MainWindow::slotSliderPlayingValueChanged(int val)
 
 void MainWindow::slotBarPlayListMidClick(int index)
 {
-    QWidget* w = mWidgetPlayList->widget(index);
+    QWidget* view = mWidgetPlayList->widget(index);
     mWidgetPlayList->removeTab(index);
-    delete w;
+    delete view;
     mBarPlayList->setFocus();
 }
 
 void MainWindow::slotWidgetPlayListDoubleClick()
 {
-    SimplePlayListView* w = new SimplePlayListView(this);
+    SimplePlayListView* view = new SimplePlayListView(this);
+    view->setMediaLoader(&mMediaLoader);
 
-    mWidgetPlayList->addTab(w, QString::number(mWidgetPlayList->count()));
+    mWidgetPlayList->addTab(view, QString::number(mWidgetPlayList->count()));
     mWidgetPlayList->setCurrentIndex(mWidgetPlayList->count()-1);
 }

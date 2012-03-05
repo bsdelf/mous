@@ -27,5 +27,7 @@ HEADERS  += MainWindow.h \
 
 FORMS    += MainWindow.ui
 
+TRANSLATIONS = QMous.ts
+
 RESOURCES += \
     AllRes.qrc

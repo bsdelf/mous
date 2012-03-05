@@ -44,7 +44,7 @@
     <message>
         <location filename="SimplePlayListView.cpp" line="29"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>复制</translation>
     </message>
     <message>
         <location filename="SimplePlayListView.cpp" line="34"/>
