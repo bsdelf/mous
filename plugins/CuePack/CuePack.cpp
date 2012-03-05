@@ -90,7 +90,7 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem*>& list) const
         item->hasRange = true;
         item->msBeg = (track_get_start(track))/75*1000;
         item->msEnd = item->msBeg + ((uint64_t)track_get_length(track))/75*1000;
-        if (item->msBeg == item->msEnd && i == ntrack)
+        if (item->msBeg >= item->msEnd || i == ntrack)
             item->msEnd = -1;
 
         Cdtext* text = track_get_cdtext(track);
