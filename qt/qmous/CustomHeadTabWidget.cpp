@@ -1,4 +1,4 @@
-#include "CustomHeadTabWidget.h"
+#include "CustomHeadTabWidget.hpp"
 using namespace sqt;
 #include <QtGui>
 #include <QtCore>

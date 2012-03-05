@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "sqt/MidClickTabBar.h"
-#include "sqt/CustomHeadTabWidget.h"
+#include "MidClickTabBar.hpp"
+#include "CustomHeadTabWidget.hpp"
 #include <mous/MediaItem.h>
 #include "SimplePlayListView.h"
 using namespace std;
@@ -42,36 +42,24 @@ void MainWindow::initMousCore()
     vector<string> pathList;
     mPluginMgr.GetPluginPath(pathList);
 
-    for (size_t i = 0; i < pathList.size(); ++i) {
-        qDebug() << ">> " << pathList[i].c_str();
-    }
-
     vector<PluginAgent*> packAgentList;
-    mPluginMgr.GetPluginAgents(packAgentList, PluginType::MediaPack);
-    qDebug() << ">> MediaPack count:" << packAgentList.size();
-
     vector<PluginAgent*> tagAgentList;
+    mPluginMgr.GetPluginAgents(packAgentList, PluginType::MediaPack);
     mPluginMgr.GetPluginAgents(tagAgentList, PluginType::TagParser);
-    qDebug() << ">> TagParser count:" << tagAgentList.size();
 
     for (size_t i = 0; i < packAgentList.size(); ++i) {
-        mLoader.RegisterPluginAgent(packAgentList[i]);
+        mMediaLoader.RegisterPluginAgent(packAgentList[i]);
     }
-
     for (size_t i = 0; i < tagAgentList.size(); ++i) {
-        mLoader.RegisterPluginAgent(tagAgentList[i]);
+        mMediaLoader.RegisterPluginAgent(tagAgentList[i]);
     }
 
     vector<PluginAgent*> decoderAgentList;
-    mPluginMgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
-    qDebug() << ">> Decoder count:" << decoderAgentList.size();
-
     vector<PluginAgent*> rendererAgentList;
+    mPluginMgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
     mPluginMgr.GetPluginAgents(rendererAgentList, PluginType::Renderer);
-    qDebug() << ">> Renderer count:" << rendererAgentList.size();
 
     mPlayer.SetRendererDevice("/dev/dsp");
-
     mPlayer.RegisterPluginAgent(rendererAgentList[0]);
     for (size_t i = 0; i < decoderAgentList.size(); ++i) {
         mPlayer.RegisterPluginAgent(decoderAgentList[i]);
@@ -79,8 +67,13 @@ void MainWindow::initMousCore()
 
     mPlayer.SigFinished.Connect(&MainWindow::slotPlayerStopped, this);
 
+    qDebug() << ">> MediaPack count:" << packAgentList.size();
+    qDebug() << ">> TagParser count:" << tagAgentList.size();
+    qDebug() << ">> Decoder count:" << decoderAgentList.size();
+    qDebug() << ">> Renderer count:" << rendererAgentList.size();
+
     deque<MediaItem*> mediaList;
-    mLoader.LoadMedia("/home/shen/project/mous/build/test.mp3", mediaList);
+    mMediaLoader.LoadMedia("/home/shen/project/mous/build/test.mp3", mediaList);
 
     mMediaItem = mediaList[0];
     mPlayer.Open(mMediaItem->url);
@@ -96,8 +89,8 @@ void MainWindow::initMyUi()
     // Play mode button
 
     // PlayList View
-    mBarPlayList = new MidClickTabBar();
-    mWidgetPlayList = new CustomHeadTabWidget();
+    mBarPlayList = new MidClickTabBar(this);
+    mWidgetPlayList = new CustomHeadTabWidget(this);
     mWidgetPlayList->setTabBar(mBarPlayList);
     mWidgetPlayList->setMovable(true);
     ui->layoutPlayList->addWidget(mWidgetPlayList);

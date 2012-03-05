@@ -14,15 +14,16 @@ LIBS += -L./ -Wl,-rpath,./ -lMousCore
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    sqt/CustomHeadTabWidget.cpp \
-    sqt/MidClickTabBar.cpp \
-    SimplePlayListView.cpp
+        SimplePlayListView.cpp \
+    CustomHeadTabWidget.cpp \
+    MidClickTabBar.cpp
 
 HEADERS  += MainWindow.h \
-    sqt/CustomHeadTabWidget.h \
-    sqt/MidClickTabBar.h \
     SimplePlayListView.h \
-    sqt/UiHelper.hpp
+    IPlayListView.h \
+    CustomHeadTabWidget.hpp \
+    MidClickTabBar.hpp \
+    UiHelper.hpp
 
 FORMS    += MainWindow.ui
 

@@ -1,4 +1,4 @@
-#include "MidClickTabBar.h"
+#include "MidClickTabBar.hpp"
 #include <QtGui>
 #include <QtCore>
 using namespace sqt;

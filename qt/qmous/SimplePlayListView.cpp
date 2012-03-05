@@ -1,15 +1,17 @@
 #include "SimplePlayListView.h"
 #include <QtCore>
 #include <QtGui>
-#include "sqt/UiHelper.hpp"
+#include <mous/MediaItem.h>
+#include "UiHelper.hpp"
 using namespace sqt;
+using namespace mous;
 
 SimplePlayListView::SimplePlayListView(QWidget *parent) :
     QTreeView(parent)
 {
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
-    QAction* action = NULL;
+    //QAction* action = NULL;
 
     QAction* actionPlaylist = new QAction(tr("Playlist"), this);
     QMenu* menuPlaylist = new QMenu(this);
@@ -65,4 +67,19 @@ SimplePlayListView::~SimplePlayListView()
         delete action;
     }
 
+}
+
+const MediaItem* SimplePlayListView::getNextItem()
+{
+    return NULL;
+}
+
+const MediaItem* SimplePlayListView::getPreviousItem()
+{
+    return NULL;
+}
+
+const size_t SimplePlayListView::getItemCount()
+{
+    return 0;
 }

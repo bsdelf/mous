@@ -67,7 +67,7 @@ private:
     const int mUpdateInterval;
 
     mous::PluginManager mPluginMgr;
-    mous::MediaLoader mLoader;
+    mous::MediaLoader mMediaLoader;
     mous::Player mPlayer;
     mous::MediaItem* mMediaItem;
 
