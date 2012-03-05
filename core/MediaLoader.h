@@ -23,7 +23,7 @@ public:
     void UnregisterPluginAgent(const PluginAgent* pAgent);
     void UnregisterAll();
 
-    EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list);
+    EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const;
 
 private:
     void AddMediaPack(const PluginAgent* pAgent);
@@ -31,8 +31,8 @@ private:
     void AddTagParser(const PluginAgent* pAgent);
     void RemoveTagParser(const PluginAgent* pAgent);
  
-    EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem*>& list);
-    EmErrorCode TryParseTag(std::deque<MediaItem*>& list);
+    EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem*>& list) const;
+    EmErrorCode TryParseTag(std::deque<MediaItem*>& list) const;
 
 private:
     std::map<const PluginAgent*, void*> m_AgentMap;
@@ -42,10 +42,12 @@ private:
     std::map<std::string, IMediaPack*> m_MediaPackMap;
     typedef std::pair<std::string, IMediaPack*> MediaPackMapPair;
     typedef std::map<std::string, IMediaPack*>::iterator MediaPackMapIter;
+    typedef std::map<std::string, IMediaPack*>::const_iterator MediaPackMapConstIter;
 
     std::map<std::string, ITagParser*> m_TagParserMap;
     typedef std::pair<std::string, ITagParser*> TagParserMapPair;
     typedef std::map<std::string, ITagParser*>::iterator TagParserMapIter;
+    typedef std::map<std::string, ITagParser*>::const_iterator TagParserMapConstIter;
 };
 
 }

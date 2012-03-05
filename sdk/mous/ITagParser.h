@@ -29,6 +29,9 @@ public:
     virtual int32_t GetYear() = 0;
     virtual int32_t GetTrack() = 0;
 
+    virtual int32_t GetDuration() = 0;
+    virtual int32_t GetBitRate() = 0;
+
     virtual void SetTitle(const std::string& title) = 0;
     virtual void SetArtist(const std::string& artist) = 0; 
     virtual void SetAlbum(const std::string& album) = 0; 
@@ -37,7 +40,8 @@ public:
     virtual void SetYear(int32_t year) = 0;
     virtual void SetTrack(int32_t track) = 0;
 
-    virtual bool IsEmpty() = 0;
+    virtual bool HasTag() = 0;
+    virtual bool HasProperties() = 0;
 };
 
 }

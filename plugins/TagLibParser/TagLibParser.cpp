@@ -2,7 +2,8 @@
 
 TagLibParser::TagLibParser():
     m_pFileRef(NULL),
-    m_pTag(NULL)
+    m_pTag(NULL),
+    m_pProp(NULL)
 {
 
 }
@@ -20,9 +21,10 @@ void TagLibParser::GetFileSuffix(vector<string>& list) const
 
 EmErrorCode TagLibParser::Open(const string& path)
 {
-    m_pFileRef = new FileRef(path.c_str());
+    m_pFileRef = new FileRef(path.c_str(), true, AudioProperties::Accurate);
     if (!m_pFileRef->isNull() && m_pFileRef->tag() != NULL) {
-	m_pTag = m_pFileRef->tag();
+        m_pTag = m_pFileRef->tag();
+        m_pProp = m_pFileRef->audioProperties();
     }
     return ErrorCode::Ok;
 }
@@ -30,72 +32,91 @@ EmErrorCode TagLibParser::Open(const string& path)
 void TagLibParser::Close()
 {
     if (m_pFileRef != NULL) {
-	delete m_pFileRef;
-	m_pFileRef = NULL;
-	m_pTag = NULL;
+        delete m_pFileRef;
+        m_pFileRef = NULL;
+        m_pTag = NULL;
+        m_pProp = NULL;
     }
 }
 
 string TagLibParser::GetTitle()
 {
     if (m_pTag != NULL) {
-	return m_pTag->title().toCString();
+        return m_pTag->title().toCString();
     } else {
-	return "";
+        return "";
     }
 }
 
 string TagLibParser::GetArtist()
 {
     if (m_pTag != NULL) {
-	return m_pTag->artist().toCString();
+        return m_pTag->artist().toCString();
     } else {
-	return "";
+        return "";
     }
 }
 
 string TagLibParser::GetAlbum()
 {
     if (m_pTag != NULL) {
-	return m_pTag->album().toCString();
+        return m_pTag->album().toCString();
     } else {
-	return "";
+        return "";
     }
 }
 
 string TagLibParser::GetComment()
 {
     if (m_pTag != NULL) {
-	return m_pTag->comment().toCString();
+        return m_pTag->comment().toCString();
     } else {
-	return "";
+        return "";
     }
 }
 
 string TagLibParser::GetGenre()
 {
     if (m_pTag != NULL) {
-	return m_pTag->genre().toCString();
+        return m_pTag->genre().toCString();
     } else {
-	return "";
+        return "";
     }
 }
 
 int32_t TagLibParser::GetYear()
 {
     if (m_pTag != NULL) {
-	return m_pTag->year();
+        return m_pTag->year();
     } else {
-	return -1;
+        return -1;
     }
 }
 
 int32_t TagLibParser::GetTrack()
 {
     if (m_pTag != NULL) {
-	return m_pTag->track();
+        return m_pTag->track();
     } else {
-	return -1;
+        return -1;
+    }
+}
+
+int32_t TagLibParser::GetDuration()
+{
+    if (m_pProp != NULL) {
+        return m_pProp->length();
+    } else {
+        return 0;
+    }
+}
+
+int32_t TagLibParser::GetBitRate()
+{
+    if (m_pProp != NULL) {
+        return m_pProp->bitrate();
+    } else {
+        return 0;
     }
 }
 
@@ -134,8 +155,12 @@ void TagLibParser::SetTrack(int32_t track)
 
 }
 
-bool TagLibParser::IsEmpty()
+bool TagLibParser::HasTag()
 {
-    return (m_pTag != NULL) ? m_pTag->isEmpty() : true;
+    return (m_pTag != NULL) ? !m_pTag->isEmpty() : false;
 }
 
+bool TagLibParser::HasProperties()
+{
+    return (m_pProp != NULL) ? true : false;
+}

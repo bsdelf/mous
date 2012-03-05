@@ -4,6 +4,7 @@
 #include <mous/ITagParser.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
+#include <taglib/audioproperties.h>
 using namespace std;
 using namespace TagLib;
 using namespace mous;
@@ -28,6 +29,9 @@ public:
     virtual int32_t GetYear();
     virtual int32_t GetTrack();
 
+    virtual int32_t GetDuration();
+    virtual int32_t GetBitRate();
+
     virtual void SetTitle(const string& title);
     virtual void SetArtist(const string& artist); 
     virtual void SetAlbum(const string& album); 
@@ -36,11 +40,13 @@ public:
     virtual void SetYear(int32_t year);
     virtual void SetTrack(int32_t track);
 
-    virtual bool IsEmpty();
+    virtual bool HasTag();
+    virtual bool HasProperties();
 
 private:
     FileRef* m_pFileRef;
     Tag* m_pTag;
+    AudioProperties* m_pProp;
 };
 
 #endif
