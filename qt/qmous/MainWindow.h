@@ -51,6 +51,8 @@ private slots:
     void slotBarPlayListMidClick(int index);
     void slotWidgetPlayListDoubleClick();
 
+    void slotPlayMediaItem(const mous::MediaItem* item);
+
 private:
     Ui::MainWindow *ui;
 
@@ -69,7 +71,7 @@ private:
     mous::PluginManager mPluginMgr;
     mous::MediaLoader mMediaLoader;
     mous::Player mPlayer;
-    mous::MediaItem* mMediaItem;
+    const mous::MediaItem* mMediaItem;
 
     bool mSliderPlayingPreempted;
 };

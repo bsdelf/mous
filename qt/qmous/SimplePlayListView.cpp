@@ -95,7 +95,7 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
 
     // Header
     QStringList headList;
-    headList << tr("Artist/Album") << tr("Title") << tr("Track") << tr("Duration");
+    headList << tr("Artist") << tr("Album") << tr("Title") << tr("Track") << tr("Duration");
     mModel.setHorizontalHeaderLabels(headList);
 
     // Test
@@ -143,6 +143,19 @@ size_t SimplePlayListView::getItemCount() const
     return 0;
 }
 
+void SimplePlayListView::mouseDoubleClickEvent(QMouseEvent * event)
+{
+    QTreeView::mouseDoubleClickEvent(event);
+
+    //if (selectedIndexes().size() != 1)
+    //    return;
+
+    QModelIndex index(selectedIndexes()[0]);
+    qDebug() << index.row();
+
+    emit sigPlayMediaItem(mMediaItemList[index.row()]);
+}
+
 /* Action menus */
 void SimplePlayListView::slotAppend()
 {
@@ -159,7 +172,9 @@ void SimplePlayListView::slotAppend()
     mMediaLoader->LoadMedia(mOldMediaPath.toUtf8().data(), itemList);
 
     for(size_t i = 0; i < itemList.size(); ++i) {
-        const MediaItem* item = itemList[i];
+        MediaItem* item = itemList[i];
+
+        mMediaItemList.push_back(item);
 
         // Check sec duration
         int duration = 0;
@@ -167,7 +182,7 @@ void SimplePlayListView::slotAppend()
             if (item->msEnd != (uint64_t)-1)
                 duration = (item->msEnd - item->msBeg)/1000;
             else
-                duration = item->secDuration - item->msBeg/1000;
+                duration = (item->secDuration - item->msBeg)/1000;
         } else {
             duration = item->secDuration;
         }
@@ -176,7 +191,8 @@ void SimplePlayListView::slotAppend()
 
         // Build row
         QList<QStandardItem *> row;
-        row << new QStandardItem(QString::fromUtf8(item->artist.c_str()) + " - " + QString::fromUtf8(item->album.c_str()));
+        row << new QStandardItem(QString::fromUtf8(item->artist.c_str()));
+        row << new QStandardItem(QString::fromUtf8(item->album.c_str()));
         row << new QStandardItem(QString::fromUtf8(item->title.c_str()));
         row << new QStandardItem(QString::number(item->track));
         row << new QStandardItem(strDuration);

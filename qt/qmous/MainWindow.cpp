@@ -212,9 +212,12 @@ void MainWindow::slotSliderPlayingValueChanged(int val)
 
 void MainWindow::slotBarPlayListMidClick(int index)
 {
-    QWidget* view = mWidgetPlayList->widget(index);
+    SimplePlayListView* view = (SimplePlayListView*)mWidgetPlayList->widget(index);
     mWidgetPlayList->removeTab(index);
+    disconnect(view, SIGNAL(sigPlayMediaItem(const mous::MediaItem*)),
+            this, SLOT(slotPlayMediaItem(const mous::MediaItem*)));
     delete view;
+
     mBarPlayList->setFocus();
 }
 
@@ -222,7 +225,30 @@ void MainWindow::slotWidgetPlayListDoubleClick()
 {
     SimplePlayListView* view = new SimplePlayListView(this);
     view->setMediaLoader(&mMediaLoader);
+    connect(view, SIGNAL(sigPlayMediaItem(const mous::MediaItem*)),
+            this, SLOT(slotPlayMediaItem(const mous::MediaItem*)));
 
     mWidgetPlayList->addTab(view, QString::number(mWidgetPlayList->count()));
     mWidgetPlayList->setCurrentIndex(mWidgetPlayList->count()-1);
+}
+
+void MainWindow::slotPlayMediaItem(const MediaItem *item)
+{
+    if (mPlayer.GetStatus() == PlayerStatus::Playing) {
+        mPlayer.Stop();
+    }
+    if (mPlayer.GetStatus() != PlayerStatus::Closed) {
+        mPlayer.Close();
+        mTimerUpdateUi->stop();
+    }
+
+    mMediaItem = item;
+    mPlayer.Open(mMediaItem->url);
+
+    mTimerUpdateUi->start(mUpdateInterval);
+    if (mMediaItem->hasRange)
+        mPlayer.Play(mMediaItem->msBeg, mMediaItem->msEnd);
+    else
+        mPlayer.Play();
+    ui->btnPlay->setIcon(mIconPaused);
 }

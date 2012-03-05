@@ -3,7 +3,12 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <deque>
 #include "IPlayListView.h"
+
+namespace mous {
+    struct MediaItem;
+}
 
 class SimplePlayListView : public QTreeView, public IPlayListView
 {
@@ -21,7 +26,11 @@ public:
     virtual size_t getItemCount() const;
 
 signals:
-    
+    void sigPlayMediaItem(const mous::MediaItem* item);
+
+private:
+    void mouseDoubleClickEvent(QMouseEvent * event);
+
 private slots:
     void slotAppend();
     void slotRemove();
@@ -44,6 +53,8 @@ private:
     QString mOldMediaPath;
 
     QStandardItemModel mModel;
+
+    std::deque<mous::MediaItem*> mMediaItemList;
 };
 
 #endif // SIMPLEPLAYLISTVIEW_H
