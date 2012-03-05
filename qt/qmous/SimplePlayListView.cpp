@@ -72,23 +72,6 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
     menu->addAction(action);
     connect(action, SIGNAL(triggered()), this, SLOT(slotPlaylistSaveAs()));
 
-    /*
-    QAction* actionPlayMode = new QAction(tr("Play Mode"), this);
-    QActionGroup* groupPlayMode = new QActionGroup(this);
-    QMenu* menuPlayMode = new QMenu(this);
-
-    action = new QAction(tr("Normal"), this);
-    action->setCheckable(true);
-    groupPlayMode->addAction(action);
-    menuPlayMode->addAction(action);
-
-    menuPlayMode->addAction(new QAction(tr("Repeat Playlist"), this));
-    menuPlayMode->addAction(new QAction(tr("Repeat Track"), this));
-    menuPlayMode->addAction(new QAction(tr("Shuffle Track"), this));
-    menuPlayMode->addAction(new QAction(tr("Shuffle Playlist"), this));
-    actionPlayMode->setMenu(menuPlayMode);
-    */
-
     setActionSeparator(actionList);
     addActions(actionList);
 
