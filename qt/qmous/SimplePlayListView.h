@@ -18,8 +18,19 @@ public:
 
 signals:
     
-public slots:
-    
+private slots:
+    void slotAppend();
+    void slotRemove();
+    void slotCut();
+    void slotPaste();
+
+    void slotTagging();
+    void slotConvert();
+    void slotProperties();
+
+    void slotPlaylistLoad();
+    void slotPlaylistRename();
+    void slotPlayListSaveAs();
 };
 
 #endif // SIMPLEPLAYLISTVIEW_H
