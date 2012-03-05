@@ -105,7 +105,7 @@ int32_t TagLibParser::GetTrack()
 int32_t TagLibParser::GetDuration()
 {
     if (m_pProp != NULL) {
-        return m_pProp->length();
+        return m_pProp->length()*1000;
     } else {
         return 0;
     }
