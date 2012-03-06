@@ -203,8 +203,8 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list) const
         }
 
         if (parser->HasProperties()) {
-            if (item->secDuration < 0)
-                item->secDuration = parser->GetDuration();
+            if (item->duration < 0)
+                item->duration = parser->GetDuration();
         } else {
             cout << "FATAL: no properties!!" << endl;
         }

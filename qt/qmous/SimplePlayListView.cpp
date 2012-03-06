@@ -177,17 +177,17 @@ void SimplePlayListView::slotAppend()
         mMediaItemList.push_back(item);
 
         // Check sec duration
-        int duration = 0;
+        int secDuration = 0;
         if (item->hasRange) {
             if (item->msEnd != (uint64_t)-1)
-                duration = (item->msEnd - item->msBeg)/1000;
+                secDuration = (item->msEnd - item->msBeg)/1000;
             else
-                duration = (item->secDuration - item->msBeg)/1000;
+                secDuration = (item->duration - item->msBeg)/1000;
         } else {
-            duration = item->secDuration;
+            secDuration = item->duration/1000;
         }
         QString strDuration;
-        strDuration.sprintf("%.2d:%.2d", duration/60, duration%60);
+        strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
 
         // Build row
         QList<QStandardItem *> row;

@@ -9,7 +9,7 @@ namespace mous {
 struct MediaItem
 {
     std::string url;
-    int32_t secDuration;
+    int32_t duration;
 
     bool hasRange;
     uint64_t msBeg;
@@ -24,7 +24,7 @@ struct MediaItem
     int32_t track;
 
     MediaItem():
-        secDuration(-1),
+        duration(-1),
         year(-1),
         track(-1)
     {
