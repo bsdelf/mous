@@ -72,14 +72,14 @@ public:
         // Lock the FreeQueue first,
         // because after SemVar::Post() the producer will begin to work,
         // and it will take the first item in FreeQueue.
-        m_FreeListMutex.Lock();
+        //m_FreeListMutex.Lock();
         m_FreeQueue.resize(bufCount);
         while (m_pFreeListSemVar->TryWait() != -1);
         for (size_t i = 0; i < bufCount; ++i) {
             m_FreeQueue[i] = m_BufferQueue[i];
             m_pFreeListSemVar->Post();
         }
-        m_FreeListMutex.Unlock();
+        //m_FreeListMutex.Unlock();
     }
 
     size_t GetBufferCount() const
