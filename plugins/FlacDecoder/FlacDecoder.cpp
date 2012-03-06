@@ -23,18 +23,18 @@ EmErrorCode FlacDecoder::Open(const string& url)
 {
     FLAC__stream_decoder_set_md5_checking(m_pDecoder, false);
     FLAC__stream_decoder_init_file(
-	    m_pDecoder,
-	    url.c_str(),
-	    &WriteCallback,
-	    NULL,
-	    &ErrorCallback,
-	    NULL);
+            m_pDecoder,
+            url.c_str(),
+            &WriteCallback,
+            NULL,
+            &ErrorCallback,
+            NULL);
 
     if (!FLAC__stream_decoder_process_until_end_of_metadata(m_pDecoder))
-	return ErrorCode::DecoderFailedToOpen;
+        return ErrorCode::DecoderFailedToOpen;
 
     if (!FLAC__stream_decoder_process_single(m_pDecoder))
-	return ErrorCode::DecoderFailedToOpen;
+        return ErrorCode::DecoderFailedToOpen;
 
     m_Channels = FLAC__stream_decoder_get_channels(m_pDecoder);
     m_SampleRate = FLAC__stream_decoder_get_sample_rate(m_pDecoder);
@@ -50,7 +50,7 @@ EmErrorCode FlacDecoder::Open(const string& url)
 void FlacDecoder::Close()
 {
     if (m_pDecoder != NULL)
-	FLAC__stream_decoder_finish(m_pDecoder);
+        FLAC__stream_decoder_finish(m_pDecoder);
 }
 
 bool FlacDecoder::IsFormatVaild() const
@@ -62,13 +62,13 @@ EmErrorCode FlacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCoun
 {
     gBuf = data;
     if (FLAC__stream_decoder_process_single(m_pDecoder)) {
-	used = gBufLen;
-	unitCount = gSamplesRead;
-	m_SampleIndex += gSamplesRead;
+        used = gBufLen;
+        unitCount = gSamplesRead;
+        m_SampleIndex += gSamplesRead;
     } else {
-	cout << "bad" << flush;
-	used = 0;
-	unitCount = 0;
+        cout << "bad" << flush;
+        used = 0;
+        unitCount = 0;
     }
     return ErrorCode::Ok;
 }
@@ -130,23 +130,23 @@ int32_t FlacDecoder::gBufLen = 0;
 int32_t FlacDecoder::gSamplesRead = 0;
 
 FLAC__StreamDecoderWriteStatus FlacDecoder::WriteCallback(
-	    const FLAC__StreamDecoder *decoder, 
-	    const FLAC__Frame *frame, 
-	    const FLAC__int32 * const buffer[], 
-	    void *client_data)
+        const FLAC__StreamDecoder *decoder, 
+        const FLAC__Frame *frame, 
+        const FLAC__int32 * const buffer[], 
+        void *client_data)
 {
     const size_t& samples = frame->header.blocksize;
     const size_t& channels = frame->header.channels;
 
     if (gBuf != NULL) {
 
-	for (size_t i = 0, sample = 0; sample < samples; ++sample) {
-	    for (size_t channel = 0; channel < channels; ++channel, i+=2) {
-		gBuf[i+1] = (buffer[channel][sample] >> 8);
-		gBuf[i] = buffer[channel][sample];
-	    }
-	}
-	gBufLen = (samples * channels) *2 ;
+        for (size_t i = 0, sample = 0; sample < samples; ++sample) {
+            for (size_t channel = 0; channel < channels; ++channel, i+=2) {
+                gBuf[i+1] = (buffer[channel][sample] >> 8);
+                gBuf[i] = buffer[channel][sample];
+            }
+        }
+        gBufLen = (samples * channels) *2 ;
 
     }
 
@@ -156,9 +156,9 @@ FLAC__StreamDecoderWriteStatus FlacDecoder::WriteCallback(
 }
 
 void FlacDecoder::ErrorCallback(
-	const FLAC__StreamDecoder *decoder, 
-	FLAC__StreamDecoderErrorStatus status, 
-	void *client_data)
+        const FLAC__StreamDecoder *decoder, 
+        FLAC__StreamDecoderErrorStatus status, 
+        void *client_data)
 {
 
 }
