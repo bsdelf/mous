@@ -85,29 +85,29 @@ private:
 private:
     struct UnitBuffer
     {
-	char* data;
-	uint32_t used;
-	uint32_t max;
+        char* data;
+        uint32_t used;
+        uint32_t max;
 
-	uint32_t unitCount;
+        uint32_t unitCount;
 
-	UnitBuffer(): 
-	    data(NULL),
-	    used(0),
-	    max(0),
-	    unitCount(0)
-	{
-	}
+        UnitBuffer(): 
+            data(NULL),
+            used(0),
+            max(0),
+            unitCount(0)
+        {
+        }
 
-	~UnitBuffer()
-	{
-	    if (data != NULL)
-		delete[] data;
-	    data = NULL;
-	    used = 0;
-	    max = 0;
-	    unitCount = 0;
-	}
+        ~UnitBuffer()
+        {
+            if (data != NULL)
+                delete[] data;
+            data = NULL;
+            used = 0;
+            max = 0;
+            unitCount = 0;
+        }
     };
 
 private:

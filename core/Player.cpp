@@ -45,6 +45,8 @@ Player::~Player()
     //Stop();
     m_ThreadForDecoder.Join();
     m_ThreadForRenderer.Join();
+
+    m_UnitBuffers.ClearBuffer();
 }
 
 EmPlayerStatus Player::GetStatus() const
@@ -200,12 +202,15 @@ EmErrorCode Player::Open(const string& path)
     uint32_t maxBytesPerUnit = m_pDecoder->GetMaxBytesPerUnit();
     for (size_t i = 0; i < m_UnitBuffers.GetBufferCount(); ++i) {
         UnitBuffer* buf = m_UnitBuffers.GetRawItem(i);
+        buf->used = 0;
         if (buf->max < maxBytesPerUnit) {
-            if (buf->data != NULL)
+            if (buf->data != NULL) {
                 delete[] buf->data;
+                cout << "free unit buf:" << buf->max << endl;
+            }
             buf->data = new char[maxBytesPerUnit];
-            buf->used = 0;
             buf->max = maxBytesPerUnit;
+            cout << "alloc unit buf:" << buf->max << endl;
         }
     }
 
@@ -308,6 +313,8 @@ void Player::Resume()
     m_DecoderIndex = m_RendererIndex;
     m_pDecoder->SetUnitIndex(m_DecoderIndex);
 
+    m_UnitBuffers.ResetPV();
+
     m_SuspendRenderer = false;
     m_SuspendDecoder = false;
     m_SemWakeRenderer.Post();
@@ -325,12 +332,20 @@ void Player::Stop()
 
 void Player::Seek(uint64_t msPos)
 {
-    if (m_Status == PlayerStatus::Playing) {
-        Pause();
-        DoSeek(msPos);
-        Resume();
-    } else {
-        DoSeek(msPos);
+    switch (m_Status) {
+        case PlayerStatus::Playing:
+            Pause();
+            DoSeek(msPos);
+            Resume();
+            break;
+
+        case PlayerStatus::Paused:
+        case PlayerStatus::Stopped:
+            DoSeek(msPos);
+            break;
+
+        default:
+            break;
     }
 }
 
@@ -396,22 +411,36 @@ void Player::WorkForDecoder()
         if (m_StopDecoder)
             break;
 
+        bool suspendedBySelf = false;
+
         for (UnitBuffer* buf = NULL; ; ) {
             buf = m_UnitBuffers.TakeFree();
             if (m_SuspendDecoder)
                 break;
+
+            if (buf == NULL) {
+                cout << "FATAL: NULL buf!!" << endl;
+                continue;
+            }
+            
+            if (buf->data == NULL) {
+                cout << "FATAL: NULL buf data!!" << endl;
+                continue;
+            }
 
             m_pDecoder->ReadUnit(buf->data, buf->used, buf->unitCount);
             m_UnitBuffers.RecycleFree(buf);
 
             m_DecoderIndex += buf->unitCount;
             if (m_DecoderIndex >= m_UnitEnd) {
+                suspendedBySelf = true;
                 m_SuspendDecoder = true;
                 break;
             }
         }
 
-        m_SemDecoderSuspended.Post();
+        if (!suspendedBySelf)
+            m_SemDecoderSuspended.Post();
     }
 }
 
@@ -422,6 +451,7 @@ void Player::WorkForRenderer()
         if (m_StopRenderer)
             break;
 
+        bool suspendedBySelf = false;
         for (UnitBuffer* buf = NULL; ; ) {
             //cout << "(" << m_UnitBuffers.GetDataCount() << ")" << endl;
             buf = m_UnitBuffers.TakeData();
@@ -433,12 +463,14 @@ void Player::WorkForRenderer()
 
             m_RendererIndex += buf->unitCount;
             if (m_RendererIndex >= m_UnitEnd) {
+                suspendedBySelf = true;
                 m_SuspendRenderer = true;
                 break;
             }
         }
 
-        m_SemRendererSuspended.Post();
+        if (!suspendedBySelf)
+            m_SemRendererSuspended.Post();
 
         if (m_RendererIndex >= m_UnitEnd)
             SigFinished();
