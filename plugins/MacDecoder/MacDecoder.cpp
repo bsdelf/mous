@@ -10,8 +10,8 @@ MacDecoder::MacDecoder():
 MacDecoder::~MacDecoder()
 {
     if (m_pDecompress != NULL) {
-	delete m_pDecompress;
-	m_pDecompress = NULL;
+        delete m_pDecompress;
+        m_pDecompress = NULL;
     }
 }
 
@@ -29,7 +29,7 @@ EmErrorCode MacDecoder::Open(const string& url)
     delete[] pFileName;
 
     if (m_pDecompress == NULL || err != ERROR_SUCCESS)
-	return ErrorCode::DecoderFailedToOpen;
+        return ErrorCode::DecoderFailedToOpen;
 
     m_Channels = m_pDecompress->GetInfo(APE_INFO_CHANNELS);
     m_SampleRate = m_pDecompress->GetInfo(APE_INFO_SAMPLE_RATE);
@@ -49,8 +49,10 @@ EmErrorCode MacDecoder::Open(const string& url)
 
 void MacDecoder::Close()
 {
-    delete m_pDecompress; 
-    m_pDecompress = NULL;
+    if (m_pDecompress != NULL) {
+        delete m_pDecompress; 
+        m_pDecompress = NULL;
+    }
 }
 
 bool MacDecoder::IsFormatVaild() const
@@ -65,11 +67,11 @@ EmErrorCode MacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount
     m_BitRate = m_pDecompress->GetInfo(APE_DECOMPRESS_CURRENT_BITRATE);
 
     if (m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv) == ERROR_SUCCESS) {
-	m_BlockIndex += blocksRecv;
-	used = blocksRecv * m_BlockAlign;
-	unitCount = blocksRecv;
+        m_BlockIndex += blocksRecv;
+        used = blocksRecv * m_BlockAlign;
+        unitCount = blocksRecv;
     } else {
-	used = 0;
+        used = 0;
     }
     return ErrorCode::Ok;
 }
