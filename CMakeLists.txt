@@ -50,8 +50,15 @@ set(OUTPUT_DIR ${MOUS_SOURCE_DIR}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 
+# libCharsetConv
+file(GLOB_RECURSE LIB_CHARSET_CONV sdk/CharsetConv/uchardect/src/*
+    sdk/CharsetConv/CharsetConv.h
+    sdk/CharsetConv/CharsetConv.cpp)
+add_library(CharsetConv SHARED ${LIB_CHARSET_CONV})
+target_link_libraries(CharsetConv -liconv)
+
 # libMousCore
-file(GLOB_RECURSE LIB_MOUS_CORE core/*.cpp)
+file(GLOB_RECURSE LIB_MOUS_CORE core/*)
 add_library(MousCore SHARED ${LIB_MOUS_CORE})
 if (IS_FREEBSD)
     target_link_libraries(MousCore -pthread)
@@ -62,42 +69,42 @@ else()
 endif()
 
 # mous-cli
-file(GLOB_RECURSE EXE_MOUS_CLI cli/*.cpp)
+file(GLOB_RECURSE EXE_MOUS_CLI cli/*)
 add_executable(mous-cli ${EXE_MOUS_CLI})
 if (IS_FREEBSD)
-    target_link_libraries(mous-cli MousCore)
+    target_link_libraries(mous-cli MousCore CharsetConv)
 elseif (IS_LINUX)
-    target_link_libraries(mous-cli MousCore -ldl)
+    target_link_libraries(mous-cli MousCore CharsetConv -ldl)
 else()
-    target_link_libraries(mous-cli MousCore)
+    target_link_libraries(mous-cli MousCore CharsetConv)
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/plugins)
 
 # Oss plugin
 if (EnablePluginOssRenderer)
-    file(GLOB SRC_OSS_RENDERER plugins/OssRenderer/*.cpp)
+    file(GLOB SRC_OSS_RENDERER plugins/OssRenderer/*)
     add_library(OssRenderer SHARED ${SRC_OSS_RENDERER})
     target_link_libraries(OssRenderer)
 endif()
 
 # Mpg123 plugin
 if (EnablePluginMpg123Decoder)
-    file(GLOB SRC_MPG123_DECODER plugins/Mpg123Decoder/*.cpp)
+    file(GLOB SRC_MPG123_DECODER plugins/Mpg123Decoder/*)
     add_library(Mpg123Decoder SHARED ${SRC_MPG123_DECODER})
     target_link_libraries(Mpg123Decoder -lmpg123)
 endif()
 
 # Mac plugin
 if (EnablePluginMacDecoder)
-    file(GLOB SRC_MAC_DECODER plugins/MacDecoder/*.cpp)
+    file(GLOB SRC_MAC_DECODER plugins/MacDecoder/*)
     add_library(MacDecoder SHARED ${SRC_MAC_DECODER})
     target_link_libraries(MacDecoder -lmac)
 endif()
 
 # Flac plugin
 if (EnablePluginFlacDecoder)
-    file(GLOB SRC_FLAC_DECODER plugins/FlacDecoder/*.cpp)
+    file(GLOB SRC_FLAC_DECODER plugins/FlacDecoder/*)
     add_library(FlacDecoder SHARED ${SRC_FLAC_DECODER})
     target_link_libraries(FlacDecoder -lFLAC)
 endif()

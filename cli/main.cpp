@@ -6,6 +6,7 @@
 #include <PlayList.h>
 #include <MediaLoader.h>
 #include <scx/Thread.hpp>
+#include <scx/FileHelp.hpp>
 using namespace std;
 using namespace scx;
 using namespace mous;
@@ -29,9 +30,29 @@ void OnPlaying()
 	}
 }
 
+/*
+#include <CharsetConv/CharsetConv.h>
+#include <enca.h>
+*/
+
 int main(int argc, char** argv)
 {
 	bool paused = false;
+
+    /*
+    string content(ReadAll(argv[1]));
+    cout << "len:" << content.length() << endl;
+
+    CharsetConv conv;
+    string output(conv.AutoConv(content.c_str(), content.length()));
+    cout << (output.empty() ? content : output) << endl;
+
+    EncaAnalyser ans = enca_analyser_alloc("uk");
+    EncaEncoding enc = enca_analyse_const(ans, (const unsigned char*)content.c_str(), content.length());
+    cout << enca_charset_name(enc.charset, ENCA_NAME_STYLE_ICONV) << endl;
+
+    return 0;
+    */
 
 	PluginManager mgr;
 	mgr.LoadPluginDir("./plugins");
