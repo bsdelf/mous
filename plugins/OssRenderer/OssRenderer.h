@@ -18,8 +18,12 @@ public:
     virtual EmErrorCode WriteDevice(const char* buf, uint32_t len);
 
 private:
+    std::string m_PrevPath;
     int m_Fd;
     bool m_IsOpened;
+    int32_t m_Channels;
+    int32_t m_SampleRate;
+    int32_t m_BitsPerSample;
 };
 
 #endif

@@ -18,15 +18,17 @@ OssRenderer::~OssRenderer()
 
 EmErrorCode OssRenderer::OpenDevice(const std::string& path)
 {
-    m_Fd = open(path.c_str(), O_WRONLY);
-    m_IsOpened = (m_Fd == -1) ? false : true;
+    if (m_PrevPath != path)
+        m_PrevPath = path;
+    m_Fd = open(m_PrevPath.c_str(), O_WRONLY);
+    m_IsOpened = (m_Fd < 0) ? false : true;
     return (m_Fd >= 0 && m_IsOpened) ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
 }
 
 void OssRenderer::CloseDevice()
 {
     if (!m_IsOpened || m_Fd == -1)
-	return;
+        return;
 
     ioctl(m_Fd, SNDCTL_DSP_SYNC);
     close(m_Fd);
@@ -37,8 +39,15 @@ void OssRenderer::CloseDevice()
 
 EmErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32_t bitsPerSample)
 {
-    if (!m_IsOpened)
-	return ErrorCode::RendererFailedToSetup;
+    if (m_IsOpened &&
+            (channels != m_Channels || 
+             sampleRate != m_SampleRate || 
+             bitsPerSample != m_BitsPerSample)) {
+        CloseDevice();
+        EmErrorCode ret = OpenDevice(m_PrevPath);
+        if (ret != ErrorCode::Ok)
+            return ret;
+    }
 
     int err = 0;
     int _channels = channels;
@@ -46,17 +55,20 @@ EmErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32
     int _bitsPerSample = bitsPerSample;
 
     err = ioctl(m_Fd, SOUND_PCM_WRITE_CHANNELS, &_channels);
-
     if (err < 0 || _channels != channels)
-	return ErrorCode::RendererBadChannels;
+        return ErrorCode::RendererBadChannels;
 
     err = ioctl(m_Fd, SOUND_PCM_WRITE_RATE, &_sampleRate);
     if (err < 0 || _sampleRate != sampleRate)
-	return ErrorCode::RendererBadSampleRate;
+        return ErrorCode::RendererBadSampleRate;
 
     err = ioctl(m_Fd, SOUND_PCM_WRITE_BITS, &_bitsPerSample);
     if (err < 0 || _bitsPerSample != bitsPerSample)
-	return ErrorCode::RendererBadBitsPerSample;
+        return ErrorCode::RendererBadBitsPerSample;
+
+    m_Channels = channels;
+    m_SampleRate = sampleRate;
+    m_BitsPerSample = bitsPerSample;
 
     return ErrorCode::Ok;
 }
@@ -64,9 +76,9 @@ EmErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32
 EmErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
 {
     for (int off = 0, nw = 0, left = len; left > 0; left -= nw, off += nw) {
-	nw = write(m_Fd, buf+off, left);
-	if (nw < 0)
-	    return ErrorCode::RendererFailedToWrite;
+        nw = write(m_Fd, buf+off, left);
+        if (nw < 0)
+            return ErrorCode::RendererFailedToWrite;
     }
     return ErrorCode::Ok;
 }
