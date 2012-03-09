@@ -7,11 +7,18 @@
 #include <map>
 #include <mous/ErrorCode.h>
 #include <mous/AudioMode.h>
-#include <scx/Thread.hpp>
-#include <scx/SemVar.hpp>
-#include <scx/PVBuffer.hpp>
 #include <scx/Signal.hpp>
 #include "PluginAgent.h"
+
+namespace scx {
+    class Mutex;
+    class CondVar;
+    class Thread;
+    class SemVar;
+
+    template <typename T>
+    class PVBuffer;
+}
 
 namespace mous {
 
@@ -56,7 +63,7 @@ public:
     void Seek(uint64_t msPos);
 
     int32_t GetBitRate() const;
-    int32_t GetSampleRate() const;
+    int32_t GetSamleRate() const;
     uint64_t GetDuration() const;
     uint64_t GetRangeBegin() const;
     uint64_t GetRangeEnd() const;
@@ -111,39 +118,41 @@ private:
     };
 
 private:
-    EmPlayerStatus m_Status;
+    EmPlayerStatus mStatus;
 
-    std::string m_RendererDevice;
+    std::string mRendererDevice;
 
-    bool m_StopDecoder;
-    bool m_SuspendDecoder;
-    IDecoder* m_pDecoder;
-    scx::Thread m_ThreadForDecoder;
-    scx::SemVar m_SemWakeDecoder;
-    scx::SemVar m_SemDecoderSuspended;
+    bool mStopDecoder;
+    bool mSuspendDecoder;
+    IDecoder* mDecoder;
+    scx::Thread* mThreadForDecoder;
+    scx::SemVar* mSemWakeDecoder;
+    scx::Mutex* mMutexDecoderSuspended;
+    scx::CondVar* mCondDecoderSuspended;
 
-    bool m_StopRenderer;
-    bool m_SuspendRenderer;
-    IRenderer* m_pRenderer;
-    scx::Thread m_ThreadForRenderer;
-    scx::SemVar m_SemWakeRenderer;
-    scx::SemVar m_SemRendererSuspended;
+    bool mStopRenderer;
+    bool mSuspendRenderer;
+    IRenderer* mRenderer;
+    scx::Thread* mThreadForRenderer;
+    scx::SemVar* mSemWakeRenderer;
+    scx::Mutex* mMutexRendererSuspended;
+    scx::CondVar* mCondRendererSuspended;
 
-    scx::PVBuffer<UnitBuffer> m_UnitBuffers;
+    scx::PVBuffer<UnitBuffer>* mUnitBuffers;
 
-    uint64_t m_UnitBeg;
-    uint64_t m_UnitEnd;
+    uint64_t mUnitBeg;
+    uint64_t mUnitEnd;
 
-    uint64_t m_DecoderIndex;
-    uint64_t m_RendererIndex;
+    uint64_t mDecoderIndex;
+    uint64_t mRendererIndex;
 
-    double m_UnitPerMs;
+    double mUnitPerMs;
 
-    std::map<const PluginAgent*, void*> m_AgentMap;
+    std::map<const PluginAgent*, void*> mAgentMap;
     typedef std::pair<const PluginAgent*, void*> AgentMapPair;
     typedef std::map<const PluginAgent*, void*>::iterator AgentMapIter;
 
-    std::map<std::string, std::vector<IDecoder*>*> m_DecoderMap;
+    std::map<std::string, std::vector<IDecoder*>*> mDecoderMap;
     typedef std::pair<std::string, std::vector<IDecoder*>*> DecoderMapPair;
     typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
 };
