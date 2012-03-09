@@ -183,7 +183,7 @@ public:
 #define SCX_THREAD_COPY_INIT_1ARG                   \
     typedef Params1<fn_t, arg_t> params_t;          \
     params_t* p_params =                            \
-    new params_t(fn, arg)
+        new params_t(fn, arg)
 
     template<typename fn_t, typename arg_t>
     Thread(fn_t fn, arg_t arg)
@@ -204,7 +204,7 @@ public:
 #define SCX_THREAD_COPY_INIT_2ARGS                      \
     typedef Params2<fn_t, arg1_t, arg2_t> params_t;     \
     params_t* p_params =                                \
-    new params_t(fn, arg1, arg2)
+        new params_t(fn, arg1, arg2)
 
     template<typename fn_t, typename arg1_t, typename arg2_t>
     Thread(fn_t fn, arg1_t arg1, arg2_t arg2)
@@ -225,7 +225,7 @@ public:
 #define SCX_THREAD_COPY_INIT_3ARGS                              \
     typedef Params3<fn_t, arg1_t, arg2_t, arg3_t> params_t;     \
     params_t* p_params =                                        \
-    new params_t(fn, arg1, arg2, arg3)
+        new params_t(fn, arg1, arg2, arg3)
 
     template<typename fn_t, typename arg1_t, typename arg2_t, typename arg3_t>
     Thread(fn_t fn, arg1_t arg1, arg2_t arg2, arg3_t arg3)
