@@ -37,7 +37,7 @@ public:
             m_pFreeListSemVar->Post(); 
         }
 
-        while (m_pDataListSemVar->TryWait() != -1);
+        m_pDataListSemVar->Clear();
     }
 
     void ClearBuffer()
@@ -50,8 +50,8 @@ public:
         m_FreeQueue.clear();
         m_DataQueue.clear();
 
-        while (m_pFreeListSemVar->TryWait() != -1);
-        while (m_pDataListSemVar->TryWait() != -1);
+        m_pFreeListSemVar->Clear();
+        m_pDataListSemVar->Clear();
     }
 
     /**
@@ -67,14 +67,14 @@ public:
         // No mutex here, 
         // because we assume both thread has been suspended.
         m_DataQueue.clear();
-        while (m_pDataListSemVar->TryWait() != -1);
+        m_pDataListSemVar->Clear();
 
         // Lock the FreeQueue first,
         // because after SemVar::Post() the producer will begin to work,
         // and it will take the first item in FreeQueue.
         //m_FreeListMutex.Lock();
         m_FreeQueue.resize(bufCount);
-        while (m_pFreeListSemVar->TryWait() != -1);
+        m_pFreeListSemVar->Clear();
         for (size_t i = 0; i < bufCount; ++i) {
             m_FreeQueue[i] = m_BufferQueue[i];
             m_pFreeListSemVar->Post();
@@ -153,7 +153,7 @@ public:
      */
     void ClearFree()
     {
-        while (m_pFreeListSemVar->TryWait() != -1);
+        m_pFreeListSemVar->Clear();
         m_FreeListMutex.Lock();
         m_FreeQueue.clear();
         m_FreeListMutex.Unlock();
@@ -164,7 +164,7 @@ public:
      */
     void ClearData()
     {
-        while (m_pDataListSemVar->TryWait() != -1);
+        m_pDataListSemVar->Clear();
         m_DataListMutex.Lock();
         m_DataQueue.clear();
         m_DataListMutex.Unlock();
