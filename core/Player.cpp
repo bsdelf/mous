@@ -1,4 +1,5 @@
 #include "Player.h"
+#include <cassert>
 #include <scx/Function.hpp>
 #include <scx/FileHelp.hpp>
 #include <scx/Conv.hpp>
@@ -297,12 +298,14 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 void Player::Pause()
 {
     if (!m_SuspendRenderer) {
+        m_SemRendererSuspended.Clear();
         m_SuspendRenderer = true;
         m_UnitBuffers.RecycleFree(NULL);
         m_SemRendererSuspended.Wait();
     }
 
     if (!m_SuspendDecoder) {
+        m_SemDecoderSuspended.Clear();
         m_SuspendDecoder = true;
         m_UnitBuffers.RecycleData(NULL);
         m_SemDecoderSuspended.Wait();
@@ -416,36 +419,25 @@ void Player::WorkForDecoder()
         if (m_StopDecoder)
             break;
 
-        bool suspendedBySelf = false;
-
         for (UnitBuffer* buf = NULL; ; ) {
             buf = m_UnitBuffers.TakeFree();
             if (m_SuspendDecoder)
                 break;
 
-            if (buf == NULL) {
-                cout << "FATAL: NULL buf!!" << endl;
-                continue;
-            }
-            
-            if (buf->data == NULL) {
-                cout << "FATAL: NULL buf data!!" << endl;
-                continue;
-            }
+            assert(buf != NULL);
+            assert(buf->data != NULL);
 
             m_pDecoder->ReadUnit(buf->data, buf->used, buf->unitCount);
             m_UnitBuffers.RecycleFree(buf);
 
             m_DecoderIndex += buf->unitCount;
             if (m_DecoderIndex >= m_UnitEnd) {
-                suspendedBySelf = true;
                 m_SuspendDecoder = true;
                 break;
             }
         }
 
-        if (!suspendedBySelf)
-            m_SemDecoderSuspended.Post();
+        m_SemDecoderSuspended.Post();
     }
 }
 
@@ -456,7 +448,6 @@ void Player::WorkForRenderer()
         if (m_StopRenderer)
             break;
 
-        bool suspendedBySelf = false;
         for (UnitBuffer* buf = NULL; ; ) {
             //cout << "(" << m_UnitBuffers.GetDataCount() << ")" << endl;
             buf = m_UnitBuffers.TakeData();
@@ -468,14 +459,12 @@ void Player::WorkForRenderer()
 
             m_RendererIndex += buf->unitCount;
             if (m_RendererIndex >= m_UnitEnd) {
-                suspendedBySelf = true;
                 m_SuspendRenderer = true;
                 break;
             }
         }
 
-        if (!suspendedBySelf)
-            m_SemRendererSuspended.Post();
+        m_SemRendererSuspended.Post();
 
         if (m_RendererIndex >= m_UnitEnd)
             SigFinished();

@@ -38,12 +38,16 @@ public:
         //return sem_timewait(&m_Sem, timeout);
     }
 
-
     int GetValue()
     {
         int sval = 0;
         sem_getvalue(&m_Sem, &sval);
         return sval;
+    }
+
+    void Clear()
+    {
+        while (TryWait() == 0);
     }
 
 private:
