@@ -219,9 +219,14 @@ EmErrorCode Player::Open(const string& path)
     int32_t channels = m_pDecoder->GetChannels();
     int32_t sampleRate = m_pDecoder->GetSampleRate();
     int32_t bitsPerSample = m_pDecoder->GetBitsPerSample();
+    cout << "channels:" << channels << endl;
+    cout << "sampleRate:" << sampleRate << endl;
+    cout << "bitsPerSample:" << bitsPerSample << endl;
     err = m_pRenderer->SetupDevice(channels, sampleRate, bitsPerSample);
-    if (err != ErrorCode::Ok)
+    if (err != ErrorCode::Ok) {
+        cout << "failed to set renderer:" << err << endl;
         return err;
+    }
 
     m_Status = PlayerStatus::Stopped;
 
