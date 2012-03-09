@@ -30,9 +30,10 @@ void OnPlaying()
 	}
 }
 
-/*
+#include <unicode/ucsdet.h>
 #include <CharsetConv/CharsetConv.h>
-#include <enca.h>
+/*
+//#include <enca.h>
 */
 
 int main(int argc, char** argv)
@@ -43,16 +44,32 @@ int main(int argc, char** argv)
     string content(ReadAll(argv[1]));
     cout << "len:" << content.length() << endl;
 
-    CharsetConv conv;
-    string output(conv.AutoConv(content.c_str(), content.length()));
-    cout << (output.empty() ? content : output) << endl;
-
-    EncaAnalyser ans = enca_analyser_alloc("uk");
-    EncaEncoding enc = enca_analyse_const(ans, (const unsigned char*)content.c_str(), content.length());
-    cout << enca_charset_name(enc.charset, ENCA_NAME_STYLE_ICONV) << endl;
-
+    UErrorCode uerr = U_ZERO_ERROR;
+    int32_t found = 1;
+    UCharsetDetector* udec = ucsdet_open(&uerr);
+    ucsdet_setText(udec, content.c_str(), content.length(), &uerr);
+    const UCharsetMatch** match = ucsdet_detectAll(udec, &found, &uerr);
+    for (int i = 0; i < found; ++i) {
+        cout << ucsdet_getName(match[i], &uerr) << '\t';
+        cout << ucsdet_getConfidence(match[i], &uerr) << endl;
+    }
+    cout << found << endl;
+    ucsdet_close(udec);
     return 0;
     */
+
+    /*
+    CharsetConv conv;
+    string output;
+    bool ok = conv.AutoConv(content.c_str(), content.length(), output);
+    cout << (ok ? output : content) << endl;
+    return 0;
+    */
+
+    //EncaAnalyser ans = enca_analyser_alloc("uk");
+    //EncaEncoding enc = enca_analyse_const(ans, (const unsigned char*)content.c_str(), content.length());
+    //cout << enca_charset_name(enc.charset, ENCA_NAME_STYLE_ICONV) << endl;
+
 
 	PluginManager mgr;
 	mgr.LoadPluginDir("./plugins");
@@ -124,7 +141,7 @@ int main(int argc, char** argv)
 	}
 
 	// Begin to play.
-	MediaItem* item = mediaList[2];
+	MediaItem* item = mediaList[0];
 	cout << ">>>> Tag Info" << endl;
 	cout << "\ttitle:" << item->title << endl;
 	cout << "\tartist:" << item->artist << endl;
@@ -134,7 +151,7 @@ int main(int argc, char** argv)
 	cout << "\tyear:" << item->year << endl;
 	cout << "\ttrack:" << item->track << endl;
 
-
+    cout << "item->url:" << item->url << endl;
 	player.Open(item->url);
 	if (item->hasRange) {
 		player.Play(item->msBeg, item->msEnd);
