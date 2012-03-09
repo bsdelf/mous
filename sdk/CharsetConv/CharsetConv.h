@@ -13,11 +13,17 @@ public:
     CharsetConv(int buflen = 1024);
     ~CharsetConv();
 
-    /* Auto detect the given buf, convert to utf8 */
-    std::string AutoConv(const char* buf, size_t len);
+public:
+    std::string Probe(const char* buf, size_t len);
 
-    /* Auto detect the given buf, convert to the encoding you want */
-    std::string AutoConvTo(const char* wanted, const char* buf, size_t len);
+    /* Auto detect the given buf, convert to utf8. */
+    bool AutoConv(const char* buf, size_t len, std::string& content);
+
+    /* Auto detect the given buf, convert to the encoding you want. */
+    bool AutoConvTo(const std::string& wanted, const char* buf, size_t len, std::string& content);
+
+    /* If converted return true, otherwise return false(failed/unnecessary). */
+    bool ConvFromTo(const std::string& from, const std::string& wanted, const char* buf, size_t len, std::string& content);
 
 private:
     nsDetectorWrapper* mDetector;

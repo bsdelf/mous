@@ -12,7 +12,9 @@ class nsDetectorWrapper: public nsUniversalDetector
 {
 public:
     nsDetectorWrapper():
-        nsUniversalDetector(NS_FILTER_ALL)
+        //nsUniversalDetector(NS_FILTER_ALL)
+        //nsUniversalDetector(NS_FILTER_CJK)
+        nsUniversalDetector(NS_FILTER_CHINESE_SIMPLIFIED)
     {
     }
 
@@ -20,9 +22,9 @@ public:
     {
     }
 
-    const char* GetCharset() const
+    string GetCharset() const
     {
-        return mCharset.c_str();
+        return mCharset;
     }
 
     virtual void Reset()
@@ -58,77 +60,124 @@ CharsetConv::~CharsetConv()
         delete[] mBuffer;
 }
 
-string CharsetConv::AutoConv(const char* buf, size_t len)
+string CharsetConv::Probe(const char* buf, size_t len)
 {
-    return AutoConvTo("UTF-8", buf, len);
+    /*
+    //#include <unicode/ucsdet.h>
+    //-licuio
+    int max = -1;
+    int maxi = -1;
+
+    UErrorCode uerr = U_ZERO_ERROR;
+    int32_t found = 1;
+    UCharsetDetector* udec = ucsdet_open(&uerr);
+    ucsdet_setText(udec, buf, len, &uerr);
+    const UCharsetMatch** match = ucsdet_detectAll(udec, &found, &uerr);
+    for (int i = 0; i < found; ++i) {
+        int conf = ucsdet_getConfidence(match[i], &uerr);
+        if (conf > max) {
+            max = conf;
+            maxi = i;
+        }
+        cout << ucsdet_getName(match[i], &uerr) << '\t';
+        cout << conf << endl;
+    }
+    cout << found << endl;
+    ucsdet_close(udec);
+    
+    if (maxi != -1)
+        return ucsdet_getName(match[maxi], &uerr);
+    else
+        return "";
+    */
+ 
+    string charset;
+    int ret = mDetector->HandleData(buf, (PRUint32)len);
+    mDetector->DataEnd();
+    if (ret == NS_OK) {
+        charset.assign(mDetector->GetCharset());
+    }
+    mDetector->Reset();
+    return charset;
 }
 
-string CharsetConv::AutoConvTo(const char* wanted, const char* buf, size_t len)
+bool CharsetConv::AutoConv(const char* buf, size_t len, string& content)
 {
-    string outcontent;
-    int ret = mDetector->HandleData(buf, (PRUint32)len);
-    if (ret == NS_OK) {
-        mDetector->DataEnd();
-        const char* set = mDetector->GetCharset();
-        cout << "set:" << set << endl;
-        if (*set != '\0') {
-            const char* inbuf = buf;
-            size_t inleft = len;
+    return AutoConvTo("UTF-8", buf, len, content);
+}
 
-            char* outstart;
-            size_t outlen;
-            char* outbuf;
-            size_t outleft;
-            if (len <= mBufferLen) {
-                outstart = mBuffer;
-                outlen = mBufferLen;
-            } else {
-                outstart = new char[len+4];
-                outlen = len;
-            }
-            outbuf = outstart;
-            outleft = outlen;
-
-            size_t converted = 0;
-            bool failed = false;
-            do {
-                iconv_t cd = iconv_open(wanted, set);
-                if (cd == (iconv_t)-1) {
-                    failed = true;
-                    break;
-                }
-
-                errno = 0;
-                converted = iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
-                if (converted != (size_t)-1) {
-                    cout << "done" << endl;
-                    break;
-                } else if (errno != E2BIG) {
-                    cout << strerror(errno) << endl;
-                    failed = true;
-                    break;
-                }
-                inbuf = buf;
-                inleft = len;
-                delete[] outstart;
-                outlen = (outlen << 1);
-                outstart = new char[outlen];
-                outbuf = outstart;
-                outleft = outlen;
-
-                iconv_close(cd);
-            } while(true);
-
-            if (!failed) {
-                outcontent.assign(outstart, outlen-outleft);
-            }
-            if (outstart != mBuffer) {
-                delete[] outstart;
-            }
-
-        } else {
-        }
-        mDetector->Reset();
+bool CharsetConv::AutoConvTo(const string& wanted, const char* buf, size_t len, string& content)
+{
+    string charset(Probe(buf, len));
+    if (!charset.empty()) {
+        return ConvFromTo(charset, wanted, buf, len, content);
+    } else {
+        return false;
     }
-    return outcontent;
+}
+
+bool CharsetConv::ConvFromTo(const string& from, const string& wanted, const char* buf, size_t len, string& content)
+{
+    if (from.empty() || wanted.empty())
+        return false;
+    if (from == wanted)
+        return false;
+
+    cout << "set:" << from << endl;
+    bool ok = true;
+    const char* inbuf = buf;
+    size_t inleft = len;
+
+    char* outstart;
+    size_t outlen;
+    char* outbuf;
+    size_t outleft;
+    if (len <= mBufferLen) {
+        outstart = mBuffer;
+        outlen = mBufferLen;
+    } else {
+        outstart = new char[len+4];
+        outlen = len+4;
+    }
+    outbuf = outstart;
+    outleft = outlen;
+
+    size_t converted = 0;
+    do {
+        iconv_t cd = iconv_open(wanted.c_str(), from.c_str());
+        if (cd == (iconv_t)-1) {
+            ok = false;
+            break;
+        }
+
+        errno = 0;
+        converted = iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
+        if (converted != (size_t)-1) {
+            cout << "done" << endl;
+            break;
+        } else if (errno != E2BIG) {
+            cout << strerror(errno) << endl;
+            ok = false;
+            break;
+        }
+        inbuf = buf;
+        inleft = len;
+        if (outstart != mBuffer) {
+            delete[] outstart;
+        }
+        outlen = (outlen << 1);
+        outstart = new char[outlen];
+        outbuf = outstart;
+        outleft = outlen;
+
+        iconv_close(cd);
+    } while(true);
+
+    if (ok) {
+        content.assign(outstart, outlen-outleft);
+    }
+    if (outstart != mBuffer) {
+        delete[] outstart;
+    }
+    return ok;
 }
