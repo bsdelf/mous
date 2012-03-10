@@ -11,9 +11,9 @@ enum e
 {
     Normal,
     Repeat,
-    Random,
-    RandomRepeat,
-    SingleRepeat
+    Shuffle,
+    ShuffleRepeat,
+    RepeatOne
 };
 }
 typedef PlayMode::e EmPlayMode;
@@ -26,17 +26,22 @@ public:
 
     void SetPlayMode(EmPlayMode mode);
     EmPlayMode GetPlayMode() const;
-    MediaItem* GetPreviousItem();
-    MediaItem* GetCurrentItem();
-    MediaItem* GetNextItem();
+
+    const MediaItem* GetPreviousItem() const;
+    const MediaItem* GetCurrentItem() const;
+    const MediaItem* GetNextItem() const;
+    bool MoveNext(bool forward = true); 
+    void ResetSeq();
 
     void InsertItem(size_t index, MediaItem* item);
+    void InsertItems(size_t index, std::deque<MediaItem*>& items);
     void AppendItem(MediaItem* item);
+    void AppendItems(std::deque<MediaItem*>& items);
     void RemoveItem(size_t index);
     void Clear();
-    MediaItem* GetItem(size_t index);
-    size_t GetItemCount() const;
 
+    const MediaItem* GetItem(size_t index) const;
+    size_t GetItemCount() const;
     void Reverse();
 
 private:
