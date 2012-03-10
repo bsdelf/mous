@@ -3,7 +3,7 @@
 #include <string>
 #include <PluginManager.h>
 #include <Player.h>
-#include <PlayList.h>
+#include <Playlist.h>
 #include <MediaLoader.h>
 #include <scx/Thread.hpp>
 #include <scx/FileHelp.hpp>
@@ -11,6 +11,7 @@ using namespace std;
 using namespace scx;
 using namespace mous;
 
+bool gStop = false;
 Player* gPlayer = NULL;
 
 void OnFinished()
@@ -21,7 +22,7 @@ void OnFinished()
 void OnPlaying()
 {
 	while (true) {
-		if (gPlayer == NULL)
+		if (gPlayer == NULL || gStop)
 			break;
 		uint64_t ms = gPlayer->GetCurrentMs();
 		cout << gPlayer->GetBitRate() << " kbps " <<
@@ -30,9 +31,8 @@ void OnPlaying()
 	}
 }
 
-#include <unicode/ucsdet.h>
-#include <CharsetConv/CharsetConv.h>
 /*
+#include <CharsetConv/CharsetConv.h>
 //#include <enca.h>
 */
 
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
 		loader.RegisterPluginAgent(tagAgentList[i]);
 	}
 
-	PlayList playlist;
+	Playlist playlist;
 
 	deque<MediaItem*> mediaList;
 	loader.LoadMedia(argv[1], mediaList);
@@ -167,13 +167,7 @@ int main(int argc, char** argv)
 		cin >> ch;
 		switch (ch) {
 			case 'q':
-				player.Stop();
 				player.Close();
-				break;
-
-			case 's':
-				paused = false;
-				player.Stop();
 				break;
 
 			case 'p':
@@ -196,7 +190,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	gPlayer = NULL;
+    gStop = true;
 	th.Join();
 
 	loader.UnregisterAll();

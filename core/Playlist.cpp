@@ -1,75 +1,75 @@
-#include "PlayList.h"
+#include "Playlist.h"
 #include <algorithm>
 using namespace std;
 using namespace mous;
 
-PlayList::PlayList():
+Playlist::Playlist():
     m_PlayMode(PlayMode::Normal)
 {
 
 }
 
-PlayList::~PlayList()
+Playlist::~Playlist()
 {
 
 }
 
-void PlayList::SetPlayMode(EmPlayMode mode)
+void Playlist::SetPlayMode(EmPlayMode mode)
 {
     m_PlayMode = mode;
 }
 
-EmPlayMode PlayList::GetPlayMode() const
+EmPlayMode Playlist::GetPlayMode() const
 {
     return m_PlayMode;
 }
 
-MediaItem* PlayList::GetPreviousItem()
+MediaItem* Playlist::GetPreviousItem()
 {
     return NULL;
 }
 
-MediaItem* PlayList::GetCurrentItem()
+MediaItem* Playlist::GetCurrentItem()
 {
     return NULL;
 }
 
-MediaItem* PlayList::GetNextItem()
+MediaItem* Playlist::GetNextItem()
 {
     return NULL;
 }
 
-void PlayList::InsertItem(size_t index, MediaItem* item)
+void Playlist::InsertItem(size_t index, MediaItem* item)
 {
     m_ItemQue.insert(m_ItemQue.begin()+index, item);
 }
 
-void PlayList::AppendItem(MediaItem* item)
+void Playlist::AppendItem(MediaItem* item)
 {
     m_ItemQue.push_back(item);
 }
 
-void PlayList::RemoveItem(size_t index)
+void Playlist::RemoveItem(size_t index)
 {
     m_ItemQue.erase(m_ItemQue.begin() + index);
 }
 
-void PlayList::Clear()
+void Playlist::Clear()
 {
     m_ItemQue.clear();
 }
 
-MediaItem* PlayList::GetItem(size_t index)
+MediaItem* Playlist::GetItem(size_t index)
 {
     return m_ItemQue[index];
 }
 
-size_t PlayList::GetItemCount() const
+size_t Playlist::GetItemCount() const
 {
     return m_ItemQue.size();
 }
 
-void PlayList::Reverse()
+void Playlist::Reverse()
 {
     reverse(m_ItemQue.begin(), m_ItemQue.end());
 }

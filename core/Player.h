@@ -12,7 +12,6 @@
 
 namespace scx {
     class Mutex;
-    class CondVar;
     class Thread;
     class SemVar;
 
@@ -32,7 +31,7 @@ enum e
     Closed,
     Playing,
     Paused,
-    Stopped
+    Stopped,
 };
 }
 typedef PlayerStatus::e EmPlayerStatus;
@@ -59,7 +58,6 @@ public:
     void Play(uint64_t msBegin, uint64_t msEnd);
     void Pause();
     void Resume();
-    void Stop();
     void Seek(uint64_t msPos);
 
     int32_t GetBitRate() const;
@@ -128,7 +126,6 @@ private:
     scx::Thread* mThreadForDecoder;
     scx::SemVar* mSemWakeDecoder;
     scx::Mutex* mMutexDecoderSuspended;
-    scx::CondVar* mCondDecoderSuspended;
 
     bool mStopRenderer;
     bool mSuspendRenderer;
@@ -136,7 +133,6 @@ private:
     scx::Thread* mThreadForRenderer;
     scx::SemVar* mSemWakeRenderer;
     scx::Mutex* mMutexRendererSuspended;
-    scx::CondVar* mCondRendererSuspended;
 
     scx::PVBuffer<UnitBuffer>* mUnitBuffers;
 

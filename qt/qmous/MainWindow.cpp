@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     if (mPlayer.GetStatus() == PlayerStatus::Playing) {
-        mPlayer.Stop();
+        mPlayer.Close();
     }
     if (mTimerUpdateUi != NULL) {
         if (mTimerUpdateUi->isActive())
@@ -187,7 +187,7 @@ void MainWindow::slotBtnStop()
 {
     qDebug() << mPlayer.GetStatus();
 
-    mPlayer.Stop();
+    mPlayer.Pause();
     mTimerUpdateUi->stop();
 }
 
@@ -235,7 +235,7 @@ void MainWindow::slotWidgetPlayListDoubleClick()
 void MainWindow::slotPlayMediaItem(const MediaItem *item)
 {
     if (mPlayer.GetStatus() == PlayerStatus::Playing) {
-        mPlayer.Stop();
+        mPlayer.Close();
     }
     if (mPlayer.GetStatus() != PlayerStatus::Closed) {
         mPlayer.Close();

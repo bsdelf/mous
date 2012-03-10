@@ -18,11 +18,11 @@ enum e
 }
 typedef PlayMode::e EmPlayMode;
 
-class PlayList
+class Playlist
 {
 public:
-    PlayList();
-    ~PlayList();
+    Playlist();
+    ~Playlist();
 
     void SetPlayMode(EmPlayMode mode);
     EmPlayMode GetPlayMode() const;

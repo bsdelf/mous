@@ -4,7 +4,6 @@
 #include <scx/FileHelp.hpp>
 #include <scx/Conv.hpp>
 #include <scx/Mutex.hpp>
-#include <scx/CondVar.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/Thread.hpp>
 #include <scx/PVBuffer.hpp>
@@ -24,14 +23,12 @@ Player::Player():
     mThreadForDecoder(new Thread),
     mSemWakeDecoder(new SemVar(0, 0)),
     mMutexDecoderSuspended(new Mutex),
-    mCondDecoderSuspended(new CondVar(*mMutexDecoderSuspended)),
     mStopRenderer(false),
     mSuspendRenderer(true),
     mRenderer(NULL),
     mThreadForRenderer(new Thread),
     mSemWakeRenderer(new SemVar(0, 0)),
     mMutexRendererSuspended(new Mutex),
-    mCondRendererSuspended(new CondVar(*mMutexRendererSuspended)),
     mUnitBuffers(new PVBuffer<UnitBuffer>()),
     mUnitBeg(0),
     mUnitEnd(0),
@@ -48,6 +45,8 @@ Player::Player():
 
 Player::~Player()
 {
+    Pause();
+
     mStopDecoder = true;
     mStopRenderer = true;
     mSemWakeDecoder->Post();
@@ -64,8 +63,6 @@ Player::~Player()
     delete mSemWakeRenderer;
     delete mMutexDecoderSuspended;
     delete mMutexRendererSuspended;
-    delete mCondDecoderSuspended;
-    delete mCondRendererSuspended;
     delete mUnitBuffers;
 }
 
@@ -171,7 +168,6 @@ void Player::SetRenderer(const PluginAgent* pAgent)
 
 void Player::UnsetRenderer(const PluginAgent* pAgent)
 {
-    Stop();
     SigStopped();
 
     AgentMapIter iter = mAgentMap.find(pAgent);
@@ -255,8 +251,9 @@ EmErrorCode Player::Open(const string& path)
 
 void Player::Close()
 {
-    mDecoder->Close();
+    Pause();
 
+    mDecoder->Close();
     mStatus = PlayerStatus::Closed;
 }
 
@@ -316,20 +313,21 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
 void Player::Pause()
 {
-    mMutexRendererSuspended->Lock();
+    if (mStatus != PlayerStatus::Playing)
+        return;
+
     if (!mSuspendRenderer) {
         mSuspendRenderer = true;
         mUnitBuffers->RecycleFree(NULL);
-        mCondRendererSuspended->Wait();
     }
+    mMutexRendererSuspended->Lock();
     mMutexRendererSuspended->Unlock();
 
-    mMutexDecoderSuspended->Lock();
     if (!mSuspendDecoder) {
         mSuspendDecoder = true;
         mUnitBuffers->RecycleData(NULL);
-        mCondDecoderSuspended->Wait();
     }
+    mMutexDecoderSuspended->Lock();
     mMutexDecoderSuspended->Unlock();
 
     mUnitBuffers->ResetPV();
@@ -350,13 +348,6 @@ void Player::Resume()
     mSemWakeDecoder->Post();
 
     mStatus = PlayerStatus::Playing;
-}
-
-void Player::Stop()
-{
-    Pause();
-
-    mStatus = PlayerStatus::Stopped;
 }
 
 void Player::Seek(uint64_t msPos)
@@ -440,6 +431,8 @@ void Player::WorkForDecoder()
         if (mStopDecoder)
             break;
 
+        mMutexDecoderSuspended->Lock();
+
         for (UnitBuffer* buf = NULL; ; ) {
             buf = mUnitBuffers->TakeFree();
             if (mSuspendDecoder)
@@ -458,8 +451,6 @@ void Player::WorkForDecoder()
             }
         }
 
-        mMutexDecoderSuspended->Lock();
-        mCondDecoderSuspended->Signal();
         mMutexDecoderSuspended->Unlock();
     };
 }
@@ -471,11 +462,16 @@ void Player::WorkForRenderer()
         if (mStopRenderer)
             break;
 
+        mMutexRendererSuspended->Lock();
+
         for (UnitBuffer* buf = NULL; ; ) {
             //cout << mUnitBuffers->GetDataCount() << flush;
             buf = mUnitBuffers->TakeData();
             if (mSuspendRenderer)
                 break;
+
+            assert(buf != NULL);
+            assert(buf->data != NULL);
 
             mRenderer->WriteDevice(buf->data, buf->used);
             mUnitBuffers->RecycleData(buf);
@@ -487,11 +483,11 @@ void Player::WorkForRenderer()
             }
         }
 
-        mMutexRendererSuspended->Lock();
-        mCondRendererSuspended->Signal();
         mMutexRendererSuspended->Unlock();
 
-        if (mRendererIndex >= mUnitEnd)
+        if (mRendererIndex >= mUnitEnd) {
+            mStatus = PlayerStatus::Stopped;
             SigFinished();
+        }
     }
 }
