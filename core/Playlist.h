@@ -2,6 +2,7 @@
 #define MOUS_PLAYLIST_H
 
 #include <deque>
+#include <mous/ErrorCode.h>
 #include <mous/MediaItem.h>
 
 namespace mous {
@@ -27,12 +28,13 @@ public:
     void SetPlayMode(EmPlayMode mode);
     EmPlayMode GetPlayMode() const;
 
-    const MediaItem* GetPreviousItem() const;
-    const MediaItem* GetCurrentItem() const;
-    const MediaItem* GetNextItem() const;
-    bool MoveNext(bool forward = true); 
+    const MediaItem* SeqPrevious() const;
+    const MediaItem* SeqCurrent() const;
+    const MediaItem* SeqNext() const;
+    EmErrorCode SeqMoveNext(int step = 1); 
     void ResetSeq();
 
+    void AssignItems(std::deque<MediaItem*>& items);
     void InsertItem(size_t index, MediaItem* item);
     void InsertItems(size_t index, std::deque<MediaItem*>& items);
     void AppendItem(MediaItem* item);
@@ -40,13 +42,15 @@ public:
     void RemoveItem(size_t index);
     void Clear();
 
-    const MediaItem* GetItem(size_t index) const;
+    MediaItem* GetItem(size_t index);
     size_t GetItemCount() const;
+    bool Empty() const;
     void Reverse();
 
 private:
     EmPlayMode m_PlayMode;
     std::deque<MediaItem*> m_ItemQue;
+    typedef std::deque<MediaItem*>::iterator ItemQueIter;
 };
 
 }

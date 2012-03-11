@@ -24,28 +24,33 @@ EmPlayMode Playlist::GetPlayMode() const
     return m_PlayMode;
 }
 
-const MediaItem* Playlist::GetPreviousItem() const
+const MediaItem* Playlist::SeqPrevious() const
 {
     return NULL;
 }
 
-const MediaItem* Playlist::GetCurrentItem() const
+const MediaItem* Playlist::SeqCurrent() const
 {
     return NULL;
 }
 
-const MediaItem* Playlist::GetNextItem() const
+const MediaItem* Playlist::SeqNext() const
 {
     return NULL;
 }
 
-bool Playlist::MoveNext(bool forward)
+EmErrorCode Playlist::SeqMoveNext(int step)
 {
-    return true;
+    return ErrorCode::Ok;
 }
 
 void Playlist::ResetSeq()
 {
+}
+
+void Playlist::AssignItems(std::deque<MediaItem*>& items)
+{
+    m_ItemQue.assign(items.begin(), items.end());
 }
 
 void Playlist::InsertItem(size_t index, MediaItem* item)
@@ -55,6 +60,7 @@ void Playlist::InsertItem(size_t index, MediaItem* item)
 
 void Playlist::InsertItems(size_t index, deque<MediaItem*>& items)
 {
+    m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
 }
 
 void Playlist::AppendItem(MediaItem* item)
@@ -64,6 +70,7 @@ void Playlist::AppendItem(MediaItem* item)
 
 void Playlist::AppendItems(deque<MediaItem*>& items)
 {
+    m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
 }
 
 void Playlist::RemoveItem(size_t index)
@@ -76,7 +83,7 @@ void Playlist::Clear()
     m_ItemQue.clear();
 }
 
-const MediaItem* Playlist::GetItem(size_t index) const
+MediaItem* Playlist::GetItem(size_t index)
 {
     return m_ItemQue[index];
 }
@@ -84,6 +91,11 @@ const MediaItem* Playlist::GetItem(size_t index) const
 size_t Playlist::GetItemCount() const
 {
     return m_ItemQue.size();
+}
+
+bool Playlist::Empty() const
+{
+    return m_ItemQue.empty();
 }
 
 void Playlist::Reverse()
