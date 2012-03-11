@@ -31,7 +31,10 @@ enum e
 
     TagPraserFailedToWrite,
 
-    MediaLoaderFailedToLoad
+    MediaLoaderFailedToLoad,
+
+    PlaylistHitBegin,
+    PlaylistHitEnd
 };
 }
 typedef ErrorCode::e EmErrorCode;
