@@ -5,7 +5,9 @@
 #include <Player.h>
 #include <Playlist.h>
 #include <MediaLoader.h>
+#include <mous/MediaItem.h>
 #include <scx/Thread.hpp>
+#include <scx/AsyncSignal.hpp>
 #include <scx/FileHelp.hpp>
 using namespace std;
 using namespace scx;
@@ -134,7 +136,7 @@ int main(int argc, char** argv)
 	// Setup player.
 	Player player;
 	player.SetRendererDevice("/dev/dsp");
-	player.SigFinished.Connect(&OnFinished);
+	player.SigFinished().Connect(&OnFinished);
 	player.RegisterPluginAgent(rendererAgentList[0]);
 	for (size_t i = 0; i < decoderAgentList.size(); ++i) {
 		player.RegisterPluginAgent(decoderAgentList[i]);

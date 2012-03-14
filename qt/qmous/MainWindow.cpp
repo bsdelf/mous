@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 #include "MidClickTabBar.hpp"
 #include "CustomHeadTabWidget.hpp"
+#include <scx/AsyncSignal.hpp>
 #include <mous/MediaItem.h>
 #include "SimplePlayListView.h"
 using namespace std;
@@ -65,7 +66,7 @@ void MainWindow::initMousCore()
         mPlayer.RegisterPluginAgent(decoderAgentList[i]);
     }
 
-    mPlayer.SigFinished.Connect(&MainWindow::slotPlayerStopped, this);
+    mPlayer.SigFinished().Connect(&MainWindow::slotPlayerStopped, this);
 
     qDebug() << ">> MediaPack count:" << packAgentList.size();
     qDebug() << ">> TagParser count:" << tagAgentList.size();

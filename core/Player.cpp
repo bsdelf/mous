@@ -6,6 +6,7 @@
 #include <scx/Mutex.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/Thread.hpp>
+#include <scx/AsyncSignal.hpp>
 #include <scx/PVBuffer.hpp>
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
@@ -34,7 +35,9 @@ Player::Player():
     mUnitEnd(0),
     mDecoderIndex(0),
     mRendererIndex(0),
-    mUnitPerMs(0)
+    mUnitPerMs(0),
+    mSigFinished(new AsyncSignal<void (void)>),
+    mSigStopped(new AsyncSignal<void (void)>)
 {
     mUnitBuffers->AllocBuffer(5);
 
@@ -64,6 +67,8 @@ Player::~Player()
     delete mMutexDecoderSuspended;
     delete mMutexRendererSuspended;
     delete mUnitBuffers;
+    delete mSigFinished;
+    delete mSigStopped;
 }
 
 EmPlayerStatus Player::GetStatus() const
@@ -168,7 +173,7 @@ void Player::SetRenderer(const PluginAgent* pAgent)
 
 void Player::UnsetRenderer(const PluginAgent* pAgent)
 {
-    SigStopped();
+    mSigStopped->Post();
 
     AgentMapIter iter = mAgentMap.find(pAgent);
     if (iter != mAgentMap.end()) {
@@ -424,6 +429,16 @@ uint64_t Player::GetCurrentMs() const
     return mRendererIndex / mUnitPerMs;
 }
 
+const AsyncSignal<void (void)>& Player::SigFinished() const
+{
+    return *mSigFinished;
+}
+
+const AsyncSignal<void (void)>& Player::SigStopped() const
+{
+    return *mSigStopped;
+}
+
 void Player::WorkForDecoder()
 {
     while (true) {
@@ -487,7 +502,7 @@ void Player::WorkForRenderer()
 
         if (mRendererIndex >= mUnitEnd) {
             mStatus = PlayerStatus::Stopped;
-            SigFinished();
+            mSigFinished->Post();
         }
     }
 }

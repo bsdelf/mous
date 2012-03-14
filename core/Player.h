@@ -7,7 +7,6 @@
 #include <map>
 #include <mous/ErrorCode.h>
 #include <mous/AudioMode.h>
-#include <scx/Signal.hpp>
 #include "PluginAgent.h"
 
 namespace scx {
@@ -15,8 +14,11 @@ namespace scx {
     class Thread;
     class SemVar;
 
-    template <typename T>
+    template<typename T>
     class PVBuffer;
+
+    template<typename signature>
+    class AsyncSignal;
 }
 
 namespace mous {
@@ -71,10 +73,10 @@ public:
     EmAudioMode GetAudioMode() const;
 
 public:
-    scx::Signal<void (void)> SigFinished;
-    scx::Signal<void (void)> SigStopped;
-    scx::Signal<void (void)> SigPaused;
-    scx::Signal<void (void)> SigResumed;
+    const scx::AsyncSignal<void (void)>& SigFinished() const;
+    const scx::AsyncSignal<void (void)>& SigStopped() const;
+    //scx::Signal<void (void)> SigPaused;
+    //scx::Signal<void (void)> SigResumed;
 
 private:
     void AddDecoder(const PluginAgent* pAgent);
@@ -151,6 +153,9 @@ private:
     std::map<std::string, std::vector<IDecoder*>*> mDecoderMap;
     typedef std::pair<std::string, std::vector<IDecoder*>*> DecoderMapPair;
     typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
+
+    scx::AsyncSignal<void (void)>* mSigFinished;
+    scx::AsyncSignal<void (void)>* mSigStopped;
 };
 
 }
