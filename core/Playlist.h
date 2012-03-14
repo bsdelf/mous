@@ -4,7 +4,6 @@
 #include <vector>
 #include <deque>
 #include <mous/ErrorCode.h>
-#include <mous/MediaItem.h>
 
 namespace scx {
     class Mutex;
@@ -33,38 +32,38 @@ public:
     void SetPlayMode(EmPlayMode mode);
     EmPlayMode GetPlayMode() const;
 
-    const MediaItem* SeqCurrent(int off = 0);
-    EmErrorCode SeqJumpTo(int index);
-    EmErrorCode SeqMoveNext(int step = 1); 
+    const void* SeqCurrent(int off = 0) const;
+    EmErrorCode SeqJumpTo(int index) const;
+    EmErrorCode SeqMoveNext(int step = 1) const; 
 
-    void AssignItems(std::deque<MediaItem*>& items);
-    void InsertItem(int index, MediaItem* item);
-    void InsertItem(int index, std::deque<MediaItem*>& items);
-    void AppendItem(MediaItem* item);
-    void AppendItem(std::deque<MediaItem*>& items);
+    void AssignItems(std::deque<void*>& items);
+    void InsertItem(int index, void* item);
+    void InsertItem(int index, std::deque<void*>& items);
+    void AppendItem(void* item);
+    void AppendItem(std::deque<void*>& items);
     void RemoveItem(int index);
     void RemoveItem(const std::vector<int>& indexes);
     void Clear();
 
-    MediaItem* GetItem(int index);
+    void* GetItem(int index);
     int GetItemCount() const;
     bool Empty() const;
     void Reverse();
 
 private:
     void AdjustShuffleRange(bool reGenerate = false);
-    void CorrectSeqIndexes();
+    void CorrectSeqIndexes() const;
     inline int CorrectIndex(int index) const;
 
 private:
     EmPlayMode m_PlayMode;
     scx::Mutex* m_MutexForQue;
 
-    std::deque<MediaItem*> m_ItemQue;
-    typedef std::deque<MediaItem*>::iterator ItemQueIter;
+    std::deque<void*> m_ItemQue;
+    typedef std::deque<void*>::iterator ItemQueIter;
 
-    int m_SeqNormalIndex;
-    int m_SeqShuffleIndex;
+    mutable int m_SeqNormalIndex;
+    mutable int m_SeqShuffleIndex;
     std::deque<int> m_SeqShuffleQue;
 };
 
