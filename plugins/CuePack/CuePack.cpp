@@ -88,8 +88,14 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem*>& list) const
         Track* track = cd_get_track(cd, i);
         item->url = dir + track_get_filename(track);
         item->hasRange = true;
-        item->msBeg = (track_get_start(track))/75*1000;
-        item->msEnd = item->msBeg + ((uint64_t)track_get_length(track))/75*1000;
+        //item->msBeg = (track_get_start(track))/75*1000;
+        //item->msEnd = item->msBeg + ((uint64_t)track_get_length(track))/75*1000;
+        item->msBeg = ((track_get_start(track)
+                    //+ track_get_index(track, 1)
+                    - track_get_zero_pre(track)) * 1000) / 75;
+        item->msEnd = ((track_get_start(track) + track_get_length(track)
+                    //- track_get_index(track, 1)
+                    + track_get_zero_pre(track)) * 1000) / 75;
         if (item->msBeg >= item->msEnd || i == ntrack)
             item->msEnd = -1;
 
