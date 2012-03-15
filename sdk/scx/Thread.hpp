@@ -50,12 +50,10 @@ private:
         fn_t fn;
         arg_t arg;
 
-        explicit Params1(fn_t f, arg_t a):
+        explicit Params1(const fn_t& f, const arg_t& a):
             fn(f),
             arg(a)
-        {
-        }
-    
+        { }
     };
 
     template<typename fn_t, 
@@ -64,15 +62,13 @@ private:
     struct Params2
     {
         fn_t fn;
-        arg1_t arg1;
-        arg2_t arg2;
+        arg1_t arg1; arg2_t arg2;
 
-        explicit Params2(fn_t f, arg1_t a1, arg2_t a2):
+        explicit Params2(const fn_t& f, 
+                const arg1_t& a1, const arg2_t& a2):
             fn(f),
-            arg1(a1),
-            arg2(a2)
-        {
-        }
+            arg1(a1), arg2(a2)
+        { }
     };
 
     template<typename fn_t, 
@@ -82,17 +78,13 @@ private:
     struct Params3
     {
         fn_t fn;
-        arg1_t arg1;
-        arg2_t arg2;
-        arg3_t arg3;
+        arg1_t arg1; arg2_t arg2; arg3_t arg3;
 
-        explicit Params3(fn_t f, arg1_t a1, arg2_t a2, arg3_t a3):
+        explicit Params3(const fn_t& f, 
+                const arg1_t& a1, const arg2_t& a2, const arg3_t& a3):
             fn(f),
-            arg1(a1),
-            arg2(a2),
-            arg3(a3)
-        {
-        }
+            arg1(a1), arg2(a2), arg3(a3)
+        { }
     };
 
     template<typename fn_t, 
@@ -103,19 +95,17 @@ private:
     struct Params4
     {
         fn_t fn;
-        arg1_t arg1;
-        arg2_t arg2;
-        arg3_t arg3;
-        arg4_t arg4;
+        arg1_t arg1; arg2_t arg2;
+        arg3_t arg3; arg4_t arg4;
 
-        explicit Params4(fn_t f, arg1_t a1, arg2_t a2, arg3_t a3, arg4_t a4):
+        explicit Params4(
+                const fn_t& f, 
+                const arg1_t& a1, const arg2_t& a2, 
+                const arg3_t& a3, const arg4_t& a4):
             fn(f),
-            arg1(a1),
-            arg2(a2),
-            arg3(a3),
-            arg4(a4)
-        {
-        }
+            arg1(a1), arg2(a2),
+            arg3(a3), arg4(a4)
+        { }
     };
 
     template<typename fn_t, 
@@ -127,21 +117,18 @@ private:
     struct Params5
     {
         fn_t fn;
-        arg1_t arg1;
-        arg2_t arg2;
-        arg3_t arg3;
-        arg4_t arg4;
+        arg1_t arg1; arg2_t arg2;
+        arg3_t arg3; arg4_t arg4;
         arg5_t arg5;
 
-        explicit Params5(fn_t f, arg1_t a1, arg2_t a2, arg3_t a3, arg4_t a4, arg5_t a5):
+        explicit Params5(const fn_t& f, 
+                const arg1_t& a1, const arg2_t& a2, 
+                const arg3_t& a3, const arg4_t& a4, const arg5_t& a5):
             fn(f),
-            arg1(a1),
-            arg2(a2),
-            arg3(a3),
-            arg4(a4),
+            arg1(a1), arg2(a2),
+            arg3(a3), arg4(a4),
             arg5(a5)
-        {
-        }
+        { }
     };
 
 public:
