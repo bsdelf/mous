@@ -61,6 +61,6 @@ extern "C" {\
         }                                           \
     }                                               \
     \
-} struct __end__
+} struct __MOUS_MACRO_END__
 
 #endif
