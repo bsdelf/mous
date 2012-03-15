@@ -7,7 +7,6 @@
 #include <map>
 #include <mous/ErrorCode.h>
 #include <mous/AudioMode.h>
-#include "PluginAgent.h"
 
 namespace scx {
     class Mutex;
@@ -23,7 +22,7 @@ namespace scx {
 
 namespace mous {
 
-class IPluginAgent;
+class PluginAgent;
 class IDecoder;
 class IRenderer;
 

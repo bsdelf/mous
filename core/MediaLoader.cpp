@@ -5,6 +5,7 @@
 #include <mous/MediaItem.h>
 #include <mous/IMediaPack.h>
 #include <mous/ITagParser.h>
+#include "PluginAgent.h"
 using namespace std;
 using namespace scx;
 using namespace mous;

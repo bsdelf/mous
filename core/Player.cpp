@@ -10,6 +10,7 @@
 #include <scx/PVBuffer.hpp>
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
+#include "PluginAgent.h"
 using namespace std;
 using namespace scx;
 using namespace mous;

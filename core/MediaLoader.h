@@ -5,11 +5,11 @@
 #include <deque>
 #include <string>
 #include <mous/ErrorCode.h>
-#include "PluginAgent.h"
 
 namespace mous {
 
 struct MediaItem;
+class PluginAgent;
 class IMediaPack;
 class ITagParser;
 

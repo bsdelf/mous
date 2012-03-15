@@ -5,8 +5,8 @@
 #include <mous/IDecoder.h>
 #include <mous/IRenderer.h>
 #include <mous/IMediaPack.h>
-using namespace std;
 #include <iostream>
+using namespace std;
 using namespace mous;
 
 PluginManager::PluginManager()
