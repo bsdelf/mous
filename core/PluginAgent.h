@@ -16,71 +16,71 @@ class PluginAgent
 
 public:
     explicit PluginAgent(EmPluginType type):
-	m_Type(type),
-	m_pHandle(NULL),
-	m_fnGetInfo(NULL),
-	m_fnCreate(NULL),
-	m_fnRelease(NULL)
+        m_Type(type),
+        m_pHandle(NULL),
+        m_fnGetInfo(NULL),
+        m_fnCreate(NULL),
+        m_fnRelease(NULL)
     {
 
     }
 
     ~PluginAgent()
     {
-	Close();
+        Close();
     }
 
     EmPluginType GetType() const
     {
-	return m_Type;
+        return m_Type;
     }
 
     EmErrorCode Open(const std::string& path)
     {
-	m_pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-	if (m_pHandle == NULL)
-	    return ErrorCode::MgrBadFormat;
+        m_pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+        if (m_pHandle == NULL)
+            return ErrorCode::MgrBadFormat;
 
-	m_fnGetInfo = (FnGetPluginInfo)dlsym(m_pHandle, StrGetPluginInfo);
-	if (m_fnGetInfo == NULL)
-	    return ErrorCode::MgrBadFormat;
+        m_fnGetInfo = (FnGetPluginInfo)dlsym(m_pHandle, StrGetPluginInfo);
+        if (m_fnGetInfo == NULL)
+            return ErrorCode::MgrBadFormat;
 
-	m_fnCreate = (FnCreatePlugin)dlsym(m_pHandle, StrCreatePlugin);
-	if (m_fnCreate == NULL)
-	    return ErrorCode::MgrBadFormat;
+        m_fnCreate = (FnCreatePlugin)dlsym(m_pHandle, StrCreatePlugin);
+        if (m_fnCreate == NULL)
+            return ErrorCode::MgrBadFormat;
 
-	m_fnRelease = (FnReleasePlugin)dlsym(m_pHandle, StrReleasePlugin);
-	if (m_fnCreate == NULL)
-	    return ErrorCode::MgrBadFormat;
+        m_fnRelease = (FnReleasePlugin)dlsym(m_pHandle, StrReleasePlugin);
+        if (m_fnCreate == NULL)
+            return ErrorCode::MgrBadFormat;
 
-	return ErrorCode::Ok;
+        return ErrorCode::Ok;
     }
 
     void Close()
     {
-	m_fnGetInfo = NULL;
-	m_fnCreate = NULL;
-	m_fnRelease = NULL;
+        m_fnGetInfo = NULL;
+        m_fnCreate = NULL;
+        m_fnRelease = NULL;
 
-	if (m_pHandle != NULL) {
-	    dlclose(m_pHandle);
-	    m_pHandle = NULL;
-	}
+        if (m_pHandle != NULL) {
+            dlclose(m_pHandle);
+            m_pHandle = NULL;
+        }
     }
 
     const PluginInfo* GetInfo() const
     {
-	return (m_fnGetInfo != NULL) ? m_fnGetInfo() : NULL;
+        return (m_fnGetInfo != NULL) ? m_fnGetInfo() : NULL;
     }
 
     void* CreateObject() const
     {
-	return m_fnCreate();
+        return m_fnCreate();
     }
 
     void ReleaseObject(void* inf) const
     {
-	m_fnRelease(inf);
+        m_fnRelease(inf);
     }
 
 private:
