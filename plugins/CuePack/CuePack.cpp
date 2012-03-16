@@ -2,8 +2,10 @@
 #include <mous/MediaItem.h>
 #include <scx/FileHelp.hpp>
 #include <scx/Conv.hpp>
-#include <stdio.h>
+#include <cstdio>
+#include <iostream>
 using namespace scx;
+using namespace std;
 
 CuePack::CuePack()
 {
@@ -15,13 +17,14 @@ CuePack::~CuePack()
 
 }
 
-void CuePack::GetFileSuffix(std::vector<std::string>& list) const
+vector<string> CuePack::FileSuffix() const
 {
+    vector<string> list;
     list.clear();
     list.push_back("cue");
+    return list;
 }
 
-#include <iostream>
 void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
     const std::map<std::string, IMediaPack*>* pMap) const
 {

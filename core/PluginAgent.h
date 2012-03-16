@@ -10,7 +10,7 @@ namespace mous {
 
 class PluginAgent
 {
-    typedef const PluginInfo* (*FnGetPluginInfo)(void);
+    typedef const PluginInfo* (*FnPluginInfo)(void);
     typedef void* (*FnCreatePlugin)(void);
     typedef void (*FnReleasePlugin)(void*);
 
@@ -18,7 +18,7 @@ public:
     explicit PluginAgent(EmPluginType type):
         m_Type(type),
         m_pHandle(NULL),
-        m_fnGetInfo(NULL),
+        m_fnInfo(NULL),
         m_fnCreate(NULL),
         m_fnRelease(NULL)
     {
@@ -30,7 +30,7 @@ public:
         Close();
     }
 
-    EmPluginType GetType() const
+    EmPluginType Type() const
     {
         return m_Type;
     }
@@ -41,8 +41,8 @@ public:
         if (m_pHandle == NULL)
             return ErrorCode::MgrBadFormat;
 
-        m_fnGetInfo = (FnGetPluginInfo)dlsym(m_pHandle, StrGetPluginInfo);
-        if (m_fnGetInfo == NULL)
+        m_fnInfo = (FnPluginInfo)dlsym(m_pHandle, StrPluginInfo);
+        if (m_fnInfo == NULL)
             return ErrorCode::MgrBadFormat;
 
         m_fnCreate = (FnCreatePlugin)dlsym(m_pHandle, StrCreatePlugin);
@@ -58,7 +58,7 @@ public:
 
     void Close()
     {
-        m_fnGetInfo = NULL;
+        m_fnInfo = NULL;
         m_fnCreate = NULL;
         m_fnRelease = NULL;
 
@@ -68,9 +68,9 @@ public:
         }
     }
 
-    const PluginInfo* GetInfo() const
+    const PluginInfo* Info() const
     {
-        return (m_fnGetInfo != NULL) ? m_fnGetInfo() : NULL;
+        return (m_fnInfo != NULL) ? m_fnInfo() : NULL;
     }
 
     void* CreateObject() const
@@ -88,7 +88,7 @@ private:
 
     void* m_pHandle;
 
-    FnGetPluginInfo m_fnGetInfo;
+    FnPluginInfo m_fnInfo;
     FnCreatePlugin m_fnCreate;
     FnReleasePlugin m_fnRelease;
 };

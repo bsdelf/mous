@@ -24,10 +24,11 @@ Mpg123Decoder::~Mpg123Decoder()
     mpg123_exit();
 }
 
-void Mpg123Decoder::GetFileSuffix(vector<string>& list) const
+vector<string> Mpg123Decoder::FileSuffix() const
 {
-    list.clear();
+    vector<string> list;
     list.push_back("mp3");
+    return list;
 }
 
 EmErrorCode Mpg123Decoder::Open(const std::string& url)
@@ -106,47 +107,47 @@ EmErrorCode Mpg123Decoder::SetUnitIndex(uint64_t index)
     }
 }
 
-uint32_t Mpg123Decoder::GetMaxBytesPerUnit() const
+uint32_t Mpg123Decoder::MaxBytesPerUnit() const
 {
     return m_MaxBytesPerUnit;
 }
 
-uint64_t Mpg123Decoder::GetUnitIndex() const
+uint64_t Mpg123Decoder::UnitIndex() const
 {
     return m_UnitIndex;
 }
 
-uint64_t Mpg123Decoder::GetUnitCount() const
+uint64_t Mpg123Decoder::UnitCount() const
 {
     return m_UnitCount;
 }
 
-EmAudioMode Mpg123Decoder::GetAudioMode() const
+EmAudioMode Mpg123Decoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }
 
-int32_t Mpg123Decoder::GetChannels() const
+int32_t Mpg123Decoder::Channels() const
 {
     return m_Channels;
 }
 
-int32_t Mpg123Decoder::GetBitsPerSample() const
+int32_t Mpg123Decoder::BitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t Mpg123Decoder::GetSampleRate() const
+int32_t Mpg123Decoder::SampleRate() const
 {
     return m_SampleRate;
 }
 
-int32_t Mpg123Decoder::GetBitRate() const
+int32_t Mpg123Decoder::BitRate() const
 {
     return m_BitRate; 
 }
 
-uint64_t Mpg123Decoder::GetDuration() const
+uint64_t Mpg123Decoder::Duration() const
 {
     return m_Duration;
 }

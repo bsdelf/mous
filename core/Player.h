@@ -44,7 +44,7 @@ public:
     ~Player();
 
 public:
-    EmPlayerStatus GetStatus() const;
+    EmPlayerStatus Status() const;
 
     void RegisterPluginAgent(const PluginAgent* pAgent);
     void UnregisterPluginAgent(const PluginAgent* pAgent);
@@ -61,15 +61,15 @@ public:
     void Resume();
     void Seek(uint64_t msPos);
 
-    int32_t GetBitRate() const;
-    int32_t GetSamleRate() const;
-    uint64_t GetDuration() const;
-    uint64_t GetRangeBegin() const;
-    uint64_t GetRangeEnd() const;
-    uint64_t GetRangeDuration() const;
-    uint64_t GetOffsetMs() const;
-    uint64_t GetCurrentMs() const;
-    EmAudioMode GetAudioMode() const;
+    int32_t BitRate() const;
+    int32_t SamleRate() const;
+    uint64_t Duration() const;
+    uint64_t RangeBegin() const;
+    uint64_t RangeEnd() const;
+    uint64_t RangeDuration() const;
+    uint64_t OffsetMs() const;
+    uint64_t CurrentMs() const;
+    EmAudioMode AudioMode() const;
 
 public:
     const scx::AsyncSignal<void (void)>& SigFinished() const;

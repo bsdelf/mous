@@ -9,28 +9,27 @@ using namespace std;
 using namespace TagLib;
 using namespace mous;
 
-
 class TagLibParser: public ITagParser
 {
 public:
     TagLibParser();
     virtual ~TagLibParser();
 
-    virtual void GetFileSuffix(vector<string>& list) const;
+    virtual vector<string> FileSuffix() const;
     
     virtual EmErrorCode Open(const string& path);
     virtual void Close();
 
-    virtual string GetTitle();
-    virtual string GetArtist();
-    virtual string GetAlbum();
-    virtual string GetComment();
-    virtual string GetGenre();
-    virtual int32_t GetYear();
-    virtual int32_t GetTrack();
+    virtual string Title() const;
+    virtual string Artist() const;
+    virtual string Album() const;
+    virtual string Comment() const;
+    virtual string Genre() const;
+    virtual int32_t Year() const;
+    virtual int32_t Track() const;
 
-    virtual int32_t GetDuration();
-    virtual int32_t GetBitRate();
+    virtual int32_t Duration() const;
+    virtual int32_t BitRate() const;
 
     virtual void SetTitle(const string& title);
     virtual void SetArtist(const string& artist); 

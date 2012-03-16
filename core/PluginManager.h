@@ -29,10 +29,9 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadAllPlugins();
 
-    void GetPluginPath(std::vector<std::string>& list);
-    void GetPluginAgents(std::vector<PluginAgent*>& list, EmPluginType);
-    const PluginInfo* GetPluginInfo(const std::string& path);
-    //const PluginInfo* GetPluginInfo(const void* vp);
+    void GetPluginAgents(std::vector<const PluginAgent*>& list, EmPluginType) const;
+    void GetPluginPath(std::vector<std::string>& list) const;
+    const PluginInfo* PluginInfo(const std::string& path) const;
 
     //void GetDecoders(std::vector<IPluginAgent*>& list);
     //void GetRenderers(std::vector<IPluginAgent*>& list);
@@ -49,6 +48,7 @@ private:
     std::map<std::string, PluginAgent*> m_PluginMap;
     typedef std::pair<std::string, PluginAgent*> PluginMapPair;
     typedef std::map<std::string, PluginAgent*>::iterator PluginMapIter;
+    typedef std::map<std::string, PluginAgent*>::const_iterator PluginMapConstIter;
 };
 
 }

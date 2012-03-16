@@ -12,12 +12,13 @@ FaadDecoder::~FaadDecoder()
 {
 }
 
-void FaadDecoder::GetFileSuffix(vector<string>& list) const
+vector<string> FaadDecoder::FileSuffix() const
 {
-    list.clear();
+    vector<string> list;
     list.push_back("m4a");
     list.push_back("aac");
     list.push_back("mp4");
+    return list;
 }
 
 EmErrorCode FaadDecoder::Open(const string& url)
@@ -234,47 +235,47 @@ EmErrorCode FaadDecoder::SetUnitIndex(uint64_t index)
     return ErrorCode::Ok;
 }
 
-uint32_t FaadDecoder::GetMaxBytesPerUnit() const
+uint32_t FaadDecoder::MaxBytesPerUnit() const
 {
     return 10240;//m_BlocksPerRead * m_BlockAlign;
 }
 
-uint64_t FaadDecoder::GetUnitIndex() const
+uint64_t FaadDecoder::UnitIndex() const
 {
     return m_SampleIndex;
 }
 
-uint64_t FaadDecoder::GetUnitCount() const
+uint64_t FaadDecoder::UnitCount() const
 {
     return m_SampleCount;
 }
 
-EmAudioMode FaadDecoder::GetAudioMode() const
+EmAudioMode FaadDecoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }
 
-int32_t FaadDecoder::GetChannels() const
+int32_t FaadDecoder::Channels() const
 {
     return m_Channels;
 }
 
-int32_t FaadDecoder::GetBitsPerSample() const
+int32_t FaadDecoder::BitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t FaadDecoder::GetSampleRate() const
+int32_t FaadDecoder::SampleRate() const
 {
     return m_SampleRate;
 }
 
-int32_t FaadDecoder::GetBitRate() const
+int32_t FaadDecoder::BitRate() const
 {
     return m_BitRate / 1000;
 }
 
-uint64_t FaadDecoder::GetDuration() const
+uint64_t FaadDecoder::Duration() const
 {
     return m_Duration;
 }

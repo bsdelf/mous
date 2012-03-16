@@ -27,7 +27,7 @@ EmErrorCode PluginManager::LoadPluginDir(const string& dir)
     gFtwFiles = NULL;
 
     for (size_t i = 0; i < files.size(); ++i) {
-	LoadPlugin(files[i]);
+        LoadPlugin(files[i]);
     }
 
     return ErrorCode::Ok;
@@ -35,59 +35,59 @@ EmErrorCode PluginManager::LoadPluginDir(const string& dir)
 
 EmErrorCode PluginManager::LoadPlugin(const string& path)
 {
-    typedef EmPluginType (*FnGetPluginType)();
-    FnGetPluginType fnGetPluginType;
+    typedef EmPluginType (*FnPluginType)();
+    FnPluginType fnPluginType;
     void* pHandle = NULL;
 
     pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
     if (pHandle == NULL) {
-	cout << dlerror() << endl;
-	return ErrorCode::MgrFailedToOpen;
+        cout << dlerror() << endl;
+        return ErrorCode::MgrFailedToOpen;
     }
 
-    fnGetPluginType = (FnGetPluginType)dlsym(pHandle, StrGetPluginType);
-    if (fnGetPluginType == NULL) {
-	dlclose(pHandle);
-	return ErrorCode::MgrBadFormat;
+    fnPluginType = (FnPluginType)dlsym(pHandle, StrPluginType);
+    if (fnPluginType == NULL) {
+        dlclose(pHandle);
+        return ErrorCode::MgrBadFormat;
     }
-    EmPluginType type = fnGetPluginType();
+    EmPluginType type = fnPluginType();
 
     PluginAgent* pAgent = new PluginAgent(type);
     /*
-    switch (type) {
-	case PluginType::Decoder:
-	    pAgent = new PluginAgent<IDecoder>(type);
-	    break;
+       switch (type) {
+       case PluginType::Decoder:
+       pAgent = new PluginAgent<IDecoder>(type);
+       break;
 
-	case PluginType::Encoder:
-	    break;
+       case PluginType::Encoder:
+       break;
 
-	case PluginType::Renderer:
-	    pAgent = new PluginAgent<IRenderer>(type);
-	    break;
+       case PluginType::Renderer:
+       pAgent = new PluginAgent<IRenderer>(type);
+       break;
 
-	case PluginType::MediaPack:
-	    pAgent = new PluginAgent<IMediaPack>(type);
-	    break;
+       case PluginType::MediaPack:
+       pAgent = new PluginAgent<IMediaPack>(type);
+       break;
 
-	case PluginType::TagParser:
-	    pAgent = new PluginAgent<ITagParser>(type);
-	    break;
+       case PluginType::TagParser:
+       pAgent = new PluginAgent<ITagParser>(type);
+       break;
 
-	case PluginType::Filter:
-	    break;
+       case PluginType::Filter:
+       break;
 
-	default:
-	    pAgent = NULL;
-	    break;
-    }
-    */
+       default:
+       pAgent = NULL;
+       break;
+       }
+       */
 
     if (pAgent->Open(path) == ErrorCode::Ok) {
-	m_PluginMap.insert(PluginMapPair(path, pAgent));
+        m_PluginMap.insert(PluginMapPair(path, pAgent));
     } else {
-	pAgent->Close();
-	delete pAgent;
+        pAgent->Close();
+        delete pAgent;
     }
 
     dlclose(pHandle);
@@ -99,98 +99,51 @@ void PluginManager::UnloadPlugin(const string& path)
 {
     PluginMapIter iter = m_PluginMap.find(path);
     if (iter != m_PluginMap.end()) {
-	PluginAgent* pAgent = iter->second;
-	pAgent->Close();
-	delete pAgent;
-	m_PluginMap.erase(iter);
+        PluginAgent* pAgent = iter->second;
+        pAgent->Close();
+        delete pAgent;
+        m_PluginMap.erase(iter);
     }
 }
 
 void PluginManager::UnloadAllPlugins()
 {
     for (PluginMapIter iter = m_PluginMap.begin();
-	    iter != m_PluginMap.end(); ++iter) {
-	PluginAgent* pAgent = iter->second;
-	pAgent->Close();
-	delete pAgent;
+            iter != m_PluginMap.end(); ++iter) {
+        PluginAgent* pAgent = iter->second;
+        pAgent->Close();
+        delete pAgent;
     }
     m_PluginMap.clear();
 }
 
-void PluginManager::GetPluginPath(vector<string>& list)
+void PluginManager::GetPluginAgents(vector<const PluginAgent*>& list, EmPluginType type) const
+{
+    list.clear();
+    for (PluginMapConstIter iter = m_PluginMap.begin();
+            iter != m_PluginMap.end(); ++iter) {
+        PluginAgent* pAgent = iter->second;
+        if (pAgent->Type() == type) {
+            list.push_back(pAgent);
+        }
+    }
+}
+
+void PluginManager::GetPluginPath(vector<string>& list) const
 {
     list.clear();
     list.reserve(m_PluginMap.size());
-    for (PluginMapIter iter = m_PluginMap.begin();
-	    iter != m_PluginMap.end(); ++iter) {
-	list.push_back(iter->first);
+    for (PluginMapConstIter iter = m_PluginMap.begin();
+            iter != m_PluginMap.end(); ++iter) {
+        list.push_back(iter->first);
     }
 }
 
-const PluginInfo* PluginManager::GetPluginInfo(const std::string& path)
+const PluginInfo* PluginManager::PluginInfo(const std::string& path) const
 {
-    PluginMapIter iter = m_PluginMap.find(path);
+    PluginMapConstIter iter = m_PluginMap.find(path);
     return (iter != m_PluginMap.end()) ?
-	iter->second->GetInfo() : NULL;
-}
-/*
-const PluginInfo* PluginManager::GetPluginInfo(const void* vp)
-{
-    for (PluginMapIter iter = m_PluginMap.begin();
-	iter != m_PluginMap.end(); ++iter) {
-	if (iter->second->GetVpPlugin() == vp)
-	    return iter->second->GetInfo();
-    }
-    return NULL;
-}
-*/
-
-/*
-void PluginManager::GetDecoders(vector<IPluginAgent*>& list)
-{
-    return GetPluginsByType(list, PluginType::Decoder);
-}
-
-void PluginManager::GetRenderers(vector<IPluginAgent*>& list)
-{
-    return GetPluginsByType(list, PluginType::Renderer);
-}
-
-void PluginManager::GetMediaPacks(std::vector<IMediaPack*>& list)
-{
-    return GetPluginsByType(list, PluginType::MediaPack);
-}
-
-void PluginManager::GetTagParsers(std::vector<ITagParser*>& list)
-{
-    return GetPluginsByType(list, PluginType::TagParser);
-}
-*/
-
-/*
-void* PluginManager::GetVpPlugin(const std::string& path, EmPluginType& type)
-{
-    PluginMapIter iter = m_PluginMap.find(path);
-    if (iter != m_PluginMap.end()) {
-	IPluginAgent* pAgent = iter->second;
-	type = pAgent->GetType();
-	return pAgent->GetVpPlugin();
-    } else {
-	return NULL;
-    }
-}
-*/
-
-void PluginManager::GetPluginAgents(vector<PluginAgent*>& list, EmPluginType type)
-{
-    list.clear();
-    for (PluginMapIter iter = m_PluginMap.begin();
-	    iter != m_PluginMap.end(); ++iter) {
-	PluginAgent* pAgent = iter->second;
-	if (pAgent->GetType() == type) {
-	    list.push_back(pAgent);
-	}
-    }
+        iter->second->Info() : NULL;
 }
 
 vector<string>* PluginManager::gFtwFiles = NULL;
@@ -198,6 +151,6 @@ vector<string>* PluginManager::gFtwFiles = NULL;
 int PluginManager::OnFtw(const char* file, const struct stat* s, int)
 {
     if (!(s->st_mode & S_IFDIR))
-	gFtwFiles->push_back(file);
+        gFtwFiles->push_back(file);
     return 0;
 }

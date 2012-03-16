@@ -30,8 +30,8 @@ struct PluginInfo
     const int32_t version;
 };
 
-const char* const StrGetPluginType = "GetPluginType";
-const char* const StrGetPluginInfo = "GetPluginInfo";
+const char* const StrPluginType = "PluginType";
+const char* const StrPluginInfo = "PluginInfo";
 const char* const StrCreatePlugin = "CreatePlugin";
 const char* const StrReleasePlugin = "ReleasePlugin";
 
@@ -42,13 +42,13 @@ const char* const StrReleasePlugin = "ReleasePlugin";
  */
 #define MOUS_DEF_PLUGIN(type, pInfo, Derived)\
 extern "C" {\
-    EmPluginType GetPluginType() {  \
-        return type;                \
-    }                               \
+    EmPluginType PluginType() {  \
+        return type;             \
+    }                            \
     \
-    const PluginInfo* GetPluginInfo() { \
-        return pInfo;                   \
-    }                                   \
+    const PluginInfo* PluginInfo() { \
+        return pInfo;                \
+    }                                \
     \
     void* CreatePlugin() {  \
         return new Derived; \

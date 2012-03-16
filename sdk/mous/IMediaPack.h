@@ -13,12 +13,9 @@ struct MediaItem;
 class IMediaPack
 {
 public:
-    virtual ~IMediaPack()
-    {
+    virtual ~IMediaPack() { }
 
-    }
-
-    virtual void GetFileSuffix(std::vector<std::string>& list) const = 0;
+    virtual std::vector<std::string> FileSuffix() const = 0;
 
     virtual void DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
         const std::map<std::string, IMediaPack*>* pMap) const = 0;
