@@ -51,9 +51,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 
 # libCharsetConv
-file(GLOB_RECURSE LIB_CHARSET_CONV sdk/CharsetConv/uchardect/src/*
-    sdk/CharsetConv/CharsetConv.h
-    sdk/CharsetConv/CharsetConv.cpp)
+file(GLOB_RECURSE LIB_CHARSET_CONV charset/*.cpp charset/uchardect/src/*)
 add_library(CharsetConv SHARED ${LIB_CHARSET_CONV})
 target_link_libraries(CharsetConv -liconv)
 
