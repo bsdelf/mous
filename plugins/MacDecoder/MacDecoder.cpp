@@ -15,7 +15,7 @@ MacDecoder::~MacDecoder()
     }
 }
 
-vector<string> MacDecoder::FileSuffix() const
+vector<string> MacDecoder::GetFileSuffix() const
 {
     vector<string> list;
     list.push_back("ape");
@@ -84,47 +84,47 @@ EmErrorCode MacDecoder::SetUnitIndex(uint64_t index)
     return ErrorCode::Ok;
 }
 
-uint32_t MacDecoder::MaxBytesPerUnit() const
+uint32_t MacDecoder::GetMaxBytesPerUnit() const
 {
     return m_BlocksPerRead * m_BlockAlign;
 }
 
-uint64_t MacDecoder::UnitIndex() const
+uint64_t MacDecoder::GetUnitIndex() const
 {
     return m_BlockIndex;
 }
 
-uint64_t MacDecoder::UnitCount() const
+uint64_t MacDecoder::GetUnitCount() const
 {
     return m_BlockCount;
 }
 
-EmAudioMode MacDecoder::AudioMode() const
+EmAudioMode MacDecoder::GetAudioMode() const
 {
     return AudioMode::Stereo;
 }
 
-int32_t MacDecoder::Channels() const
+int32_t MacDecoder::GetChannels() const
 {
     return m_Channels;
 }
 
-int32_t MacDecoder::BitsPerSample() const
+int32_t MacDecoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t MacDecoder::SampleRate() const
+int32_t MacDecoder::GetSampleRate() const
 {
     return m_SampleRate;
 }
 
-int32_t MacDecoder::BitRate() const
+int32_t MacDecoder::GetBitRate() const
 {
     return m_BitRate;
 }
 
-uint64_t MacDecoder::Duration() const
+uint64_t MacDecoder::GetDuration() const
 {
     return m_Duration;
 }

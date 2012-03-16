@@ -26,8 +26,8 @@ void OnPlaying()
 	while (true) {
 		if (gPlayer == NULL || gStop)
 			break;
-		uint64_t ms = gPlayer->CurrentMs();
-		cout << gPlayer->BitRate() << " kbps " <<
+		uint64_t ms = gPlayer->GetCurrentMs();
+		cout << gPlayer->GetBitRate() << " kbps " <<
 			ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
 		usleep(200*1000);
 	}
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 	mgr.GetPluginPath(pathList);
 	for (size_t i = 0; i < pathList.size(); ++i) {
 		cout << ">> " << pathList[i] << endl;
-		const PluginInfo* info = mgr.PluginInfo(pathList[i]);
+		const PluginInfo* info = mgr.GetPluginInfo(pathList[i]);
 		cout << ">>>> " << info->author << endl;
 		cout << ">>>> " << info->name << endl;
 		cout << ">>>> " << info->description << endl;

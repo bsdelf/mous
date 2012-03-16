@@ -31,7 +31,7 @@ public:
 
     void GetPluginAgents(std::vector<const PluginAgent*>& list, EmPluginType) const;
     void GetPluginPath(std::vector<std::string>& list) const;
-    const PluginInfo* PluginInfo(const std::string& path) const;
+    const PluginInfo* GetPluginInfo(const std::string& path) const;
 
     //void GetDecoders(std::vector<IPluginAgent*>& list);
     //void GetRenderers(std::vector<IPluginAgent*>& list);

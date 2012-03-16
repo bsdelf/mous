@@ -45,7 +45,7 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
         return ErrorCode::MgrFailedToOpen;
     }
 
-    fnPluginType = (FnPluginType)dlsym(pHandle, StrPluginType);
+    fnPluginType = (FnPluginType)dlsym(pHandle, StrGetPluginType);
     if (fnPluginType == NULL) {
         dlclose(pHandle);
         return ErrorCode::MgrBadFormat;
@@ -123,7 +123,7 @@ void PluginManager::GetPluginAgents(vector<const PluginAgent*>& list, EmPluginTy
     for (PluginMapConstIter iter = m_PluginMap.begin();
             iter != m_PluginMap.end(); ++iter) {
         PluginAgent* pAgent = iter->second;
-        if (pAgent->Type() == type) {
+        if (pAgent->GetType() == type) {
             list.push_back(pAgent);
         }
     }
@@ -139,11 +139,11 @@ void PluginManager::GetPluginPath(vector<string>& list) const
     }
 }
 
-const PluginInfo* PluginManager::PluginInfo(const std::string& path) const
+const PluginInfo* PluginManager::GetPluginInfo(const std::string& path) const
 {
     PluginMapConstIter iter = m_PluginMap.find(path);
     return (iter != m_PluginMap.end()) ?
-        iter->second->Info() : NULL;
+        iter->second->GetInfo() : NULL;
 }
 
 vector<string>* PluginManager::gFtwFiles = NULL;

@@ -13,21 +13,21 @@ class ITagParser
 public:
     virtual ~ITagParser() { }
 
-    virtual std::vector<std::string> FileSuffix() const = 0;
+    virtual std::vector<std::string> GetFileSuffix() const = 0;
     
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
 
-    virtual std::string Title() const = 0;
-    virtual std::string Artist() const = 0;
-    virtual std::string Album() const = 0;
-    virtual std::string Comment() const = 0;
-    virtual std::string Genre() const = 0;
-    virtual int32_t Year() const = 0;
-    virtual int32_t Track() const = 0;
+    virtual std::string GetTitle() const = 0;
+    virtual std::string GetArtist() const = 0;
+    virtual std::string GetAlbum() const = 0;
+    virtual std::string GetComment() const = 0;
+    virtual std::string GetGenre() const = 0;
+    virtual int32_t GetYear() const = 0;
+    virtual int32_t GetTrack() const = 0;
 
-    virtual int32_t Duration() const = 0;
-    virtual int32_t BitRate() const = 0;
+    virtual int32_t GetDuration() const = 0;
+    virtual int32_t GetBitRate() const = 0;
 
     virtual void SetTitle(const std::string& title) = 0;
     virtual void SetArtist(const std::string& artist) = 0; 
@@ -37,8 +37,8 @@ public:
     virtual void SetYear(int32_t year) = 0;
     virtual void SetTrack(int32_t track) = 0;
 
-    virtual bool HasTag() = 0;
-    virtual bool HasProperties() = 0;
+    virtual bool HasTag() const = 0;
+    virtual bool HasProperties() const = 0;
 };
 
 }

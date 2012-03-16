@@ -15,21 +15,21 @@ public:
     TagLibParser();
     virtual ~TagLibParser();
 
-    virtual vector<string> FileSuffix() const;
+    virtual vector<string> GetFileSuffix() const;
     
     virtual EmErrorCode Open(const string& path);
     virtual void Close();
 
-    virtual string Title() const;
-    virtual string Artist() const;
-    virtual string Album() const;
-    virtual string Comment() const;
-    virtual string Genre() const;
-    virtual int32_t Year() const;
-    virtual int32_t Track() const;
+    virtual string GetTitle() const;
+    virtual string GetArtist() const;
+    virtual string GetAlbum() const;
+    virtual string GetComment() const;
+    virtual string GetGenre() const;
+    virtual int32_t GetYear() const;
+    virtual int32_t GetTrack() const;
 
-    virtual int32_t Duration() const;
-    virtual int32_t BitRate() const;
+    virtual int32_t GetDuration() const;
+    virtual int32_t GetBitRate() const;
 
     virtual void SetTitle(const string& title);
     virtual void SetArtist(const string& artist); 
@@ -39,8 +39,8 @@ public:
     virtual void SetYear(int32_t year);
     virtual void SetTrack(int32_t track);
 
-    virtual bool HasTag();
-    virtual bool HasProperties();
+    virtual bool HasTag() const;
+    virtual bool HasProperties() const;
 
 private:
     FileRef* m_pFileRef;

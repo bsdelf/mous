@@ -12,7 +12,7 @@ FaadDecoder::~FaadDecoder()
 {
 }
 
-vector<string> FaadDecoder::FileSuffix() const
+vector<string> FaadDecoder::GetFileSuffix() const
 {
     vector<string> list;
     list.push_back("m4a");
@@ -30,14 +30,14 @@ EmErrorCode FaadDecoder::Open(const string& url)
 
     FILE* file = fopen(url.c_str(), "rb");
     if (file == NULL)
-	return ErrorCode::DecoderFailedToOpen;
+        return ErrorCode::DecoderFailedToOpen;
 
     unsigned char header[8];
     fread(header, 1, 8, file);
     fclose(file);
     if (header[4] == 'f' && header[5] == 't' && 
-	header[6] == 'y' && header[7] == 'p') {
-	m_IsMp4File = true;
+            header[6] == 'y' && header[7] == 'p') {
+        m_IsMp4File = true;
     }
 
     return m_IsMp4File ? OpenMp4(url) : OpenAac(url);
@@ -55,7 +55,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
 
     m_File = fopen(url.c_str(), "rb");
     if (m_File == NULL)
-	return ErrorCode::DecoderFailedToOpen;
+        return ErrorCode::DecoderFailedToOpen;
 
     m_Mp4Callback.read = &ReadCallback;
     m_Mp4Callback.seek = &SeekCallback;
@@ -69,14 +69,14 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
 
     m_Infile = mp4ff_open_read(&m_Mp4Callback);
     if (m_Infile == NULL)
-	return ErrorCode::DecoderFailedToOpen;
+        return ErrorCode::DecoderFailedToOpen;
 
     m_Track = GetAACTrack(m_Infile);
     if (m_Track < 0) {
-	NeAACDecClose(m_pDecoder);
-	mp4ff_close(m_Infile);
-	fclose(m_File);
-	return ErrorCode::DecoderFailedToInit;
+        NeAACDecClose(m_pDecoder);
+        mp4ff_close(m_Infile);
+        fclose(m_File);
+        return ErrorCode::DecoderFailedToInit;
     }
 
     unsigned char* confBuf = NULL;
@@ -86,10 +86,10 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     unsigned long sampleRate;
     unsigned char channels;
     if (NeAACDecInit2(m_pDecoder, confBuf, confBufSize, &sampleRate, &channels) < 0) {
-	NeAACDecClose(m_pDecoder);
-	mp4ff_close(m_Infile);
-	fclose(m_File);
-	return ErrorCode::DecoderFailedToInit;
+        NeAACDecClose(m_pDecoder);
+        mp4ff_close(m_Infile);
+        fclose(m_File);
+        return ErrorCode::DecoderFailedToInit;
     }
     m_SampleRate = sampleRate;
     m_Channels = channels;
@@ -100,13 +100,13 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     m_UseAacLength = 0;
 
     if (confBuf != NULL) {
-	if (NeAACDecAudioSpecificConfig(confBuf, confBufSize, &mp4Asc) >= 0) {
-	    if (mp4Asc.frameLengthFlag == 1)
-		m_FrameSize = 960;
-	    if (mp4Asc.sbr_present_flag == 1)
-		m_FrameSize *= 2;
-	}
-	free(confBuf);
+        if (NeAACDecAudioSpecificConfig(confBuf, confBufSize, &mp4Asc) >= 0) {
+            if (mp4Asc.frameLengthFlag == 1)
+                m_FrameSize = 960;
+            if (mp4Asc.sbr_present_flag == 1)
+                m_FrameSize *= 2;
+        }
+        free(confBuf);
     }
 
     m_SampleCount = mp4ff_num_samples(m_Infile, m_Track);
@@ -114,7 +114,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
 
     float f = 1024.0;
     if (mp4Asc.sbr_present_flag == 1) {
-	f *= 2.0;
+        f *= 2.0;
     }
     m_Duration = (float)m_SampleCount*(float)(f-1.0)/(float)mp4Asc.samplingFrequency * 1000;
 
@@ -129,13 +129,13 @@ EmErrorCode FaadDecoder::OpenAac(const string& url)
 void FaadDecoder::Close()
 {
     if (m_pDecoder != NULL)
-	NeAACDecClose(m_pDecoder);
+        NeAACDecClose(m_pDecoder);
 
     if (m_Infile != NULL)
-	mp4ff_close(m_Infile);
+        mp4ff_close(m_Infile);
 
     if (m_File != NULL)
-	fclose(m_File);
+        fclose(m_File);
 }
 
 bool FaadDecoder::IsFormatVaild() const
@@ -146,7 +146,7 @@ bool FaadDecoder::IsFormatVaild() const
 EmErrorCode FaadDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return m_IsMp4File ? 
-	ReadUnitMp4(data, used, unitCount) : ReadUnitAac(data, used, unitCount);
+    ReadUnitMp4(data, used, unitCount) : ReadUnitAac(data, used, unitCount);
 }
 
 EmErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCount)
@@ -160,63 +160,63 @@ EmErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitC
     int rc = mp4ff_read_sample(m_Infile, m_Track, m_SampleIndex, &buffer,  &bufferSize);
 
     if (rc == 0) {
-	NeAACDecClose(m_pDecoder);
-	mp4ff_close(m_Infile);
-	fclose(m_File);
-	return ErrorCode::DecoderFailedToRead;
+        NeAACDecClose(m_pDecoder);
+        mp4ff_close(m_Infile);
+        fclose(m_File);
+        return ErrorCode::DecoderFailedToRead;
     }
 
     NeAACDecFrameInfo frameInfo;
     void* sampleBuf = NeAACDecDecode(m_pDecoder, &frameInfo, buffer, bufferSize);
     if (buffer != NULL)
-	free(buffer);
+        free(buffer);
 
     unsigned int sampleCount;
     unsigned int delay = 0;
 
     // gapless
     {
-	if (m_SampleIndex == 0)
-	    duration = 0;
+        if (m_SampleIndex == 0)
+            duration = 0;
 
-	if (m_UseAacLength || (m_TimeScale != m_SampleRate)) {
-	    sampleCount = frameInfo.samples;
-	} else {
-	    sampleCount = (unsigned int)(duration * frameInfo.channels);
-	    if (sampleCount > frameInfo.samples)
-		sampleCount = frameInfo.samples;
+        if (m_UseAacLength || (m_TimeScale != m_SampleRate)) {
+            sampleCount = frameInfo.samples;
+        } else {
+            sampleCount = (unsigned int)(duration * frameInfo.channels);
+            if (sampleCount > frameInfo.samples)
+                sampleCount = frameInfo.samples;
 
-	    if (!m_UseAacLength && 
-		(m_SampleIndex != 0) &&
-		(m_SampleIndex < m_SampleCount/2) &&
-		(sampleCount != frameInfo.samples)) {
-		m_UseAacLength = 1;
-		sampleCount = frameInfo.samples;
-	    }
-	}
+            if (!m_UseAacLength && 
+                    (m_SampleIndex != 0) &&
+                    (m_SampleIndex < m_SampleCount/2) &&
+                    (sampleCount != frameInfo.samples)) {
+                m_UseAacLength = 1;
+                sampleCount = frameInfo.samples;
+            }
+        }
 
-	if ((m_SampleIndex == 0) &&
-	    (sampleCount < (unsigned int)m_FrameSize*frameInfo.channels) && 
-	    (frameInfo.samples > sampleCount)) {
-	    delay = frameInfo.samples - sampleCount;
-	}
+        if ((m_SampleIndex == 0) &&
+                (sampleCount < (unsigned int)m_FrameSize*frameInfo.channels) && 
+                (frameInfo.samples > sampleCount)) {
+            delay = frameInfo.samples - sampleCount;
+        }
 
-	if ((frameInfo.error == 0) && (sampleCount > 0)) {
-	    audio_file aufile = {
-		FAAD_FMT_16BIT,
-		NULL,
-		0, 
-		0,
-		16, // bits/sample
-		2,  // channels
-		0,
-		0
-	    };
-	    aufile.outputBuf = data;
-	    aufile.samplerate = m_SampleRate;
-	    aufile.channelMask = aacChannelConfig2wavexChannelMask(&frameInfo);
-	    used = write_audio_file(&aufile, sampleBuf, sampleCount, delay);
-	}
+        if ((frameInfo.error == 0) && (sampleCount > 0)) {
+            audio_file aufile = {
+                FAAD_FMT_16BIT,
+                NULL,
+                0, 
+                0,
+                16, // bits/sample
+                2,  // channels
+                0,
+                0
+            };
+            aufile.outputBuf = data;
+            aufile.samplerate = m_SampleRate;
+            aufile.channelMask = aacChannelConfig2wavexChannelMask(&frameInfo);
+            used = write_audio_file(&aufile, sampleBuf, sampleCount, delay);
+        }
     }
     unitCount = 1;
     m_SampleIndex += 1;
@@ -235,47 +235,47 @@ EmErrorCode FaadDecoder::SetUnitIndex(uint64_t index)
     return ErrorCode::Ok;
 }
 
-uint32_t FaadDecoder::MaxBytesPerUnit() const
+uint32_t FaadDecoder::GetMaxBytesPerUnit() const
 {
     return 10240;//m_BlocksPerRead * m_BlockAlign;
 }
 
-uint64_t FaadDecoder::UnitIndex() const
+uint64_t FaadDecoder::GetUnitIndex() const
 {
     return m_SampleIndex;
 }
 
-uint64_t FaadDecoder::UnitCount() const
+uint64_t FaadDecoder::GetUnitCount() const
 {
     return m_SampleCount;
 }
 
-EmAudioMode FaadDecoder::AudioMode() const
+EmAudioMode FaadDecoder::GetAudioMode() const
 {
     return AudioMode::Stereo;
 }
 
-int32_t FaadDecoder::Channels() const
+int32_t FaadDecoder::GetChannels() const
 {
     return m_Channels;
 }
 
-int32_t FaadDecoder::BitsPerSample() const
+int32_t FaadDecoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t FaadDecoder::SampleRate() const
+int32_t FaadDecoder::GetSampleRate() const
 {
     return m_SampleRate;
 }
 
-int32_t FaadDecoder::BitRate() const
+int32_t FaadDecoder::GetBitRate() const
 {
     return m_BitRate / 1000;
 }
 
-uint64_t FaadDecoder::Duration() const
+uint64_t FaadDecoder::GetDuration() const
 {
     return m_Duration;
 }
@@ -287,21 +287,21 @@ int FaadDecoder::GetAACTrack(mp4ff_t* infile)
     int numTracks = mp4ff_total_tracks(infile);
 
     for (i = 0; i < numTracks; i++) {
-	unsigned char *buff = NULL;
-	unsigned int buff_size = 0;
-	mp4AudioSpecificConfig mp4ASC;
+        unsigned char *buff = NULL;
+        unsigned int buff_size = 0;
+        mp4AudioSpecificConfig mp4ASC;
 
-	mp4ff_get_decoder_config(infile, i, &buff, &buff_size);
+        mp4ff_get_decoder_config(infile, i, &buff, &buff_size);
 
-	if (buff) {
-	    rc = NeAACDecAudioSpecificConfig(buff, buff_size, &mp4ASC);
-	    free(buff);
+        if (buff) {
+            rc = NeAACDecAudioSpecificConfig(buff, buff_size, &mp4ASC);
+            free(buff);
 
-	    if (rc < 0)
-		continue;
+            if (rc < 0)
+                continue;
 
-	    return i;
-	}
+            return i;
+        }
     }
 
     /* can't decoder this */
@@ -341,10 +341,10 @@ uint32_t FaadDecoder::SeekCallback(void* userData, uint64_t pos)
 long FaadDecoder::aacChannelConfig2wavexChannelMask(NeAACDecFrameInfo *hInfo)
 {
     if (hInfo->channels == 6 && hInfo->num_lfe_channels) {
-	return SPEAKER_FRONT_LEFT + SPEAKER_FRONT_RIGHT +
-	    SPEAKER_FRONT_CENTER + SPEAKER_LOW_FREQUENCY +
-	    SPEAKER_BACK_LEFT + SPEAKER_BACK_RIGHT;
+        return SPEAKER_FRONT_LEFT + SPEAKER_FRONT_RIGHT +
+            SPEAKER_FRONT_CENTER + SPEAKER_LOW_FREQUENCY +
+            SPEAKER_BACK_LEFT + SPEAKER_BACK_RIGHT;
     } else {
-	return 0;
+        return 0;
     }
 }

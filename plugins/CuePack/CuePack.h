@@ -14,7 +14,7 @@ public:
     CuePack();
     virtual ~CuePack();
 
-    virtual vector<string> FileSuffix() const;
+    virtual vector<string> GetFileSuffix() const;
 
     virtual void DumpMedia(const string& path, deque<MediaItem*>& list,
 	    const map<string, IMediaPack*>* pMap) const;

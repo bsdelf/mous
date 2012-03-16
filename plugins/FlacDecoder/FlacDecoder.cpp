@@ -13,7 +13,7 @@ FlacDecoder::~FlacDecoder()
     FLAC__stream_decoder_delete(m_pDecoder);
 }
 
-vector<string> FlacDecoder::FileSuffix() const
+vector<string> FlacDecoder::GetFileSuffix() const
 {
     vector<string> list;
     list.push_back("flac");
@@ -81,47 +81,47 @@ EmErrorCode FlacDecoder::SetUnitIndex(uint64_t index)
     return ErrorCode::Ok;
 }
 
-uint32_t FlacDecoder::MaxBytesPerUnit() const
+uint32_t FlacDecoder::GetMaxBytesPerUnit() const
 {
     return FLAC__MAX_BLOCK_SIZE * FLAC__MAX_CHANNELS * sizeof(uint32_t);
 }
 
-uint64_t FlacDecoder::UnitIndex() const
+uint64_t FlacDecoder::GetUnitIndex() const
 {
     return m_SampleIndex;
 }
 
-uint64_t FlacDecoder::UnitCount() const
+uint64_t FlacDecoder::GetUnitCount() const
 {
     return m_SampleCount;
 }
 
-EmAudioMode FlacDecoder::AudioMode() const
+EmAudioMode FlacDecoder::GetAudioMode() const
 {
     return AudioMode::Stereo;
 }
 
-int32_t FlacDecoder::Channels() const
+int32_t FlacDecoder::GetChannels() const
 {
     return m_Channels;
 }
 
-int32_t FlacDecoder::BitsPerSample() const
+int32_t FlacDecoder::GetBitsPerSample() const
 {
     return m_BitsPerSample;
 }
 
-int32_t FlacDecoder::SampleRate() const
+int32_t FlacDecoder::GetSampleRate() const
 {
     return m_SampleRate;
 }
 
-int32_t FlacDecoder::BitRate() const
+int32_t FlacDecoder::GetBitRate() const
 {
     return m_BitRate;
 }
 
-uint64_t FlacDecoder::Duration() const
+uint64_t FlacDecoder::GetDuration() const
 {
     return m_Duration;
 }

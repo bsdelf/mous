@@ -22,7 +22,7 @@ MediaLoader::~MediaLoader()
 
 void MediaLoader::RegisterPluginAgent(const PluginAgent* pAgent)
 {
-    switch (pAgent->Type()) {
+    switch (pAgent->GetType()) {
     case PluginType::MediaPack:
         AddMediaPack(pAgent);
         break;
@@ -38,7 +38,7 @@ void MediaLoader::RegisterPluginAgent(const PluginAgent* pAgent)
 
 void MediaLoader::UnregisterPluginAgent(const PluginAgent* pAgent)
 {
-    switch (pAgent->Type()) {
+    switch (pAgent->GetType()) {
     case PluginType::MediaPack:
         RemoveMediaPack(pAgent);
         break;
@@ -67,7 +67,7 @@ void MediaLoader::AddMediaPack(const PluginAgent* pAgent)
     m_AgentMap.insert(AgentMapPair(pAgent, pPack));
 
     // Register MediaPack.
-    vector<string> list(pPack->FileSuffix());
+    vector<string> list(pPack->GetFileSuffix());
     for (size_t i = 0; i < list.size(); ++i) {
         string suffix = ToLower(list[i]);
         MediaPackMapIter iter = m_MediaPackMap.find(suffix);
@@ -83,7 +83,7 @@ void MediaLoader::RemoveMediaPack(const PluginAgent* pAgent)
     if (iter != m_AgentMap.end()) {
         // Unregister MediaPack.
         IMediaPack* pPack = (IMediaPack*)iter->second;
-        vector<string> list(pPack->FileSuffix());
+        vector<string> list(pPack->GetFileSuffix());
         for (size_t i = 0; i < list.size(); ++i) {
             string suffix = ToLower(list[i]);
             MediaPackMapIter iter = m_MediaPackMap.find(suffix);
@@ -105,7 +105,7 @@ void MediaLoader::AddTagParser(const PluginAgent* pAgent)
     m_AgentMap.insert(AgentMapPair(pAgent, pParser));
 
     // Register TagParser.
-    vector<string> list(pParser->FileSuffix());
+    vector<string> list(pParser->GetFileSuffix());
     for (size_t i = 0; i < list.size(); ++i) {
         string suffix = ToLower(list[i]);
         TagParserMapIter iter = m_TagParserMap.find(suffix);
@@ -121,7 +121,7 @@ void MediaLoader::RemoveTagParser(const PluginAgent* pAgent)
     if (iter != m_AgentMap.end()) {
         // Unregister TagParser.
         ITagParser* pParser = (ITagParser*)iter->second;
-        vector<string> list(pParser->FileSuffix());
+        vector<string> list(pParser->GetFileSuffix());
         for (size_t i = 0; i < list.size(); ++i) {
             string suffix = ToLower(list[i]);
             TagParserMapIter iter = m_TagParserMap.find(suffix);
@@ -182,26 +182,26 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list) const
         parser->Open(item->url);
         if (parser->HasTag()) {
             if (item->title.empty())
-                item->title = parser->Title();
+                item->title = parser->GetTitle();
             if (item->artist.empty())
-                item->artist = parser->Artist();
+                item->artist = parser->GetArtist();
             if (item->album.empty())
-                item->album = parser->Album();
+                item->album = parser->GetAlbum();
             if (item->comment.empty())
-                item->comment = parser->Comment();
+                item->comment = parser->GetComment();
             if (item->genre.empty())
-                item->genre = parser->Genre();
+                item->genre = parser->GetGenre();
             if (item->year < 0)
-                item->year = parser->Year();
+                item->year = parser->GetYear();
             if (item->track < 0)
-                item->track = parser->Track();
+                item->track = parser->GetTrack();
         } else {
             cout << "WARN: no tag!!" << endl;
         }
 
         if (parser->HasProperties()) {
             if (item->duration < 0)
-                item->duration = parser->Duration();
+                item->duration = parser->GetDuration();
         } else {
             cout << "FATAL: no properties!!" << endl;
         }

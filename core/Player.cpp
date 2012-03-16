@@ -72,14 +72,14 @@ Player::~Player()
     delete mSigStopped;
 }
 
-EmPlayerStatus Player::Status() const
+EmPlayerStatus Player::GetStatus() const
 {
     return mStatus;
 }
 
 void Player::RegisterPluginAgent(const PluginAgent* pAgent)
 {
-    switch (pAgent->Type()) {
+    switch (pAgent->GetType()) {
         case PluginType::Decoder:
             AddDecoder(pAgent);
             break;
@@ -95,7 +95,7 @@ void Player::RegisterPluginAgent(const PluginAgent* pAgent)
 
 void Player::UnregisterPluginAgent(const PluginAgent* pAgent)
 {
-    switch (pAgent->Type()) {
+    switch (pAgent->GetType()) {
         case PluginType::Decoder:
             RemoveDecoder(pAgent);
             break;
@@ -116,7 +116,7 @@ void Player::AddDecoder(const PluginAgent* pAgent)
     mAgentMap.insert(AgentMapPair(pAgent, pDecoder));
 
     // Register decoder.
-    vector<string> list(pDecoder->FileSuffix());
+    vector<string> list(pDecoder->GetFileSuffix());
     for (size_t i = 0; i < list.size(); ++i) {
         string suffix = ToLower(list[i]);
         DecoderMapIter iter = mDecoderMap.find(suffix);
@@ -137,7 +137,7 @@ void Player::RemoveDecoder(const PluginAgent* pAgent)
     if (iter != mAgentMap.end()) {
         // Unregister decoder.
         IDecoder* pDecoder = (IDecoder*)iter->second;
-        vector<string> list(pDecoder->FileSuffix());
+        vector<string> list(pDecoder->GetFileSuffix());
         for (size_t i = 0; i < list.size(); ++i) {
             string suffix = ToLower(list[i]);
             DecoderMapIter iter = mDecoderMap.find(suffix);
@@ -219,7 +219,7 @@ EmErrorCode Player::Open(const string& path)
         return err;
     }
 
-    uint32_t maxBytesPerUnit = mDecoder->MaxBytesPerUnit();
+    uint32_t maxBytesPerUnit = mDecoder->GetMaxBytesPerUnit();
     for (size_t i = 0; i < mUnitBuffers->GetBufferCount(); ++i) {
         UnitBuffer* buf = mUnitBuffers->GetRawItem(i);
         buf->used = 0;
@@ -234,11 +234,11 @@ EmErrorCode Player::Open(const string& path)
         }
     }
 
-    mUnitPerMs = (double)mDecoder->UnitCount() / mDecoder->Duration();
+    mUnitPerMs = (double)mDecoder->GetUnitCount() / mDecoder->GetDuration();
 
-    int32_t channels = mDecoder->Channels();
-    int32_t samleRate = mDecoder->SampleRate();
-    int32_t bitsPerSamle = mDecoder->BitsPerSample();
+    int32_t channels = mDecoder->GetChannels();
+    int32_t samleRate = mDecoder->GetSampleRate();
+    int32_t bitsPerSamle = mDecoder->GetBitsPerSample();
     cout << "channels:" << channels << endl;
     cout << "samleRate:" << samleRate << endl;
     cout << "bitsPerSamle:" << bitsPerSamle << endl;
@@ -264,13 +264,13 @@ void Player::Close()
 void Player::Play()
 {
     uint64_t beg = 0;
-    uint64_t end = mDecoder->UnitCount();
+    uint64_t end = mDecoder->GetUnitCount();
     PlayRange(beg, end);
 }
 
 void Player::Play(uint64_t msBegin, uint64_t msEnd)
 {
-    const uint64_t total = mDecoder->UnitCount();
+    const uint64_t total = mDecoder->GetUnitCount();
 
     uint64_t beg = 0;
     uint64_t end = 0;
@@ -376,54 +376,54 @@ void Player::Seek(uint64_t msPos)
 void Player::DoSeek(uint64_t msPos)
 {
     uint64_t unitPos = mUnitPerMs * msPos;
-    if (unitPos > mDecoder->UnitCount())
-        unitPos = mDecoder->UnitCount();
+    if (unitPos > mDecoder->GetUnitCount())
+        unitPos = mDecoder->GetUnitCount();
     mDecoder->SetUnitIndex(unitPos);
     mDecoderIndex = unitPos;
     mRendererIndex = unitPos;
 }
 
-int32_t Player::BitRate() const
+int32_t Player::GetBitRate() const
 {
-    return (mDecoder != NULL) ? mDecoder->BitRate() : -1;
+    return (mDecoder != NULL) ? mDecoder->GetBitRate() : -1;
 }
 
-int32_t Player::SamleRate() const
+int32_t Player::GetSamleRate() const
 {
-    return (mDecoder != NULL) ? mDecoder->SampleRate() : -1;
+    return (mDecoder != NULL) ? mDecoder->GetSampleRate() : -1;
 }
 
-EmAudioMode Player::AudioMode() const
+EmAudioMode Player::GetAudioMode() const
 {
-    return (mDecoder != NULL) ? mDecoder->AudioMode() : AudioMode::None;
+    return (mDecoder != NULL) ? mDecoder->GetAudioMode() : AudioMode::None;
 }
 
-uint64_t Player::Duration() const
+uint64_t Player::GetDuration() const
 {
-    return mDecoder->Duration();
+    return mDecoder->GetDuration();
 }
 
-uint64_t Player::RangeBegin() const
+uint64_t Player::GetRangeBegin() const
 {
     return mUnitBeg / mUnitPerMs;
 }
 
-uint64_t Player::RangeEnd() const
+uint64_t Player::GetRangeEnd() const
 {
     return mUnitEnd / mUnitPerMs;
 }
 
-uint64_t Player::RangeDuration() const
+uint64_t Player::GetRangeDuration() const
 {
     return (mUnitEnd - mUnitBeg) / mUnitPerMs;
 }
 
-uint64_t Player::OffsetMs() const
+uint64_t Player::GetOffsetMs() const
 {
-    return CurrentMs() - RangeBegin();
+    return GetCurrentMs() - GetRangeBegin();
 }
 
-uint64_t Player::CurrentMs() const
+uint64_t Player::GetCurrentMs() const
 {
     return mRendererIndex / mUnitPerMs;
 }

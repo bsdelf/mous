@@ -30,10 +30,10 @@ struct PluginInfo
     const int32_t version;
 };
 
-const char* const StrPluginType = "PluginType";
-const char* const StrPluginInfo = "PluginInfo";
-const char* const StrCreatePlugin = "CreatePlugin";
-const char* const StrReleasePlugin = "ReleasePlugin";
+const char* const StrGetPluginType = "MousGetPluginType";
+const char* const StrGetPluginInfo = "MousGetPluginInfo";
+const char* const StrCreatePlugin = "MousCreatePlugin";
+const char* const StrReleasePlugin = "MousReleasePlugin";
 
 }
 
@@ -42,19 +42,19 @@ const char* const StrReleasePlugin = "ReleasePlugin";
  */
 #define MOUS_DEF_PLUGIN(type, pInfo, Derived)\
 extern "C" {\
-    EmPluginType PluginType() {  \
-        return type;             \
-    }                            \
+    EmPluginType MousGetPluginType() {  \
+        return type;                    \
+    }                                   \
     \
-    const PluginInfo* PluginInfo() { \
-        return pInfo;                \
-    }                                \
+    const PluginInfo* MousGetPluginInfo() { \
+        return pInfo;                       \
+    }                                       \
     \
-    void* CreatePlugin() {  \
+    void* MousCreatePlugin() {  \
         return new Derived; \
     }                       \
     \
-    void ReleasePlugin(void* p) {                   \
+    void MousReleasePlugin(void* p) {               \
         if (p != NULL) {                            \
             Derived* dp = static_cast<Derived*>(p); \
             delete dp;                              \

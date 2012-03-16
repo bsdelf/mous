@@ -18,7 +18,7 @@ public:
     explicit PluginAgent(EmPluginType type):
         m_Type(type),
         m_pHandle(NULL),
-        m_fnInfo(NULL),
+        m_fnGetInfo(NULL),
         m_fnCreate(NULL),
         m_fnRelease(NULL)
     {
@@ -30,7 +30,7 @@ public:
         Close();
     }
 
-    EmPluginType Type() const
+    EmPluginType GetType() const
     {
         return m_Type;
     }
@@ -41,8 +41,8 @@ public:
         if (m_pHandle == NULL)
             return ErrorCode::MgrBadFormat;
 
-        m_fnInfo = (FnPluginInfo)dlsym(m_pHandle, StrPluginInfo);
-        if (m_fnInfo == NULL)
+        m_fnGetInfo = (FnPluginInfo)dlsym(m_pHandle, StrGetPluginInfo);
+        if (m_fnGetInfo == NULL)
             return ErrorCode::MgrBadFormat;
 
         m_fnCreate = (FnCreatePlugin)dlsym(m_pHandle, StrCreatePlugin);
@@ -58,7 +58,7 @@ public:
 
     void Close()
     {
-        m_fnInfo = NULL;
+        m_fnGetInfo = NULL;
         m_fnCreate = NULL;
         m_fnRelease = NULL;
 
@@ -68,9 +68,9 @@ public:
         }
     }
 
-    const PluginInfo* Info() const
+    const PluginInfo* GetInfo() const
     {
-        return (m_fnInfo != NULL) ? m_fnInfo() : NULL;
+        return (m_fnGetInfo != NULL) ? m_fnGetInfo() : NULL;
     }
 
     void* CreateObject() const
@@ -88,7 +88,7 @@ private:
 
     void* m_pHandle;
 
-    FnPluginInfo m_fnInfo;
+    FnPluginInfo m_fnGetInfo;
     FnCreatePlugin m_fnCreate;
     FnReleasePlugin m_fnRelease;
 };
