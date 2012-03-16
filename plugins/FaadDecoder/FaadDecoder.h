@@ -1,9 +1,9 @@
 #ifndef FAADDECODER_H
 #define FAADDECODER_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <mous/IDecoder.h>
+#include <plugin/IDecoder.h>
+#include <cstdlib>
+#include <cstdio>
 #include <neaacdec.h>
 #include <mp4ff.h>
 using namespace mous;
@@ -45,14 +45,14 @@ private:
 private:
     struct AudioFile
     {
-	int outputFormat;
-	char* output;
-	unsigned int fileType;
-	unsigned long samplerate;
-	unsigned int bits_per_sample;
-	unsigned int channels;
-	unsigned long total_samples;
-	long channelMask;
+        int outputFormat;
+        char* output;
+        unsigned int fileType;
+        unsigned long samplerate;
+        unsigned int bits_per_sample;
+        unsigned int channels;
+        unsigned long total_samples;
+        long channelMask;
     };
 
 private:

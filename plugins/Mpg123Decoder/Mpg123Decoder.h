@@ -1,8 +1,8 @@
 #ifndef MP3DECODER_H
 #define MP3DECODER_H
 
-#include <mous/IDecoder.h>
-#include "mpg123.h"
+#include <plugin/IDecoder.h>
+#include <mpg123.h>
 using namespace std;
 using namespace mous;
 

@@ -1,7 +1,7 @@
 #ifndef OSS_RENDERER_H
 #define OSS_RENDERER_H
 
-#include <mous/IRenderer.h>
+#include <plugin/IRenderer.h>
 using namespace mous;
 
 class OssRenderer: public IRenderer

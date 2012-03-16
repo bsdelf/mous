@@ -1,7 +1,7 @@
 #ifndef TAGLIBPARSER_H
 #define TAGLIBPARSER_H
 
-#include <mous/ITagParser.h>
+#include <plugin/ITagParser.h>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/audioproperties.h>

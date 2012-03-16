@@ -2,9 +2,9 @@
 #include <iostream>
 #include <scx/FileHelp.hpp>
 #include <scx/Conv.hpp>
-#include <mous/MediaItem.h>
-#include <mous/IMediaPack.h>
-#include <mous/ITagParser.h>
+#include <common/MediaItem.h>
+#include <plugin/IMediaPack.h>
+#include <plugin/ITagParser.h>
 #include "PluginAgent.h"
 using namespace std;
 using namespace scx;

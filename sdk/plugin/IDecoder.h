@@ -4,8 +4,8 @@
 #include <inttypes.h>
 #include <string>
 #include <vector>
-#include "AudioMode.h"
-#include "ErrorCode.h"
+#include <common/AudioMode.h>
+#include <common/ErrorCode.h>
 
 namespace mous {
 

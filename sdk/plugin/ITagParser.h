@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <vector>
 #include <string>
-#include "ErrorCode.h"
+#include <common/ErrorCode.h>
 
 namespace mous {
 

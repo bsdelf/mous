@@ -2,40 +2,7 @@
 #define MOUS_PLUGINHELPER_H
 
 #include <inttypes.h>
-
-/**
- * Plugin common definition.
- */
-namespace mous {
-
-namespace PluginType {
-enum e
-{
-    None = 0,
-    Decoder,
-    Encoder,
-    Renderer,
-    MediaPack,
-    TagParser,
-    Filter
-};
-}
-typedef PluginType::e EmPluginType;
-
-struct PluginInfo
-{
-    const char* author;
-    const char* name;
-    const char* description;
-    const int32_t version;
-};
-
-const char* const StrGetPluginType = "MousGetPluginType";
-const char* const StrGetPluginInfo = "MousGetPluginInfo";
-const char* const StrCreatePlugin = "MousCreatePlugin";
-const char* const StrReleasePlugin = "MousReleasePlugin";
-
-}
+#include <common/PluginDef.h>
 
 /**
  * Simple yet helpful macro for declare a plugin.

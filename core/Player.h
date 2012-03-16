@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <mous/ErrorCode.h>
-#include <mous/AudioMode.h>
+#include <common/ErrorCode.h>
+#include <common/AudioMode.h>
 
 namespace scx {
     class Mutex;

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <deque>
-#include <mous/ErrorCode.h>
+#include <common/ErrorCode.h>
 
 namespace scx {
     class Mutex;

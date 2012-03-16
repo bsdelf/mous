@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 #include <string>
-#include <mous/ErrorCode.h>
+#include <common/ErrorCode.h>
 
 namespace mous {
 

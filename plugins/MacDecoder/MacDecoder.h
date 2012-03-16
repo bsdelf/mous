@@ -1,7 +1,7 @@
 #ifndef MACDECODER_H
 #define MACDECODER_H
 
-#include <mous/IDecoder.h>
+#include <plugin/IDecoder.h>
 #include <mac/All.h>
 #include <mac/NoWindows.h>
 #include <mac/APEDecompress.h>

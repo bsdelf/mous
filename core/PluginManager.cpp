@@ -1,10 +1,10 @@
 #include "PluginManager.h"
 #include <ftw.h>
 #include <sys/stat.h>
-#include <mous/PluginHelper.h>
-#include <mous/IDecoder.h>
-#include <mous/IRenderer.h>
-#include <mous/IMediaPack.h>
+#include <plugin/PluginHelper.h>
+#include <plugin/IDecoder.h>
+#include <plugin/IRenderer.h>
+#include <plugin/IMediaPack.h>
 #include <iostream>
 using namespace std;
 using namespace mous;

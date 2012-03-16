@@ -1,4 +1,4 @@
-#include <mous/IMediaPack.h>
+#include <plugin/IMediaPack.h>
 extern "C" {
 #include <libcue-1.4/libcue/libcue.h>
 #include <libcue-1.4/libcue/cd.h>

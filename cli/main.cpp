@@ -5,7 +5,7 @@
 #include <Player.h>
 #include <Playlist.h>
 #include <MediaLoader.h>
-#include <mous/MediaItem.h>
+#include <common/MediaItem.h>
 #include <scx/Thread.hpp>
 #include <scx/AsyncSignal.hpp>
 #include <scx/FileHelp.hpp>

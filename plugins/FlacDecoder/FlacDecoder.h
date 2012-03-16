@@ -1,7 +1,7 @@
 #ifndef FLAC_DECODER_H
 #define FLAC_DECODER_H
 
-#include <mous/IDecoder.h>
+#include <plugin/IDecoder.h>
 #include <FLAC/stream_decoder.h>
 using namespace std;
 using namespace mous;

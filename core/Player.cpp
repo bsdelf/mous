@@ -8,8 +8,8 @@
 #include <scx/Thread.hpp>
 #include <scx/AsyncSignal.hpp>
 #include <scx/PVBuffer.hpp>
-#include <mous/IDecoder.h>
-#include <mous/IRenderer.h>
+#include <plugin/IDecoder.h>
+#include <plugin/IRenderer.h>
 #include "PluginAgent.h"
 using namespace std;
 using namespace scx;

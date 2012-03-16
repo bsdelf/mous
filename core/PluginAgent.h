@@ -3,8 +3,8 @@
 
 #include <string>
 #include <dlfcn.h>
-#include <mous/ErrorCode.h>
-#include <mous/PluginHelper.h>
+#include <common/ErrorCode.h>
+#include <plugin/PluginHelper.h>
 
 namespace mous {
 

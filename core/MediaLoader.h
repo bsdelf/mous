@@ -4,7 +4,7 @@
 #include <map>
 #include <deque>
 #include <string>
-#include <mous/ErrorCode.h>
+#include <common/ErrorCode.h>
 
 namespace mous {
 
