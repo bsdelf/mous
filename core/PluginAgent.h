@@ -47,7 +47,7 @@ public:
         if (m_fnCreate == NULL)
             return ErrorCode::MgrBadFormat;
 
-        m_fnFree = (FnFreePlugin )dlsym(m_pHandle, StrReleasePlugin);
+        m_fnFree = (FnFreePlugin )dlsym(m_pHandle, StrFreePlugin);
         if (m_fnCreate == NULL)
             return ErrorCode::MgrBadFormat;
 
