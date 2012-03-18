@@ -21,7 +21,7 @@ extern "C" {\
         return new Derived; \
     }                       \
     \
-    void MousReleasePlugin(void* p) {               \
+    void MousFreePlugin(void* p) {                  \
         if (p != NULL) {                            \
             Derived* dp = static_cast<Derived*>(p); \
             delete dp;                              \
