@@ -30,8 +30,8 @@ struct PluginInfo
 
 const char* const StrGetPluginType = "MousGetPluginType";
 const char* const StrGetPluginInfo = "MousGetPluginInfo";
-const char* const StrCreatePlugin = "MousCreatePlugin";
-const char* const StrFreePlugin = "MousFreePlugin";
+const char* const StrCreateObject = "MousCreateObject";
+const char* const StrFreeObject = "MousFreeObject";
 
 }
 

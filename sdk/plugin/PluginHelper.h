@@ -17,11 +17,11 @@ extern "C" {\
         return pInfo;                       \
     }                                       \
     \
-    void* MousCreatePlugin() {  \
+    void* MousCreatObject() {  \
         return new Derived; \
     }                       \
     \
-    void MousFreePlugin(void* p) {                  \
+    void MousFreeObject(void* p) {                  \
         if (p != NULL) {                            \
             Derived* dp = static_cast<Derived*>(p); \
             delete dp;                              \

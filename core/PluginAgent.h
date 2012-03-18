@@ -9,8 +9,8 @@ namespace mous {
 class PluginAgent: public IPluginAgent
 {
     typedef const PluginInfo* (*FnPluginInfo)(void);
-    typedef void* (*FnCreatePlugin)(void);
-    typedef void (*FnFreePlugin )(void*);
+    typedef void* (*FnCreateObject)(void);
+    typedef void (*FnFreeObject)(void*);
 
 public:
     explicit PluginAgent(EmPluginType type):
@@ -43,11 +43,11 @@ public:
         if (m_fnGetInfo == NULL)
             return ErrorCode::MgrBadFormat;
 
-        m_fnCreate = (FnCreatePlugin)dlsym(m_pHandle, StrCreatePlugin);
+        m_fnCreate = (FnCreateObject)dlsym(m_pHandle, StrCreateObject);
         if (m_fnCreate == NULL)
             return ErrorCode::MgrBadFormat;
 
-        m_fnFree = (FnFreePlugin )dlsym(m_pHandle, StrFreePlugin);
+        m_fnFree = (FnFreeObject)dlsym(m_pHandle, StrFreeObject);
         if (m_fnCreate == NULL)
             return ErrorCode::MgrBadFormat;
 
@@ -87,8 +87,8 @@ private:
     void* m_pHandle;
 
     FnPluginInfo m_fnGetInfo;
-    FnCreatePlugin m_fnCreate;
-    FnFreePlugin  m_fnFree;
+    FnCreateObject m_fnCreate;
+    FnFreeObject m_fnFree;
 };
 
 }
