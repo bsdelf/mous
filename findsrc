@@ -1,0 +1,5 @@
+#!/bin/sh
+find \
+    ./sdk/common/ ./sdk/core/ ./sdk/plugin/ ./plugins/ ./core/ ./cli/ ./qt/qmous/ \
+    -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.cxx" \
+    | xargs wc | sort -k 4
