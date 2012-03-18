@@ -18,19 +18,19 @@ IPlayer* gPlayer = NULL;
 
 void OnFinished()
 {
-	cout << "Finished!" << endl;
+    cout << "Finished!" << endl;
 }
 
 void OnPlaying()
 {
-	while (true) {
-		if (gPlayer == NULL || gStop)
-			break;
-		uint64_t ms = gPlayer->GetCurrentMs();
-		cout << gPlayer->GetBitRate() << " kbps " <<
-			ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
-		usleep(200*1000);
-	}
+    while (true) {
+        if (gPlayer == NULL || gStop)
+            break;
+        uint64_t ms = gPlayer->GetCurrentMs();
+        cout << gPlayer->GetBitRate() << " kbps " <<
+            ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
+        usleep(200*1000);
+    }
 }
 
 /*
@@ -40,7 +40,7 @@ void OnPlaying()
 
 int main(int argc, char** argv)
 {
-	bool paused = false;
+    bool paused = false;
 
     /*
     string content(ReadAll(argv[1]));
@@ -72,136 +72,136 @@ int main(int argc, char** argv)
     //EncaEncoding enc = enca_analyse_const(ans, (const unsigned char*)content.c_str(), content.length());
     //cout << enca_charset_name(enc.charset, ENCA_NAME_STYLE_ICONV) << endl;
 
-	IPluginManager* mgr = IPluginManager::Create();
-	mgr->LoadPluginDir("./plugins");
+    IPluginManager* mgr = IPluginManager::Create();
+    mgr->LoadPluginDir("./plugins");
 
-	// Dump all plugin path.
-	vector<string> pathList;
-	mgr->GetPluginPath(pathList);
-	for (size_t i = 0; i < pathList.size(); ++i) {
-		cout << ">> " << pathList[i] << endl;
-		const PluginInfo* info = mgr->GetPluginInfo(pathList[i]);
-		cout << ">>>> " << info->author << endl;
-		cout << ">>>> " << info->name << endl;
-		cout << ">>>> " << info->description << endl;
-		cout << ">>>> " << info->version << endl;
-	}
-	cout << endl;
+    // Dump all plugin path.
+    vector<string> pathList;
+    mgr->GetPluginPath(pathList);
+    for (size_t i = 0; i < pathList.size(); ++i) {
+        cout << ">> " << pathList[i] << endl;
+        const PluginInfo* info = mgr->GetPluginInfo(pathList[i]);
+        cout << ">>>> " << info->author << endl;
+        cout << ">>>> " << info->name << endl;
+        cout << ">>>> " << info->description << endl;
+        cout << ">>>> " << info->version << endl;
+    }
+    cout << endl;
 
-	// Get all plugin agents.
-	vector<const IPluginAgent*> decoderAgentList;
-	mgr->GetPluginAgents(decoderAgentList, PluginType::Decoder);
-	cout << ">> Decoder count:" << decoderAgentList.size() << endl;
+    // Get all plugin agents.
+    vector<const IPluginAgent*> decoderAgentList;
+    mgr->GetPluginAgents(decoderAgentList, PluginType::Decoder);
+    cout << ">> Decoder count:" << decoderAgentList.size() << endl;
 
-	vector<const IPluginAgent*> rendererAgentList;
-	mgr->GetPluginAgents(rendererAgentList, PluginType::Renderer);
-	cout << ">> Renderer count:" << rendererAgentList.size() << endl;
+    vector<const IPluginAgent*> rendererAgentList;
+    mgr->GetPluginAgents(rendererAgentList, PluginType::Renderer);
+    cout << ">> Renderer count:" << rendererAgentList.size() << endl;
 
-	vector<const IPluginAgent*> packAgentList;
-	mgr->GetPluginAgents(packAgentList, PluginType::MediaPack);
-	cout << ">> MediaPack count:" << packAgentList.size() << endl;
+    vector<const IPluginAgent*> packAgentList;
+    mgr->GetPluginAgents(packAgentList, PluginType::MediaPack);
+    cout << ">> MediaPack count:" << packAgentList.size() << endl;
 
-	vector<const IPluginAgent*> tagAgentList;
-	mgr->GetPluginAgents(tagAgentList, PluginType::TagParser);
-	cout << ">> TagParser count:" << tagAgentList.size() << endl;
-	cout << endl;
+    vector<const IPluginAgent*> tagAgentList;
+    mgr->GetPluginAgents(tagAgentList, PluginType::TagParser);
+    cout << ">> TagParser count:" << tagAgentList.size() << endl;
+    cout << endl;
 
-	// Check args enough.
-	if (argc < 2) {
-		cout << "Usage:" << endl;
-		cout << "mous-cli [-r] [file]" << endl;
-		cout << "-r\tRepeat mode." << endl;
-		return -1;
-	}
+    // Check args enough.
+    if (argc < 2) {
+        cout << "Usage:" << endl;
+        cout << "mous-cli [-r] [file]" << endl;
+        cout << "-r\tRepeat mode." << endl;
+        return -1;
+    }
 
-	// Check plugins enough.
-	if (decoderAgentList.empty() || rendererAgentList.empty())
-		return -2;
+    // Check plugins enough.
+    if (decoderAgentList.empty() || rendererAgentList.empty())
+        return -2;
 
-	// Setup loader
-	IMediaLoader* loader = IMediaLoader::Create();
-	for (size_t i = 0; i < packAgentList.size(); ++i) {
-		loader->RegisterPluginAgent(packAgentList[i]);
-	}
-	for (size_t i = 0; i < tagAgentList.size(); ++i) {
-		loader->RegisterPluginAgent(tagAgentList[i]);
-	}
+    // Setup loader
+    IMediaLoader* loader = IMediaLoader::Create();
+    for (size_t i = 0; i < packAgentList.size(); ++i) {
+        loader->RegisterPluginAgent(packAgentList[i]);
+    }
+    for (size_t i = 0; i < tagAgentList.size(); ++i) {
+        loader->RegisterPluginAgent(tagAgentList[i]);
+    }
 
-	IPlaylist* playlist = IPlaylist::Create();
+    IPlaylist* playlist = IPlaylist::Create();
 
-	deque<MediaItem*> mediaList;
-	loader->LoadMedia(argv[1], mediaList);
+    deque<MediaItem*> mediaList;
+    loader->LoadMedia(argv[1], mediaList);
 
-	// Setup player->
-	IPlayer* player = IPlayer::Create();
-	player->SetRendererDevice("/dev/dsp");
-	player->SigFinished()->Connect(&OnFinished);
-	player->RegisterPluginAgent(rendererAgentList[0]);
-	for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-		player->RegisterPluginAgent(decoderAgentList[i]);
-	}
+    // Setup player->
+    IPlayer* player = IPlayer::Create();
+    player->SetRendererDevice("/dev/dsp");
+    player->SigFinished()->Connect(&OnFinished);
+    player->RegisterPluginAgent(rendererAgentList[0]);
+    for (size_t i = 0; i < decoderAgentList.size(); ++i) {
+        player->RegisterPluginAgent(decoderAgentList[i]);
+    }
 
-	// Begin to play.
-	MediaItem* item = mediaList[0];
-	cout << ">>>> Tag Info" << endl;
-	cout << "\ttitle:" << item->title << endl;
-	cout << "\tartist:" << item->artist << endl;
-	cout << "\talbum:" << item->album << endl;
-	cout << "\tcomment:" << item->comment << endl;
-	cout << "\tgenre:" << item->genre << endl;
-	cout << "\tyear:" << item->year << endl;
-	cout << "\ttrack:" << item->track << endl;
+    // Begin to play.
+    MediaItem* item = mediaList[0];
+    cout << ">>>> Tag Info" << endl;
+    cout << "\ttitle:" << item->title << endl;
+    cout << "\tartist:" << item->artist << endl;
+    cout << "\talbum:" << item->album << endl;
+    cout << "\tcomment:" << item->comment << endl;
+    cout << "\tgenre:" << item->genre << endl;
+    cout << "\tyear:" << item->year << endl;
+    cout << "\ttrack:" << item->track << endl;
 
     cout << "item->url:" << item->url << endl;
-	player->Open(item->url);
-	if (item->hasRange) {
-		player->Play(item->msBeg, item->msEnd);
-	} else {
-		player->Play();
-	}
-	Thread th;
-	gPlayer = player;
-	th.Run(Function<void (void)>(&OnPlaying));
+    player->Open(item->url);
+    if (item->hasRange) {
+        player->Play(item->msBeg, item->msEnd);
+    } else {
+        player->Play();
+    }
+    Thread th;
+    gPlayer = player;
+    th.Run(Function<void (void)>(&OnPlaying));
 
-	char ch = ' ';
-	while (ch != 'q') {
-		cin >> ch;
-		switch (ch) {
-			case 'q':
-				player->Close();
-				break;
+    char ch = ' ';
+    while (ch != 'q') {
+        cin >> ch;
+        switch (ch) {
+            case 'q':
+                player->Close();
+                break;
 
-			case 'p':
-				if (paused) {
-					player->Resume();
-					paused = false;
-				} else {
-					player->Pause();
-					paused = true;
-				}
-				break;
+            case 'p':
+                if (paused) {
+                    player->Resume();
+                    paused = false;
+                } else {
+                    player->Pause();
+                    paused = true;
+                }
+                break;
 
-			case 'r':
-				if (item->hasRange) {
-					player->Play(item->msBeg, item->msEnd);
-				} else {
-					player->Play();
-				}
-				break;
-		}
-	}
+            case 'r':
+                if (item->hasRange) {
+                    player->Play(item->msBeg, item->msEnd);
+                } else {
+                    player->Play();
+                }
+                break;
+        }
+    }
 
     gStop = true;
-	th.Join();
+    th.Join();
 
-	loader->UnregisterAll();
-	player->UnregisterAll();
-	mgr->UnloadAllPlugins();
+    loader->UnregisterAll();
+    player->UnregisterAll();
+    mgr->UnloadAllPlugins();
 
     IPlayer::Free(player);
     IPluginManager::Free(mgr);
     IMediaLoader::Free(loader);
     IPlaylist::Free(playlist);
 
-	return 0;
+    return 0;
 }
