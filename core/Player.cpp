@@ -1,83 +1,70 @@
 #include "Player.h"
 #include <cassert>
-#include <scx/Function.hpp>
-#include <scx/FileHelp.hpp>
+#include <iostream>
 #include <scx/Conv.hpp>
-#include <scx/Mutex.hpp>
-#include <scx/SemVar.hpp>
-#include <scx/Thread.hpp>
-#include <scx/AsyncSignal.hpp>
-#include <scx/PVBuffer.hpp>
+#include <scx/FileHelp.hpp>
 #include <plugin/IDecoder.h>
 #include <plugin/IRenderer.h>
-#include "PluginAgent.h"
+#include <core/IPluginAgent.h>
 using namespace std;
 using namespace scx;
 using namespace mous;
 
-#include <iostream>
+IPlayer* IPlayer::Create()
+{
+    return new Player;
+}
+
+void IPlayer::Free(IPlayer* player)
+{
+    if (player != NULL)
+        delete player;
+}
 
 Player::Player():
-    mStatus(PlayerStatus::Closed),
-    mStopDecoder(false),
-    mSuspendDecoder(true),
-    mDecoder(NULL),
-    mThreadForDecoder(new Thread),
-    mSemWakeDecoder(new SemVar(0, 0)),
-    mMutexDecoderSuspended(new Mutex),
-    mStopRenderer(false),
-    mSuspendRenderer(true),
-    mRenderer(NULL),
-    mThreadForRenderer(new Thread),
-    mSemWakeRenderer(new SemVar(0, 0)),
-    mMutexRendererSuspended(new Mutex),
-    mUnitBuffers(new PVBuffer<UnitBuffer>()),
-    mUnitBeg(0),
-    mUnitEnd(0),
-    mDecoderIndex(0),
-    mRendererIndex(0),
-    mUnitPerMs(0),
-    mSigFinished(new AsyncSignal<void (void)>),
-    mSigStopped(new AsyncSignal<void (void)>)
+    m_Status(PlayerStatus::Closed),
+    m_StopDecoder(false),
+    m_SuspendDecoder(true),
+    m_Decoder(NULL),
+    m_SemWakeDecoder(SemVar(0, 0)),
+    m_StopRenderer(false),
+    m_SuspendRenderer(true),
+    m_Renderer(NULL),
+    m_SemWakeRenderer(SemVar(0, 0)),
+    m_UnitBeg(0),
+    m_UnitEnd(0),
+    m_DecoderIndex(0),
+    m_RendererIndex(0),
+    m_UnitPerMs(0)
 {
-    mUnitBuffers->AllocBuffer(5);
+    m_UnitBuffers.AllocBuffer(5);
 
-    mThreadForDecoder->Run(Function<void (void)>(&Player::WorkForDecoder, this));
+    m_ThreadForDecoder.Run(Function<void (void)>(&Player::WorkForDecoder, this));
 
-    mThreadForRenderer->Run(Function<void (void)>(&Player::WorkForRenderer, this));
+    m_ThreadForRenderer.Run(Function<void (void)>(&Player::WorkForRenderer, this));
 }
 
 Player::~Player()
 {
     Pause();
 
-    mStopDecoder = true;
-    mStopRenderer = true;
-    mSemWakeDecoder->Post();
-    mSemWakeRenderer->Post();
+    m_StopDecoder = true;
+    m_StopRenderer = true;
+    m_SemWakeDecoder.Post();
+    m_SemWakeRenderer.Post();
 
-    mThreadForDecoder->Join();
-    mThreadForRenderer->Join();
+    m_ThreadForDecoder.Join();
+    m_ThreadForRenderer.Join();
 
-    mUnitBuffers->ClearBuffer();
-
-    delete mThreadForDecoder;
-    delete mThreadForRenderer;
-    delete mSemWakeDecoder;
-    delete mSemWakeRenderer;
-    delete mMutexDecoderSuspended;
-    delete mMutexRendererSuspended;
-    delete mUnitBuffers;
-    delete mSigFinished;
-    delete mSigStopped;
+    m_UnitBuffers.ClearBuffer();
 }
 
 EmPlayerStatus Player::GetStatus() const
 {
-    return mStatus;
+    return m_Status;
 }
 
-void Player::RegisterPluginAgent(const PluginAgent* pAgent)
+void Player::RegisterPluginAgent(const IPluginAgent* pAgent)
 {
     switch (pAgent->GetType()) {
         case PluginType::Decoder:
@@ -93,7 +80,7 @@ void Player::RegisterPluginAgent(const PluginAgent* pAgent)
     }
 }
 
-void Player::UnregisterPluginAgent(const PluginAgent* pAgent)
+void Player::UnregisterPluginAgent(const IPluginAgent* pAgent)
 {
     switch (pAgent->GetType()) {
         case PluginType::Decoder:
@@ -109,21 +96,21 @@ void Player::UnregisterPluginAgent(const PluginAgent* pAgent)
     }
 }
 
-void Player::AddDecoder(const PluginAgent* pAgent)
+void Player::AddDecoder(const IPluginAgent* pAgent)
 {
     // Register agent.
     IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
-    mAgentMap.insert(AgentMapPair(pAgent, pDecoder));
+    m_AgentMap.insert(AgentMapPair(pAgent, pDecoder));
 
     // Register decoder.
     vector<string> list(pDecoder->GetFileSuffix());
     for (size_t i = 0; i < list.size(); ++i) {
         string suffix = ToLower(list[i]);
-        DecoderMapIter iter = mDecoderMap.find(suffix);
-        if (iter == mDecoderMap.end()) {
+        DecoderMapIter iter = m_DecoderMap.find(suffix);
+        if (iter == m_DecoderMap.end()) {
             vector<IDecoder*>* dlist = new vector<IDecoder*>();
             dlist->push_back(pDecoder);
-            mDecoderMap.insert(DecoderMapPair(suffix, dlist));
+            m_DecoderMap.insert(DecoderMapPair(suffix, dlist));
         } else {
             vector<IDecoder*>* dlist = iter->second;
             dlist->push_back(pDecoder);
@@ -131,17 +118,17 @@ void Player::AddDecoder(const PluginAgent* pAgent)
     }
 }
 
-void Player::RemoveDecoder(const PluginAgent* pAgent)
+void Player::RemoveDecoder(const IPluginAgent* pAgent)
 {
-    AgentMapIter iter = mAgentMap.find(pAgent);
-    if (iter != mAgentMap.end()) {
+    AgentMapIter iter = m_AgentMap.find(pAgent);
+    if (iter != m_AgentMap.end()) {
         // Unregister decoder.
         IDecoder* pDecoder = (IDecoder*)iter->second;
         vector<string> list(pDecoder->GetFileSuffix());
         for (size_t i = 0; i < list.size(); ++i) {
             string suffix = ToLower(list[i]);
-            DecoderMapIter iter = mDecoderMap.find(suffix);
-            if (iter != mDecoderMap.end()) {
+            DecoderMapIter iter = m_DecoderMap.find(suffix);
+            if (iter != m_DecoderMap.end()) {
                 vector<IDecoder*>* dlist = iter->second;
                 for (size_t i = 0; i < dlist->size(); ++i) {
                     if ((*dlist)[i] == pDecoder) {
@@ -151,77 +138,77 @@ void Player::RemoveDecoder(const PluginAgent* pAgent)
                 }
                 if (dlist->empty()) {
                     delete dlist;
-                    mDecoderMap.erase(iter);
+                    m_DecoderMap.erase(iter);
                 }
             }
         }
 
         // Unregister agent.
-        pAgent->ReleaseObject(pDecoder);
-        mAgentMap.erase(iter);
+        pAgent->FreeObject(pDecoder);
+        m_AgentMap.erase(iter);
     }
 }
 
-void Player::SetRenderer(const PluginAgent* pAgent)
+void Player::SetRenderer(const IPluginAgent* pAgent)
 {
-    mRenderer = (IRenderer*)pAgent->CreateObject();
-    mAgentMap.insert(AgentMapPair(pAgent, mRenderer));
+    m_Renderer = (IRenderer*)pAgent->CreateObject();
+    m_AgentMap.insert(AgentMapPair(pAgent, m_Renderer));
 
-    mRenderer->OpenDevice(mRendererDevice);
+    m_Renderer->OpenDevice(m_RendererDevice);
 }
 
-void Player::UnsetRenderer(const PluginAgent* pAgent)
+void Player::UnsetRenderer(const IPluginAgent* pAgent)
 {
-    mSigStopped->Post();
+    m_SigStopped.Post();
 
-    AgentMapIter iter = mAgentMap.find(pAgent);
-    if (iter != mAgentMap.end()) {
-        mAgentMap.erase(iter);
+    AgentMapIter iter = m_AgentMap.find(pAgent);
+    if (iter != m_AgentMap.end()) {
+        m_AgentMap.erase(iter);
 
-        if (mRenderer != NULL) {
-            mRenderer->CloseDevice();
-            pAgent->ReleaseObject(mRenderer);
-            mRenderer = NULL;
+        if (m_Renderer != NULL) {
+            m_Renderer->CloseDevice();
+            pAgent->FreeObject(m_Renderer);
+            m_Renderer = NULL;
         }
     }
 }
 
 void Player::UnregisterAll()
 {
-    while (!mAgentMap.empty()) {
-        AgentMapIter iter = mAgentMap.begin();
+    while (!m_AgentMap.empty()) {
+        AgentMapIter iter = m_AgentMap.begin();
         UnregisterPluginAgent(iter->first);
     }
 }
 
 void Player::SetRendererDevice(const string& path)
 {
-    mRendererDevice = path;
+    m_RendererDevice = path;
 }
 
 EmErrorCode Player::Open(const string& path)
 {
     string suffix = ToLower(FileSuffix(path));
     cout << "Suffix:" << suffix << endl;
-    DecoderMapIter iter = mDecoderMap.find(suffix);
-    if (iter != mDecoderMap.end()) {
-        mDecoder = (*(iter->second))[0];
+    DecoderMapIter iter = m_DecoderMap.find(suffix);
+    if (iter != m_DecoderMap.end()) {
+        m_Decoder = (*(iter->second))[0];
     } else {
         return ErrorCode::PlayerNoDecoder;
     }
 
-    if (mRenderer == NULL)
+    if (m_Renderer == NULL)
         return ErrorCode::PlayerNoRenderer;
 
-    EmErrorCode err = mDecoder->Open(path);
+    EmErrorCode err = m_Decoder->Open(path);
     if (err != ErrorCode::Ok) {
         cout << "Failed to open!" << endl;
         return err;
     }
 
-    uint32_t maxBytesPerUnit = mDecoder->GetMaxBytesPerUnit();
-    for (size_t i = 0; i < mUnitBuffers->GetBufferCount(); ++i) {
-        UnitBuffer* buf = mUnitBuffers->GetRawItem(i);
+    uint32_t maxBytesPerUnit = m_Decoder->GetMaxBytesPerUnit();
+    for (size_t i = 0; i < m_UnitBuffers.GetBufferCount(); ++i) {
+        UnitBuffer* buf = m_UnitBuffers.GetRawItem(i);
         buf->used = 0;
         if (buf->max < maxBytesPerUnit) {
             if (buf->data != NULL) {
@@ -234,21 +221,21 @@ EmErrorCode Player::Open(const string& path)
         }
     }
 
-    mUnitPerMs = (double)mDecoder->GetUnitCount() / mDecoder->GetDuration();
+    m_UnitPerMs = (double)m_Decoder->GetUnitCount() / m_Decoder->GetDuration();
 
-    int32_t channels = mDecoder->GetChannels();
-    int32_t samleRate = mDecoder->GetSampleRate();
-    int32_t bitsPerSamle = mDecoder->GetBitsPerSample();
+    int32_t channels = m_Decoder->GetChannels();
+    int32_t samleRate = m_Decoder->GetSampleRate();
+    int32_t bitsPerSamle = m_Decoder->GetBitsPerSample();
     cout << "channels:" << channels << endl;
     cout << "samleRate:" << samleRate << endl;
     cout << "bitsPerSamle:" << bitsPerSamle << endl;
-    err = mRenderer->SetupDevice(channels, samleRate, bitsPerSamle);
+    err = m_Renderer->SetupDevice(channels, samleRate, bitsPerSamle);
     if (err != ErrorCode::Ok) {
         cout << "failed to set renderer:" << err << endl;
         return err;
     }
 
-    mStatus = PlayerStatus::Stopped;
+    m_Status = PlayerStatus::Stopped;
 
     return ErrorCode::Ok;
 }
@@ -257,30 +244,30 @@ void Player::Close()
 {
     Pause();
 
-    mDecoder->Close();
-    mStatus = PlayerStatus::Closed;
+    m_Decoder->Close();
+    m_Status = PlayerStatus::Closed;
 }
 
 void Player::Play()
 {
     uint64_t beg = 0;
-    uint64_t end = mDecoder->GetUnitCount();
+    uint64_t end = m_Decoder->GetUnitCount();
     PlayRange(beg, end);
 }
 
 void Player::Play(uint64_t msBegin, uint64_t msEnd)
 {
-    const uint64_t total = mDecoder->GetUnitCount();
+    const uint64_t total = m_Decoder->GetUnitCount();
 
     uint64_t beg = 0;
     uint64_t end = 0;
 
-    beg = mUnitPerMs * msBegin;
+    beg = m_UnitPerMs * msBegin;
     if (beg > total)
         beg = total;
 
     if (msEnd != (uint64_t)-1) {
-        end = mUnitPerMs * msEnd;
+        end = m_UnitPerMs * msEnd;
         if (end > total)
             end = total;
     } else {
@@ -296,67 +283,67 @@ void Player::Play(uint64_t msBegin, uint64_t msEnd)
 
 void Player::PlayRange(uint64_t beg, uint64_t end)
 {
-    mUnitBeg = beg;
-    mUnitEnd = end;
+    m_UnitBeg = beg;
+    m_UnitEnd = end;
 
-    mDecoderIndex = mUnitBeg;
-    mRendererIndex = mUnitBeg;
+    m_DecoderIndex = m_UnitBeg;
+    m_RendererIndex = m_UnitBeg;
 
-    mDecoder->SetUnitIndex(mUnitBeg);
+    m_Decoder->SetUnitIndex(m_UnitBeg);
 
-    mUnitBuffers->ResetPV();
+    m_UnitBuffers.ResetPV();
 
-    mSuspendRenderer = false;
-    mSemWakeRenderer->Post();
+    m_SuspendRenderer = false;
+    m_SemWakeRenderer.Post();
 
-    mSuspendDecoder = false;
-    mSemWakeDecoder->Post();
+    m_SuspendDecoder = false;
+    m_SemWakeDecoder.Post();
 
-    mStatus = PlayerStatus::Playing;
+    m_Status = PlayerStatus::Playing;
 }
 
 void Player::Pause()
 {
-    if (mStatus != PlayerStatus::Playing)
+    if (m_Status != PlayerStatus::Playing)
         return;
 
-    if (!mSuspendRenderer) {
-        mSuspendRenderer = true;
-        mUnitBuffers->RecycleFree(NULL);
+    if (!m_SuspendRenderer) {
+        m_SuspendRenderer = true;
+        m_UnitBuffers.RecycleFree(NULL);
     }
-    mMutexRendererSuspended->Lock();
-    mMutexRendererSuspended->Unlock();
+    m_MutexRendererSuspended.Lock();
+    m_MutexRendererSuspended.Unlock();
 
-    if (!mSuspendDecoder) {
-        mSuspendDecoder = true;
-        mUnitBuffers->RecycleData(NULL);
+    if (!m_SuspendDecoder) {
+        m_SuspendDecoder = true;
+        m_UnitBuffers.RecycleData(NULL);
     }
-    mMutexDecoderSuspended->Lock();
-    mMutexDecoderSuspended->Unlock();
+    m_MutexDecoderSuspended.Lock();
+    m_MutexDecoderSuspended.Unlock();
 
-    mUnitBuffers->ResetPV();
+    m_UnitBuffers.ResetPV();
 
-    mStatus = PlayerStatus::Paused;
+    m_Status = PlayerStatus::Paused;
 }
 
 void Player::Resume()
 {
-    mDecoderIndex = mRendererIndex;
-    mDecoder->SetUnitIndex(mDecoderIndex);
+    m_DecoderIndex = m_RendererIndex;
+    m_Decoder->SetUnitIndex(m_DecoderIndex);
 
-    mUnitBuffers->ResetPV();
+    m_UnitBuffers.ResetPV();
 
-    mSuspendRenderer = false;
-    mSuspendDecoder = false;
-    mSemWakeRenderer->Post();
-    mSemWakeDecoder->Post();
+    m_SuspendRenderer = false;
+    m_SuspendDecoder = false;
+    m_SemWakeRenderer.Post();
+    m_SemWakeDecoder.Post();
 
-    mStatus = PlayerStatus::Playing;
+    m_Status = PlayerStatus::Playing;
 }
 
 void Player::Seek(uint64_t msPos)
 {
-    switch (mStatus) {
+    switch (m_Status) {
         case PlayerStatus::Playing:
             Pause();
             DoSeek(msPos);
@@ -375,47 +362,47 @@ void Player::Seek(uint64_t msPos)
 
 void Player::DoSeek(uint64_t msPos)
 {
-    uint64_t unitPos = mUnitPerMs * msPos;
-    if (unitPos > mDecoder->GetUnitCount())
-        unitPos = mDecoder->GetUnitCount();
-    mDecoder->SetUnitIndex(unitPos);
-    mDecoderIndex = unitPos;
-    mRendererIndex = unitPos;
+    uint64_t unitPos = m_UnitPerMs * msPos;
+    if (unitPos > m_Decoder->GetUnitCount())
+        unitPos = m_Decoder->GetUnitCount();
+    m_Decoder->SetUnitIndex(unitPos);
+    m_DecoderIndex = unitPos;
+    m_RendererIndex = unitPos;
 }
 
 int32_t Player::GetBitRate() const
 {
-    return (mDecoder != NULL) ? mDecoder->GetBitRate() : -1;
+    return (m_Decoder != NULL) ? m_Decoder->GetBitRate() : -1;
 }
 
 int32_t Player::GetSamleRate() const
 {
-    return (mDecoder != NULL) ? mDecoder->GetSampleRate() : -1;
+    return (m_Decoder != NULL) ? m_Decoder->GetSampleRate() : -1;
 }
 
 EmAudioMode Player::GetAudioMode() const
 {
-    return (mDecoder != NULL) ? mDecoder->GetAudioMode() : AudioMode::None;
+    return (m_Decoder != NULL) ? m_Decoder->GetAudioMode() : AudioMode::None;
 }
 
 uint64_t Player::GetDuration() const
 {
-    return mDecoder->GetDuration();
+    return m_Decoder->GetDuration();
 }
 
 uint64_t Player::GetRangeBegin() const
 {
-    return mUnitBeg / mUnitPerMs;
+    return m_UnitBeg / m_UnitPerMs;
 }
 
 uint64_t Player::GetRangeEnd() const
 {
-    return mUnitEnd / mUnitPerMs;
+    return m_UnitEnd / m_UnitPerMs;
 }
 
 uint64_t Player::GetRangeDuration() const
 {
-    return (mUnitEnd - mUnitBeg) / mUnitPerMs;
+    return (m_UnitEnd - m_UnitBeg) / m_UnitPerMs;
 }
 
 uint64_t Player::GetOffsetMs() const
@@ -425,83 +412,83 @@ uint64_t Player::GetOffsetMs() const
 
 uint64_t Player::GetCurrentMs() const
 {
-    return mRendererIndex / mUnitPerMs;
+    return m_RendererIndex / m_UnitPerMs;
 }
 
-const AsyncSignal<void (void)>& Player::SigFinished() const
+const AsyncSignal<void (void)>* Player::SigFinished() const
 {
-    return *mSigFinished;
+    return &m_SigFinished;
 }
 
-const AsyncSignal<void (void)>& Player::SigStopped() const
+const AsyncSignal<void (void)>* Player::SigStopped() const
 {
-    return *mSigStopped;
+    return &m_SigStopped;
 }
 
 void Player::WorkForDecoder()
 {
     while (true) {
-        mSemWakeDecoder->Wait();
-        if (mStopDecoder)
+        m_SemWakeDecoder.Wait();
+        if (m_StopDecoder)
             break;
 
-        mMutexDecoderSuspended->Lock();
+        m_MutexDecoderSuspended.Lock();
 
         for (UnitBuffer* buf = NULL; ; ) {
-            buf = mUnitBuffers->TakeFree();
-            if (mSuspendDecoder)
+            buf = m_UnitBuffers.TakeFree();
+            if (m_SuspendDecoder)
                 break;
 
             assert(buf != NULL);
             assert(buf->data != NULL);
 
-            mDecoder->ReadUnit(buf->data, buf->used, buf->unitCount);
-            mUnitBuffers->RecycleFree(buf);
+            m_Decoder->ReadUnit(buf->data, buf->used, buf->unitCount);
+            m_UnitBuffers.RecycleFree(buf);
 
-            mDecoderIndex += buf->unitCount;
-            if (mDecoderIndex >= mUnitEnd) {
-                mSuspendDecoder = true;
+            m_DecoderIndex += buf->unitCount;
+            if (m_DecoderIndex >= m_UnitEnd) {
+                m_SuspendDecoder = true;
                 break;
             }
         }
 
-        mMutexDecoderSuspended->Unlock();
+        m_MutexDecoderSuspended.Unlock();
     };
 }
 
 void Player::WorkForRenderer()
 {
     while (true) {
-        mSemWakeRenderer->Wait();
-        if (mStopRenderer)
+        m_SemWakeRenderer.Wait();
+        if (m_StopRenderer)
             break;
 
-        mMutexRendererSuspended->Lock();
+        m_MutexRendererSuspended.Lock();
 
         for (UnitBuffer* buf = NULL; ; ) {
-            //cout << mUnitBuffers->GetDataCount() << flush;
-            buf = mUnitBuffers->TakeData();
-            if (mSuspendRenderer)
+            //cout << m_UnitBuffers->GetDataCount() << flush;
+            buf = m_UnitBuffers.TakeData();
+            if (m_SuspendRenderer)
                 break;
 
             assert(buf != NULL);
             assert(buf->data != NULL);
 
-            mRenderer->WriteDevice(buf->data, buf->used);
-            mUnitBuffers->RecycleData(buf);
+            m_Renderer->WriteDevice(buf->data, buf->used);
+            m_UnitBuffers.RecycleData(buf);
 
-            mRendererIndex += buf->unitCount;
-            if (mRendererIndex >= mUnitEnd) {
-                mSuspendRenderer = true;
+            m_RendererIndex += buf->unitCount;
+            if (m_RendererIndex >= m_UnitEnd) {
+                m_SuspendRenderer = true;
                 break;
             }
         }
 
-        mMutexRendererSuspended->Unlock();
+        m_MutexRendererSuspended.Unlock();
 
-        if (mRendererIndex >= mUnitEnd) {
-            mStatus = PlayerStatus::Stopped;
-            mSigFinished->Post();
+        if (m_RendererIndex >= m_UnitEnd) {
+            m_Status = PlayerStatus::Stopped;
+            m_SigFinished.Post();
         }
     }
 }

@@ -7,37 +7,20 @@
 #include <map>
 #include <common/ErrorCode.h>
 #include <common/AudioMode.h>
-
-namespace scx {
-    class Mutex;
-    class Thread;
-    class SemVar;
-
-    template<typename T>
-    class PVBuffer;
-
-    template<typename signature>
-    class AsyncSignal;
-}
+#include <core/IPlayer.h>
+#include <scx/PVBuffer.hpp>
+#include <scx/AsyncSignal.hpp>
+#include <scx/Mutex.hpp>
+#include <scx/SemVar.hpp>
+#include <scx/Thread.hpp>
 
 namespace mous {
 
-class PluginAgent;
+class IPluginAgent;
 class IDecoder;
 class IRenderer;
 
-namespace PlayerStatus {
-enum e
-{
-    Closed,
-    Playing,
-    Paused,
-    Stopped,
-};
-}
-typedef PlayerStatus::e EmPlayerStatus;
-
-class Player
+class Player: public IPlayer
 {
 public:
     Player();
@@ -46,8 +29,8 @@ public:
 public:
     EmPlayerStatus GetStatus() const;
 
-    void RegisterPluginAgent(const PluginAgent* pAgent);
-    void UnregisterPluginAgent(const PluginAgent* pAgent);
+    void RegisterPluginAgent(const IPluginAgent* pAgent);
+    void UnregisterPluginAgent(const IPluginAgent* pAgent);
     void UnregisterAll();
 
     void SetRendererDevice(const std::string& path);
@@ -72,16 +55,16 @@ public:
     EmAudioMode GetAudioMode() const;
 
 public:
-    const scx::AsyncSignal<void (void)>& SigFinished() const;
-    const scx::AsyncSignal<void (void)>& SigStopped() const;
+    const scx::AsyncSignal<void (void)>* SigFinished() const;
+    const scx::AsyncSignal<void (void)>* SigStopped() const;
     //scx::Signal<void (void)> SigPaused;
     //scx::Signal<void (void)> SigResumed;
 
 private:
-    void AddDecoder(const PluginAgent* pAgent);
-    void RemoveDecoder(const PluginAgent* pAgent);
-    void SetRenderer(const PluginAgent* pAgent);
-    void UnsetRenderer(const PluginAgent* pAgent);
+    void AddDecoder(const IPluginAgent* pAgent);
+    void RemoveDecoder(const IPluginAgent* pAgent);
+    void SetRenderer(const IPluginAgent* pAgent);
+    void UnsetRenderer(const IPluginAgent* pAgent);
 
     void PlayRange(uint64_t beg, uint64_t end);
     void DoSeek(uint64_t msPos);
@@ -117,44 +100,44 @@ private:
     };
 
 private:
-    EmPlayerStatus mStatus;
+    EmPlayerStatus m_Status;
 
-    std::string mRendererDevice;
+    std::string m_RendererDevice;
 
-    bool mStopDecoder;
-    bool mSuspendDecoder;
-    IDecoder* mDecoder;
-    scx::Thread* mThreadForDecoder;
-    scx::SemVar* mSemWakeDecoder;
-    scx::Mutex* mMutexDecoderSuspended;
+    bool m_StopDecoder;
+    bool m_SuspendDecoder;
+    IDecoder* m_Decoder;
+    scx::Thread m_ThreadForDecoder;
+    scx::SemVar m_SemWakeDecoder;
+    scx::Mutex m_MutexDecoderSuspended;
 
-    bool mStopRenderer;
-    bool mSuspendRenderer;
-    IRenderer* mRenderer;
-    scx::Thread* mThreadForRenderer;
-    scx::SemVar* mSemWakeRenderer;
-    scx::Mutex* mMutexRendererSuspended;
+    bool m_StopRenderer;
+    bool m_SuspendRenderer;
+    IRenderer* m_Renderer;
+    scx::Thread m_ThreadForRenderer;
+    scx::SemVar m_SemWakeRenderer;
+    scx::Mutex m_MutexRendererSuspended;
 
-    scx::PVBuffer<UnitBuffer>* mUnitBuffers;
+    scx::PVBuffer<UnitBuffer> m_UnitBuffers;
 
-    uint64_t mUnitBeg;
-    uint64_t mUnitEnd;
+    uint64_t m_UnitBeg;
+    uint64_t m_UnitEnd;
 
-    uint64_t mDecoderIndex;
-    uint64_t mRendererIndex;
+    uint64_t m_DecoderIndex;
+    uint64_t m_RendererIndex;
 
-    double mUnitPerMs;
+    double m_UnitPerMs;
 
-    std::map<const PluginAgent*, void*> mAgentMap;
-    typedef std::pair<const PluginAgent*, void*> AgentMapPair;
-    typedef std::map<const PluginAgent*, void*>::iterator AgentMapIter;
+    std::map<const IPluginAgent*, void*> m_AgentMap;
+    typedef std::pair<const IPluginAgent*, void*> AgentMapPair;
+    typedef std::map<const IPluginAgent*, void*>::iterator AgentMapIter;
 
-    std::map<std::string, std::vector<IDecoder*>*> mDecoderMap;
+    std::map<std::string, std::vector<IDecoder*>*> m_DecoderMap;
     typedef std::pair<std::string, std::vector<IDecoder*>*> DecoderMapPair;
     typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
 
-    scx::AsyncSignal<void (void)>* mSigFinished;
-    scx::AsyncSignal<void (void)>* mSigStopped;
+    scx::AsyncSignal<void (void)> m_SigFinished;
+    scx::AsyncSignal<void (void)> m_SigStopped;
 };
 
 }

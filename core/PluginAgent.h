@@ -1,18 +1,16 @@
 #ifndef MOUS_PLUGINAGENT_H
 #define MOUS_PLUGINAGENT_H
 
-#include <string>
 #include <dlfcn.h>
-#include <common/ErrorCode.h>
-#include <plugin/PluginHelper.h>
+#include <core/IPluginAgent.h>
 
 namespace mous {
 
-class PluginAgent
+class PluginAgent: public IPluginAgent
 {
     typedef const PluginInfo* (*FnPluginInfo)(void);
     typedef void* (*FnCreatePlugin)(void);
-    typedef void (*FnReleasePlugin)(void*);
+    typedef void (*FnFreePlugin )(void*);
 
 public:
     explicit PluginAgent(EmPluginType type):
@@ -20,7 +18,7 @@ public:
         m_pHandle(NULL),
         m_fnGetInfo(NULL),
         m_fnCreate(NULL),
-        m_fnRelease(NULL)
+        m_fnFree(NULL)
     {
 
     }
@@ -49,7 +47,7 @@ public:
         if (m_fnCreate == NULL)
             return ErrorCode::MgrBadFormat;
 
-        m_fnRelease = (FnReleasePlugin)dlsym(m_pHandle, StrReleasePlugin);
+        m_fnFree = (FnFreePlugin )dlsym(m_pHandle, StrReleasePlugin);
         if (m_fnCreate == NULL)
             return ErrorCode::MgrBadFormat;
 
@@ -60,7 +58,7 @@ public:
     {
         m_fnGetInfo = NULL;
         m_fnCreate = NULL;
-        m_fnRelease = NULL;
+        m_fnFree = NULL;
 
         if (m_pHandle != NULL) {
             dlclose(m_pHandle);
@@ -78,9 +76,9 @@ public:
         return m_fnCreate();
     }
 
-    void ReleaseObject(void* inf) const
+    void FreeObject(void* inf) const
     {
-        m_fnRelease(inf);
+        m_fnFree(inf);
     }
 
 private:
@@ -90,7 +88,7 @@ private:
 
     FnPluginInfo m_fnGetInfo;
     FnCreatePlugin m_fnCreate;
-    FnReleasePlugin m_fnRelease;
+    FnFreePlugin  m_fnFree;
 };
 
 }

@@ -5,10 +5,21 @@
 #include <common/MediaItem.h>
 #include <plugin/IMediaPack.h>
 #include <plugin/ITagParser.h>
-#include "PluginAgent.h"
+#include <core/IPluginAgent.h>
 using namespace std;
 using namespace scx;
 using namespace mous;
+
+IMediaLoader* IMediaLoader::Create()
+{
+    return new MediaLoader;
+}
+
+void IMediaLoader::Free(IMediaLoader* ptr)
+{
+    if (ptr != NULL)
+        delete ptr;
+}
 
 MediaLoader::MediaLoader()
 {
@@ -20,7 +31,7 @@ MediaLoader::~MediaLoader()
 
 }
 
-void MediaLoader::RegisterPluginAgent(const PluginAgent* pAgent)
+void MediaLoader::RegisterPluginAgent(const IPluginAgent* pAgent)
 {
     switch (pAgent->GetType()) {
     case PluginType::MediaPack:
@@ -36,7 +47,7 @@ void MediaLoader::RegisterPluginAgent(const PluginAgent* pAgent)
     }
 }
 
-void MediaLoader::UnregisterPluginAgent(const PluginAgent* pAgent)
+void MediaLoader::UnregisterPluginAgent(const IPluginAgent* pAgent)
 {
     switch (pAgent->GetType()) {
     case PluginType::MediaPack:
@@ -60,7 +71,7 @@ void MediaLoader::UnregisterAll()
     }
 }
 
-void MediaLoader::AddMediaPack(const PluginAgent* pAgent)
+void MediaLoader::AddMediaPack(const IPluginAgent* pAgent)
 {
     // Register agent.
     IMediaPack* pPack = (IMediaPack*)pAgent->CreateObject();
@@ -77,7 +88,7 @@ void MediaLoader::AddMediaPack(const PluginAgent* pAgent)
     }
 }
 
-void MediaLoader::RemoveMediaPack(const PluginAgent* pAgent)
+void MediaLoader::RemoveMediaPack(const IPluginAgent* pAgent)
 {
     AgentMapIter iter = m_AgentMap.find(pAgent);
     if (iter != m_AgentMap.end()) {
@@ -92,15 +103,15 @@ void MediaLoader::RemoveMediaPack(const PluginAgent* pAgent)
             }
         }
 
-        // Unregister PluginAgent.
-        pAgent->ReleaseObject(pPack);
+        // Unregister IPluginAgent.
+        pAgent->FreeObject(pPack);
         m_AgentMap.erase(iter);
     }
 }
 
-void MediaLoader::AddTagParser(const PluginAgent* pAgent)
+void MediaLoader::AddTagParser(const IPluginAgent* pAgent)
 {
-    // Register PluginAgent.
+    // Register IPluginAgent.
     ITagParser* pParser = (ITagParser*)pAgent->CreateObject();
     m_AgentMap.insert(AgentMapPair(pAgent, pParser));
 
@@ -115,7 +126,7 @@ void MediaLoader::AddTagParser(const PluginAgent* pAgent)
     }
 }
 
-void MediaLoader::RemoveTagParser(const PluginAgent* pAgent)
+void MediaLoader::RemoveTagParser(const IPluginAgent* pAgent)
 {
     AgentMapIter iter = m_AgentMap.find(pAgent);
     if (iter != m_AgentMap.end()) {
@@ -130,8 +141,8 @@ void MediaLoader::RemoveTagParser(const PluginAgent* pAgent)
             }
         }
 
-        // Unregister PluginAgent.
-        pAgent->ReleaseObject(pParser);
+        // Unregister IPluginAgent.
+        pAgent->FreeObject(pParser);
         m_AgentMap.erase(iter);
     }
 }

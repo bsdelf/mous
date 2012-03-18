@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 #include <common/ErrorCode.h>
-#include "PluginAgent.h"
+#include <core/IPluginManager.h>
 
 struct stat;
 
@@ -18,7 +18,7 @@ class IRenderer;
 class IMediaPack;
 class ITagParser;
 
-class PluginManager
+class PluginManager: public IPluginManager
 {
 public:
     PluginManager();
@@ -29,7 +29,7 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadAllPlugins();
 
-    void GetPluginAgents(std::vector<const PluginAgent*>& list, EmPluginType) const;
+    void GetPluginAgents(std::vector<const IPluginAgent*>& list, EmPluginType) const;
     void GetPluginPath(std::vector<std::string>& list) const;
     const PluginInfo* GetPluginInfo(const std::string& path) const;
 
@@ -45,10 +45,10 @@ private:
 private:
 
 private:
-    std::map<std::string, PluginAgent*> m_PluginMap;
-    typedef std::pair<std::string, PluginAgent*> PluginMapPair;
-    typedef std::map<std::string, PluginAgent*>::iterator PluginMapIter;
-    typedef std::map<std::string, PluginAgent*>::const_iterator PluginMapConstIter;
+    std::map<std::string, IPluginAgent*> m_PluginMap;
+    typedef std::pair<std::string, IPluginAgent*> PluginMapPair;
+    typedef std::map<std::string, IPluginAgent*>::iterator PluginMapIter;
+    typedef std::map<std::string, IPluginAgent*>::const_iterator PluginMapConstIter;
 };
 
 }

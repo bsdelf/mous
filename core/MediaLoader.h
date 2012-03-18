@@ -5,39 +5,40 @@
 #include <deque>
 #include <string>
 #include <common/ErrorCode.h>
+#include <core/IMediaLoader.h>
 
 namespace mous {
 
 struct MediaItem;
-class PluginAgent;
+class IPluginAgent;
 class IMediaPack;
 class ITagParser;
 
-class MediaLoader
+class MediaLoader: public IMediaLoader
 {
 public:
     MediaLoader();
     ~MediaLoader();
 
-    void RegisterPluginAgent(const PluginAgent* pAgent);
-    void UnregisterPluginAgent(const PluginAgent* pAgent);
+    void RegisterPluginAgent(const IPluginAgent* pAgent);
+    void UnregisterPluginAgent(const IPluginAgent* pAgent);
     void UnregisterAll();
 
     EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const;
 
 private:
-    void AddMediaPack(const PluginAgent* pAgent);
-    void RemoveMediaPack(const PluginAgent* pAgent);
-    void AddTagParser(const PluginAgent* pAgent);
-    void RemoveTagParser(const PluginAgent* pAgent);
+    void AddMediaPack(const IPluginAgent* pAgent);
+    void RemoveMediaPack(const IPluginAgent* pAgent);
+    void AddTagParser(const IPluginAgent* pAgent);
+    void RemoveTagParser(const IPluginAgent* pAgent);
  
     EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem*>& list) const;
     EmErrorCode TryParseTag(std::deque<MediaItem*>& list) const;
 
 private:
-    std::map<const PluginAgent*, void*> m_AgentMap;
-    typedef std::pair<const PluginAgent*, void*> AgentMapPair;
-    typedef std::map<const PluginAgent*, void*>::iterator AgentMapIter;
+    std::map<const IPluginAgent*, void*> m_AgentMap;
+    typedef std::pair<const IPluginAgent*, void*> AgentMapPair;
+    typedef std::map<const IPluginAgent*, void*>::iterator AgentMapIter;
 
     std::map<std::string, IMediaPack*> m_MediaPackMap;
     typedef std::pair<std::string, IMediaPack*> MediaPackMapPair;

@@ -1,13 +1,26 @@
 #include "PluginManager.h"
 #include <ftw.h>
+#include <dlfcn.h>
 #include <sys/stat.h>
-#include <plugin/PluginHelper.h>
+#include <iostream>
+#include <common/PluginDef.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IRenderer.h>
 #include <plugin/IMediaPack.h>
-#include <iostream>
+#include <core/IPluginAgent.h>
 using namespace std;
 using namespace mous;
+
+IPluginManager* IPluginManager::Create()
+{
+    return new PluginManager;
+}
+
+void IPluginManager::Free(IPluginManager* ptr)
+{
+    if (ptr != NULL)
+        delete ptr;
+}
 
 PluginManager::PluginManager()
 {
@@ -52,42 +65,12 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
     }
     EmPluginType type = fnPluginType();
 
-    PluginAgent* pAgent = new PluginAgent(type);
-    /*
-       switch (type) {
-       case PluginType::Decoder:
-       pAgent = new PluginAgent<IDecoder>(type);
-       break;
-
-       case PluginType::Encoder:
-       break;
-
-       case PluginType::Renderer:
-       pAgent = new PluginAgent<IRenderer>(type);
-       break;
-
-       case PluginType::MediaPack:
-       pAgent = new PluginAgent<IMediaPack>(type);
-       break;
-
-       case PluginType::TagParser:
-       pAgent = new PluginAgent<ITagParser>(type);
-       break;
-
-       case PluginType::Filter:
-       break;
-
-       default:
-       pAgent = NULL;
-       break;
-       }
-       */
-
+    IPluginAgent* pAgent = IPluginAgent::Create(type);
     if (pAgent->Open(path) == ErrorCode::Ok) {
         m_PluginMap.insert(PluginMapPair(path, pAgent));
     } else {
         pAgent->Close();
-        delete pAgent;
+        IPluginAgent::Free(pAgent);
     }
 
     dlclose(pHandle);
@@ -99,9 +82,9 @@ void PluginManager::UnloadPlugin(const string& path)
 {
     PluginMapIter iter = m_PluginMap.find(path);
     if (iter != m_PluginMap.end()) {
-        PluginAgent* pAgent = iter->second;
+        IPluginAgent* pAgent = iter->second;
         pAgent->Close();
-        delete pAgent;
+        IPluginAgent::Free(pAgent);
         m_PluginMap.erase(iter);
     }
 }
@@ -110,19 +93,19 @@ void PluginManager::UnloadAllPlugins()
 {
     for (PluginMapIter iter = m_PluginMap.begin();
             iter != m_PluginMap.end(); ++iter) {
-        PluginAgent* pAgent = iter->second;
+        IPluginAgent* pAgent = iter->second;
         pAgent->Close();
-        delete pAgent;
+        IPluginAgent::Free(pAgent);
     }
     m_PluginMap.clear();
 }
 
-void PluginManager::GetPluginAgents(vector<const PluginAgent*>& list, EmPluginType type) const
+void PluginManager::GetPluginAgents(vector<const IPluginAgent*>& list, EmPluginType type) const
 {
     list.clear();
     for (PluginMapConstIter iter = m_PluginMap.begin();
             iter != m_PluginMap.end(); ++iter) {
-        PluginAgent* pAgent = iter->second;
+        IPluginAgent* pAgent = iter->second;
         if (pAgent->GetType() == type) {
             list.push_back(pAgent);
         }
