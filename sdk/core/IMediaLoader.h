@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <string>
+#include <common/ErrorCode.h>
 
 namespace mous {
 
