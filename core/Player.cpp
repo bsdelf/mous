@@ -103,7 +103,7 @@ void Player::AddDecoder(const IPluginAgent* pAgent)
     m_AgentMap.insert(AgentMapPair(pAgent, pDecoder));
 
     // Register decoder.
-    vector<string> list(pDecoder->GetFileSuffix());
+    const vector<string>& list = pDecoder->GetFileSuffix();
     for (size_t i = 0; i < list.size(); ++i) {
         string suffix = ToLower(list[i]);
         DecoderMapIter iter = m_DecoderMap.find(suffix);
@@ -124,7 +124,7 @@ void Player::RemoveDecoder(const IPluginAgent* pAgent)
     if (iter != m_AgentMap.end()) {
         // Unregister decoder.
         IDecoder* pDecoder = (IDecoder*)iter->second;
-        vector<string> list(pDecoder->GetFileSuffix());
+        const vector<string>& list = pDecoder->GetFileSuffix();
         for (size_t i = 0; i < list.size(); ++i) {
             string suffix = ToLower(list[i]);
             DecoderMapIter iter = m_DecoderMap.find(suffix);
