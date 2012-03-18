@@ -44,6 +44,8 @@ public:
     virtual void UnregisterAll() = 0;
 
     virtual void SetRendererDevice(const std::string& path) = 0;
+    virtual int GetRendererVolume() const = 0;
+    virtual void SetRendererVolume(int level) = 0;
 
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;

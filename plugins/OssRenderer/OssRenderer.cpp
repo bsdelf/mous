@@ -82,3 +82,17 @@ EmErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
     }
     return ErrorCode::Ok;
 }
+
+int OssRenderer::GetVolumeLevel() const
+{
+    int level = 0;
+    ioctl(m_Fd, SNDCTL_DSP_GETPLAYVOL, &level);
+    level = ((level >> 8) + (level & 0xff)) / 2;
+    return level;
+}
+
+void OssRenderer::SetVolumeLevel(int level)
+{
+    int all = (level) | (level << 8);
+    ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
+}

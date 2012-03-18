@@ -186,6 +186,17 @@ void Player::SetRendererDevice(const string& path)
     m_RendererDevice = path;
 }
 
+int Player::GetRendererVolume() const
+{
+    return m_Renderer != NULL ? m_Renderer->GetVolumeLevel() : -1;
+}
+
+void Player::SetRendererVolume(int level)
+{
+    if (m_Renderer != NULL)
+        m_Renderer->SetVolumeLevel(level);
+}
+
 EmErrorCode Player::Open(const string& path)
 {
     string suffix = ToLower(FileSuffix(path));

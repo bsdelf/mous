@@ -32,6 +32,8 @@ public:
     void UnregisterAll();
 
     void SetRendererDevice(const std::string& path);
+    int GetRendererVolume() const;
+    void SetRendererVolume(int level);
 
     EmErrorCode Open(const std::string& path);
     void Close();
