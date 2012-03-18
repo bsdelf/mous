@@ -1,13 +1,9 @@
-#ifndef MOUS_PLAYLIST_H
-#define MOUS_PLAYLIST_H
+#ifndef MOUS_IPLAYLIST_H
+#define MOUS_IPLAYLIST_H
 
 #include <vector>
 #include <deque>
 #include <common/ErrorCode.h>
-
-namespace scx {
-    class Mutex;
-}
 
 namespace mous {
 
@@ -23,48 +19,35 @@ enum e
 }
 typedef PlayMode::e EmPlayMode;
 
-class Playlist
+class IPlaylist
 {
 public:
-    Playlist();
-    ~Playlist();
+    static IPlaylist* Create();
+    static void Free(IPlaylist*);
 
-    void SetPlayMode(EmPlayMode mode);
-    EmPlayMode GetPlayMode() const;
+public:
+    virtual ~IPlaylist() { }
 
-    const void* SeqCurrent(int off = 0) const;
-    EmErrorCode SeqJumpTo(int index) const;
-    EmErrorCode SeqMoveNext(int step = 1) const; 
+    virtual void SetPlayMode(EmPlayMode mode) = 0;
+    virtual EmPlayMode GetPlayMode() const = 0;
 
-    void AssignItems(std::deque<void*>& items);
-    void InsertItem(int index, void* item);
-    void InsertItem(int index, std::deque<void*>& items);
-    void AppendItem(void* item);
-    void AppendItem(std::deque<void*>& items);
-    void RemoveItem(int index);
-    void RemoveItem(const std::vector<int>& indexes);
-    void Clear();
+    virtual const void* SeqCurrent(int off = 0) const = 0;
+    virtual EmErrorCode SeqJumpTo(int index) const = 0;
+    virtual EmErrorCode SeqMoveNext(int step = 1) const = 0;
 
-    void* GetItem(int index);
-    int GetItemCount() const;
-    bool Empty() const;
-    void Reverse();
+    virtual void AssignItems(std::deque<void*>& items) = 0;
+    virtual void InsertItem(int index, void* item) = 0;
+    virtual void InsertItem(int index, std::deque<void*>& items) = 0;
+    virtual void AppendItem(void* item) = 0;
+    virtual void AppendItem(std::deque<void*>& items) = 0;
+    virtual void RemoveItem(int index) = 0;
+    virtual void RemoveItem(const std::vector<int>& indexes) = 0;
+    virtual void Clear() = 0;
 
-private:
-    void AdjustShuffleRange(bool reGenerate = false);
-    void CorrectSeqIndexes() const;
-    inline int CorrectIndex(int index) const;
-
-private:
-    EmPlayMode m_PlayMode;
-    scx::Mutex* m_MutexForQue;
-
-    std::deque<void*> m_ItemQue;
-    typedef std::deque<void*>::iterator ItemQueIter;
-
-    mutable int m_SeqNormalIndex;
-    mutable int m_SeqShuffleIndex;
-    std::deque<int> m_SeqShuffleQue;
+    virtual void* GetItem(int index) = 0;
+    virtual int GetItemCount() const = 0;
+    virtual bool Empty() const = 0;
+    virtual void Reverse() = 0;
 };
 
 }

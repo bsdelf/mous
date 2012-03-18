@@ -2,8 +2,6 @@
 #define MOUS_MEDIALOADER_H
 
 #include <map>
-#include <deque>
-#include <string>
 #include <common/ErrorCode.h>
 #include <core/IMediaLoader.h>
 

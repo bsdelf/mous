@@ -3,14 +3,22 @@
 #include <cassert>
 #include <algorithm>
 #include <iostream>
-#include <scx/Mutex.hpp>
 using namespace std;
-using namespace scx;
 using namespace mous;
+
+IPlaylist* IPlaylist::Create()
+{
+    return new Playlist;
+}
+
+void IPlaylist::Free(IPlaylist* ptr)
+{
+    if (ptr != NULL)
+        delete ptr;
+}
 
 Playlist::Playlist():
     m_PlayMode(PlayMode::Normal),
-    m_MutexForQue(new Mutex),
     m_SeqNormalIndex(-1),
     m_SeqShuffleIndex(-1)
 {
@@ -19,7 +27,6 @@ Playlist::Playlist():
 
 Playlist::~Playlist()
 {
-    delete m_MutexForQue;
 }
 
 void Playlist::SetPlayMode(EmPlayMode mode)
@@ -35,7 +42,7 @@ EmPlayMode Playlist::GetPlayMode() const
 const void* Playlist::SeqCurrent(int off) const
 {
     void* item = NULL;
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     CorrectSeqIndexes();
     switch (m_PlayMode) {
         case PlayMode::Normal:
@@ -57,14 +64,14 @@ const void* Playlist::SeqCurrent(int off) const
         }
             break;
     }
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
     return item;
 }
 
 EmErrorCode Playlist::SeqJumpTo(int index) const
 {
     EmErrorCode ret = ErrorCode::Ok;
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     CorrectSeqIndexes();
     switch (m_PlayMode) {
         case PlayMode::Normal:
@@ -82,14 +89,14 @@ EmErrorCode Playlist::SeqJumpTo(int index) const
         case PlayMode::RepeatOne:
             break;
     }
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
     return ret;
 }
 
 EmErrorCode Playlist::SeqMoveNext(int step) const
 {
     EmErrorCode ret = ErrorCode::Ok;
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     CorrectSeqIndexes();
     switch (m_PlayMode) {
         case PlayMode::Normal:
@@ -107,105 +114,105 @@ EmErrorCode Playlist::SeqMoveNext(int step) const
         case PlayMode::RepeatOne:
             break;
     }
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
     return ret;
 }
 
 void Playlist::AssignItems(std::deque<void*>& items)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     m_ItemQue.assign(items.begin(), items.end());
     AdjustShuffleRange(true);
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::InsertItem(int index, void* item)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, item);
     AdjustShuffleRange();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::InsertItem(int index, deque<void*>& items)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
     AdjustShuffleRange();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::AppendItem(void* item)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     m_ItemQue.push_back(item);
     AdjustShuffleRange();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::AppendItem(deque<void*>& items)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
     AdjustShuffleRange();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::RemoveItem(int index)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     m_ItemQue.erase(m_ItemQue.begin() + index);
     AdjustShuffleRange();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::RemoveItem(const vector<int>& indexes)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     for (int i = indexes.size()-1; i >= 0; --i) {
         m_ItemQue.erase(m_ItemQue.begin() + indexes[i]);
     }
     AdjustShuffleRange();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::Clear()
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     m_ItemQue.clear();
     m_SeqShuffleQue.clear();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void* Playlist::GetItem(int index)
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     void* item = m_ItemQue[index];
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
     return item;
 }
 
 int Playlist::GetItemCount() const
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     int size = m_ItemQue.size();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
     return size;
 }
 
 bool Playlist::Empty() const
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     bool empty = m_ItemQue.empty();
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
     return empty;
 }
 
 void Playlist::Reverse()
 {
-    m_MutexForQue->Lock();
+    m_MutexForQue.Lock();
     reverse(m_ItemQue.begin(), m_ItemQue.end());
-    m_MutexForQue->Unlock();
+    m_MutexForQue.Unlock();
 }
 
 void Playlist::AdjustShuffleRange(bool reGenerate)

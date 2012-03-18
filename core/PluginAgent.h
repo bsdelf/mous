@@ -1,8 +1,8 @@
 #ifndef MOUS_PLUGINAGENT_H
 #define MOUS_PLUGINAGENT_H
 
-#include <dlfcn.h>
 #include <core/IPluginAgent.h>
+#include <dlfcn.h>
 
 namespace mous {
 

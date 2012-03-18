@@ -1,6 +1,9 @@
 #ifndef MOUS_IMEDIALOADER_H
 #define MOUS_IMEDIALOADER_H
 
+#include <deque>
+#include <string>
+
 namespace mous {
 
 struct MediaItem;

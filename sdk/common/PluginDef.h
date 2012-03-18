@@ -25,7 +25,7 @@ struct PluginInfo
     const char* author;
     const char* name;
     const char* description;
-    const int32_t version;
+    const int version;
 };
 
 const char* const StrGetPluginType = "MousGetPluginType";

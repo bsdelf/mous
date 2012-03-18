@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 		loader->RegisterPluginAgent(tagAgentList[i]);
 	}
 
-	Playlist playlist;
+	IPlaylist* playlist = IPlaylist::Create();
 
 	deque<MediaItem*> mediaList;
 	loader->LoadMedia(argv[1], mediaList);
@@ -201,6 +201,7 @@ int main(int argc, char** argv)
     IPlayer::Free(player);
     IPluginManager::Free(mgr);
     IMediaLoader::Free(loader);
+    IPlaylist::Free(playlist);
 
 	return 0;
 }

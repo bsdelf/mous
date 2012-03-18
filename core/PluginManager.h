@@ -3,8 +3,6 @@
 
 #include <inttypes.h>
 #include <map>
-#include <vector>
-#include <string>
 #include <common/ErrorCode.h>
 #include <core/IPluginManager.h>
 

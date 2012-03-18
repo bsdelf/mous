@@ -1,29 +1,12 @@
 #ifndef MOUS_PLAYLIST_H
 #define MOUS_PLAYLIST_H
 
-#include <vector>
-#include <deque>
-#include <common/ErrorCode.h>
-
-namespace scx {
-    class Mutex;
-}
+#include <core/IPlaylist.h>
+#include <scx/Mutex.hpp>
 
 namespace mous {
 
-namespace PlayMode {
-enum e
-{
-    Normal,
-    Repeat,
-    Shuffle,
-    ShuffleRepeat,
-    RepeatOne
-};
-}
-typedef PlayMode::e EmPlayMode;
-
-class Playlist
+class Playlist: public IPlaylist
 {
 public:
     Playlist();
@@ -57,7 +40,7 @@ private:
 
 private:
     EmPlayMode m_PlayMode;
-    scx::Mutex* m_MutexForQue;
+    mutable scx::Mutex m_MutexForQue;
 
     std::deque<void*> m_ItemQue;
     typedef std::deque<void*>::iterator ItemQueIter;

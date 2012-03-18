@@ -1,6 +1,8 @@
 #ifndef MOUS_IPLAYER_H
 #define MOUS_IPLAYER_H
 
+#include <inttypes.h>
+#include <string>
 #include <common/ErrorCode.h>
 #include <common/AudioMode.h>
 

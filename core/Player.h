@@ -1,8 +1,6 @@
 #ifndef MOUS_PLAYER_H
 #define MOUS_PLAYER_H
 
-#include <inttypes.h>
-#include <string>
 #include <vector>
 #include <map>
 #include <common/ErrorCode.h>
