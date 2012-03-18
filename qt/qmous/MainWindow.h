@@ -44,6 +44,8 @@ private slots:
     void slotBtnPlay();
     void slotBtnStop();
 
+    void slotSliderVolumeValueChanged(int);
+
     void slotSliderPlayingPressed();
     void slotSliderPlayingReleased();
     void slotSliderPlayingValueChanged(int);

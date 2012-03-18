@@ -89,6 +89,9 @@ void MainWindow::initMyUi()
 
     // Play mode button
 
+    // Volume
+    ui->sliderVolume->setValue(mPlayer->GetRendererVolume());
+
     // PlayList View
     mBarPlayList = new MidClickTabBar(this);
     mWidgetPlayList = new CustomHeadTabWidget(this);
@@ -114,6 +117,8 @@ void MainWindow::initQtSlots()
 
     connect(ui->btnPlay, SIGNAL(clicked()), this, SLOT(slotBtnPlay()));
     connect(ui->btnStop, SIGNAL(clicked()), this, SLOT(slotBtnStop()));
+
+    connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(slotSliderVolumeValueChanged(int)));
 
     connect(ui->sliderPlaying, SIGNAL(sliderPressed()), this, SLOT(slotSliderPlayingPressed()));
     connect(ui->sliderPlaying, SIGNAL(sliderReleased()), this, SLOT(slotSliderPlayingReleased()));
@@ -197,6 +202,11 @@ void MainWindow::slotBtnStop()
 
     mPlayer->Pause();
     mTimerUpdateUi->stop();
+}
+
+void MainWindow::slotSliderVolumeValueChanged(int val)
+{
+    mPlayer->SetRendererVolume(val);
 }
 
 void MainWindow::slotSliderPlayingPressed()
