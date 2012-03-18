@@ -16,7 +16,7 @@ extern "C" {\
         return p_info;                      \
     }                                       \
     \
-    void* MousCreatObject() {   \
+    void* MousCreateObject() {  \
         return new obj_t;       \
     }                           \
     \
