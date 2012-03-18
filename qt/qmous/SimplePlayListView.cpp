@@ -1,8 +1,8 @@
 #include "SimplePlayListView.h"
 #include <QtCore>
 #include <QtGui>
-#include <mous/MediaItem.h>
-#include <MediaLoader.h>
+#include <common/MediaItem.h>
+#include <core/IMediaLoader.h>
 #include "UiHelper.hpp"
 using namespace std;
 using namespace sqt;
@@ -123,7 +123,7 @@ SimplePlayListView::~SimplePlayListView()
 }
 
 /* IPlayListView interfaces */
-void SimplePlayListView::setMediaLoader(const MediaLoader* loader)
+void SimplePlayListView::setMediaLoader(const IMediaLoader* loader)
 {
     mMediaLoader = loader;
 }

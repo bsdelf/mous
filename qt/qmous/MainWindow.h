@@ -3,9 +3,9 @@
 
 #include <QtCore>
 #include <QtGui>
-#include <PluginManager.h>
-#include <MediaLoader.h>
-#include <Player.h>
+#include <core/IPluginManager.h>
+#include <core/IMediaLoader.h>
+#include <core/IPlayer.h>
 
 namespace Ui {
     class MainWindow;
@@ -68,9 +68,9 @@ private:
     QTimer* mTimerUpdateUi;
     const int mUpdateInterval;
 
-    mous::PluginManager mPluginMgr;
-    mous::MediaLoader mMediaLoader;
-    mous::Player mPlayer;
+    mous::IPluginManager* mPluginMgr;
+    mous::IMediaLoader* mMediaLoader;
+    mous::IPlayer* mPlayer;
     const mous::MediaItem* mMediaItem;
 
     bool mSliderPlayingPreempted;

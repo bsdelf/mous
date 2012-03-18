@@ -3,7 +3,7 @@
 #include "MidClickTabBar.hpp"
 #include "CustomHeadTabWidget.hpp"
 #include <scx/AsyncSignal.hpp>
-#include <mous/MediaItem.h>
+#include <common/MediaItem.h>
 #include "SimplePlayListView.h"
 using namespace std;
 using namespace sqt;
@@ -14,6 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     mTimerUpdateUi(new QTimer),
     mUpdateInterval(500),
+    mPluginMgr(IPluginManager::Create()),
+    mMediaLoader(IMediaLoader::Create()),
+    mPlayer(IPlayer::Create()),
     mMediaItem(NULL),
     mSliderPlayingPreempted(false)
 {
@@ -25,8 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    if (mPlayer.GetStatus() == PlayerStatus::Playing) {
-        mPlayer.Close();
+    if (mPlayer->GetStatus() == PlayerStatus::Playing) {
+        mPlayer->Close();
     }
     if (mTimerUpdateUi != NULL) {
         if (mTimerUpdateUi->isActive())
@@ -35,38 +38,42 @@ MainWindow::~MainWindow()
     }
 
     delete ui;
+
+    IPluginManager::Free(mPluginMgr);
+    IMediaLoader::Free(mMediaLoader);
+    IPlayer::Free(mPlayer);
 }
 
 void MainWindow::initMousCore()
 {
-    mPluginMgr.LoadPluginDir("./plugins");
+    mPluginMgr->LoadPluginDir("./plugins");
     vector<string> pathList;
-    mPluginMgr.GetPluginPath(pathList);
+    mPluginMgr->GetPluginPath(pathList);
 
-    vector<PluginAgent*> packAgentList;
-    vector<PluginAgent*> tagAgentList;
-    mPluginMgr.GetPluginAgents(packAgentList, PluginType::MediaPack);
-    mPluginMgr.GetPluginAgents(tagAgentList, PluginType::TagParser);
+    vector<const IPluginAgent*> packAgentList;
+    vector<const IPluginAgent*> tagAgentList;
+    mPluginMgr->GetPluginAgents(packAgentList, PluginType::MediaPack);
+    mPluginMgr->GetPluginAgents(tagAgentList, PluginType::TagParser);
 
     for (size_t i = 0; i < packAgentList.size(); ++i) {
-        mMediaLoader.RegisterPluginAgent(packAgentList[i]);
+        mMediaLoader->RegisterPluginAgent(packAgentList[i]);
     }
     for (size_t i = 0; i < tagAgentList.size(); ++i) {
-        mMediaLoader.RegisterPluginAgent(tagAgentList[i]);
+        mMediaLoader->RegisterPluginAgent(tagAgentList[i]);
     }
 
-    vector<PluginAgent*> decoderAgentList;
-    vector<PluginAgent*> rendererAgentList;
-    mPluginMgr.GetPluginAgents(decoderAgentList, PluginType::Decoder);
-    mPluginMgr.GetPluginAgents(rendererAgentList, PluginType::Renderer);
+    vector<const IPluginAgent*> decoderAgentList;
+    vector<const IPluginAgent*> rendererAgentList;
+    mPluginMgr->GetPluginAgents(decoderAgentList, PluginType::Decoder);
+    mPluginMgr->GetPluginAgents(rendererAgentList, PluginType::Renderer);
 
-    mPlayer.SetRendererDevice("/dev/dsp");
-    mPlayer.RegisterPluginAgent(rendererAgentList[0]);
+    mPlayer->SetRendererDevice("/dev/dsp");
+    mPlayer->RegisterPluginAgent(rendererAgentList[0]);
     for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-        mPlayer.RegisterPluginAgent(decoderAgentList[i]);
+        mPlayer->RegisterPluginAgent(decoderAgentList[i]);
     }
 
-    mPlayer.SigFinished().Connect(&MainWindow::slotPlayerStopped, this);
+    mPlayer->SigFinished()->Connect(&MainWindow::slotPlayerStopped, this);
 
     qDebug() << ">> MediaPack count:" << packAgentList.size();
     qDebug() << ">> TagParser count:" << tagAgentList.size();
@@ -132,9 +139,9 @@ void MainWindow::slotPlayerStopped()
 void MainWindow::slotUpdateUi()
 {
     // Update statusbar.
-    int total = mPlayer.GetRangeDuration();
-    int ms = mPlayer.GetOffsetMs();
-    int kbps = mPlayer.GetBitRate();
+    int total = mPlayer->GetRangeDuration();
+    int ms = mPlayer->GetOffsetMs();
+    int kbps = mPlayer->GetBitRate();
 
     mStatusMsg.sprintf("%d kbps | %.2d:%.2d/%.2d:%.2d",
                  kbps,
@@ -151,34 +158,34 @@ void MainWindow::slotUpdateUi()
 
 void MainWindow::slotBtnPlay()
 {
-    qDebug() << mPlayer.GetStatus();
+    qDebug() << mPlayer->GetStatus();
 
-    switch (mPlayer.GetStatus()) {
+    switch (mPlayer->GetStatus()) {
     case PlayerStatus::Closed:
         if (mMediaItem != NULL) {
-            mPlayer.Open(mMediaItem->url);
+            mPlayer->Open(mMediaItem->url);
             slotBtnPlay();
         }
         break;
 
     case PlayerStatus::Playing:
-        mPlayer.Pause();
+        mPlayer->Pause();
         mTimerUpdateUi->stop();
         ui->btnPlay->setIcon(mIconPlaying);
         break;
 
     case PlayerStatus::Paused:
         mTimerUpdateUi->start(mUpdateInterval);
-        mPlayer.Resume();
+        mPlayer->Resume();
         ui->btnPlay->setIcon(mIconPaused);
         break;
 
     case PlayerStatus::Stopped:
         mTimerUpdateUi->start(mUpdateInterval);
         if (mMediaItem->hasRange)
-            mPlayer.Play(mMediaItem->msBeg, mMediaItem->msEnd);
+            mPlayer->Play(mMediaItem->msBeg, mMediaItem->msEnd);
         else
-            mPlayer.Play();
+            mPlayer->Play();
         ui->btnPlay->setIcon(mIconPaused);
         break;
     }
@@ -186,9 +193,9 @@ void MainWindow::slotBtnPlay()
 
 void MainWindow::slotBtnStop()
 {
-    qDebug() << mPlayer.GetStatus();
+    qDebug() << mPlayer->GetStatus();
 
-    mPlayer.Pause();
+    mPlayer->Pause();
     mTimerUpdateUi->stop();
 }
 
@@ -207,8 +214,8 @@ void MainWindow::slotSliderPlayingValueChanged(int val)
     if (!mSliderPlayingPreempted)
         return;
 
-    uint64_t ms = (double)val / ui->sliderPlaying->maximum() * mPlayer.GetRangeDuration();
-    mPlayer.Seek(mPlayer.GetRangeBegin() + ms);
+    uint64_t ms = (double)val / ui->sliderPlaying->maximum() * mPlayer->GetRangeDuration();
+    mPlayer->Seek(mPlayer->GetRangeBegin() + ms);
 }
 
 void MainWindow::slotBarPlayListMidClick(int index)
@@ -225,7 +232,7 @@ void MainWindow::slotBarPlayListMidClick(int index)
 void MainWindow::slotWidgetPlayListDoubleClick()
 {
     SimplePlayListView* view = new SimplePlayListView(this);
-    view->setMediaLoader(&mMediaLoader);
+    view->setMediaLoader(mMediaLoader);
     connect(view, SIGNAL(sigPlayMediaItem(const mous::MediaItem*)),
             this, SLOT(slotPlayMediaItem(const mous::MediaItem*)));
 
@@ -235,21 +242,21 @@ void MainWindow::slotWidgetPlayListDoubleClick()
 
 void MainWindow::slotPlayMediaItem(const MediaItem *item)
 {
-    if (mPlayer.GetStatus() == PlayerStatus::Playing) {
-        mPlayer.Close();
+    if (mPlayer->GetStatus() == PlayerStatus::Playing) {
+        mPlayer->Close();
     }
-    if (mPlayer.GetStatus() != PlayerStatus::Closed) {
-        mPlayer.Close();
+    if (mPlayer->GetStatus() != PlayerStatus::Closed) {
+        mPlayer->Close();
         mTimerUpdateUi->stop();
     }
 
     mMediaItem = item;
-    mPlayer.Open(mMediaItem->url);
+    mPlayer->Open(mMediaItem->url);
 
     mTimerUpdateUi->start(mUpdateInterval);
     if (mMediaItem->hasRange)
-        mPlayer.Play(mMediaItem->msBeg, mMediaItem->msEnd);
+        mPlayer->Play(mMediaItem->msBeg, mMediaItem->msEnd);
     else
-        mPlayer.Play();
+        mPlayer->Play();
     ui->btnPlay->setIcon(mIconPaused);
 }

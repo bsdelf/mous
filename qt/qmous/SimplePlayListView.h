@@ -19,7 +19,7 @@ public:
 public:
     virtual ~SimplePlayListView();
 
-    virtual void setMediaLoader(const mous::MediaLoader* loader);
+    virtual void setMediaLoader(const mous::IMediaLoader* loader);
 
     virtual const mous::MediaItem* getNextItem();
     virtual const mous::MediaItem* getPreviousItem();
@@ -48,7 +48,7 @@ private slots:
     void slotPlaylistSaveAs();
 
 private:
-    const mous::MediaLoader* mMediaLoader;
+    const mous::IMediaLoader* mMediaLoader;
 
     QString mOldMediaPath;
 

@@ -9,7 +9,7 @@ QT       += core gui
 TARGET = qmous
 TEMPLATE = app
 
-INCLUDEPATH += ../../sdk ../../core
+INCLUDEPATH += ../../sdk
 LIBS += -L./ -Wl,-rpath,./ -lMousCore
 
 SOURCES += main.cpp\

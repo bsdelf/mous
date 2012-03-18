@@ -3,7 +3,7 @@
 
 namespace mous {
     struct MediaItem;
-    class MediaLoader;
+    class IMediaLoader;
 }
 
 class IPlayListView
@@ -11,7 +11,7 @@ class IPlayListView
 public:
     virtual ~IPlayListView() { }
 
-    virtual void setMediaLoader(const mous::MediaLoader* loader) = 0;
+    virtual void setMediaLoader(const mous::IMediaLoader* loader) = 0;
 
     virtual const mous::MediaItem* getNextItem() = 0;
     virtual const mous::MediaItem* getPreviousItem() = 0;
