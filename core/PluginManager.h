@@ -1,7 +1,6 @@
 #ifndef MOUS_PLUGINMANAGER_H
 #define MOUS_PLUGINMANAGER_H
 
-#include <inttypes.h>
 #include <map>
 #include <common/ErrorCode.h>
 #include <core/IPluginManager.h>
