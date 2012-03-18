@@ -61,19 +61,21 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
     fnPluginType = (FnPluginType)dlsym(pHandle, StrGetPluginType);
     if (fnPluginType == NULL) {
         dlclose(pHandle);
+        cout << dlerror() << endl;
         return ErrorCode::MgrBadFormat;
     }
     EmPluginType type = fnPluginType();
+    dlclose(pHandle);
 
     IPluginAgent* pAgent = IPluginAgent::Create(type);
     if (pAgent->Open(path) == ErrorCode::Ok) {
         m_PluginMap.insert(PluginMapPair(path, pAgent));
     } else {
+        cout << dlerror() << endl;
         pAgent->Close();
         IPluginAgent::Free(pAgent);
+        return ErrorCode::MgrBadFormat;
     }
-
-    dlclose(pHandle);
 
     return ErrorCode::Ok;
 }
