@@ -1,7 +1,6 @@
 #ifndef MOUS_PLUGINHELPER_H
 #define MOUS_PLUGINHELPER_H
 
-#include <inttypes.h>
 #include <common/PluginDef.h>
 
 /**
@@ -17,14 +16,14 @@ extern "C" {\
         return p_info;                      \
     }                                       \
     \
-    void* MousCreatObject() {  \
-        return new obj_t; \
-    }                       \
+    void* MousCreatObject() {   \
+        return new obj_t;       \
+    }                           \
     \
     void MousFreeObject(void* p) {              \
         if (p != NULL) {                        \
-            obj_t* dp = static_cast<obj_t*>(p); \
-            delete dp;                          \
+            obj_t* op = static_cast<obj_t*>(p); \
+            delete op;                          \
         }                                       \
     }                                           \
     \

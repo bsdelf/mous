@@ -1,6 +1,8 @@
 #ifndef MOUS_PLUGINDEF_H
 #define MOUS_PLUGINDEF_H
 
+#include <inttypes.h>
+
 /**
  * Plugin common definition.
  */
@@ -25,7 +27,7 @@ struct PluginInfo
     const char* author;
     const char* name;
     const char* description;
-    const int version;
+    const int32_t version;
 };
 
 const char* const StrGetPluginType = "MousGetPluginType";
