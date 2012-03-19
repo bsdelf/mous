@@ -8,8 +8,7 @@
 
 namespace scx {
 
-template<typename signature>
-class AsyncSignal;
+template<typename signature> class AsyncSignal;
 
 }
 
