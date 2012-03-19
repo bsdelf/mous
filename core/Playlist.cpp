@@ -142,7 +142,8 @@ void Playlist::AssignItems(std::deque<void*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.assign(items.begin(), items.end());
-    AdjustSeqRange(true);
+    AdjustSeqIndexes();
+    AdjustShuffleRange(true);
     m_MutexForQue.Unlock();
 }
 
@@ -150,7 +151,8 @@ void Playlist::InsertItem(int index, void* item)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, item);
-    AdjustSeqRange();
+    AdjustSeqIndexes();
+    AdjustShuffleRange();
     m_MutexForQue.Unlock();
 }
 
@@ -158,7 +160,8 @@ void Playlist::InsertItem(int index, deque<void*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
-    AdjustSeqRange();
+    AdjustSeqIndexes();
+    AdjustShuffleRange();
     m_MutexForQue.Unlock();
 }
 
@@ -166,7 +169,8 @@ void Playlist::AppendItem(void* item)
 {
     m_MutexForQue.Lock();
     m_ItemQue.push_back(item);
-    AdjustSeqRange();
+    AdjustSeqIndexes();
+    AdjustShuffleRange();
     m_MutexForQue.Unlock();
 }
 
@@ -174,7 +178,8 @@ void Playlist::AppendItem(deque<void*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
-    AdjustSeqRange();
+    AdjustSeqIndexes();
+    AdjustShuffleRange();
     m_MutexForQue.Unlock();
 }
 
@@ -182,7 +187,8 @@ void Playlist::RemoveItem(int index)
 {
     m_MutexForQue.Lock();
     m_ItemQue.erase(m_ItemQue.begin() + index);
-    AdjustSeqRange();
+    AdjustSeqIndexes();
+    AdjustShuffleRange();
     m_MutexForQue.Unlock();
 }
 
@@ -192,7 +198,8 @@ void Playlist::RemoveItem(const vector<int>& indexes)
     for (int i = indexes.size()-1; i >= 0; --i) {
         m_ItemQue.erase(m_ItemQue.begin() + indexes[i]);
     }
-    AdjustSeqRange();
+    AdjustSeqIndexes();
+    AdjustShuffleRange();
     m_MutexForQue.Unlock();
 }
 
@@ -201,6 +208,7 @@ void Playlist::Clear()
     m_MutexForQue.Lock();
     m_ItemQue.clear();
     m_SeqShuffleQue.clear();
+    AdjustSeqIndexes();
     m_MutexForQue.Unlock();
 }
 
@@ -235,7 +243,7 @@ void Playlist::Reverse()
     m_MutexForQue.Unlock();
 }
 
-void Playlist::AdjustSeqRange(bool reGenerate)
+void Playlist::AdjustSeqIndexes()
 {
     if (!m_ItemQue.empty()) {
         if (m_SeqNormalIndex == -1)
@@ -249,7 +257,10 @@ void Playlist::AdjustSeqRange(bool reGenerate)
         m_SeqRepeatIndex = -1;
         m_SeqShuffleIndex = -1;
     }
+}
 
+void Playlist::AdjustShuffleRange(bool reGenerate)
+{
     if (reGenerate)
         m_SeqShuffleQue.clear();
 

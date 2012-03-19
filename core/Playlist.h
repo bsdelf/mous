@@ -34,7 +34,8 @@ public:
     void Reverse();
 
 private:
-    void AdjustSeqRange(bool reGenerate = false);
+    void AdjustSeqIndexes();
+    void AdjustShuffleRange(bool reGenerate = false);
 
 private:
     EmPlayMode m_PlayMode;
