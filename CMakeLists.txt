@@ -43,7 +43,7 @@ endif()
 # include and link
 include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
-include_directories(BEFORE sdk core)
+include_directories(BEFORE sdk)
 
 # build output dir
 set(OUTPUT_DIR ${MOUS_SOURCE_DIR}/build)
