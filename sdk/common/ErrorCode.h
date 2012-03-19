@@ -33,6 +33,7 @@ enum e
 
     MediaLoaderFailedToLoad,
 
+    PlaylistEmpty,
     PlaylistHitBegin,
     PlaylistHitEnd
 };

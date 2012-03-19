@@ -34,9 +34,7 @@ public:
     void Reverse();
 
 private:
-    void AdjustShuffleRange(bool reGenerate = false);
-    void CorrectSeqIndexes() const;
-    inline int CorrectIndex(int index) const;
+    void AdjustSeqRange(bool reGenerate = false);
 
 private:
     EmPlayMode m_PlayMode;
@@ -46,6 +44,7 @@ private:
     typedef std::deque<void*>::iterator ItemQueIter;
 
     mutable int m_SeqNormalIndex;
+    mutable int m_SeqRepeatIndex;
     mutable int m_SeqShuffleIndex;
     std::deque<int> m_SeqShuffleQue;
 };

@@ -15,9 +15,23 @@ using namespace mous;
 
 bool gStop = false;
 IPlayer* gPlayer = NULL;
+IPlaylist* gPlaylist = NULL;
 
 void OnFinished()
 {
+    if (gPlaylist != NULL && !gStop) {
+        MediaItem* item = (MediaItem*)gPlaylist->SeqCurrent(1);
+        if (item != NULL) {
+            gPlaylist->SeqMoveNext();
+            item = (MediaItem*)gPlaylist->SeqCurrent();
+            gPlayer->Close();
+            gPlayer->Open(item->url);
+            if (item->hasRange)
+                gPlayer->Play(item->msBeg, item->msEnd);
+            else
+                gPlayer->Play();
+        }
+    }
     cout << "Finished!" << endl;
 }
 
@@ -128,9 +142,14 @@ int main(int argc, char** argv)
     }
 
     IPlaylist* playlist = IPlaylist::Create();
+    playlist->SetPlayMode(PlayMode::Repeat);
+    gPlaylist = playlist;
 
     deque<MediaItem*> mediaList;
     loader->LoadMedia(argv[1], mediaList);
+
+    for (size_t i = 0; i < mediaList.size(); ++i)
+        playlist->AppendItem((void*)mediaList[i]);
 
     // Setup player->
     IPlayer* player = IPlayer::Create();
@@ -142,7 +161,10 @@ int main(int argc, char** argv)
     }
 
     // Begin to play.
-    MediaItem* item = mediaList[0];
+    if (playlist->Empty())
+        return -1;
+
+    MediaItem* item = (MediaItem*)playlist->SeqCurrent();
     cout << ">>>> Tag Info" << endl;
     cout << "\ttitle:" << item->title << endl;
     cout << "\tartist:" << item->artist << endl;

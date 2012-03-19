@@ -20,6 +20,7 @@ void IPlaylist::Free(IPlaylist* ptr)
 Playlist::Playlist():
     m_PlayMode(PlayMode::Normal),
     m_SeqNormalIndex(-1),
+    m_SeqRepeatIndex(-1),
     m_SeqShuffleIndex(-1)
 {
 
@@ -43,27 +44,31 @@ const void* Playlist::SeqCurrent(int off) const
 {
     void* item = NULL;
     m_MutexForQue.Lock();
-    CorrectSeqIndexes();
-    switch (m_PlayMode) {
-        case PlayMode::Normal:
-        case PlayMode::Repeat:
-        case PlayMode::RepeatOne:
-        {
-            int index = CorrectIndex(m_SeqNormalIndex + off);
-            if (index >= 0)
-                item = m_ItemQue[index];
-        }
-            break;
 
-        case PlayMode::Shuffle:
-        case PlayMode::ShuffleRepeat:
-        {
-            int index = CorrectIndex(m_SeqShuffleIndex + off);
-            if (index >= 0)
-                item = m_ItemQue[index];
+    if (!m_ItemQue.empty()) {
+        int idx = -1;
+        switch (m_PlayMode) {
+            case PlayMode::Normal:
+                idx = m_SeqNormalIndex + off;
+                break;
+
+            case PlayMode::Repeat:
+            case PlayMode::RepeatOne:
+                idx = (m_SeqRepeatIndex + off) % m_ItemQue.size();
+                break;
+
+            case PlayMode::Shuffle:
+                idx = m_SeqShuffleIndex + off;
+                break;
+
+            case PlayMode::ShuffleRepeat:
+                idx = (m_SeqShuffleIndex + off) % m_ItemQue.size();
+                break;
         }
-            break;
+        if (idx >= 0 && idx < m_ItemQue.size())
+            item = m_ItemQue[idx];
     }
+
     m_MutexForQue.Unlock();
     return item;
 }
@@ -72,23 +77,28 @@ EmErrorCode Playlist::SeqJumpTo(int index) const
 {
     EmErrorCode ret = ErrorCode::Ok;
     m_MutexForQue.Lock();
-    CorrectSeqIndexes();
-    switch (m_PlayMode) {
-        case PlayMode::Normal:
-            break;
+    if (m_ItemQue.empty())
+        ret = ErrorCode::PlaylistEmpty;
+    else if (index < 0)
+        ret = ErrorCode::PlaylistHitBegin;
+    else if (index >= m_ItemQue.size())
+        ret = ErrorCode::PlaylistHitEnd;
+    else
+        switch (m_PlayMode) {
+            case PlayMode::Normal:
+                m_SeqNormalIndex = index;
+                break;
 
-        case PlayMode::Repeat:
-            break;
+            case PlayMode::Repeat:
+            case PlayMode::RepeatOne:
+                m_SeqRepeatIndex = index;
+                break;
 
-        case PlayMode::Shuffle:
-            break;
-
-        case PlayMode::ShuffleRepeat:
-            break;
-
-        case PlayMode::RepeatOne:
-            break;
-    }
+            case PlayMode::Shuffle:
+            case PlayMode::ShuffleRepeat:
+                m_SeqShuffleIndex = index;
+                break;
+        }
     m_MutexForQue.Unlock();
     return ret;
 }
@@ -97,23 +107,33 @@ EmErrorCode Playlist::SeqMoveNext(int step) const
 {
     EmErrorCode ret = ErrorCode::Ok;
     m_MutexForQue.Lock();
-    CorrectSeqIndexes();
+    int* idx = NULL;
     switch (m_PlayMode) {
         case PlayMode::Normal:
+            m_SeqNormalIndex += step;
+            idx = &m_SeqNormalIndex;
             break;
 
         case PlayMode::Repeat:
+            m_SeqRepeatIndex = (m_SeqRepeatIndex + step) % m_ItemQue.size();
+            idx = &m_SeqRepeatIndex;
             break;
 
         case PlayMode::Shuffle:
+            m_SeqShuffleIndex += step;
+            idx = &m_SeqShuffleIndex;
             break;
 
         case PlayMode::ShuffleRepeat:
+            m_SeqShuffleIndex = (m_SeqShuffleIndex + step) % m_ItemQue.size();
+            idx = &m_SeqShuffleIndex;
             break;
 
         case PlayMode::RepeatOne:
+            idx = &m_SeqRepeatIndex;
             break;
     }
+    assert(idx != NULL && *idx >= 0 && *idx < m_ItemQue.size());
     m_MutexForQue.Unlock();
     return ret;
 }
@@ -122,7 +142,7 @@ void Playlist::AssignItems(std::deque<void*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.assign(items.begin(), items.end());
-    AdjustShuffleRange(true);
+    AdjustSeqRange(true);
     m_MutexForQue.Unlock();
 }
 
@@ -130,7 +150,7 @@ void Playlist::InsertItem(int index, void* item)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, item);
-    AdjustShuffleRange();
+    AdjustSeqRange();
     m_MutexForQue.Unlock();
 }
 
@@ -138,7 +158,7 @@ void Playlist::InsertItem(int index, deque<void*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
-    AdjustShuffleRange();
+    AdjustSeqRange();
     m_MutexForQue.Unlock();
 }
 
@@ -146,7 +166,7 @@ void Playlist::AppendItem(void* item)
 {
     m_MutexForQue.Lock();
     m_ItemQue.push_back(item);
-    AdjustShuffleRange();
+    AdjustSeqRange();
     m_MutexForQue.Unlock();
 }
 
@@ -154,7 +174,7 @@ void Playlist::AppendItem(deque<void*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
-    AdjustShuffleRange();
+    AdjustSeqRange();
     m_MutexForQue.Unlock();
 }
 
@@ -162,7 +182,7 @@ void Playlist::RemoveItem(int index)
 {
     m_MutexForQue.Lock();
     m_ItemQue.erase(m_ItemQue.begin() + index);
-    AdjustShuffleRange();
+    AdjustSeqRange();
     m_MutexForQue.Unlock();
 }
 
@@ -172,7 +192,7 @@ void Playlist::RemoveItem(const vector<int>& indexes)
     for (int i = indexes.size()-1; i >= 0; --i) {
         m_ItemQue.erase(m_ItemQue.begin() + indexes[i]);
     }
-    AdjustShuffleRange();
+    AdjustSeqRange();
     m_MutexForQue.Unlock();
 }
 
@@ -215,8 +235,21 @@ void Playlist::Reverse()
     m_MutexForQue.Unlock();
 }
 
-void Playlist::AdjustShuffleRange(bool reGenerate)
+void Playlist::AdjustSeqRange(bool reGenerate)
 {
+    if (!m_ItemQue.empty()) {
+        if (m_SeqNormalIndex == -1)
+            m_SeqNormalIndex = 0;
+        if (m_SeqRepeatIndex == -1)
+            m_SeqRepeatIndex = 0;
+        if (m_SeqShuffleIndex == -1)
+            m_SeqShuffleIndex = 0;
+    } else {
+        m_SeqNormalIndex = -1;
+        m_SeqRepeatIndex = -1;
+        m_SeqShuffleIndex = -1;
+    }
+
     if (reGenerate)
         m_SeqShuffleQue.clear();
 
@@ -244,19 +277,3 @@ void Playlist::AdjustShuffleRange(bool reGenerate)
     }
     cout << endl;
 }
-
-void Playlist::CorrectSeqIndexes() const
-{
-    m_SeqNormalIndex = CorrectIndex(m_SeqNormalIndex);
-    m_SeqShuffleIndex = CorrectIndex(m_SeqShuffleIndex);
-}
-
-int Playlist::CorrectIndex(int index) const
-{
-    if (index >= (int)m_ItemQue.size())
-        index = m_ItemQue.size()-1;
-    else if (index < 0)
-        index = -1;
-    return index;
-}
-
