@@ -30,7 +30,7 @@ void OssRenderer::CloseDevice()
     if (!m_IsOpened || m_Fd == -1)
         return;
 
-    ioctl(m_Fd, SNDCTL_DSP_SYNC);
+    //ioctl(m_Fd, SNDCTL_DSP_SYNC);
     close(m_Fd);
 
     m_Fd = -1;
@@ -54,15 +54,15 @@ EmErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32
     int _sampleRate = sampleRate;
     int _bitsPerSample = bitsPerSample;
 
-    err = ioctl(m_Fd, SOUND_PCM_WRITE_CHANNELS, &_channels);
+    err = ioctl(m_Fd, SNDCTL_DSP_CHANNELS, &_channels);
     if (err < 0 || _channels != channels)
         return ErrorCode::RendererBadChannels;
 
-    err = ioctl(m_Fd, SOUND_PCM_WRITE_RATE, &_sampleRate);
+    err = ioctl(m_Fd, SNDCTL_DSP_SPEED, &_sampleRate);
     if (err < 0 || _sampleRate != sampleRate)
         return ErrorCode::RendererBadSampleRate;
 
-    err = ioctl(m_Fd, SOUND_PCM_WRITE_BITS, &_bitsPerSample);
+    err = ioctl(m_Fd, SNDCTL_DSP_SETFMT, &_bitsPerSample);
     if (err < 0 || _bitsPerSample != bitsPerSample)
         return ErrorCode::RendererBadBitsPerSample;
 
