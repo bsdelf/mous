@@ -121,6 +121,10 @@ int main(int argc, char** argv)
     cout << ">> TagParser count:" << tagAgentList.size() << endl;
     cout << endl;
 
+    vector<const IPluginAgent*> pelAgentList;
+    mgr->GetPluginAgents(pelAgentList, PluginType::PlayerEventListener);
+    cout << ">> PlayerEventListener count:" << pelAgentList.size() << endl;
+
     // Check args enough.
     if (argc < 2) {
         cout << "Usage:" << endl;
@@ -152,13 +156,16 @@ int main(int argc, char** argv)
     for (size_t i = 0; i < mediaList.size(); ++i)
         playlist->AppendItem((void*)mediaList[i]);
 
-    // Setup player->
+    // Setup player
     IPlayer* player = IPlayer::Create();
     player->SetRendererDevice("/dev/dsp");
     player->SigFinished()->Connect(&OnFinished);
     player->RegisterPluginAgent(rendererAgentList[0]);
     for (size_t i = 0; i < decoderAgentList.size(); ++i) {
         player->RegisterPluginAgent(decoderAgentList[i]);
+    }
+    for (size_t i = 0; i < pelAgentList.size(); ++i) {
+        player->RegisterPluginAgent(pelAgentList[i]);
     }
 
     // Begin to play.
