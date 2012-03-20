@@ -29,6 +29,7 @@ option(EnablePluginFlacDecoder "FLAC Decoder" on)
 option(EnablePluginFaadDecoder "FAAD Decoder" on)
 option(EnablePluginTagLibParser "TagLib Parser" on)
 option(EnablePluginCuePack "Cue sheet Parser" on)
+option(EnablePluginPlayerStatistics "Player activity statistics" on)
 
 if (EnableCompileClang)
     set(CMAKE_C_COMPILER "clang")
@@ -126,6 +127,13 @@ if (EnablePluginCuePack)
     file(GLOB SRC_CUEPACK plugins/CuePack/*)
     add_library(CuePack SHARED ${SRC_CUEPACK})
     target_link_libraries(CuePack -lcue)
+endif()
+
+# PlayerStatistics plugin
+if (EnablePluginPlayerStatistics)
+    file(GLOB SRC_PLAYERSTATISTICS plugins/PlayerStatistics/*)
+    add_library(PlayerStatistics SHARED ${SRC_PLAYERSTATISTICS})
+    target_link_libraries(PlayerStatistics)
 endif()
 
 # messages
