@@ -68,6 +68,10 @@ public:
 public:
     virtual const scx::AsyncSignal<void (void)>* SigFinished() const = 0;
     virtual const scx::AsyncSignal<void (void)>* SigStopped() const = 0;
+
+public:
+    virtual const scx::AsyncSignal<void (void)>* SigStartPlay() const = 0;
+    virtual const scx::AsyncSignal<void (void)>* SigStopPlaying() const = 0;
 };
 
 }

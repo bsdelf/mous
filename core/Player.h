@@ -5,6 +5,7 @@
 #include <map>
 #include <common/ErrorCode.h>
 #include <common/AudioMode.h>
+#include <plugin/IPlayerEventListener.h>
 #include <core/IPlayer.h>
 #include <scx/PVBuffer.hpp>
 #include <scx/AsyncSignal.hpp>
@@ -60,11 +61,17 @@ public:
     //scx::Signal<void (void)> SigPaused;
     //scx::Signal<void (void)> SigResumed;
 
+public:
+    virtual const scx::AsyncSignal<void (void)>* SigStartPlay() const;
+    virtual const scx::AsyncSignal<void (void)>* SigStopPlaying() const;
+
 private:
     void AddDecoder(const IPluginAgent* pAgent);
     void RemoveDecoder(const IPluginAgent* pAgent);
     void SetRenderer(const IPluginAgent* pAgent);
     void UnsetRenderer(const IPluginAgent* pAgent);
+    void AddEventListener(const IPluginAgent* pAgent);
+    void RemoveEventListener(const IPluginAgent* pAgent);
 
     void PlayRange(uint64_t beg, uint64_t end);
     void DoSeek(uint64_t msPos);
@@ -138,6 +145,9 @@ private:
 
     scx::AsyncSignal<void (void)> m_SigFinished;
     scx::AsyncSignal<void (void)> m_SigStopped;
+
+    scx::AsyncSignal<void (void)> m_SigStartPlay;
+    scx::AsyncSignal<void (void)> m_SigStopPlaying;
 };
 
 }

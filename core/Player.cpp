@@ -75,6 +75,10 @@ void Player::RegisterPluginAgent(const IPluginAgent* pAgent)
             SetRenderer(pAgent);
             break;
 
+        case PluginType::PlayerEventListener:
+            AddEventListener(pAgent);
+            break;
+
         default:
             break;
     }
@@ -89,6 +93,10 @@ void Player::UnregisterPluginAgent(const IPluginAgent* pAgent)
 
         case PluginType::Renderer:
             UnsetRenderer(pAgent);
+            break;
+
+        case PluginType::PlayerEventListener:
+            RemoveEventListener(pAgent);
             break;
 
         default:
@@ -170,6 +178,25 @@ void Player::UnsetRenderer(const IPluginAgent* pAgent)
             pAgent->FreeObject(m_Renderer);
             m_Renderer = NULL;
         }
+    }
+}
+
+void Player::AddEventListener(const IPluginAgent* pAgent)
+{
+    // Register plugin
+    IPlayerEventListener* pListener = (IPlayerEventListener*)pAgent->CreateObject();
+    pListener->SetEventProvider(this);
+    m_AgentMap.insert(AgentMapPair(pAgent, pListener));
+}
+
+void Player::RemoveEventListener(const IPluginAgent* pAgent)
+{
+    AgentMapIter iter = m_AgentMap.find(pAgent);
+    if (iter != m_AgentMap.end()) {
+        IPlayerEventListener* pListener = (IPlayerEventListener*)iter->second;
+        pListener->UnsetEventProvider();
+        pAgent->FreeObject(pListener);
+        m_AgentMap.erase(iter);
     }
 }
 
@@ -314,6 +341,8 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
     m_SemWakeDecoder.Post();
 
     m_Status = PlayerStatus::Playing;
+
+    m_SigStartPlay.Post();
 }
 
 void Player::Pause()
@@ -338,6 +367,8 @@ void Player::Pause()
     m_UnitBuffers.ResetPV();
 
     m_Status = PlayerStatus::Paused;
+
+    m_SigStopPlaying.Post();
 }
 
 void Player::Resume()
@@ -437,6 +468,16 @@ const AsyncSignal<void (void)>* Player::SigFinished() const
 const AsyncSignal<void (void)>* Player::SigStopped() const
 {
     return &m_SigStopped;
+}
+
+const AsyncSignal<void (void)>* Player::SigStartPlay() const
+{
+    return &m_SigStartPlay;
+}
+
+const AsyncSignal<void (void)>* Player::SigStopPlaying() const
+{
+    return &m_SigStopPlaying;
 }
 
 void Player::WorkForDecoder()
