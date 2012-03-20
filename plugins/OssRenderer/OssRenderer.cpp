@@ -3,6 +3,9 @@
 #include <unistd.h> // write
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
+#include <errno.h>
+#include <iostream>
+using namespace std;
 
 OssRenderer::OssRenderer():
     m_Fd(-1),
@@ -27,27 +30,29 @@ EmErrorCode OssRenderer::OpenDevice(const std::string& path)
 
 void OssRenderer::CloseDevice()
 {
-    if (!m_IsOpened || m_Fd == -1)
+    if (!m_IsOpened || m_Fd < 0)
         return;
 
-    //ioctl(m_Fd, SNDCTL_DSP_SYNC);
+    ioctl(m_Fd, SNDCTL_DSP_SYNC);
     close(m_Fd);
 
     m_Fd = -1;
     m_IsOpened = false;
 }
 
-EmErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32_t bitsPerSample)
+EmErrorCode OssRenderer::SetupDevice(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
-    if (m_IsOpened &&
-            (channels != m_Channels || 
-             sampleRate != m_SampleRate || 
-             bitsPerSample != m_BitsPerSample)) {
-        CloseDevice();
-        EmErrorCode ret = OpenDevice(m_PrevPath);
-        if (ret != ErrorCode::Ok)
-            return ret;
+    if (m_IsOpened
+            && channels == m_Channels
+            && sampleRate == m_SampleRate
+            && bitsPerSample == m_BitsPerSample) {
+        return ErrorCode::Ok;
     }
+
+    CloseDevice();
+    EmErrorCode ret = OpenDevice(m_PrevPath);
+    if (ret != ErrorCode::Ok)
+        return ret;
 
     int err = 0;
     int _channels = channels;
@@ -55,16 +60,28 @@ EmErrorCode OssRenderer::SetupDevice(int32_t channels, int32_t sampleRate, int32
     int _bitsPerSample = bitsPerSample;
 
     err = ioctl(m_Fd, SNDCTL_DSP_CHANNELS, &_channels);
-    if (err < 0 || _channels != channels)
+    errno = 0;
+    if (err == -1 || _channels != channels) {
+        channels = _channels;
+        cout << strerror(errno) << endl;
         return ErrorCode::RendererBadChannels;
+    }
 
+    errno = 0;
     err = ioctl(m_Fd, SNDCTL_DSP_SPEED, &_sampleRate);
-    if (err < 0 || _sampleRate != sampleRate)
+    if (err == -1 || _sampleRate != sampleRate) {
+        sampleRate = _sampleRate;
+        cout << strerror(errno) << endl;
         return ErrorCode::RendererBadSampleRate;
+    }
 
+    errno = 0;
     err = ioctl(m_Fd, SNDCTL_DSP_SETFMT, &_bitsPerSample);
-    if (err < 0 || _bitsPerSample != bitsPerSample)
+    if (err == -1 || _bitsPerSample != bitsPerSample) {
+        bitsPerSample = _bitsPerSample;
+        cout << strerror(errno) << endl;
         return ErrorCode::RendererBadBitsPerSample;
+    }
 
     m_Channels = channels;
     m_SampleRate = sampleRate;
