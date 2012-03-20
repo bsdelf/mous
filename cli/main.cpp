@@ -24,7 +24,8 @@ void OnFinished()
         if (item != NULL) {
             gPlaylist->SeqMoveNext();
             item = (MediaItem*)gPlaylist->SeqCurrent();
-            gPlayer->Close();
+            if (gPlayer->GetStatus() != PlayerStatus::Closed)
+                gPlayer->Close();
             gPlayer->Open(item->url);
             if (item->hasRange)
                 gPlayer->Play(item->msBeg, item->msEnd);
@@ -40,7 +41,7 @@ void OnPlaying()
     while (true) {
         if (gPlayer == NULL || gStop)
             break;
-        uint64_t ms = gPlayer->GetCurrentMs();
+        uint64_t ms = gPlayer->GetOffsetMs();
         cout << gPlayer->GetBitRate() << " kbps " <<
             ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
         usleep(200*1000);
