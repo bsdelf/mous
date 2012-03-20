@@ -21,7 +21,7 @@ public:
     PluginManager();
     ~PluginManager();
 
-    EmErrorCode LoadPluginDir(const std::string& dir);
+    size_t LoadPluginDir(const std::string& dir);
     EmErrorCode LoadPlugin(const std::string& path);
     void UnloadPlugin(const std::string& path);
     void UnloadAllPlugins();

@@ -1,7 +1,6 @@
 #include "PluginManager.h"
 #include <ftw.h>
 #include <sys/stat.h>
-#include <common/PluginDef.h>
 #include <core/IPluginAgent.h>
 using namespace std;
 using namespace mous;
@@ -27,7 +26,7 @@ PluginManager::~PluginManager()
 
 }
 
-EmErrorCode PluginManager::LoadPluginDir(const string& dir)
+size_t PluginManager::LoadPluginDir(const string& dir)
 {
     vector<string> files;
     gFtwFiles = &files;
@@ -38,7 +37,7 @@ EmErrorCode PluginManager::LoadPluginDir(const string& dir)
         LoadPlugin(files[i]);
     }
 
-    return ErrorCode::Ok;
+    return m_PluginMap.size();
 }
 
 EmErrorCode PluginManager::LoadPlugin(const string& path)

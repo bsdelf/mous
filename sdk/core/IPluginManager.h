@@ -20,7 +20,7 @@ public:
 public:
     virtual ~IPluginManager() { }
 
-    virtual EmErrorCode LoadPluginDir(const std::string& dir) = 0;
+    virtual size_t LoadPluginDir(const std::string& dir) = 0;
     virtual EmErrorCode LoadPlugin(const std::string& path) = 0;
     virtual void UnloadPlugin(const std::string& path) = 0;
     virtual void UnloadAllPlugins() = 0;
