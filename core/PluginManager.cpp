@@ -1,12 +1,7 @@
 #include "PluginManager.h"
 #include <ftw.h>
-#include <dlfcn.h>
 #include <sys/stat.h>
-#include <iostream>
 #include <common/PluginDef.h>
-#include <plugin/IDecoder.h>
-#include <plugin/IRenderer.h>
-#include <plugin/IMediaPack.h>
 #include <core/IPluginAgent.h>
 using namespace std;
 using namespace mous;
@@ -48,36 +43,15 @@ EmErrorCode PluginManager::LoadPluginDir(const string& dir)
 
 EmErrorCode PluginManager::LoadPlugin(const string& path)
 {
-    typedef EmPluginType (*FnPluginType)();
-    FnPluginType fnPluginType;
-    void* pHandle = NULL;
-
-    pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-    if (pHandle == NULL) {
-        cout << dlerror() << endl;
-        return ErrorCode::MgrFailedToOpen;
-    }
-
-    fnPluginType = (FnPluginType)dlsym(pHandle, StrGetPluginType);
-    if (fnPluginType == NULL) {
-        dlclose(pHandle);
-        cout << dlerror() << endl;
-        return ErrorCode::MgrBadFormat;
-    }
-    EmPluginType type = fnPluginType();
-    dlclose(pHandle);
-
-    IPluginAgent* pAgent = IPluginAgent::Create(type);
-    if (pAgent->Open(path) == ErrorCode::Ok) {
+    IPluginAgent* pAgent = IPluginAgent::Create();
+    EmErrorCode ret = pAgent->Open(path);
+    if (ret == ErrorCode::Ok) {
         m_PluginMap.insert(PluginMapPair(path, pAgent));
     } else {
-        cout << dlerror() << endl;
-        pAgent->Close();
         IPluginAgent::Free(pAgent);
-        return ErrorCode::MgrBadFormat;
     }
 
-    return ErrorCode::Ok;
+    return ret;
 }
 
 void PluginManager::UnloadPlugin(const string& path)

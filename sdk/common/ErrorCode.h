@@ -10,8 +10,8 @@ enum e
 
     FileNotFound,
 
-    MgrFailedToOpen,
-    MgrBadFormat,
+    PluginFailedToOpen,
+    PluginBadFormat,
 
     DecoderFailedToInit,
     DecoderFailedToOpen,

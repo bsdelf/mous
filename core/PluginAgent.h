@@ -2,93 +2,37 @@
 #define MOUS_PLUGINAGENT_H
 
 #include <core/IPluginAgent.h>
-#include <dlfcn.h>
 
 namespace mous {
 
 class PluginAgent: public IPluginAgent
 {
+    typedef EmPluginType (*FnPluginType)(void);
     typedef const PluginInfo* (*FnPluginInfo)(void);
     typedef void* (*FnCreateObject)(void);
     typedef void (*FnFreeObject)(void*);
 
 public:
-    explicit PluginAgent(EmPluginType type):
-        m_Type(type),
-        m_pHandle(NULL),
-        m_fnGetInfo(NULL),
-        m_fnCreate(NULL),
-        m_fnFree(NULL)
-    {
+    PluginAgent();
+    ~PluginAgent();
 
-    }
+    EmErrorCode Open(const std::string& path);
+    void Close();
 
-    ~PluginAgent()
-    {
-        Close();
-    }
-
-    EmPluginType GetType() const
-    {
-        return m_Type;
-    }
-
-    EmErrorCode Open(const std::string& path)
-    {
-        m_pHandle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-        if (m_pHandle == NULL)
-            return ErrorCode::MgrBadFormat;
-
-        m_fnGetInfo = (FnPluginInfo)dlsym(m_pHandle, StrGetPluginInfo);
-        if (m_fnGetInfo == NULL)
-            return ErrorCode::MgrBadFormat;
-
-        m_fnCreate = (FnCreateObject)dlsym(m_pHandle, StrCreateObject);
-        if (m_fnCreate == NULL)
-            return ErrorCode::MgrBadFormat;
-
-        m_fnFree = (FnFreeObject)dlsym(m_pHandle, StrFreeObject);
-        if (m_fnCreate == NULL)
-            return ErrorCode::MgrBadFormat;
-
-        return ErrorCode::Ok;
-    }
-
-    void Close()
-    {
-        m_fnGetInfo = NULL;
-        m_fnCreate = NULL;
-        m_fnFree = NULL;
-
-        if (m_pHandle != NULL) {
-            dlclose(m_pHandle);
-            m_pHandle = NULL;
-        }
-    }
-
-    const PluginInfo* GetInfo() const
-    {
-        return (m_fnGetInfo != NULL) ? m_fnGetInfo() : NULL;
-    }
-
-    void* CreateObject() const
-    {
-        return m_fnCreate();
-    }
-
-    void FreeObject(void* inf) const
-    {
-        m_fnFree(inf);
-    }
+    EmPluginType GetType() const;
+    const PluginInfo* GetInfo() const;
+    void* CreateObject() const;
+    void FreeObject(void* inf) const;
 
 private:
-    const EmPluginType m_Type;
+    void* m_Handle;
 
-    void* m_pHandle;
+    FnPluginType m_FnPluginType;
+    FnPluginInfo m_FnGetInfo;
+    FnCreateObject m_FnCreate;
+    FnFreeObject m_FnFree;
 
-    FnPluginInfo m_fnGetInfo;
-    FnCreateObject m_fnCreate;
-    FnFreeObject m_fnFree;
+    EmPluginType m_Type;
 };
 
 }
