@@ -243,6 +243,9 @@ EmErrorCode Player::Open(const string& path)
     err = m_Renderer->SetupDevice(channels, samleRate, bitsPerSamle);
     if (err != ErrorCode::Ok) {
         cout << "failed to set renderer:" << err << endl;
+        cout << "   channels:" << channels << endl;
+        cout << "   samleRate:" << samleRate << endl;
+        cout << "   bitsPerSamle:" << bitsPerSamle << endl;
         return err;
     }
 
