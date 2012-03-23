@@ -18,7 +18,7 @@ enum e
     MediaPack,
     TagParser,
     Filter,
-    PlayerEventListener
+    EventWatcher
 };
 }
 typedef PluginType::e EmPluginType;
