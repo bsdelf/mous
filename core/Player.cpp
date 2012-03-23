@@ -75,10 +75,6 @@ void Player::RegisterPluginAgent(const IPluginAgent* pAgent)
             SetRenderer(pAgent);
             break;
 
-        case PluginType::PlayerEventListener:
-            AddEventListener(pAgent);
-            break;
-
         default:
             break;
     }
@@ -93,10 +89,6 @@ void Player::UnregisterPluginAgent(const IPluginAgent* pAgent)
 
         case PluginType::Renderer:
             UnsetRenderer(pAgent);
-            break;
-
-        case PluginType::PlayerEventListener:
-            RemoveEventListener(pAgent);
             break;
 
         default:
@@ -178,25 +170,6 @@ void Player::UnsetRenderer(const IPluginAgent* pAgent)
             pAgent->FreeObject(m_Renderer);
             m_Renderer = NULL;
         }
-    }
-}
-
-void Player::AddEventListener(const IPluginAgent* pAgent)
-{
-    // Register plugin
-    IPlayerEventListener* pListener = (IPlayerEventListener*)pAgent->CreateObject();
-    pListener->SetEventProvider(this);
-    m_AgentMap.insert(AgentMapPair(pAgent, pListener));
-}
-
-void Player::RemoveEventListener(const IPluginAgent* pAgent)
-{
-    AgentMapIter iter = m_AgentMap.find(pAgent);
-    if (iter != m_AgentMap.end()) {
-        IPlayerEventListener* pListener = (IPlayerEventListener*)iter->second;
-        pListener->UnsetEventProvider();
-        pAgent->FreeObject(pListener);
-        m_AgentMap.erase(iter);
     }
 }
 
