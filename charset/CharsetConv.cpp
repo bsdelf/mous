@@ -120,6 +120,9 @@ bool CharsetConv::AutoConvTo(const string& wanted, const char* buf, size_t len, 
 
 bool CharsetConv::ConvFromTo(const string& from, const string& wanted, const char* buf, size_t len, string& content)
 {
+    typedef size_t (*StdIconv)(iconv_t, const char**, size_t*, char**, size_t*);
+    StdIconv std_iconv = (StdIconv)iconv;
+
     if (from.empty() || wanted.empty())
         return false;
     if (from == wanted)
@@ -153,7 +156,7 @@ bool CharsetConv::ConvFromTo(const string& from, const string& wanted, const cha
         }
 
         errno = 0;
-        converted = iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
+        converted = std_iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
         if (converted != (size_t)-1) {
             cout << "done" << endl;
             break;
