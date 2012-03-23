@@ -122,8 +122,8 @@ int main(int argc, char** argv)
     cout << endl;
 
     vector<const IPluginAgent*> pelAgentList;
-    mgr->GetPluginAgents(pelAgentList, PluginType::PlayerEventListener);
-    cout << ">> PlayerEventListener count:" << pelAgentList.size() << endl;
+    mgr->GetPluginAgents(pelAgentList, PluginType::EventWatcher);
+    cout << ">> EventWatcher count:" << pelAgentList.size() << endl;
 
     // Check args enough.
     if (argc < 2) {
@@ -227,10 +227,14 @@ int main(int argc, char** argv)
     loader->UnregisterAll();
     player->UnregisterAll();
     mgr->UnloadAllPlugins();
+    
+    for (size_t i = 0; i < mediaList.size(); ++i) {
+        delete mediaList[i];
+    }
 
     IPlayer::Free(player);
-    IPluginManager::Free(mgr);
     IMediaLoader::Free(loader);
+    IPluginManager::Free(mgr);
     IPlaylist::Free(playlist);
 
     return 0;
