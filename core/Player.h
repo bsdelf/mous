@@ -5,9 +5,8 @@
 #include <map>
 #include <common/ErrorCode.h>
 #include <common/AudioMode.h>
-#include <plugin/IPlayerEventListener.h>
 #include <core/IPlayer.h>
-#include <scx/PVBuffer.hpp>
+#include <scx/LPVBuffer.hpp>
 #include <scx/AsyncSignal.hpp>
 #include <scx/Mutex.hpp>
 #include <scx/SemVar.hpp>
@@ -125,7 +124,7 @@ private:
     scx::SemVar m_SemWakeRenderer;
     scx::Mutex m_MutexRendererSuspended;
 
-    scx::PVBuffer<UnitBuffer> m_UnitBuffers;
+    scx::LPVBuffer<UnitBuffer> m_UnitBuffers;
 
     uint64_t m_UnitBeg;
     uint64_t m_UnitEnd;
