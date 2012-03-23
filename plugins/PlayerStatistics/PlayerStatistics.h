@@ -1,19 +1,19 @@
 #ifndef PLAYERSTATISTICS_H
 #define PLAYERSTATISTICS_H
 
-#include <plugin/IPlayerEventListener.h>
+#include <plugin/IEventWatcher.h>
 #include <core/IPlayer.h>
 #include <scx/AsyncSignal.hpp>
 using namespace mous;
 
-class PlayerStatistics: public IPlayerEventListener
+class PlayerStatistics: public IEventWatcher
 {
 public:
     PlayerStatistics();
     ~PlayerStatistics();
 
-    virtual void SetEventProvider(const IPlayer* player);
-    virtual void UnsetEventProvider();
+    virtual void SetPlayer(const IPlayer* player);
+    virtual void UnsetPlayer();
 
 public:
     void SlotStartPlay();

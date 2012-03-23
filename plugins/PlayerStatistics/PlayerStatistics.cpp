@@ -14,13 +14,13 @@ PlayerStatistics::~PlayerStatistics()
     cout << "PlayerStatistics::m_StartTimes " << m_StartTimes << endl;
 }
 
-void PlayerStatistics::SetEventProvider(const IPlayer* player)
+void PlayerStatistics::SetPlayer(const IPlayer* player)
 {
     player->SigStartPlay()->Connect(&PlayerStatistics::SlotStartPlay, this);
     m_Player = player;
 }
 
-void PlayerStatistics::UnsetEventProvider()
+void PlayerStatistics::UnsetPlayer()
 {
     m_Player->SigStartPlay()->DisconnectReceiver(this);
     m_Player = NULL;

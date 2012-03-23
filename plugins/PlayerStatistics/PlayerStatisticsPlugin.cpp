@@ -8,4 +8,4 @@ static const PluginInfo info = {
     1
 };
 
-MOUS_DEF_PLUGIN(PluginType::PlayerEventListener, &info, PlayerStatistics);
+MOUS_DEF_PLUGIN(PluginType::EventWatcher, &info, PlayerStatistics);
