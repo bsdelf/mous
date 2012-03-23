@@ -1,6 +1,6 @@
 #include "CuePack.h"
 #include <common/MediaItem.h>
-#include <scx/FileHelp.hpp>
+#include <scx/FileHelper.hpp>
 #include <scx/Conv.hpp>
 #include <cstdio>
 #include <iostream>
@@ -32,7 +32,7 @@ void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
     Cd* cd = cue_parse_file(file);
     fclose(file);
 
-    string dir = FileDir(path);
+    string dir = FileHelper::FileDir(path);
 
     DumpCue(dir, cd, list);
 }

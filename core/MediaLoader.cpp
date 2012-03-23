@@ -1,6 +1,6 @@
 #include "MediaLoader.h"
 #include <iostream>
-#include <scx/FileHelp.hpp>
+#include <scx/FileHelper.hpp>
 #include <scx/Conv.hpp>
 #include <common/MediaItem.h>
 #include <plugin/IMediaPack.h>
@@ -158,7 +158,7 @@ EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem*>& list) 
 EmErrorCode MediaLoader::TryUnpack(const string& path, deque<MediaItem*>& list) const
 {
     // Find MediaPack.
-    string suffix = ToLower(FileSuffix(path));
+    string suffix = ToLower(FileHelper::FileSuffix(path));
     MediaPackMapConstIter iter = m_MediaPackMap.find(suffix);
     if (iter == m_MediaPackMap.end()) {
         // General Media
@@ -180,7 +180,7 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list) const
     for (size_t i = 0; i < list.size(); ++i) {
         // Find TagParser.
         MediaItem* item = list[i];
-        string suffix = ToLower(FileSuffix(item->url));
+        string suffix = ToLower(FileHelper::FileSuffix(item->url));
         TagParserMapConstIter iter = m_TagParserMap.find(suffix);
         if (iter == m_TagParserMap.end()) {
             iter = m_TagParserMap.find("*");

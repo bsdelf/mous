@@ -8,7 +8,6 @@
 #include <core/IPluginManager.h>
 #include <scx/Thread.hpp>
 #include <scx/AsyncSignal.hpp>
-#include <scx/FileHelp.hpp>
 using namespace std;
 using namespace scx;
 using namespace mous;

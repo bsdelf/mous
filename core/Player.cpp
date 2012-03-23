@@ -2,7 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include <scx/Conv.hpp>
-#include <scx/FileHelp.hpp>
+#include <scx/FileHelper.hpp>
 #include <plugin/IDecoder.h>
 #include <plugin/IRenderer.h>
 #include <core/IPluginAgent.h>
@@ -199,7 +199,7 @@ void Player::SetRendererVolume(int level)
 
 EmErrorCode Player::Open(const string& path)
 {
-    string suffix = ToLower(FileSuffix(path));
+    string suffix = ToLower(FileHelper::FileSuffix(path));
     cout << "Suffix:" << suffix << endl;
     DecoderMapIter iter = m_DecoderMap.find(suffix);
     if (iter != m_DecoderMap.end()) {
