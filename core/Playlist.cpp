@@ -1,5 +1,6 @@
 #include "Playlist.h"
 #include <cstdlib>
+#include <ctime>
 #include <cassert>
 #include <algorithm>
 #include <iostream>
@@ -266,7 +267,7 @@ void Playlist::AdjustShuffleRange(bool reGenerate)
 
     int need = m_ItemQue.size() - m_SeqShuffleQue.size();
     if (need > 0) {
-        srandomdev();
+        srandom(time(NULL));
         for (int i = 0; i < need; ++i) {
             int inspos = random() % (m_SeqShuffleQue.size()+1);
             m_SeqShuffleQue.insert(m_SeqShuffleQue.begin()+inspos, m_SeqShuffleQue.size());
