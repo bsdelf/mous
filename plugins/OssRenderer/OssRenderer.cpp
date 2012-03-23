@@ -4,6 +4,7 @@
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
 #include <errno.h>
+#include <cstring>
 #include <iostream>
 using namespace std;
 
