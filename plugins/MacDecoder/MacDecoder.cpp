@@ -1,5 +1,4 @@
 #include "MacDecoder.h"
-#include <mac/CharacterHelper.h>
 
 MacDecoder::MacDecoder():
     m_pDecompress(NULL)
@@ -25,7 +24,8 @@ vector<string> MacDecoder::GetFileSuffix() const
 EmErrorCode MacDecoder::Open(const string& url)
 {
     int err;
-    str_utf16* pFileName = GetUTF16FromUTF8((const str_utf8*)url.c_str());
+
+    str_utf16* pFileName = GetUTF16FromUTF8((str_utf8*)url.data());
     m_pDecompress = CreateIAPEDecompress(pFileName, &err);
     delete[] pFileName;
 
@@ -127,4 +127,49 @@ int32_t MacDecoder::GetBitRate() const
 uint64_t MacDecoder::GetDuration() const
 {
     return m_Duration;
+}
+
+// Copyed for MACLIB, it just works, I don't know how.(Yanhui Shen)
+str_utf16 * MacDecoder::GetUTF16FromUTF8(const str_utf8 * pUTF8)
+{
+    // get the length
+    int nCharacters = 0; int nIndex = 0;
+    while (pUTF8[nIndex] != 0)
+    {
+        if ((pUTF8[nIndex] & 0x80) == 0)
+            nIndex += 1;
+        else if ((pUTF8[nIndex] & 0xE0) == 0xE0)
+            nIndex += 3;
+        else
+            nIndex += 2;
+
+        nCharacters += 1;
+    }
+
+    // make a UTF-16 string
+    str_utf16 * pUTF16 = new str_utf16 [nCharacters + 1];
+    nIndex = 0; nCharacters = 0;
+    while (pUTF8[nIndex] != 0)
+    {
+        if ((pUTF8[nIndex] & 0x80) == 0)
+        {
+            pUTF16[nCharacters] = pUTF8[nIndex];
+            nIndex += 1;
+        }
+        else if ((pUTF8[nIndex] & 0xE0) == 0xE0)
+        {
+            pUTF16[nCharacters] = ((pUTF8[nIndex] & 0x1F) << 12) | ((pUTF8[nIndex + 1] & 0x3F) << 6) | (pUTF8[nIndex + 2] & 0x3F);
+            nIndex += 3;
+        }
+        else
+        {
+            pUTF16[nCharacters] = ((pUTF8[nIndex] & 0x3F) << 6) | (pUTF8[nIndex + 1] & 0x3F);
+            nIndex += 2;
+        }
+
+        nCharacters += 1;
+    }
+    pUTF16[nCharacters] = 0;
+
+    return pUTF16; 
 }

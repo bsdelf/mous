@@ -35,6 +35,9 @@ public:
     virtual uint64_t GetDuration() const;
 
 private:
+    static str_utf16 * GetUTF16FromUTF8(const str_utf8 * pUTF8);
+
+private:
     IAPEDecompress* m_pDecompress;
 
     uint32_t m_MaxBytesPerUnit;
