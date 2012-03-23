@@ -2,6 +2,7 @@
 #include "uchardect/src/nscore.h"
 #include "uchardect/src/nsUniversalDetector.h"
 #include <cstring>
+#include <errno.h>
 #include <iconv.h>
 #include <iostream>
 using namespace std;
