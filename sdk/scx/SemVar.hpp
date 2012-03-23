@@ -38,16 +38,18 @@ public:
         //return sem_timewait(&m_Sem, timeout);
     }
 
-    int GetValue()
+    int GetValue() const
     {
         int sval = 0;
-        sem_getvalue(&m_Sem, &sval);
+        sem_t* sem = const_cast<sem_t*>(&m_Sem);
+        sem_getvalue(sem, &sval);
         return sval;
     }
 
-    void Clear()
+    void Clear() const
     {
-        while (TryWait() == 0);
+        sem_t* sem = const_cast<sem_t*>(&m_Sem);
+        while (sem_trywait(sem) == 0);
     }
 
 private:
