@@ -54,7 +54,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 # libCharsetConv
 file(GLOB_RECURSE LIB_CHARSET_CONV charset/*.cpp charset/uchardect/src/*)
 add_library(CharsetConv SHARED ${LIB_CHARSET_CONV})
-target_link_libraries(CharsetConv -liconv)
+if (NOT IS_LINUX)
+    target_link_libraries(CharsetConv -liconv)
+endif()
 
 # libMousCore
 file(GLOB_RECURSE LIB_MOUS_CORE core/*)

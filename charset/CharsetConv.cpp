@@ -1,8 +1,9 @@
 #include "CharsetConv.h"
 #include "uchardect/src/nscore.h"
 #include "uchardect/src/nsUniversalDetector.h"
-#include <iostream>
+#include <cstring>
 #include <iconv.h>
+#include <iostream>
 using namespace std;
 using namespace mous;
 
