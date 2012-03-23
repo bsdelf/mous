@@ -9,7 +9,10 @@ using namespace std;
 
 OssRenderer::OssRenderer():
     m_Fd(-1),
-    m_IsOpened(false)
+    m_IsOpened(false),
+    m_Channels(-1),
+    m_SampleRate(-1),
+    m_BitsPerSample(-1)
 {
 
 }
