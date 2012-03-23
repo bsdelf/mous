@@ -104,6 +104,14 @@ EmErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
     return ErrorCode::Ok;
 }
 
+#ifndef SNDCTL_DSP_GETPLAYVOL 
+#define SNDCTL_DSP_GETPLAYVOL MIXER_READ(SOUND_MIXER_VOLUME)
+#endif
+
+#ifndef SNDCTL_DSP_SETPLAYVOL
+#define SNDCTL_DSP_SETPLAYVOL MIXER_WRITE(SOUND_MIXER_VOLUME)
+#endif
+
 int OssRenderer::GetVolumeLevel() const
 {
     int level = 0;
