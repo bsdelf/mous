@@ -60,10 +60,14 @@ const void* Playlist::SeqCurrent(int off) const
 
             case PlayMode::Shuffle:
                 idx = m_SeqShuffleIndex + off;
+                idx = (idx >= 0 && idx < m_SeqShuffleQue.size()) ?
+                    m_SeqShuffleQue[idx] : -1;
                 break;
 
             case PlayMode::ShuffleRepeat:
                 idx = (m_SeqShuffleIndex + off) % m_ItemQue.size();
+                idx = (idx >= 0 && idx < m_SeqShuffleQue.size()) ?
+                    m_SeqShuffleQue[idx] : -1;
                 break;
         }
         if (idx >= 0 && idx < m_ItemQue.size())
