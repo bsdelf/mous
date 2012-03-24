@@ -251,7 +251,7 @@ EmErrorCode Player::Open(const string& path)
 
     m_Status = PlayerStatus::Stopped;
 
-    return ErrorCode::Ok;
+    return err;
 }
 
 void Player::Close()
