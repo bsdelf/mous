@@ -33,8 +33,11 @@ EmErrorCode FaadDecoder::Open(const string& url)
         return ErrorCode::DecoderFailedToOpen;
 
     unsigned char header[8];
-    fread(header, 1, 8, file);
+    size_t rcount = fread(header, 1, 8, file);
     fclose(file);
+    if (rcount != 8)
+        return ErrorCode::DecoderFailedToOpen;
+
     if (header[4] == 'f' && header[5] == 't' && 
             header[6] == 'y' && header[7] == 'p') {
         m_IsMp4File = true;
