@@ -41,19 +41,17 @@ public:
     int GetValue() const
     {
         int sval = 0;
-        sem_t* sem = const_cast<sem_t*>(&m_Sem);
-        sem_getvalue(sem, &sval);
+        sem_getvalue(&m_Sem, &sval);
         return sval;
     }
 
     void Clear() const
     {
-        sem_t* sem = const_cast<sem_t*>(&m_Sem);
-        while (sem_trywait(sem) == 0);
+        while (sem_trywait(&m_Sem) == 0);
     }
 
 private:
-    sem_t m_Sem;
+    mutable sem_t m_Sem;
 };
 
 }
