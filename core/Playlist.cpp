@@ -60,17 +60,17 @@ const void* Playlist::SeqCurrent(int off) const
 
             case PlayMode::Shuffle:
                 idx = m_SeqShuffleIndex + off;
-                idx = (idx >= 0 && idx < m_SeqShuffleQue.size()) ?
+                idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
                     m_SeqShuffleQue[idx] : -1;
                 break;
 
             case PlayMode::ShuffleRepeat:
                 idx = (m_SeqShuffleIndex + off) % m_ItemQue.size();
-                idx = (idx >= 0 && idx < m_SeqShuffleQue.size()) ?
+                idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
                     m_SeqShuffleQue[idx] : -1;
                 break;
         }
-        if (idx >= 0 && idx < m_ItemQue.size())
+        if (idx >= 0 && idx < (int)m_ItemQue.size())
             item = m_ItemQue[idx];
     }
 
@@ -86,7 +86,7 @@ EmErrorCode Playlist::SeqJumpTo(int index) const
         ret = ErrorCode::PlaylistEmpty;
     else if (index < 0)
         ret = ErrorCode::PlaylistHitBegin;
-    else if (index >= m_ItemQue.size())
+    else if (index >= (int)m_ItemQue.size())
         ret = ErrorCode::PlaylistHitEnd;
     else
         switch (m_PlayMode) {
@@ -138,7 +138,7 @@ EmErrorCode Playlist::SeqMoveNext(int step) const
             idx = &m_SeqRepeatIndex;
             break;
     }
-    assert(idx != NULL && *idx >= 0 && *idx < m_ItemQue.size());
+    assert(idx != NULL && *idx >= 0 && *idx < (int)m_ItemQue.size());
     m_MutexForQue.Unlock();
     return ret;
 }
