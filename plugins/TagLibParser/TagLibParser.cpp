@@ -23,7 +23,7 @@ vector<string> TagLibParser::GetFileSuffix() const
 
 EmErrorCode TagLibParser::Open(const string& path)
 {
-    m_pFileRef = new FileRef(path.c_str(), true, AudioProperties::Accurate);
+    m_pFileRef = new FileRef(path.c_str(), true);//AudioProperties::);
     if (!m_pFileRef->isNull() && m_pFileRef->tag() != NULL) {
         m_pTag = m_pFileRef->tag();
         m_pProp = m_pFileRef->audioProperties();
