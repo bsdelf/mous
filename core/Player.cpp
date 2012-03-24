@@ -470,7 +470,7 @@ void Player::WorkForDecoder()
             assert(buf != NULL);
             assert(buf->data != NULL);
 
-            m_Decoder->ReadUnit(buf->data, buf->used, buf->unitCount);
+            m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
             m_UnitBuffers.RecycleFree(buf);
 
             m_DecoderIndex += buf->unitCount;

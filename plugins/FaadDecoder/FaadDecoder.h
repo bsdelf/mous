@@ -22,7 +22,7 @@ public:
 
     virtual bool IsFormatVaild() const;
 
-    virtual EmErrorCode ReadUnit(char* data, uint32_t& used, uint32_t& unitCount);
+    virtual EmErrorCode DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount);
     virtual EmErrorCode SetUnitIndex(uint64_t index);
     virtual uint32_t GetMaxBytesPerUnit() const;
     virtual uint64_t GetUnitIndex() const;
@@ -39,8 +39,8 @@ private:
     EmErrorCode OpenMp4(const string& url);
     EmErrorCode OpenAac(const string& url);
 
-    EmErrorCode ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCount);
-    EmErrorCode ReadUnitAac(char* data, uint32_t& used, uint32_t& unitCount);
+    EmErrorCode DecodeMp4Unit(char* data, uint32_t& used, uint32_t& unitCount);
+    EmErrorCode DecodeAacUnit(char* data, uint32_t& used, uint32_t& unitCount);
 
 private:
     struct AudioFile

@@ -61,7 +61,7 @@ bool MacDecoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode MacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     int blocksRecv = 0;
 

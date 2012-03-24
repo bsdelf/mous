@@ -21,7 +21,7 @@ public:
 
     virtual bool IsFormatVaild() const = 0;
 
-    virtual EmErrorCode ReadUnit(char* data, uint32_t& used, uint32_t& unitCount) = 0;
+    virtual EmErrorCode DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount) = 0;
     virtual EmErrorCode SetUnitIndex(uint64_t index) = 0;
     virtual uint32_t GetMaxBytesPerUnit() const = 0;
     virtual uint64_t GetUnitIndex() const = 0;

@@ -59,7 +59,7 @@ bool FlacDecoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode FlacDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     gBuf = data;
     if (FLAC__stream_decoder_process_single(m_pDecoder)) {

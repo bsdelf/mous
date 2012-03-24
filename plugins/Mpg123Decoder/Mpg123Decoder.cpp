@@ -75,7 +75,7 @@ bool Mpg123Decoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode Mpg123Decoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode Mpg123Decoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     mpg123_frameinfo info;
     mpg123_info(m_pHandle, &info);

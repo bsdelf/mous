@@ -143,13 +143,13 @@ bool FaadDecoder::IsFormatVaild() const
     return false;
 }
 
-EmErrorCode FaadDecoder::ReadUnit(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FaadDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return m_IsMp4File ? 
-    ReadUnitMp4(data, used, unitCount) : ReadUnitAac(data, used, unitCount);
+        DecodeMp4Unit(data, used, unitCount) : DecodeAacUnit(data, used, unitCount);
 }
 
-EmErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FaadDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     unsigned char* buffer = NULL;
     unsigned int bufferSize = 0;
@@ -224,7 +224,7 @@ EmErrorCode FaadDecoder::ReadUnitMp4(char* data, uint32_t& used, uint32_t& unitC
     return ErrorCode::Ok;
 }
 
-EmErrorCode FaadDecoder::ReadUnitAac(char* data, uint32_t& used, uint32_t& unitCount)
+EmErrorCode FaadDecoder::DecodeAacUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return ErrorCode::Ok;
 }
