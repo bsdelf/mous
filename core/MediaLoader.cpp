@@ -149,6 +149,8 @@ void MediaLoader::RemoveTagParser(const IPluginAgent* pAgent)
 
 EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem*>& list) const
 {
+    list.clear();
+
     TryUnpack(path, list);
     TryParseTag(list);
 
