@@ -23,10 +23,13 @@ struct MediaItem
     int32_t year;
     int32_t track;
 
+    void* userData;
+
     MediaItem():
         duration(-1),
         year(-1),
-        track(-1)
+        track(-1),
+        userData(NULL)
     {
 
     }
