@@ -146,7 +146,7 @@ int main(int argc, char** argv)
 
     // Setup playlist
     IPlaylist* playlist = IPlaylist::Create();
-    playlist->SetPlayMode(PlayMode::Repeat);
+    playlist->SetPlayMode(PlayMode::ShuffleRepeat);
     gPlaylist = playlist;
 
     deque<MediaItem*> mediaList;
