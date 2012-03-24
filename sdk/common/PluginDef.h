@@ -27,7 +27,7 @@ struct PluginInfo
 {
     const char* author;
     const char* name;
-    const char* description;
+    const char* desc;
     const int32_t version;
 };
 

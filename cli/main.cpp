@@ -104,7 +104,7 @@ int main(int argc, char** argv)
         const PluginInfo* info = mgr->GetPluginInfo(pathList[i]);
         cout << ">>>> " << info->author << endl;
         cout << ">>>> " << info->name << endl;
-        cout << ">>>> " << info->description << endl;
+        cout << ">>>> " << info->desc << endl;
         cout << ">>>> " << info->version << endl;
     }
     cout << endl;
