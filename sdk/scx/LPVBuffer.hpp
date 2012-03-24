@@ -94,7 +94,7 @@ public:
     item_t* TakeFree()
     {
         m_FreeListSemVar.Wait(); 
-        m_FreeIndex = ++m_FreeIndex % m_BufferCount;
+        m_FreeIndex = (m_FreeIndex+1) % m_BufferCount;
         return m_BufferArray + m_FreeIndex;
     }
 
@@ -102,7 +102,7 @@ public:
     {
         m_FreeListSemVar.Wait(); 
         m_FreeListMutex.Lock();
-        m_FreeIndex = ++m_FreeIndex % m_BufferCount;
+        m_FreeIndex = (m_FreeIndex+1) % m_BufferCount;
         item_t* item = m_BufferArray + m_FreeIndex;
         m_FreeListMutex.Unlock();
         return item;
@@ -116,7 +116,7 @@ public:
     item_t* TakeData()
     {
         m_DataListSemVar.Wait(); 
-        m_DataIndex = ++m_DataIndex % m_BufferCount;
+        m_DataIndex = (m_DataIndex+1) % m_BufferCount;
         return m_BufferArray + m_DataIndex;
     }
 
@@ -124,7 +124,7 @@ public:
     {
         m_DataListSemVar.Wait(); 
         m_DataListMutex.Lock();
-        m_DataIndex = ++m_DataIndex % m_BufferCount;
+        m_DataIndex = (m_DataIndex+1) % m_BufferCount;
         item_t* item = m_BufferArray + m_DataIndex;
         m_DataListMutex.Unlock();
         return item;
