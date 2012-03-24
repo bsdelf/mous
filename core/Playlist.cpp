@@ -139,7 +139,7 @@ EmErrorCode Playlist::SeqMoveNext(int step) const
     return ret;
 }
 
-void Playlist::AssignItems(std::deque<void*>& items)
+void Playlist::AssignItem(std::deque<MediaItem*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.assign(items.begin(), items.end());
@@ -148,7 +148,7 @@ void Playlist::AssignItems(std::deque<void*>& items)
     m_MutexForQue.Unlock();
 }
 
-void Playlist::InsertItem(int index, void* item)
+void Playlist::InsertItem(int index, MediaItem* item)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, item);
@@ -157,7 +157,7 @@ void Playlist::InsertItem(int index, void* item)
     m_MutexForQue.Unlock();
 }
 
-void Playlist::InsertItem(int index, deque<void*>& items)
+void Playlist::InsertItem(int index, deque<MediaItem*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
@@ -166,7 +166,7 @@ void Playlist::InsertItem(int index, deque<void*>& items)
     m_MutexForQue.Unlock();
 }
 
-void Playlist::AppendItem(void* item)
+void Playlist::AppendItem(MediaItem* item)
 {
     m_MutexForQue.Lock();
     m_ItemQue.push_back(item);
@@ -175,7 +175,7 @@ void Playlist::AppendItem(void* item)
     m_MutexForQue.Unlock();
 }
 
-void Playlist::AppendItem(deque<void*>& items)
+void Playlist::AppendItem(deque<MediaItem*>& items)
 {
     m_MutexForQue.Lock();
     m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
@@ -213,10 +213,10 @@ void Playlist::Clear()
     m_MutexForQue.Unlock();
 }
 
-void* Playlist::GetItem(int index)
+MediaItem* Playlist::GetItem(int index)
 {
     m_MutexForQue.Lock();
-    void* item = m_ItemQue[index];
+    MediaItem* item = m_ItemQue[index];
     m_MutexForQue.Unlock();
     return item;
 }

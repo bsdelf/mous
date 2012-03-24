@@ -144,6 +144,7 @@ int main(int argc, char** argv)
         loader->RegisterPluginAgent(tagAgentList[i]);
     }
 
+    // Setup playlist
     IPlaylist* playlist = IPlaylist::Create();
     playlist->SetPlayMode(PlayMode::Repeat);
     gPlaylist = playlist;
@@ -151,10 +152,8 @@ int main(int argc, char** argv)
     deque<MediaItem*> mediaList;
     for (int i = 1; i < argc; ++i) {
         loader->LoadMedia(argv[i], mediaList);
+        playlist->AppendItem(mediaList);
     }
-
-    for (size_t i = 0; i < mediaList.size(); ++i)
-        playlist->AppendItem((void*)mediaList[i]);
 
     // Setup player
     IPlayer* player = IPlayer::Create();

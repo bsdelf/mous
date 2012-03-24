@@ -3,6 +3,7 @@
 
 #include <core/IPlaylist.h>
 #include <scx/Mutex.hpp>
+#include <common/MediaItem.h>
 
 namespace mous {
 
@@ -19,16 +20,16 @@ public:
     EmErrorCode SeqJumpTo(int index) const;
     EmErrorCode SeqMoveNext(int step = 1) const; 
 
-    void AssignItems(std::deque<void*>& items);
-    void InsertItem(int index, void* item);
-    void InsertItem(int index, std::deque<void*>& items);
-    void AppendItem(void* item);
-    void AppendItem(std::deque<void*>& items);
+    void AssignItem(std::deque<MediaItem*>& items);
+    void InsertItem(int index, MediaItem* item);
+    void InsertItem(int index, std::deque<MediaItem*>& items);
+    void AppendItem(MediaItem* item);
+    void AppendItem(std::deque<MediaItem*>& items);
     void RemoveItem(int index);
     void RemoveItem(const std::vector<int>& indexes);
     void Clear();
 
-    void* GetItem(int index);
+    MediaItem* GetItem(int index);
     int GetItemCount() const;
     bool Empty() const;
     void Reverse();
@@ -41,8 +42,8 @@ private:
     EmPlayMode m_PlayMode;
     mutable scx::Mutex m_MutexForQue;
 
-    std::deque<void*> m_ItemQue;
-    typedef std::deque<void*>::iterator ItemQueIter;
+    std::deque<MediaItem*> m_ItemQue;
+    typedef std::deque<MediaItem*>::iterator ItemQueIter;
 
     mutable int m_SeqNormalIndex;
     mutable int m_SeqRepeatIndex;

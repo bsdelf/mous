@@ -19,6 +19,8 @@ enum e
 }
 typedef PlayMode::e EmPlayMode;
 
+struct MediaItem;
+
 class IPlaylist
 {
 public:
@@ -35,16 +37,16 @@ public:
     virtual EmErrorCode SeqJumpTo(int index) const = 0;
     virtual EmErrorCode SeqMoveNext(int step = 1) const = 0;
 
-    virtual void AssignItems(std::deque<void*>& items) = 0;
-    virtual void InsertItem(int index, void* item) = 0;
-    virtual void InsertItem(int index, std::deque<void*>& items) = 0;
-    virtual void AppendItem(void* item) = 0;
-    virtual void AppendItem(std::deque<void*>& items) = 0;
+    virtual void AssignItem(std::deque<MediaItem*>& items) = 0;
+    virtual void InsertItem(int index, MediaItem* item) = 0;
+    virtual void InsertItem(int index, std::deque<MediaItem*>& items) = 0;
+    virtual void AppendItem(MediaItem* item) = 0;
+    virtual void AppendItem(std::deque<MediaItem*>& items) = 0;
     virtual void RemoveItem(int index) = 0;
     virtual void RemoveItem(const std::vector<int>& indexes) = 0;
     virtual void Clear() = 0;
 
-    virtual void* GetItem(int index) = 0;
+    virtual MediaItem* GetItem(int index) = 0;
     virtual int GetItemCount() const = 0;
     virtual bool Empty() const = 0;
     virtual void Reverse() = 0;
