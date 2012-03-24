@@ -54,6 +54,13 @@ void OnPlaying()
 
 int main(int argc, char** argv)
 {
+    // Check args enough.
+    if (argc < 2) {
+        cout << "Usage:" << endl;
+        cout << argv[0] << " [file1] [file2] [...]" << endl;
+        return -1;
+    }
+
     bool paused = false;
 
     /*
@@ -124,14 +131,6 @@ int main(int argc, char** argv)
     mgr->GetPluginAgents(pelAgentList, PluginType::EventWatcher);
     cout << ">> EventWatcher count:" << pelAgentList.size() << endl;
 
-    // Check args enough.
-    if (argc < 2) {
-        cout << "Usage:" << endl;
-        cout << "mous-cli [-r] [file]" << endl;
-        cout << "-r\tRepeat mode." << endl;
-        return -1;
-    }
-
     // Check plugins enough.
     if (decoderAgentList.empty() || rendererAgentList.empty())
         return -2;
@@ -150,7 +149,9 @@ int main(int argc, char** argv)
     gPlaylist = playlist;
 
     deque<MediaItem*> mediaList;
-    loader->LoadMedia(argv[1], mediaList);
+    for (int i = 1; i < argc; ++i) {
+        loader->LoadMedia(argv[i], mediaList);
+    }
 
     for (size_t i = 0; i < mediaList.size(); ++i)
         playlist->AppendItem((void*)mediaList[i]);
