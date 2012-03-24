@@ -1,5 +1,5 @@
-#ifndef MOUS_ARGVDEF_H
-#define MOUS_ARGVDEF_H
+#ifndef MOUS_OPTION_H
+#define MOUS_OPTION_H
 
 #include <inttypes.h>
 #include <string>
@@ -8,7 +8,7 @@
 
 namespace mous {
 
-namespace ArgvType {
+namespace OptionType {
 enum e {
     None = 0,
 
@@ -24,33 +24,30 @@ enum e {
     RangedFloat
 };
 }
-typedef ArgvType::e EmArgvType;
+typedef OptionType::e EmOptionType;
 
-typedef std::pair<void*, EmArgvType> ArgvPair;
-typedef std::pair<const void*, EmArgvType> ArgvConstPair;
-
-struct ArgvInt
+struct OptionInt
 {
     std::string desc;
     int32_t defaultVal;
     mutable int32_t userVal; 
 };
 
-struct ArgvFloat
+struct OptionFloat
 {
     std::string desc;
     double defaultVal;
     mutable double userVal; 
 };
 
-struct ArgvString
+struct OptionString
 {
     std::string desc;
     std::string defaultVal;
     mutable std::string userVal; 
 };
 
-struct ArgvEnumedInt
+struct OptionEnumedInt
 {
     std::string desc;
     std::vector<int32_t> enumedVal;
@@ -58,7 +55,7 @@ struct ArgvEnumedInt
     mutable size_t userChoice; 
 };
 
-struct ArgvEnumedFloat
+struct OptionEnumedFloat
 {
     std::string desc;
     std::vector<double> enumedtVal;
@@ -66,7 +63,7 @@ struct ArgvEnumedFloat
     mutable size_t userChoice; 
 };
 
-struct ArgvEnumedString
+struct OptionEnumedString
 {
     std::string desc;
     std::vector<std::string> enumedVal;
@@ -74,7 +71,7 @@ struct ArgvEnumedString
     mutable size_t userChoice; 
 };
 
-struct ArgvRangedInt
+struct OptionRangedInt
 {
     std::string desc;
     int32_t min;
@@ -83,7 +80,7 @@ struct ArgvRangedInt
     mutable int32_t userVal; 
 };
 
-struct ArgvRangedFloat
+struct OptionRangedFloat
 {
     std::string desc;
     double min;
@@ -95,16 +92,20 @@ struct ArgvRangedFloat
 class OptionProvider
 {
 public:
+    typedef std::pair<void*, EmOptionType> OptionPair;
+    typedef std::pair<const void*, EmOptionType> ConstOptionPair;
+
+public:
     virtual ~OptionProvider() { }
 
-    // use my facility, implement these
-    virtual bool GetOptions(std::vector<ArgvConstPair>& list) const { return false; }
-    virtual bool PickOptions() { return false; }
-    virtual bool PickOption(size_t index) { return false; }
+    // use my facility, reimplement these
+    virtual bool GetOptions(std::vector<ConstOptionPair>& list) const { return false; }
+    virtual bool PickOptions() const { return false; }
+    virtual bool PickOption(size_t index) const { return false; }
 
-    // if you want to use getopt(), implement these
+    // use getopt(), reimplement these
     virtual const char* GetUsage() const { return NULL; }
-    virtual bool SetOptions(const char* opts) { return false; }
+    virtual bool SetOptions(int argc, const char* argv[]) const { return false; }
 };
 
 }
