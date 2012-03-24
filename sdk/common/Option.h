@@ -89,14 +89,14 @@ struct OptionRangedFloat
     mutable double userVal; 
 };
 
-class OptionProvider
+class IOptionProvider
 {
 public:
     typedef std::pair<void*, EmOptionType> OptionPair;
     typedef std::pair<const void*, EmOptionType> ConstOptionPair;
 
 public:
-    virtual ~OptionProvider() { }
+    virtual ~IOptionProvider() { }
 
     // use my facility, reimplement these
     virtual bool GetOptions(std::vector<ConstOptionPair>& list) const { return false; }

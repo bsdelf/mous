@@ -4,10 +4,11 @@
 #include <inttypes.h>
 #include <string>
 #include <common/ErrorCode.h>
+#include <common/Option.h>
 
 namespace mous {
 
-class IRenderer
+class IRenderer: public IOptionProvider
 {
 public:
     virtual ~IRenderer() { }

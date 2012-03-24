@@ -5,10 +5,11 @@
 #include <vector>
 #include <string>
 #include <common/ErrorCode.h>
+#include <common/Option.h>
 
 namespace mous {
 
-class ITagParser
+class ITagParser: public IOptionProvider
 {
 public:
     virtual ~ITagParser() { }

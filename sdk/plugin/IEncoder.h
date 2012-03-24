@@ -4,10 +4,11 @@
 #include <inttypes.h>
 #include <common/AudioMode.h>
 #include <common/ErrorCode.h>
+#include <common/Option.h>
 
 namespace mous {
 
-class IEncoder
+class IEncoder: public IOptionProvider
 {
 public:
     virtual ~IEncoder() { }

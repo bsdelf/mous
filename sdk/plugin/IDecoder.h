@@ -6,10 +6,11 @@
 #include <vector>
 #include <common/AudioMode.h>
 #include <common/ErrorCode.h>
+#include <common/Option.h>
 
 namespace mous {
 
-class IDecoder 
+class IDecoder: public IOptionProvider
 {
 public:
     virtual ~IDecoder() { }

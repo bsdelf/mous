@@ -5,12 +5,13 @@
 #include <vector>
 #include <deque>
 #include <string>
+#include <common/Option.h>
 
 namespace mous {
 
 struct MediaItem;
 
-class IMediaPack
+class IMediaPack: public IOptionProvider
 {
 public:
     virtual ~IMediaPack() { }
