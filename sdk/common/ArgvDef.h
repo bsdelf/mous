@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace mous {
 
@@ -24,6 +25,9 @@ enum e {
 };
 }
 typedef ArgvType::e EmArgvType;
+
+typedef std::pair<void*, EmArgvType> ArgvPair;
+typedef std::pair<const void*, EmArgvType> ArgvConstPair;
 
 struct ArgvInt
 {
@@ -86,6 +90,21 @@ struct ArgvRangedFloat
     double max;
     double defaultVal;
     mutable double userVal; 
+};
+
+class OptionProvider
+{
+public:
+    virtual ~OptionProvider() { }
+
+    // use my facility, implement these
+    virtual bool GetOptions(std::vector<ArgvConstPair>& list) const { return false; }
+    virtual bool PickOptions() { return false; }
+    virtual bool PickOption(size_t index) { return false; }
+
+    // if you want to use getopt(), implement these
+    virtual const char* GetUsage() const { return NULL; }
+    virtual bool SetOptions(const char* opts) { return false; }
 };
 
 }
