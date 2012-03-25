@@ -171,13 +171,14 @@ int main(int argc, char** argv)
     {
         vector<PluginOption> list;
         player->GetPluginOption(list);
-        cout << ">> Plugin options:" << endl;
+        cout << ">> Player plugin options:" << endl;
         for (size_t i = 0; i < list.size(); ++i) {
+            PluginOption& opt = list[i];
             cout << ">>>> index:" << i+1 << endl;
-            cout << "\tplugin type: " << ToString(list[i].pluginType)<< endl;
-            for (size_t i = 0; i < list[i].options.size(); ++i) {
-                cout << "\t\t option type: " << ToString(list[i].options[i].second) << endl;
-                cout << "\t\t option desc: " << list[i].options[i].first->desc << endl;
+            cout << "\tplugin type: " << ToString(opt.pluginType)<< endl;
+            for (size_t io = 0; io < opt.options.size(); ++io) {
+                cout << "\t\t option type: " << ToString(opt.options[io].second) << endl;
+                cout << "\t\t option desc: " << opt.options[io].first->desc << endl;
             }
         }
     }
