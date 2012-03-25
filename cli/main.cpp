@@ -7,6 +7,7 @@
 #include <core/IPlaylist.h>
 #include <core/IMediaLoader.h>
 #include <core/IPluginManager.h>
+#include <scx/Mutex.hpp>
 #include <scx/Thread.hpp>
 #include <scx/AsyncSignal.hpp>
 using namespace std;
@@ -16,9 +17,11 @@ using namespace mous;
 bool gStop = false;
 IPlayer* gPlayer = NULL;
 IPlaylist* gPlaylist = NULL;
+Mutex gMutexForSwitch;
 
 void OnFinished()
 {
+    gMutexForSwitch.Lock();
     if (gPlaylist != NULL && !gStop) {
         MediaItem* item = (MediaItem*)gPlaylist->SeqCurrent(1);
         if (item != NULL) {
@@ -33,6 +36,7 @@ void OnFinished()
                 gPlayer->Play();
         }
     }
+    gMutexForSwitch.Unlock();
     cout << "Finished!" << endl;
 }
 
@@ -41,9 +45,11 @@ void OnPlaying()
     while (true) {
         if (gPlayer == NULL || gStop)
             break;
+        gMutexForSwitch.Lock();
         uint64_t ms = gPlayer->GetOffsetMs();
         cout << gPlayer->GetBitRate() << " kbps " <<
             ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
+        gMutexForSwitch.Unlock();
         usleep(200*1000);
     }
 }
