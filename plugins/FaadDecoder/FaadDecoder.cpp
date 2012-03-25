@@ -76,9 +76,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
 
     m_Track = GetAACTrack(m_Infile);
     if (m_Track < 0) {
-        NeAACDecClose(m_pDecoder);
-        mp4ff_close(m_Infile);
-        fclose(m_File);
+        Close();
         return ErrorCode::DecoderFailedToInit;
     }
 
@@ -89,9 +87,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     unsigned long sampleRate;
     unsigned char channels;
     if (NeAACDecInit2(m_pDecoder, confBuf, confBufSize, &sampleRate, &channels) < 0) {
-        NeAACDecClose(m_pDecoder);
-        mp4ff_close(m_Infile);
-        fclose(m_File);
+        Close();
         return ErrorCode::DecoderFailedToInit;
     }
     m_SampleRate = sampleRate;
@@ -131,14 +127,20 @@ EmErrorCode FaadDecoder::OpenAac(const string& url)
 
 void FaadDecoder::Close()
 {
-    if (m_pDecoder != NULL)
+    if (m_pDecoder != NULL) {
         NeAACDecClose(m_pDecoder);
+        m_pDecoder = NULL;
+    }
 
-    if (m_Infile != NULL)
+    if (m_Infile != NULL) {
         mp4ff_close(m_Infile);
+        m_Infile = NULL;
+    }
 
-    if (m_File != NULL)
+    if (m_File != NULL) {
         fclose(m_File);
+        m_File = NULL;
+    }
 }
 
 bool FaadDecoder::IsFormatVaild() const
@@ -163,9 +165,7 @@ EmErrorCode FaadDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& uni
     int rc = mp4ff_read_sample(m_Infile, m_Track, m_SampleIndex, &buffer,  &bufferSize);
 
     if (rc == 0) {
-        NeAACDecClose(m_pDecoder);
-        mp4ff_close(m_Infile);
-        fclose(m_File);
+        Close();
         return ErrorCode::DecoderFailedToRead;
     }
 
