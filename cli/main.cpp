@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <common/MediaItem.h>
+#include <common/PluginOption.h>
 #include <core/IPlayer.h>
 #include <core/IPlaylist.h>
 #include <core/IMediaLoader.h>
@@ -157,7 +158,6 @@ int main(int argc, char** argv)
 
     // Setup player
     IPlayer* player = IPlayer::Create();
-    player->SetRendererDevice("/dev/dsp");
     player->SigFinished()->Connect(&OnFinished);
     player->RegisterPluginAgent(rendererAgentList[0]);
     for (size_t i = 0; i < decoderAgentList.size(); ++i) {
@@ -165,6 +165,20 @@ int main(int argc, char** argv)
     }
     for (size_t i = 0; i < pelAgentList.size(); ++i) {
         player->RegisterPluginAgent(pelAgentList[i]);
+    }
+
+    // Show player options 
+    {
+        vector<PluginOption> list;
+        player->GetPluginOption(list);
+        cout << ">> Plugin options:" << endl;
+        for (size_t i = 0; i < list.size(); ++i) {
+            cout << ">>>> index:" << i+1 << endl;
+            cout << "\tplugin type: " << ToString(list[i].pluginType)<< endl;
+            for (size_t i = 0; i < list[i].options.size(); ++i) {
+                cout << "\t\t option type: " << ToString(list[i].options[i].second) << endl;
+            }
+        }
     }
 
     // Begin to play.
