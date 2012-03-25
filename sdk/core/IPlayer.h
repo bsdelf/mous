@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <string>
+#include <vector>
 #include <common/ErrorCode.h>
 #include <common/AudioMode.h>
 
@@ -15,6 +16,7 @@ template<typename signature> class AsyncSignal;
 namespace mous {
 
 class IPluginAgent;
+struct PluginOption;
 
 namespace PlayerStatus {
 enum e
@@ -64,6 +66,9 @@ public:
     virtual uint64_t GetOffsetMs() const = 0;
     virtual uint64_t GetCurrentMs() const = 0;
     virtual EmAudioMode GetAudioMode() const = 0;
+
+    // reimplement this to provide options
+    virtual bool GetPluginOption(std::vector<PluginOption>& list) const { return false; };
 
 public:
     virtual const scx::AsyncSignal<void (void)>* SigFinished() const = 0;

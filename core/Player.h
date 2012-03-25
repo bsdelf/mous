@@ -54,6 +54,8 @@ public:
     uint64_t GetCurrentMs() const;
     EmAudioMode GetAudioMode() const;
 
+    bool GetPluginOption(std::vector<PluginOption>& list) const;
+
 public:
     const scx::AsyncSignal<void (void)>* SigFinished() const;
     const scx::AsyncSignal<void (void)>* SigStopped() const;
@@ -137,10 +139,12 @@ private:
     std::map<const IPluginAgent*, void*> m_AgentMap;
     typedef std::pair<const IPluginAgent*, void*> AgentMapPair;
     typedef std::map<const IPluginAgent*, void*>::iterator AgentMapIter;
+    typedef std::map<const IPluginAgent*, void*>::const_iterator AgentMapConstIter;
 
     std::map<std::string, std::vector<IDecoder*>*> m_DecoderMap;
     typedef std::pair<std::string, std::vector<IDecoder*>*> DecoderMapPair;
     typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
+    typedef std::map<std::string, std::vector<IDecoder*>*>::const_iterator DecoderMapConstIter;
 
     scx::AsyncSignal<void (void)> m_SigFinished;
     scx::AsyncSignal<void (void)> m_SigStopped;

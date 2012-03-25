@@ -3,6 +3,7 @@
 #include <iostream>
 #include <scx/Conv.hpp>
 #include <scx/FileHelper.hpp>
+#include <common/PluginOption.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IRenderer.h>
 #include <core/IPluginAgent.h>
@@ -398,11 +399,6 @@ int32_t Player::GetSamleRate() const
     return (m_Decoder != NULL) ? m_Decoder->GetSampleRate() : -1;
 }
 
-EmAudioMode Player::GetAudioMode() const
-{
-    return (m_Decoder != NULL) ? m_Decoder->GetAudioMode() : AudioMode::None;
-}
-
 uint64_t Player::GetDuration() const
 {
     return m_Decoder->GetDuration();
@@ -431,6 +427,45 @@ uint64_t Player::GetOffsetMs() const
 uint64_t Player::GetCurrentMs() const
 {
     return m_RendererIndex / m_UnitPerMs;
+}
+
+EmAudioMode Player::GetAudioMode() const
+{
+    return (m_Decoder != NULL) ? m_Decoder->GetAudioMode() : AudioMode::None;
+}
+
+bool Player::GetPluginOption(std::vector<PluginOption>& list) const
+{
+    list.resize(m_AgentMap.size());
+    size_t listIdx = 0;
+    for (AgentMapConstIter iter = m_AgentMap.begin();
+            iter != m_AgentMap.end(); ++iter) {
+
+        const IPluginAgent* agent = iter->first;
+
+        list[listIdx].pluginType = agent->GetType();
+        list[listIdx].pluginInfo = agent->GetInfo();
+        switch (agent->GetType()) {
+            case PluginType::Decoder:
+            {
+                IDecoder* decoder = (IDecoder*)iter->second;
+                decoder->GetOptions(list[listIdx].options);
+            }
+                break;
+
+            case PluginType::Renderer:
+            {
+                IRenderer* renderer = (IRenderer*)iter->second;
+                renderer->GetOptions(list[listIdx].options);
+            }
+                break;
+
+            default:
+                break;
+        }
+        ++listIdx;
+    }
+    return true;
 }
 
 const AsyncSignal<void (void)>* Player::SigFinished() const
