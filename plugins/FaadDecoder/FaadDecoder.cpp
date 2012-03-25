@@ -3,7 +3,10 @@
 #include <iostream>
 using namespace std;
 
-FaadDecoder::FaadDecoder()
+FaadDecoder::FaadDecoder():
+    m_File(NULL),
+    m_Infile(NULL),
+    m_NeAACDecHandle(NULL)
 {
 
 }
@@ -64,11 +67,11 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     m_Mp4Callback.seek = &SeekCallback;
     m_Mp4Callback.user_data = m_File;
 
-    m_pDecoder = NeAACDecOpen();
-    config = NeAACDecGetCurrentConfiguration(m_pDecoder);
+    m_NeAACDecHandle = NeAACDecOpen();
+    config = NeAACDecGetCurrentConfiguration(m_NeAACDecHandle);
     config->outputFormat = FAAD_FMT_16BIT;//outputFormat;
     config->downMatrix = 0;//downMatrix;
-    NeAACDecSetConfiguration(m_pDecoder, config);
+    NeAACDecSetConfiguration(m_NeAACDecHandle, config);
 
     m_Infile = mp4ff_open_read(&m_Mp4Callback);
     if (m_Infile == NULL)
@@ -86,7 +89,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
 
     unsigned long sampleRate;
     unsigned char channels;
-    if (NeAACDecInit2(m_pDecoder, confBuf, confBufSize, &sampleRate, &channels) < 0) {
+    if (NeAACDecInit2(m_NeAACDecHandle, confBuf, confBufSize, &sampleRate, &channels) < 0) {
         Close();
         return ErrorCode::DecoderFailedToInit;
     }
@@ -127,9 +130,9 @@ EmErrorCode FaadDecoder::OpenAac(const string& url)
 
 void FaadDecoder::Close()
 {
-    if (m_pDecoder != NULL) {
-        NeAACDecClose(m_pDecoder);
-        m_pDecoder = NULL;
+    if (m_NeAACDecHandle != NULL) {
+        NeAACDecClose(m_NeAACDecHandle);
+        m_NeAACDecHandle = NULL;
     }
 
     if (m_Infile != NULL) {
@@ -170,7 +173,7 @@ EmErrorCode FaadDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& uni
     }
 
     NeAACDecFrameInfo frameInfo;
-    void* sampleBuf = NeAACDecDecode(m_pDecoder, &frameInfo, buffer, bufferSize);
+    void* sampleBuf = NeAACDecDecode(m_NeAACDecHandle, &frameInfo, buffer, bufferSize);
     if (buffer != NULL)
         free(buffer);
 

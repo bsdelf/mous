@@ -69,7 +69,7 @@ private:
     bool m_IsMp4File;
 
     mp4ff_t* m_Infile;
-    NeAACDecHandle m_pDecoder;
+    NeAACDecHandle m_NeAACDecHandle;
     NeAACDecFrameInfo m_FrameInfo;
 
     int m_Track;
