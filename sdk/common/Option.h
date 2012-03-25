@@ -56,6 +56,7 @@ inline const char* ToString(EmOptionType type)
         case OptionType::RangedFloat:
             return "RangedFloat";
     }
+    return "";
 }
 
 struct OptionInt

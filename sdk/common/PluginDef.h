@@ -63,6 +63,7 @@ inline const char* ToString(EmPluginType type)
         case PluginType::EventWatcher:
             return "EventWatche";
     }
+    return "";
 }
 
 }
