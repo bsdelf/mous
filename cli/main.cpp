@@ -177,6 +177,7 @@ int main(int argc, char** argv)
             cout << "\tplugin type: " << ToString(list[i].pluginType)<< endl;
             for (size_t i = 0; i < list[i].options.size(); ++i) {
                 cout << "\t\t option type: " << ToString(list[i].options[i].second) << endl;
+                cout << "\t\t option desc: " << list[i].options[i].first->desc << endl;
             }
         }
     }
