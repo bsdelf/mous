@@ -31,7 +31,7 @@ private:
     int32_t m_SampleRate;
     int32_t m_BitsPerSample;
 
-    OptionString m_OptDevicePath;
+    StringOption m_OptDevicePath;
 };
 
 #endif
