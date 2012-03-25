@@ -26,6 +26,38 @@ enum e {
 }
 typedef OptionType::e EmOptionType;
 
+inline const char* ToString(EmOptionType type)
+{
+    switch (type) {
+        case OptionType::None:
+            return "None";
+
+        case OptionType::Int:
+            return "Int";
+
+        case OptionType::Float:
+            return "Float";
+
+        case OptionType::String:
+            return "String";
+
+        case OptionType::EnumedInt:
+            return "EnumedInt";
+
+        case OptionType::EnumedFloat:
+            return "EnumedFloat";
+
+        case OptionType::EnumedString:
+            return "EnumedString";
+
+        case OptionType::RangedInt:
+            return "RangedInt";
+
+        case OptionType::RangedFloat:
+            return "RangedFloat";
+    }
+}
+
 struct OptionInt
 {
     std::string desc;
