@@ -31,7 +31,6 @@ public:
     void UnregisterPluginAgent(const IPluginAgent* pAgent);
     void UnregisterAll();
 
-    void SetRendererDevice(const std::string& path);
     int GetRendererVolume() const;
     void SetRendererVolume(int level);
 
@@ -109,8 +108,6 @@ private:
 
 private:
     EmPlayerStatus m_Status;
-
-    std::string m_RendererDevice;
 
     bool m_StopDecoder;
     bool m_SuspendDecoder;

@@ -155,7 +155,7 @@ void Player::SetRenderer(const IPluginAgent* pAgent)
     m_Renderer = (IRenderer*)pAgent->CreateObject();
     m_AgentMap.insert(AgentMapPair(pAgent, m_Renderer));
 
-    m_Renderer->OpenDevice(m_RendererDevice);
+    m_Renderer->Open();
 }
 
 void Player::UnsetRenderer(const IPluginAgent* pAgent)
@@ -167,7 +167,7 @@ void Player::UnsetRenderer(const IPluginAgent* pAgent)
         m_AgentMap.erase(iter);
 
         if (m_Renderer != NULL) {
-            m_Renderer->CloseDevice();
+            m_Renderer->Close();
             pAgent->FreeObject(m_Renderer);
             m_Renderer = NULL;
         }
@@ -180,11 +180,6 @@ void Player::UnregisterAll()
         AgentMapIter iter = m_AgentMap.begin();
         UnregisterPluginAgent(iter->first);
     }
-}
-
-void Player::SetRendererDevice(const string& path)
-{
-    m_RendererDevice = path;
 }
 
 int Player::GetRendererVolume() const
@@ -241,7 +236,7 @@ EmErrorCode Player::Open(const string& path)
     cout << "channels:" << channels << endl;
     cout << "samleRate:" << samleRate << endl;
     cout << "bitsPerSamle:" << bitsPerSamle << endl;
-    err = m_Renderer->SetupDevice(channels, samleRate, bitsPerSamle);
+    err = m_Renderer->Setup(channels, samleRate, bitsPerSamle);
     if (err != ErrorCode::Ok) {
         cout << "failed to set renderer:" << err << endl;
         cout << "   channels:" << channels << endl;
@@ -436,34 +431,39 @@ EmAudioMode Player::GetAudioMode() const
 
 bool Player::GetPluginOption(std::vector<PluginOption>& list) const
 {
-    list.resize(m_AgentMap.size());
-    size_t listIdx = 0;
-    for (AgentMapConstIter iter = m_AgentMap.begin();
+    list.clear();
+    bool hasOpt;
+    PluginOption optionItem;
+
+    for (AgentMapConstIter iter = m_AgentMap.begin(); 
             iter != m_AgentMap.end(); ++iter) {
 
         const IPluginAgent* agent = iter->first;
 
-        list[listIdx].pluginType = agent->GetType();
-        list[listIdx].pluginInfo = agent->GetInfo();
+        optionItem.pluginType = agent->GetType();
+        optionItem.pluginInfo = agent->GetInfo();
         switch (agent->GetType()) {
             case PluginType::Decoder:
             {
                 IDecoder* decoder = (IDecoder*)iter->second;
-                decoder->GetOptions(list[listIdx].options);
+                hasOpt = decoder->GetOptions(optionItem.options);
             }
                 break;
 
             case PluginType::Renderer:
             {
                 IRenderer* renderer = (IRenderer*)iter->second;
-                renderer->GetOptions(list[listIdx].options);
+                hasOpt = renderer->GetOptions(optionItem.options);
             }
                 break;
 
             default:
+                hasOpt = false;
                 break;
         }
-        ++listIdx;
+
+        if (hasOpt)
+            list.push_back(optionItem);
     }
     return true;
 }
@@ -537,7 +537,7 @@ void Player::WorkForRenderer()
             assert(buf != NULL);
             assert(buf->data != NULL);
 
-            m_Renderer->WriteDevice(buf->data, buf->used);
+            m_Renderer->Write(buf->data, buf->used);
             m_UnitBuffers.RecycleData(buf);
 
             m_RendererIndex += buf->unitCount;
