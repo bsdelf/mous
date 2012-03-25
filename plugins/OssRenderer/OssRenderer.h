@@ -12,14 +12,16 @@ public:
 public:
     virtual ~OssRenderer();
 
-    virtual EmErrorCode OpenDevice(const std::string& path);
-    virtual void CloseDevice();
+    virtual EmErrorCode Open();
+    virtual void Close();
 
-    virtual EmErrorCode SetupDevice(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample);
-    virtual EmErrorCode WriteDevice(const char* buf, uint32_t len);
+    virtual EmErrorCode Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample);
+    virtual EmErrorCode Write(const char* buf, uint32_t len);
 
     virtual int GetVolumeLevel() const;
     virtual void SetVolumeLevel(int level);
+
+    virtual bool GetOptions(std::vector<ConstOptionPair>& list) const;
 
 private:
     std::string m_PrevPath;
@@ -28,6 +30,8 @@ private:
     int32_t m_Channels;
     int32_t m_SampleRate;
     int32_t m_BitsPerSample;
+
+    OptionString m_OptDevicePath;
 };
 
 #endif

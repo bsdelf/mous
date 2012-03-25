@@ -15,24 +15,25 @@ OssRenderer::OssRenderer():
     m_SampleRate(-1),
     m_BitsPerSample(-1)
 {
-
+    m_OptDevicePath.desc = "Output device.";
+    m_OptDevicePath.userVal = m_OptDevicePath.defaultVal = "/dev/dsp";
 }
 
 OssRenderer::~OssRenderer()
 {
-    CloseDevice();
+    Close();
 }
 
-EmErrorCode OssRenderer::OpenDevice(const std::string& path)
+EmErrorCode OssRenderer::Open()
 {
-    if (m_PrevPath != path)
-        m_PrevPath = path;
+    if (m_PrevPath != m_OptDevicePath.userVal)
+        m_PrevPath = m_OptDevicePath.userVal;
     m_Fd = open(m_PrevPath.c_str(), O_WRONLY);
     m_IsOpened = (m_Fd < 0) ? false : true;
     return (m_Fd >= 0 && m_IsOpened) ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
 }
 
-void OssRenderer::CloseDevice()
+void OssRenderer::Close()
 {
     if (!m_IsOpened || m_Fd < 0)
         return;
@@ -44,7 +45,7 @@ void OssRenderer::CloseDevice()
     m_IsOpened = false;
 }
 
-EmErrorCode OssRenderer::SetupDevice(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+EmErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     if (m_IsOpened
             && channels == m_Channels
@@ -53,8 +54,8 @@ EmErrorCode OssRenderer::SetupDevice(int32_t& channels, int32_t& sampleRate, int
         return ErrorCode::Ok;
     }
 
-    CloseDevice();
-    EmErrorCode ret = OpenDevice(m_PrevPath);
+    Close();
+    EmErrorCode ret = Open();
     if (ret != ErrorCode::Ok)
         return ret;
 
@@ -94,7 +95,7 @@ EmErrorCode OssRenderer::SetupDevice(int32_t& channels, int32_t& sampleRate, int
     return ErrorCode::Ok;
 }
 
-EmErrorCode OssRenderer::WriteDevice(const char* buf, uint32_t len)
+EmErrorCode OssRenderer::Write(const char* buf, uint32_t len)
 {
     for (int off = 0, nw = 0, left = len; left > 0; left -= nw, off += nw) {
         nw = write(m_Fd, buf+off, left);
@@ -124,4 +125,11 @@ void OssRenderer::SetVolumeLevel(int level)
 {
     int all = (level) | (level << 8);
     ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
+}
+
+bool OssRenderer::GetOptions(std::vector<ConstOptionPair>& list) const
+{
+    list.resize(1);
+    list[0] = ConstOptionPair(&m_OptDevicePath, OptionType::String);
+    return true;
 }
