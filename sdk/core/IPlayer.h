@@ -44,7 +44,6 @@ public:
     virtual void UnregisterPluginAgent(const IPluginAgent* pAgent) = 0;
     virtual void UnregisterAll() = 0;
 
-    virtual void SetRendererDevice(const std::string& path) = 0;
     virtual int GetRendererVolume() const = 0;
     virtual void SetRendererVolume(int level) = 0;
 
