@@ -10,7 +10,7 @@
 
 namespace mous {
 
-class IDecoder: public IOptionProvider
+class IDecoder
 {
 public:
     virtual ~IDecoder() { }
@@ -34,6 +34,9 @@ public:
     virtual int32_t GetSampleRate() const = 0;
     virtual int32_t GetBitRate() const = 0;
     virtual uint64_t GetDuration() const = 0;
+
+    // reimplement this to provide options
+    virtual bool GetOptions(std::vector<ConstOptionPair>& list) const { return false; };
 };
 
 }

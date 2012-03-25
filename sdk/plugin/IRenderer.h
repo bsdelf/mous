@@ -2,13 +2,14 @@
 #define MOUS_IRENDERER_H
 
 #include <inttypes.h>
+#include <vector>
 #include <string>
 #include <common/ErrorCode.h>
 #include <common/Option.h>
 
 namespace mous {
 
-class IRenderer: public IOptionProvider
+class IRenderer
 {
 public:
     virtual ~IRenderer() { }
@@ -22,6 +23,9 @@ public:
     // 0(muted) to 100(max)
     virtual int GetVolumeLevel() const = 0;
     virtual void SetVolumeLevel(int level) = 0;
+
+    // reimplement this to provide options
+    virtual bool GetOptions(std::vector<ConstOptionPair>& list) const { return false; };
 };
 
 }

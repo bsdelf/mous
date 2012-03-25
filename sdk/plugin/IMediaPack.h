@@ -11,7 +11,7 @@ namespace mous {
 
 struct MediaItem;
 
-class IMediaPack: public IOptionProvider
+class IMediaPack
 {
 public:
     virtual ~IMediaPack() { }
@@ -23,6 +23,9 @@ public:
 
     virtual void DumpStream(const std::string& stream, std::deque<MediaItem*>& list,
         const std::map<std::string, IMediaPack*>* pMap) const = 0;
+
+    // reimplement this to provide options
+    virtual bool GetOptions(std::vector<ConstOptionPair>& list) const { return false; };
 
 public:
     typedef std::map<std::string, IMediaPack*>::iterator MediaPackMapIter;

@@ -9,7 +9,7 @@
 
 namespace mous {
 
-class ITagParser: public IOptionProvider
+class ITagParser
 {
 public:
     virtual ~ITagParser() { }
@@ -40,6 +40,9 @@ public:
 
     virtual bool HasTag() const = 0;
     virtual bool HasProperties() const = 0;
+
+    // reimplement this to provide options
+    virtual bool GetOptions(std::vector<ConstOptionPair>& list) const { return false; };
 };
 
 }
