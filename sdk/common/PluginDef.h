@@ -36,6 +36,35 @@ const char* const StrGetPluginInfo = "MousGetPluginInfo";
 const char* const StrCreateObject = "MousCreateObject";
 const char* const StrFreeObject = "MousFreeObject";
 
+inline const char* ToString(EmPluginType type) 
+{
+    switch (type) {
+        case PluginType::None:
+            return "None";
+
+        case PluginType::Decoder:
+            return "Decoder";
+
+        case PluginType::Encoder:
+            return "Encoder";
+
+        case PluginType::Renderer:
+            return "Renderer";
+
+        case PluginType::MediaPack:
+            return "MediaPack";
+
+        case PluginType::TagParser:
+            return "TagParser";
+
+        case PluginType::Filter:
+            return "Filter";
+
+        case PluginType::EventWatcher:
+            return "EventWatche";
+    }
+}
+
 }
 
 #endif
