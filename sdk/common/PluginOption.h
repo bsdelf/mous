@@ -11,7 +11,7 @@ struct PluginOption
 {
     EmPluginType pluginType;
     const PluginInfo* pluginInfo;
-    std::vector<ConstOptionPair> options;
+    std::vector<const BaseOption*> options;
 };
 
 }

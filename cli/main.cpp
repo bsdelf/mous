@@ -183,9 +183,8 @@ int main(int argc, char** argv)
             cout << ">>>> index:" << i+1 << endl;
             cout << "\tplugin type: " << ToString(opt.pluginType)<< endl;
             for (size_t io = 0; io < opt.options.size(); ++io) {
-                cout << "\t\t option type: " << ToString(opt.options[io].second) << endl;
-                CommonOption* common = (CommonOption*)opt.options[io].first;
-                cout << "\t\t option desc: " << common->desc << endl;
+                cout << "\t\t option type: " << ToString(opt.options[io]->type) << endl;
+                cout << "\t\t option desc: " << opt.options[io]->desc << endl;
             }
         }
     }

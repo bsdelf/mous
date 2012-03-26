@@ -15,7 +15,8 @@ OssRenderer::OssRenderer():
     m_SampleRate(-1),
     m_BitsPerSample(-1)
 {
-    m_OptDevicePath.common.desc = "Output device.";
+    m_OptDevicePath.type = OptionType::String;
+    m_OptDevicePath.desc = "Output device.";
     m_OptDevicePath.userVal = m_OptDevicePath.defaultVal = "/dev/dsp";
 }
 
@@ -127,9 +128,9 @@ void OssRenderer::SetVolumeLevel(int level)
     ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
 }
 
-bool OssRenderer::GetOptions(std::vector<ConstOptionPair>& list) const
+bool OssRenderer::GetOptions(std::vector<const BaseOption*>& list) const
 {
     list.resize(1);
-    list[0] = ConstOptionPair(&m_OptDevicePath, OptionType::String);
+    list[0] = &m_OptDevicePath;
     return true;
 }

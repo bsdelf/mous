@@ -59,75 +59,66 @@ inline const char* ToString(EmOptionType type)
     return "";
 }
 
-struct CommonOption
+struct BaseOption
 {
+    EmOptionType type;
     std::string desc;
 };
 
-struct IntOption
+struct IntOption: public BaseOption
 {
-    CommonOption common;
     int32_t defaultVal;
     mutable int32_t userVal; 
 };
 
-struct FloatOption
+struct FloatOption: public BaseOption
 {
-    CommonOption common;
     double defaultVal;
     mutable double userVal; 
 };
 
-struct StringOption
+struct StringOption: public BaseOption
 {
-    CommonOption common;
     std::string defaultVal;
     mutable std::string userVal; 
 };
 
-struct EnumedIntOption
+struct EnumedIntOption: public BaseOption
 {
-    CommonOption common;
     std::vector<int32_t> enumedVal;
     size_t defaultChoice;
     mutable size_t userChoice; 
 };
 
-struct EnumedFloatOption
+struct EnumedFloatOption: public BaseOption
 {
-    CommonOption common;
     std::vector<double> enumedtVal;
     size_t defaultChoice;
     mutable size_t userChoice; 
 };
 
-struct EnumedStringOption
+struct EnumedStringOption: public BaseOption
 {
-    CommonOption common;
     std::vector<std::string> enumedVal;
     size_t defaultChoice;
     mutable size_t userChoice; 
 };
 
-struct RangedIntOption
+struct RangedIntOption: public BaseOption
 {
-    CommonOption common;
     int32_t min;
     int32_t max;
     int32_t defaultVal;
     mutable int32_t userVal; 
 };
 
-struct RangedFloatOption
+struct RangedFloatOption: public BaseOption
 {
-    CommonOption common;
     double min;
     double max;
     double defaultVal;
     mutable double userVal; 
 };
-
-typedef std::pair<const void*, EmOptionType> ConstOptionPair;
 
 }
 
