@@ -14,6 +14,7 @@ struct BaseOption;
 class IConvTask
 {
 public:
+    // the content pointed by MediaItem* will be copyed
     static IConvTask* Create(const MediaItem*, IDecoder*, IEncoder*);
     static void Free(IConvTask*);
 
