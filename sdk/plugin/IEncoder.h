@@ -23,7 +23,7 @@ public:
     virtual void SetBitRate(int32_t bitRate) const = 0;
 
     // reimplement this to provide options
-    virtual bool GetOptions(std::vector<ConstOptionPair>& list) const { return false; };
+    virtual bool GetOptions(std::vector<const BaseOption*>& list) const { return false; };
 };
 
 }
