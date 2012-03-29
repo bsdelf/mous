@@ -1,5 +1,5 @@
 #include "TagLibParser.h"
-#include <plugin/PluginHelper.h>
+#include <util/PluginHelper.h>
 
 static const PluginInfo info = {
     "Yanhui Shen",
