@@ -3,7 +3,7 @@
 #include "MidClickTabBar.hpp"
 #include "CustomHeadTabWidget.hpp"
 #include <scx/AsyncSignal.hpp>
-#include <common/MediaItem.h>
+#include <util/MediaItem.h>
 #include "SimplePlayListView.h"
 using namespace std;
 using namespace sqt;
@@ -39,6 +39,10 @@ MainWindow::~MainWindow()
 
     delete ui;
 
+    mPlayer->UnregisterAll();
+    mMediaLoader->UnregisterAll();
+    mPluginMgr->UnloadAllPlugins();
+
     IPluginManager::Free(mPluginMgr);
     IMediaLoader::Free(mMediaLoader);
     IPlayer::Free(mPlayer);
@@ -67,7 +71,6 @@ void MainWindow::initMousCore()
     mPluginMgr->GetPluginAgents(decoderAgentList, PluginType::Decoder);
     mPluginMgr->GetPluginAgents(rendererAgentList, PluginType::Renderer);
 
-    mPlayer->SetRendererDevice("/dev/dsp");
     mPlayer->RegisterPluginAgent(rendererAgentList[0]);
     for (size_t i = 0; i < decoderAgentList.size(); ++i) {
         mPlayer->RegisterPluginAgent(decoderAgentList[i]);
@@ -138,6 +141,10 @@ void MainWindow::formatTime(QString& str, int ms)
 void MainWindow::slotPlayerStopped()
 {
     qDebug() << "Stopped!";
+    if (mPlaylistView != NULL) {
+        const MediaItem* item = mPlaylistView->getNextItem();
+        slotPlayMediaItem(mPlaylistView, item);
+    }
 }
 
 /* Qt slots */
@@ -243,14 +250,14 @@ void MainWindow::slotWidgetPlayListDoubleClick()
 {
     SimplePlayListView* view = new SimplePlayListView(this);
     view->setMediaLoader(mMediaLoader);
-    connect(view, SIGNAL(sigPlayMediaItem(const mous::MediaItem*)),
-            this, SLOT(slotPlayMediaItem(const mous::MediaItem*)));
+    connect(view, SIGNAL(sigPlayMediaItem(IPlayListView*, const mous::MediaItem*)),
+            this, SLOT(slotPlayMediaItem(IPlayListView*, const mous::MediaItem*)));
 
     mWidgetPlayList->addTab(view, QString::number(mWidgetPlayList->count()));
     mWidgetPlayList->setCurrentIndex(mWidgetPlayList->count()-1);
 }
 
-void MainWindow::slotPlayMediaItem(const MediaItem *item)
+void MainWindow::slotPlayMediaItem(IPlayListView *view, const MediaItem *item)
 {
     if (mPlayer->GetStatus() == PlayerStatus::Playing) {
         mPlayer->Close();
@@ -269,4 +276,6 @@ void MainWindow::slotPlayMediaItem(const MediaItem *item)
     else
         mPlayer->Play();
     ui->btnPlay->setIcon(mIconPaused);
+
+    mPlaylistView = view;
 }

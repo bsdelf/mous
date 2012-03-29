@@ -1,7 +1,7 @@
 #include "SimplePlayListView.h"
 #include <QtCore>
 #include <QtGui>
-#include <common/MediaItem.h>
+#include <util/MediaItem.h>
 #include <core/IMediaLoader.h>
 #include "UiHelper.hpp"
 using namespace std;
@@ -108,6 +108,8 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
              mModel.setItem(row, column, item);
          }
      }
+
+    mMediaList.SetPlayMode(PlaylistMode::Repeat);
 }
 
 SimplePlayListView::~SimplePlayListView()
@@ -130,17 +132,27 @@ void SimplePlayListView::setMediaLoader(const IMediaLoader* loader)
 
 const MediaItem* SimplePlayListView::getNextItem()
 {
-    return NULL;
+    MediaItem* item = NULL;
+    if (mMediaList.SeqCurrent(item, 1)) {
+        mMediaList.SeqMoveNext();
+        mMediaList.SeqCurrent(item);
+    }
+    return item;
 }
 
 const MediaItem* SimplePlayListView::getPreviousItem()
 {
+    MediaItem* item = NULL;
+    if (mMediaList.SeqCurrent(item, -1)) {
+        mMediaList.SeqMoveNext(-1);
+        mMediaList.SeqCurrent(item);
+    }
     return NULL;
 }
 
 size_t SimplePlayListView::getItemCount() const
 {
-    return 0;
+    return mMediaList.GetItemCount();
 }
 
 void SimplePlayListView::mouseDoubleClickEvent(QMouseEvent * event)
@@ -153,7 +165,11 @@ void SimplePlayListView::mouseDoubleClickEvent(QMouseEvent * event)
     QModelIndex index(selectedIndexes()[0]);
     qDebug() << index.row();
 
-    emit sigPlayMediaItem(mMediaItemList[index.row()]);
+    mMediaList.SeqJumpTo(index.row());
+    MediaItem* item = NULL;
+    mMediaList.SeqCurrent(item);
+
+    emit sigPlayMediaItem(this, item);
 }
 
 /* Action menus */
@@ -165,16 +181,24 @@ void SimplePlayListView::slotAppend()
         QFileInfo info(mOldMediaPath);
         oldPath = info.dir().dirName();
     }
-    mOldMediaPath = QFileDialog::getOpenFileName(this,
+    QStringList pathList = QFileDialog::getOpenFileNames(this,
          tr("Open Media"), oldPath, tr("*"));
+    if (pathList.isEmpty())
+        return;
+
+    mOldMediaPath = pathList.first();
 
     deque<MediaItem*> itemList;
-    mMediaLoader->LoadMedia(mOldMediaPath.toUtf8().data(), itemList);
+    deque<MediaItem*> tmpItemList;
+    for (int i = 0; i < pathList.size(); ++i) {
+        mMediaLoader->LoadMedia(pathList.at(i).toUtf8().data(), tmpItemList);
+        itemList.insert(itemList.end(), tmpItemList.begin(), tmpItemList.end());
+    }
 
     for(size_t i = 0; i < itemList.size(); ++i) {
         MediaItem* item = itemList[i];
 
-        mMediaItemList.push_back(item);
+        mMediaList.AppendItem(item);
 
         // Check sec duration
         int secDuration = 0;

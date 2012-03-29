@@ -6,6 +6,7 @@
 #include <core/IPluginManager.h>
 #include <core/IMediaLoader.h>
 #include <core/IPlayer.h>
+#include "IPlayListView.h"
 
 namespace Ui {
     class MainWindow;
@@ -53,7 +54,7 @@ private slots:
     void slotBarPlayListMidClick(int index);
     void slotWidgetPlayListDoubleClick();
 
-    void slotPlayMediaItem(const mous::MediaItem* item);
+    void slotPlayMediaItem(IPlayListView* view, const mous::MediaItem* item);
 
 private:
     Ui::MainWindow *ui;
@@ -76,6 +77,8 @@ private:
     const mous::MediaItem* mMediaItem;
 
     bool mSliderPlayingPreempted;
+
+    IPlayListView* mPlaylistView;
 };
 
 #endif // MAINWINDOW_H

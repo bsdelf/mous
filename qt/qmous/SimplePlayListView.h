@@ -5,6 +5,7 @@
 #include <QtGui>
 #include <deque>
 #include "IPlayListView.h"
+#include <util/Playlist.h>
 
 namespace mous {
     struct MediaItem;
@@ -26,7 +27,7 @@ public:
     virtual size_t getItemCount() const;
 
 signals:
-    void sigPlayMediaItem(const mous::MediaItem* item);
+    void sigPlayMediaItem(IPlayListView *view, const mous::MediaItem* item);
 
 private:
     void mouseDoubleClickEvent(QMouseEvent * event);
@@ -54,7 +55,7 @@ private:
 
     QStandardItemModel mModel;
 
-    std::deque<mous::MediaItem*> mMediaItemList;
+    mous::Playlist<mous::MediaItem*> mMediaList;
 };
 
 #endif // SIMPLEPLAYLISTVIEW_H
