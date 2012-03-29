@@ -49,39 +49,40 @@ public:
         return m_PlayMode;
     }
 
-    const void* SeqCurrent(int off = 0) const
+    bool SeqCurrent(item_t& item, int off = 0) const
     {
-        void* item = NULL;
+        if (m_ItemQue.empty())
+            return false;
 
-        if (!m_ItemQue.empty()) {
-            int idx = -1;
-            switch (m_PlayMode) {
-                case PlaylistMode::Normal:
-                    idx = m_SeqNormalIndex + off;
-                    break;
+        int idx = -1;
+        switch (m_PlayMode) {
+            case PlaylistMode::Normal:
+                idx = m_SeqNormalIndex + off;
+                break;
 
-                case PlaylistMode::Repeat:
-                case PlaylistMode::RepeatOne:
-                    idx = (m_SeqRepeatIndex + off) % m_ItemQue.size();
-                    break;
+            case PlaylistMode::Repeat:
+            case PlaylistMode::RepeatOne:
+                idx = (m_SeqRepeatIndex + off) % m_ItemQue.size();
+                break;
 
-                case PlaylistMode::Shuffle:
-                    idx = m_SeqShuffleIndex + off;
-                    idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
-                        m_SeqShuffleQue[idx] : -1;
-                    break;
+            case PlaylistMode::Shuffle:
+                idx = m_SeqShuffleIndex + off;
+                idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
+                    m_SeqShuffleQue[idx] : -1;
+                break;
 
-                case PlaylistMode::ShuffleRepeat:
-                    idx = (m_SeqShuffleIndex + off) % m_ItemQue.size();
-                    idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
-                        m_SeqShuffleQue[idx] : -1;
-                    break;
-            }
-            if (idx >= 0 && idx < (int)m_ItemQue.size())
-                item = m_ItemQue[idx];
+            case PlaylistMode::ShuffleRepeat:
+                idx = (m_SeqShuffleIndex + off) % m_ItemQue.size();
+                idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
+                    m_SeqShuffleQue[idx] : -1;
+                break;
+
         }
 
-        return item;
+        if (idx >= 0 && idx < (int)m_ItemQue.size())
+            item = m_ItemQue[idx];
+
+        return true;
     }
 
     bool SeqJumpTo(int index) const
