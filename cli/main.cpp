@@ -153,14 +153,13 @@ int main(int argc, char** argv)
 
     // Setup playlist
     IPlaylist* playlist = IPlaylist::Create();
-    playlist->SetPlayMode(PlayMode::ShuffleRepeat);
     gPlaylist = playlist;
-
     deque<MediaItem*> mediaList;
     for (int i = 1; i < argc; ++i) {
         loader->LoadMedia(argv[i], mediaList);
         playlist->AppendItem(mediaList);
     }
+    playlist->SetPlayMode(PlayMode::Repeat);
 
     // Setup player
     IPlayer* player = IPlayer::Create();

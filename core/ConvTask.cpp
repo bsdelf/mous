@@ -21,8 +21,10 @@ ConvTask::ConvTask(const MediaItem* item, IDecoder* decoder, IEncoder* encoder):
 
 ConvTask::~ConvTask()
 {
-    delete m_Decoder;
-    delete m_Encoder;
+    if (m_Decoder != NULL)
+        delete m_Decoder;
+    if (m_Encoder != NULL)
+        delete m_Encoder;
 }
 
 bool ConvTask::GetDecoderOptions(std::vector<const BaseOption*>& list) const

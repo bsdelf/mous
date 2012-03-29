@@ -8,6 +8,7 @@ namespace mous {
 
 struct MediaItem;
 class IConvTask;
+class IPluginAgent;
 
 class IConvTaskFactory
 {
@@ -18,7 +19,11 @@ public:
 public:
     virtual ~IConvTaskFactory() { }
 
-    virtual bool CanConvert(const MediaItem* item, std::vector<std::string>& encoders) const = 0;
+    virtual void RegisterPluginAgent(const IPluginAgent* pAgent) = 0;
+    virtual void UnregisterPluginAgent(const IPluginAgent* pAgent) = 0;
+    virtual void UnregisterAll() = 0;
+
+    virtual std::vector<std::string> GetEncoderNames() const = 0;
     virtual IConvTask* CreateTask(const MediaItem* item, const std::string& encoder) const = 0;
 };
 
