@@ -2,8 +2,8 @@
 #define MOUS_IPLUGINAGENT_H
 
 #include <string>
-#include <common/ErrorCode.h>
-#include <common/PluginDef.h>
+#include <util/ErrorCode.h>
+#include <util/PluginDef.h>
 
 namespace mous {
 

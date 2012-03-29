@@ -2,7 +2,7 @@
 #include <iostream>
 #include <scx/FileHelper.hpp>
 #include <scx/Conv.hpp>
-#include <common/MediaItem.h>
+#include <util/MediaItem.h>
 #include <plugin/IMediaPack.h>
 #include <plugin/ITagParser.h>
 #include <core/IPluginAgent.h>

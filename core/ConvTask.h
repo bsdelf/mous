@@ -1,7 +1,7 @@
 #ifndef MOUS_CONVTASK_H
 #define MOUS_CONVTASK_H
 
-#include <common/MediaItem.h>
+#include <util/MediaItem.h>
 #include <core/IConvTask.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IEncoder.h>

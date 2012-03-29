@@ -1,7 +1,7 @@
 #ifndef MOUS_PLUGINHELPER_H
 #define MOUS_PLUGINHELPER_H
 
-#include <common/PluginDef.h>
+#include <util/PluginDef.h>
 
 /**
  * Simple yet helpful macro for declare a plugin.

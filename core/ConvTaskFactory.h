@@ -2,7 +2,7 @@
 #define MOUS_CONVTASKFACTORY_H
 
 #include <map>
-#include <common/MediaItem.h>
+#include <util/MediaItem.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IEncoder.h>
 #include <core/IConvTaskFactory.h>

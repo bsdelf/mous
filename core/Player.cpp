@@ -3,7 +3,6 @@
 #include <iostream>
 #include <scx/Conv.hpp>
 #include <scx/FileHelper.hpp>
-#include <common/PluginOption.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IRenderer.h>
 #include <core/IPluginAgent.h>

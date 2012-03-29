@@ -2,7 +2,6 @@
 #define MOUS_MEDIALOADER_H
 
 #include <map>
-#include <common/ErrorCode.h>
 #include <core/IMediaLoader.h>
 
 namespace mous {

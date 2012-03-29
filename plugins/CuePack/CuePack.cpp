@@ -1,5 +1,5 @@
 #include "CuePack.h"
-#include <common/MediaItem.h>
+#include <util/MediaItem.h>
 #include <scx/FileHelper.hpp>
 #include <scx/Conv.hpp>
 #include <cstdio>

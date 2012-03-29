@@ -2,7 +2,6 @@
 #define MOUS_PLUGINMANAGER_H
 
 #include <map>
-#include <common/ErrorCode.h>
 #include <core/IPluginManager.h>
 
 struct stat;

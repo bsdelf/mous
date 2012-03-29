@@ -4,8 +4,9 @@
 #include <inttypes.h>
 #include <string>
 #include <vector>
-#include <common/ErrorCode.h>
-#include <common/AudioMode.h>
+#include <util/ErrorCode.h>
+#include <util/AudioMode.h>
+#include <util/PluginOption.h>
 
 namespace scx {
 
@@ -16,7 +17,6 @@ template<typename signature> class AsyncSignal;
 namespace mous {
 
 class IPluginAgent;
-struct PluginOption;
 
 namespace PlayerStatus {
 enum e

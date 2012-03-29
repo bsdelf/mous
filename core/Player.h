@@ -3,8 +3,6 @@
 
 #include <vector>
 #include <map>
-#include <common/ErrorCode.h>
-#include <common/AudioMode.h>
 #include <core/IPlayer.h>
 #include <scx/LPVBuffer.hpp>
 #include <scx/AsyncSignal.hpp>

@@ -2,8 +2,8 @@
 #define MOUS_PLUGINOPTION_H
 
 #include <vector>
-#include <common/Option.h>
-#include <common/PluginDef.h>
+#include <util/Option.h>
+#include <util/PluginDef.h>
 
 namespace mous {
 

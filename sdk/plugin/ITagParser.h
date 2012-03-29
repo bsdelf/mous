@@ -4,8 +4,8 @@
 #include <inttypes.h>
 #include <vector>
 #include <string>
-#include <common/ErrorCode.h>
-#include <common/Option.h>
+#include <util/ErrorCode.h>
+#include <util/Option.h>
 
 namespace mous {
 

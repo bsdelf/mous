@@ -1,10 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <common/MediaItem.h>
-#include <common/PluginOption.h>
+#include <util/MediaItem.h>
+#include <util/PluginOption.h>
+#include <util/Playlist.h>
 #include <core/IPlayer.h>
-#include <core/IPlaylist.h>
 #include <core/IMediaLoader.h>
 #include <core/IPluginManager.h>
 #include <scx/Mutex.hpp>
@@ -16,7 +16,7 @@ using namespace mous;
 
 bool gStop = false;
 IPlayer* gPlayer = NULL;
-IPlaylist* gPlaylist = NULL;
+Playlist<MediaItem*>* gPlaylist = NULL;
 Mutex gMutexForSwitch;
 
 void OnFinished()
@@ -152,14 +152,14 @@ int main(int argc, char** argv)
     }
 
     // Setup playlist
-    IPlaylist* playlist = IPlaylist::Create();
-    gPlaylist = playlist;
+    Playlist<MediaItem*> playlist;
+    gPlaylist = &playlist;
     deque<MediaItem*> mediaList;
     for (int i = 1; i < argc; ++i) {
         loader->LoadMedia(argv[i], mediaList);
-        playlist->AppendItem(mediaList);
+        playlist.AppendItem(mediaList);
     }
-    playlist->SetPlayMode(PlayMode::Repeat);
+    playlist.SetPlayMode(PlaylistMode::Repeat);
 
     // Setup player
     IPlayer* player = IPlayer::Create();
@@ -189,10 +189,10 @@ int main(int argc, char** argv)
     }
 
     // Begin to play.
-    if (playlist->Empty())
+    if (playlist.Empty())
         return -1;
 
-    MediaItem* item = (MediaItem*)playlist->SeqCurrent();
+    MediaItem* item = (MediaItem*)playlist.SeqCurrent();
     cout << ">>>> Tag Info" << endl;
     cout << "\ttitle:" << item->title << endl;
     cout << "\tartist:" << item->artist << endl;
@@ -255,7 +255,6 @@ int main(int argc, char** argv)
     IPlayer::Free(player);
     IMediaLoader::Free(loader);
     IPluginManager::Free(mgr);
-    IPlaylist::Free(playlist);
 
     return 0;
 }

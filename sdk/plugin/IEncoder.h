@@ -3,9 +3,9 @@
 
 #include <vector>
 #include <inttypes.h>
-#include <common/AudioMode.h>
-#include <common/ErrorCode.h>
-#include <common/Option.h>
+#include <util/AudioMode.h>
+#include <util/ErrorCode.h>
+#include <util/Option.h>
 
 namespace mous {
 
