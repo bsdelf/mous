@@ -65,8 +65,6 @@ void ConvTaskFactory::UnregisterAll()
         for (size_t i = 0; i < list.size(); ++i) {
             RemoveDecAgent(list[i]);
         }
-        delete iter->second;
-        m_DecAgentMap.erase(iter);
     }
     
     m_EncAgentMap.clear();

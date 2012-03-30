@@ -1,4 +1,5 @@
 #include "ConvTask.h"
+#include <iostream>
 using namespace mous;
 
 IConvTask* IConvTask::Create(const MediaItem* item, const IPluginAgent* decAgent, const IPluginAgent* encAgent)
@@ -44,6 +45,7 @@ bool ConvTask::GetEncoderOptions(std::vector<const BaseOption*>& list) const
 
 void ConvTask::Run(const string& output)
 {
+    m_Progress = 0.0000001;
     m_Finished = false;
     m_Canceled = false;
     m_WorkThread.Run(Function<void (const string&)>(&ConvTask::DoConvert, this), output);
@@ -71,7 +73,6 @@ void ConvTask::DoConvert(const string& output)
 
     err = m_Decoder->Open(m_Item.url);
     if (err != ErrorCode::Ok) {
-        m_DecAgent->FreeObject(m_Decoder);
         m_Progress = -1;
         m_Finished = true;
         return;
@@ -79,11 +80,14 @@ void ConvTask::DoConvert(const string& output)
 
     err = m_Encoder->OpenOutput(output);
     if (err != ErrorCode::Ok) {
-        m_EncAgent->FreeObject(m_Encoder);
         m_Progress = -1;
         m_Finished = true;
         return;
     }
+
+    m_Encoder->SetChannels(m_Decoder->GetChannels());
+    m_Encoder->SetSampleRate(m_Decoder->GetSampleRate());
+    m_Encoder->SetBitsPerSample(m_Decoder->GetBitsPerSample());
 
     char* unitBuffer = new char[m_Decoder->GetMaxBytesPerUnit()];
     uint32_t unitBufferUsed = 0;
@@ -110,6 +114,7 @@ void ConvTask::DoConvert(const string& output)
     unitOff = unitBeg;
     m_Decoder->SetUnitIndex(unitBeg);
 
+    cout << unitBeg << "-" << unitEnd << endl;
     while (unitOff < unitEnd && !m_Canceled) {
         m_Decoder->DecodeUnit(unitBuffer, unitBufferUsed, unitCount);
         m_Encoder->Encode(unitBuffer, unitBufferUsed);
