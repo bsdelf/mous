@@ -1,5 +1,8 @@
 #include "ConvTaskFactory.h"
+#include <plugin/IDecoder.h>
+#include <plugin/IEncoder.h>
 #include <scx/FileHelper.hpp>
+using namespace scx;
 using namespace mous;
 
 IConvTaskFactory* IConvTaskFactory::Create()
@@ -86,32 +89,23 @@ vector<string> ConvTaskFactory::GetEncoderNames() const
 
 IConvTask* ConvTaskFactory::CreateTask(const MediaItem* item, const std::string& encoder) const
 {
-    IDecoder* dec = NULL;
     const IPluginAgent* decAgent = NULL;
     const string& suffix = FileHelper::FileSuffix(item->url);
     DecAgentMapConstIter decAgentIter = m_DecAgentMap.find(suffix);
     if (decAgentIter != m_DecAgentMap.end()) {
         vector<const IPluginAgent*> list = *(decAgentIter->second);
         decAgent = list[0];
-        dec = (IDecoder*)decAgent->CreateObject();
     }
 
-    IEncoder* enc = NULL;
     const IPluginAgent* encAgent = NULL;
     EncAgentMapConstIter encAgentIter = m_EncAgentMap.find(encoder);
     if (encAgentIter != m_EncAgentMap.end()) {
         encAgent = encAgentIter->second;
-        enc = (IEncoder*)encAgent->CreateObject();
     }
 
     IConvTask* task = NULL;
-    if (item != NULL && dec != NULL && enc != NULL) {
-        task = IConvTask::Create(item, dec, enc);
-    } else {
-        if (dec != NULL && decAgent != NULL)
-            decAgent->FreeObject(dec);
-        if (enc != NULL && encAgent != NULL)
-            encAgent->FreeObject(enc);
+    if (item != NULL && decAgent != NULL && encAgent != NULL) {
+        task = IConvTask::Create(item, decAgent, encAgent);
     }
     return task;
 }

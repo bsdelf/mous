@@ -3,13 +3,9 @@
 
 #include <map>
 #include <util/MediaItem.h>
-#include <plugin/IDecoder.h>
-#include <plugin/IEncoder.h>
 #include <core/IConvTaskFactory.h>
 #include <core/IConvTask.h>
 #include <core/IPluginAgent.h>
-#include <scx/LPVBuffer.hpp>
-using namespace scx;
 using namespace std;
 
 namespace mous {
