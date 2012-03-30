@@ -12,11 +12,12 @@ WavEncoder::~WavEncoder()
 
 EmErrorCode WavEncoder::OpenOutput(const std::string& path)
 {
-    m_OutputFile.open(path.c_str(), ios::binary | ios::in | ios::out);
+    m_OutputFile.open(path.c_str(), ios::binary | ios::out | ios::in);
     if (!m_OutputFile.is_open())
         return ErrorCode::EncoderFailedToOpen;
 
     InitWavHeader(&m_WavHeader);
+    m_OutputFile.write((char*)&m_WavHeader, sizeof(WavHeader));
     return ErrorCode::Ok;
 }
 
@@ -36,6 +37,9 @@ EmErrorCode WavEncoder::FlushRest()
 {
     m_WavHeader.dataChunkLen = (uint32_t)m_OutputFile.tellg() - (uint32_t)sizeof(WavHeader);
     m_WavHeader.lenAfterRiff = m_WavHeader.dataChunkLen + 36;
+    m_WavHeader.formatChunkLen = 16;//m_WavHeader.dataChunkLen + 24;
+    m_WavHeader.blockAlign = m_WavHeader.channels * ((m_WavHeader.bitsPerSample + 7) / 8);
+    m_WavHeader.avgBytesPerSec = m_WavHeader.blockAlign * m_WavHeader.sampleRate;
     m_OutputFile.seekg(0, ios::beg);
     m_OutputFile.write((char*)&m_WavHeader, sizeof(WavHeader));
     return ErrorCode::Ok;
@@ -65,4 +69,6 @@ void WavEncoder::InitWavHeader(WavHeader* header)
 
     memcpy(header->formatId, "fmt ", 4);
     memcpy(header->dataId, "data", 4);
+
+    header->formatTag = 0x0001;
 }
