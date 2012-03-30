@@ -7,6 +7,8 @@
 #include <core/IPlayer.h>
 #include <core/IMediaLoader.h>
 #include <core/IPluginManager.h>
+#include <core/IConvTask.h>
+#include <core/IConvTaskFactory.h>
 #include <scx/Mutex.hpp>
 #include <scx/Thread.hpp>
 #include <scx/AsyncSignal.hpp>
@@ -23,10 +25,10 @@ void OnFinished()
 {
     gMutexForSwitch.Lock();
     if (gPlaylist != NULL && !gStop) {
-        MediaItem* item = (MediaItem*)gPlaylist->SeqCurrent(1);
-        if (item != NULL) {
+        MediaItem* item = NULL;
+        if (gPlaylist->SeqCurrent(item, 1)) {
             gPlaylist->SeqMoveNext();
-            item = (MediaItem*)gPlaylist->SeqCurrent();
+            gPlaylist->SeqCurrent(item);
             if (gPlayer->GetStatus() != PlayerStatus::Closed)
                 gPlayer->Close();
             gPlayer->Open(item->url);
@@ -121,6 +123,10 @@ int main(int argc, char** argv)
     mgr->GetPluginAgents(decoderAgentList, PluginType::Decoder);
     cout << ">> Decoder count:" << decoderAgentList.size() << endl;
 
+    vector<const IPluginAgent*> encoderAgentList;
+    mgr->GetPluginAgents(encoderAgentList, PluginType::Encoder);
+    cout << ">> Encoder count:" << encoderAgentList.size() << endl;
+
     vector<const IPluginAgent*> rendererAgentList;
     mgr->GetPluginAgents(rendererAgentList, PluginType::Renderer);
     cout << ">> Renderer count:" << rendererAgentList.size() << endl;
@@ -161,6 +167,57 @@ int main(int argc, char** argv)
     }
     playlist.SetPlayMode(PlaylistMode::Repeat);
 
+    // test for encoder
+    //if (false)
+    {
+        IConvTaskFactory* factory = IConvTaskFactory::Create();
+        for (size_t i = 0; i < encoderAgentList.size(); ++i) {
+            factory->RegisterPluginAgent(encoderAgentList[i]);
+        }
+        for (size_t i = 0; i < decoderAgentList.size(); ++i) {
+            factory->RegisterPluginAgent(decoderAgentList[i]);
+        }
+
+        vector<string> encoders = factory->GetEncoderNames();
+        if (encoders.empty()) {
+            cout << "No encoders!" << endl;
+            IConvTaskFactory::Free(factory);
+            return 0;
+        }
+
+        cout << ">> Available encoders:" << endl;
+        for (size_t i = 0; i < encoders.size(); ++i) {
+            cout << i+1 << ": " << encoders[i] << endl;
+        }
+        int index;
+        cout << ">> Select encoder:";
+        cin >> index;
+        if (index < 1) {
+            IConvTaskFactory::Free(factory);
+            return 0;
+        }
+
+        MediaItem* item = playlist.GetItem(8);
+        cout << item->url << endl;
+        IConvTask* task = factory->CreateTask(item, encoders[index-1]);
+        task->Run("output.wav");
+
+        while (!task->IsFinished()) {
+            double percent =  task->GetProgress();
+            if (percent < 0) {
+                cout << "failed!" << endl;
+                break;
+            }
+            cout << "progress:" << (int)(percent*100) << "%" << "\r" << flush;
+            usleep(1000);
+        }
+        cout << "quit!" << endl;
+
+        IConvTask::Free(task);
+        IConvTaskFactory::Free(factory);
+        return 0;
+    }
+
     // Setup player
     IPlayer* player = IPlayer::Create();
     player->SigFinished()->Connect(&OnFinished);
@@ -192,7 +249,8 @@ int main(int argc, char** argv)
     if (playlist.Empty())
         return -1;
 
-    MediaItem* item = (MediaItem*)playlist.SeqCurrent();
+    MediaItem* item = NULL;
+    playlist.SeqCurrent(item);
     cout << ">>>> Tag Info" << endl;
     cout << "\ttitle:" << item->title << endl;
     cout << "\tartist:" << item->artist << endl;
