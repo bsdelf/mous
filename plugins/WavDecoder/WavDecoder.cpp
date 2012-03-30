@@ -49,7 +49,7 @@ EmErrorCode WavDecoder::Open(const std::string& url)
     m_BlockLength = m_SampleLength * SAMPLES_PER_BLOCK;
     m_BlockBuffer = new char[m_BlockLength];
     m_BlockIndex = 0;
-    m_TotalBlocks = m_RawDataLength/m_BlockLength + (m_RawDataLength%m_BlockLength == 0 ? 0 : 1);
+    m_TotalBlocks = (m_RawDataLength + m_BlockLength - 1) / m_BlockLength;
 
     m_Duration = (double)m_RawDataLength
         / (m_WavHeader.bitsPerSample / 8 * m_WavHeader.channels) 
