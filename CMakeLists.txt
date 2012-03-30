@@ -18,19 +18,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 #set(IS_APPLE "APPLE")
 
-# options
+#==== Compiler ====#
 option(EnableCompileClang "Use Clang C compiler" off)
 option(EnableCompileGCC46 "Use GCC46 compiler" off)
-
-option(EnablePluginOssRenderer "OSS Output" on)
-option(EnablePluginAlsaRenderer "ALSA output" on)
-option(EnablePluginMacDecoder "MAC Decoder" on)
-option(EnablePluginMpg123Decoder "MPG123 Decoder" on)
-option(EnablePluginFlacDecoder "FLAC Decoder" on)
-option(EnablePluginFaadDecoder "FAAD Decoder" on)
-option(EnablePluginTagLibParser "TagLib Parser" on)
-option(EnablePluginCuePack "Cue sheet Parser" on)
-option(EnablePluginPlayerStatistics "Player activity statistics" on)
 
 if (EnableCompileClang)
     set(CMAKE_C_COMPILER "clang")
@@ -42,12 +32,32 @@ if (EnableCompileGCC46)
     set(CMAKE_CXX_COMPILER "g++46")
 endif()
 
+#==== Optional ====#
+option(EnablePluginOssRenderer "OSS Output" on)
+option(EnablePluginAlsaRenderer "ALSA output" on)
+
+option(EnablePluginWavEncoder "WAV Encoder" on)
+option(EnablePluginLameEncoder "LAME Encoder" on)
+option(EnablePluginFlacEncoder "FLAC Encoder" on)
+
+option(EnablePluginWavDecoder "WAV Decoder" on)
+option(EnablePluginMacDecoder "MAC Decoder" on)
+option(EnablePluginMpg123Decoder "MPG123 Decoder" on)
+option(EnablePluginFlacDecoder "FLAC Decoder" on)
+option(EnablePluginFaadDecoder "FAAD Decoder" on)
+
+option(EnablePluginTagLibParser "TagLib Parser" on)
+option(EnablePluginCuePack "Cue sheet Parser" on)
+
+option(EnablePluginPlayerStatistics "Player activity statistics" on)
+
+#==== Library path ====#
 # include and link
 include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
 include_directories(BEFORE sdk)
 
-# build output dir
+#==== build output dir ====#
 set(OUTPUT_DIR ${MOUS_SOURCE_DIR}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
@@ -95,6 +105,16 @@ if (EnablePluginAlsaRenderer)
     file(GLOB SRC_ALSA_RENDERER plugins/AlsaRenderer/*)
     add_library(AlsaRenderer SHARED ${SRC_ALSA_RENDERER})
     target_link_libraries(AlsaRenderer)
+endif()
+
+# WAV plugin
+if (EnablePluginWavDecoder)
+    file(GLOB SRC_WAV_DECODER plugins/WavDecoder/*)
+    add_library(WavDecoder SHARED ${SRC_WAV_DECODER})
+endif()
+if (EnablePluginWavEncoder)
+    file(GLOB SRC_WAV_ENCODER plugins/WavEncoder/*)
+    add_library(WavEncoder SHARED ${SRC_WAV_ENCODER})
 endif()
 
 # Mpg123 plugin
