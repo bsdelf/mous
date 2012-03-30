@@ -23,6 +23,7 @@ option(EnableCompileClang "Use Clang C compiler" off)
 option(EnableCompileGCC46 "Use GCC46 compiler" off)
 
 option(EnablePluginOssRenderer "OSS Output" on)
+option(EnablePluginAlsaRenderer "ALSA output" on)
 option(EnablePluginMacDecoder "MAC Decoder" on)
 option(EnablePluginMpg123Decoder "MPG123 Decoder" on)
 option(EnablePluginFlacDecoder "FLAC Decoder" on)
@@ -87,6 +88,13 @@ if (EnablePluginOssRenderer)
     file(GLOB SRC_OSS_RENDERER plugins/OssRenderer/*)
     add_library(OssRenderer SHARED ${SRC_OSS_RENDERER})
     target_link_libraries(OssRenderer)
+endif()
+
+# Alsa plugin
+if (EnablePluginAlsaRenderer)
+    file(GLOB SRC_ALSA_RENDERER plugins/AlsaRenderer/*)
+    add_library(AlsaRenderer SHARED ${SRC_ALSA_RENDERER})
+    target_link_libraries(AlsaRenderer)
 endif()
 
 # Mpg123 plugin
