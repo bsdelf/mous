@@ -13,10 +13,15 @@ enum e
     PluginFailedToOpen,
     PluginBadFormat,
 
-    DecoderFailedToInit,
     DecoderFailedToOpen,
+    DecoderFailedToInit,
     DecoderFailedToRead,
     DecoderOutOfRange,
+
+    EncoderFailedToOpen,
+    EncoderFailedToInit,
+    EncoderFailedToEncode,
+    EncoderFailedToFlush,
 
     RendererFailedToOpen,
     RendererFailedToSetup,
