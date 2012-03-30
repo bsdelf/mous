@@ -26,13 +26,14 @@ but of course it will be useless!
 Supported   Dependence		Reason
 X	    NONE		Alsa Renderer
 O	    NONE		Oss Renderer
-X	    NONE		Wav Decoder
 
+O	    NONE		    Wav Decoder
 O	    audio/mpg123	Mp3 Decoder
 O	    audio/mac		Ape Decoder
 O	    audio/flac		Flac Decoder
 O	    audio/faad		Mp4 Decoder
 
+O	    NONE		    Wav Encoder
 X	    audio/lame		Mp3 Encoder
 X	    audio/faac		Mp4 Encoder
 X	    audio/flac		Flac Encoder
