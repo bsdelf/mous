@@ -8,8 +8,6 @@
 namespace mous {
 
 struct MediaItem;
-class IDecoder;
-class IEncoder;
 struct BaseOption;
 
 class IConvTask
