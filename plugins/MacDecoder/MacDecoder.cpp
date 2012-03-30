@@ -25,7 +25,7 @@ EmErrorCode MacDecoder::Open(const string& url)
 {
     int err;
 
-    str_utf16* pFileName = GetUTF16FromUTF8((str_utf8*)url.data());
+    str_utf16* pFileName = GetUTF16FromUTF8((str_utf8*)url.c_str());
     m_pDecompress = CreateIAPEDecompress(pFileName, &err);
     delete[] pFileName;
 
