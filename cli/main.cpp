@@ -179,7 +179,7 @@ int main(int argc, char** argv)
         loader->LoadMedia(argv[i], mediaList);
         playlist.AppendItem(mediaList);
     }
-    playlist.SetPlayMode(PlaylistMode::Repeat);
+    playlist.SetMode(PlaylistMode::Repeat);
 
     // test for encoder
     if (false)

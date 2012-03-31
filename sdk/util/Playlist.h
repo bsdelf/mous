@@ -27,7 +27,7 @@ class Playlist
 {
 public:
     Playlist():
-        m_PlayMode(PlaylistMode::Normal),
+        m_PlaylistMode(PlaylistMode::Normal),
         m_SeqNormalIndex(-1),
         m_SeqRepeatIndex(-1),
         m_SeqShuffleIndex(-1)
@@ -39,14 +39,14 @@ public:
     {
     }
 
-    void SetPlayMode(EmPlaylistMode mode)
+    void SetMode(EmPlaylistMode mode)
     {
-        m_PlayMode = mode;
+        m_PlaylistMode = mode;
     }
 
-    EmPlaylistMode GetPlayMode() const
+    EmPlaylistMode GetMode() const
     {
-        return m_PlayMode;
+        return m_PlaylistMode;
     }
 
     bool SeqCurrent(item_t& item, int off = 0) const
@@ -55,7 +55,7 @@ public:
             return false;
 
         int idx = -1;
-        switch (m_PlayMode) {
+        switch (m_PlaylistMode) {
             case PlaylistMode::Normal:
                 idx = m_SeqNormalIndex + off;
                 break;
@@ -90,7 +90,7 @@ public:
         if (m_ItemQue.empty() || index < 0 || index >= (int)m_ItemQue.size())
             return false;
 
-        switch (m_PlayMode) {
+        switch (m_PlaylistMode) {
             case PlaylistMode::Normal:
                 m_SeqNormalIndex = index;
                 break;
@@ -111,7 +111,7 @@ public:
     void SeqMoveNext(int step = 1) const
     {
         int* idx = NULL;
-        switch (m_PlayMode) {
+        switch (m_PlaylistMode) {
             case PlaylistMode::Normal:
                 m_SeqNormalIndex += step;
                 idx = &m_SeqNormalIndex;
@@ -268,7 +268,7 @@ private:
     }
 
 private:
-    EmPlaylistMode m_PlayMode;
+    EmPlaylistMode m_PlaylistMode;
 
     std::deque<item_t> m_ItemQue;
     typedef typename std::deque<item_t>::iterator ItemQueIter;
