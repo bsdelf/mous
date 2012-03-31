@@ -59,12 +59,8 @@ void MainWindow::initMousCore()
     mPluginMgr->GetPlugins(packAgentList, PluginType::MediaPack);
     mPluginMgr->GetPlugins(tagAgentList, PluginType::TagParser);
 
-    for (size_t i = 0; i < packAgentList.size(); ++i) {
-        mMediaLoader->RegisterMediaPackPlugin(packAgentList[i]);
-    }
-    for (size_t i = 0; i < tagAgentList.size(); ++i) {
-        mMediaLoader->RegisterTagParserPlugin(tagAgentList[i]);
-    }
+    mMediaLoader->RegisterMediaPackPlugin(packAgentList);
+    mMediaLoader->RegisterTagParserPlugin(tagAgentList);
 
     vector<const IPluginAgent*> decoderAgentList;
     vector<const IPluginAgent*> rendererAgentList;
@@ -72,9 +68,7 @@ void MainWindow::initMousCore()
     mPluginMgr->GetPlugins(rendererAgentList, PluginType::Renderer);
 
     mPlayer->RegisterRendererPlugin(rendererAgentList[0]);
-    for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-        mPlayer->RegisterDecoderPlugin(decoderAgentList[i]);
-    }
+    mPlayer->RegisterDecoderPlugin(decoderAgentList);
 
     mPlayer->SigFinished()->Connect(&MainWindow::slotPlayerStopped, this);
 
