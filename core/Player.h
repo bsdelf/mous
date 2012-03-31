@@ -5,7 +5,7 @@
 #include <map>
 #include <core/IPlayer.h>
 #include <scx/LPVBuffer.hpp>
-#include <scx/AsyncSignal.hpp>
+#include <scx/Signal.hpp>
 #include <scx/Mutex.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/Thread.hpp>
@@ -25,12 +25,13 @@ public:
 public:
     EmPlayerStatus GetStatus() const;
 
-    void RegisterPluginAgent(const IPluginAgent* pAgent);
-    void UnregisterPluginAgent(const IPluginAgent* pAgent);
+    void RegisterDecoderPlugin(const IPluginAgent* pAgent);
+    void RegisterRendererPlugin(const IPluginAgent* pAgent);
+    void UnregisterPlugin(const IPluginAgent* pAgent);
     void UnregisterAll();
 
-    int GetRendererVolume() const;
-    void SetRendererVolume(int level);
+    int GetVolume() const;
+    void SetVolume(int level);
 
     EmErrorCode Open(const std::string& path);
     void Close();
@@ -51,23 +52,19 @@ public:
     uint64_t GetCurrentMs() const;
     EmAudioMode GetAudioMode() const;
 
-    bool GetPluginOption(std::vector<PluginOption>& list) const;
+    bool GetDecoderPluginOption(std::vector<PluginOption>& list) const;
+    bool GetRendererPluginOption(PluginOption& option) const;
 
 public:
-    const scx::AsyncSignal<void (void)>* SigFinished() const;
-    const scx::AsyncSignal<void (void)>* SigStopped() const;
-    //scx::Signal<void (void)> SigPaused;
-    //scx::Signal<void (void)> SigResumed;
-
-public:
-    virtual const scx::AsyncSignal<void (void)>* SigStartPlay() const;
-    virtual const scx::AsyncSignal<void (void)>* SigStopPlaying() const;
+    const scx::Signal<void (void)>* SigFinished() const;
 
 private:
-    void AddDecoder(const IPluginAgent* pAgent);
-    void RemoveDecoder(const IPluginAgent* pAgent);
-    void SetRenderer(const IPluginAgent* pAgent);
-    void UnsetRenderer(const IPluginAgent* pAgent);
+    void AddDecoderPlugin(const IPluginAgent* pAgent);
+    void RemoveDecoderPlugin(const IPluginAgent* pAgent);
+
+    void SetRendererPlugin(const IPluginAgent* pAgent);
+    void UnsetRendererPlugin(const IPluginAgent* pAgent);
+
     void AddEventListener(const IPluginAgent* pAgent);
     void RemoveEventListener(const IPluginAgent* pAgent);
 
@@ -104,6 +101,11 @@ private:
         }
     };
 
+    struct DecoderPluginNode {
+        const IPluginAgent* agent;
+        IDecoder* decoder;
+    };
+
 private:
     EmPlayerStatus m_Status;
 
@@ -131,21 +133,14 @@ private:
 
     double m_UnitPerMs;
 
-    std::map<const IPluginAgent*, void*> m_AgentMap;
-    typedef std::pair<const IPluginAgent*, void*> AgentMapPair;
-    typedef std::map<const IPluginAgent*, void*>::iterator AgentMapIter;
-    typedef std::map<const IPluginAgent*, void*>::const_iterator AgentMapConstIter;
+    const IPluginAgent* m_RendererPlugin;
 
-    std::map<std::string, std::vector<IDecoder*>*> m_DecoderMap;
-    typedef std::pair<std::string, std::vector<IDecoder*>*> DecoderMapPair;
-    typedef std::map<std::string, std::vector<IDecoder*>*>::iterator DecoderMapIter;
-    typedef std::map<std::string, std::vector<IDecoder*>*>::const_iterator DecoderMapConstIter;
+    std::map<std::string, DecoderPluginNode*> m_DecoderPluginMap;
+    typedef std::pair<std::string, DecoderPluginNode*> DecoderPluginMapPair;
+    typedef std::map<std::string, DecoderPluginNode*>::iterator DecoderPluginMapIter;
+    typedef std::map<std::string, DecoderPluginNode*>::const_iterator DecoderPluginMapConstIter;
 
-    scx::AsyncSignal<void (void)> m_SigFinished;
-    scx::AsyncSignal<void (void)> m_SigStopped;
-
-    scx::AsyncSignal<void (void)> m_SigStartPlay;
-    scx::AsyncSignal<void (void)> m_SigStopPlaying;
+    scx::Signal<void (void)> m_SigFinished;
 };
 
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cassert>
 #include <util/MediaItem.h>
 #include <util/PluginOption.h>
 #include <util/Playlist.h>
@@ -11,7 +12,7 @@
 #include <core/IConvTaskFactory.h>
 #include <scx/Mutex.hpp>
 #include <scx/Thread.hpp>
-#include <scx/AsyncSignal.hpp>
+#include <scx/Signal.hpp>
 using namespace std;
 using namespace scx;
 using namespace mous;
@@ -60,6 +61,19 @@ void OnPlaying()
 #include <CharsetConv/CharsetConv.h>
 //#include <enca.h>
 */
+
+void PrintPluginOption(vector<PluginOption>& list)
+{
+    for (size_t i = 0; i < list.size(); ++i) {
+        PluginOption& opt = list[i];
+        cout << ">>>> index:" << i+1 << endl;
+        cout << "\tplugin type: " << ToString(opt.pluginType)<< endl;
+        for (size_t io = 0; io < opt.options.size(); ++io) {
+            cout << "\t\t option type: " << ToString(opt.options[io]->type) << endl;
+            cout << "\t\t option desc: " << opt.options[io]->desc << endl;
+        }
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -168,7 +182,7 @@ int main(int argc, char** argv)
     playlist.SetPlayMode(PlaylistMode::Repeat);
 
     // test for encoder
-    //if (false)
+    if (false)
     {
         IConvTaskFactory* factory = IConvTaskFactory::Create();
         for (size_t i = 0; i < encoderAgentList.size(); ++i) {
@@ -197,7 +211,7 @@ int main(int argc, char** argv)
             return 0;
         }
 
-        MediaItem* item = playlist.GetItem(8);
+        MediaItem* item = playlist.GetItem(11);
         cout << item->url << endl;
         IConvTask* task = factory->CreateTask(item, encoders[index-1]);
         task->Run("output.wav");
@@ -221,28 +235,26 @@ int main(int argc, char** argv)
     // Setup player
     IPlayer* player = IPlayer::Create();
     player->SigFinished()->Connect(&OnFinished);
-    player->RegisterPluginAgent(rendererAgentList[0]);
+    player->RegisterRendererPlugin(rendererAgentList[0]);
     for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-        player->RegisterPluginAgent(decoderAgentList[i]);
+        player->RegisterDecoderPlugin(decoderAgentList[i]);
     }
     for (size_t i = 0; i < pelAgentList.size(); ++i) {
-        player->RegisterPluginAgent(pelAgentList[i]);
+        //player->RegisterPlugin(pelAgentList[i]);
     }
 
     // Show player options 
     {
         vector<PluginOption> list;
-        player->GetPluginOption(list);
-        cout << ">> Player plugin options:" << endl;
-        for (size_t i = 0; i < list.size(); ++i) {
-            PluginOption& opt = list[i];
-            cout << ">>>> index:" << i+1 << endl;
-            cout << "\tplugin type: " << ToString(opt.pluginType)<< endl;
-            for (size_t io = 0; io < opt.options.size(); ++io) {
-                cout << "\t\t option type: " << ToString(opt.options[io]->type) << endl;
-                cout << "\t\t option desc: " << opt.options[io]->desc << endl;
-            }
-        }
+        cout << ">> Player decoder plugin options:" << endl;
+        player->GetDecoderPluginOption(list);
+        PrintPluginOption(list);
+        cout << ">> Player renderer plugin options:" << endl;
+        PluginOption opt;
+        player->GetRendererPluginOption(opt);
+        list.resize(1);
+        list[0] = opt;
+        PrintPluginOption(list);
     }
 
     // Begin to play.
@@ -251,6 +263,7 @@ int main(int argc, char** argv)
 
     MediaItem* item = NULL;
     playlist.SeqCurrent(item);
+    assert(item != NULL);
     cout << ">>>> Tag Info" << endl;
     cout << "\ttitle:" << item->title << endl;
     cout << "\tartist:" << item->artist << endl;

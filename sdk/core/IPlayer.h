@@ -10,7 +10,7 @@
 
 namespace scx {
 
-template<typename signature> class AsyncSignal;
+template<typename signature> class Signal;
 
 }
 
@@ -40,12 +40,13 @@ public:
 
     virtual EmPlayerStatus GetStatus() const = 0;
 
-    virtual void RegisterPluginAgent(const IPluginAgent* pAgent) = 0;
-    virtual void UnregisterPluginAgent(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterDecoderPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterRendererPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
     virtual void UnregisterAll() = 0;
 
-    virtual int GetRendererVolume() const = 0;
-    virtual void SetRendererVolume(int level) = 0;
+    virtual int GetVolume() const = 0;
+    virtual void SetVolume(int level) = 0;
 
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
@@ -67,15 +68,11 @@ public:
     virtual EmAudioMode GetAudioMode() const = 0;
 
     // reimplement this to provide options
-    virtual bool GetPluginOption(std::vector<PluginOption>& list) const { return false; };
+    virtual bool GetDecoderPluginOption(std::vector<PluginOption>& list) const = 0;
+    virtual bool GetRendererPluginOption(PluginOption& option) const = 0;
 
 public:
-    virtual const scx::AsyncSignal<void (void)>* SigFinished() const = 0;
-    virtual const scx::AsyncSignal<void (void)>* SigStopped() const = 0;
-
-public:
-    virtual const scx::AsyncSignal<void (void)>* SigStartPlay() const = 0;
-    virtual const scx::AsyncSignal<void (void)>* SigStopPlaying() const = 0;
+    virtual const scx::Signal<void (void)>* SigFinished() const = 0;
 };
 
 }

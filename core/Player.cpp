@@ -35,7 +35,8 @@ Player::Player():
     m_UnitEnd(0),
     m_DecoderIndex(0),
     m_RendererIndex(0),
-    m_UnitPerMs(0)
+    m_UnitPerMs(0),
+    m_RendererPlugin(NULL)
 {
     m_UnitBuffers.AllocBuffer(5);
 
@@ -64,15 +65,27 @@ EmPlayerStatus Player::GetStatus() const
     return m_Status;
 }
 
-void Player::RegisterPluginAgent(const IPluginAgent* pAgent)
+void Player::RegisterDecoderPlugin(const IPluginAgent* pAgent)
+{
+    if (pAgent->GetType() == PluginType::Decoder)
+        AddDecoderPlugin(pAgent);
+}
+
+void Player::RegisterRendererPlugin(const IPluginAgent* pAgent)
+{
+    if (pAgent->GetType() == PluginType::Renderer)
+        SetRendererPlugin(pAgent);
+}
+
+void Player::UnregisterPlugin(const IPluginAgent* pAgent)
 {
     switch (pAgent->GetType()) {
         case PluginType::Decoder:
-            AddDecoder(pAgent);
+            RemoveDecoderPlugin(pAgent);
             break;
 
         case PluginType::Renderer:
-            SetRenderer(pAgent);
+            UnsetRendererPlugin(pAgent);
             break;
 
         default:
@@ -80,113 +93,94 @@ void Player::RegisterPluginAgent(const IPluginAgent* pAgent)
     }
 }
 
-void Player::UnregisterPluginAgent(const IPluginAgent* pAgent)
+void Player::AddDecoderPlugin(const IPluginAgent* pAgent)
 {
-    switch (pAgent->GetType()) {
-        case PluginType::Decoder:
-            RemoveDecoder(pAgent);
-            break;
-
-        case PluginType::Renderer:
-            UnsetRenderer(pAgent);
-            break;
-
-        default:
-            break;
-    }
-}
-
-void Player::AddDecoder(const IPluginAgent* pAgent)
-{
-    // Register agent.
+    // create Decoder & get suffix
     IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
-    m_AgentMap.insert(AgentMapPair(pAgent, pDecoder));
-
-    // Register decoder.
     const vector<string>& list = pDecoder->GetFileSuffix();
+
+    // try add
+    bool usedAtLeastOnce = false;
     for (size_t i = 0; i < list.size(); ++i) {
         string suffix = ToLower(list[i]);
-        DecoderMapIter iter = m_DecoderMap.find(suffix);
-        if (iter == m_DecoderMap.end()) {
-            vector<IDecoder*>* dlist = new vector<IDecoder*>();
-            dlist->push_back(pDecoder);
-            m_DecoderMap.insert(DecoderMapPair(suffix, dlist));
-        } else {
-            vector<IDecoder*>* dlist = iter->second;
-            dlist->push_back(pDecoder);
+        DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
+        if (iter == m_DecoderPluginMap.end()) {
+            DecoderPluginNode* node = new DecoderPluginNode;
+            node->agent = pAgent;
+            node->decoder = pDecoder;
+            m_DecoderPluginMap.insert(DecoderPluginMapPair(suffix, node));
+            usedAtLeastOnce = true;
         }
+    }
+
+    // clear if not used
+    if (!usedAtLeastOnce) {
+        pAgent->FreeObject(pDecoder);
     }
 }
 
-void Player::RemoveDecoder(const IPluginAgent* pAgent)
+void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
 {
-    AgentMapIter iter = m_AgentMap.find(pAgent);
-    if (iter != m_AgentMap.end()) {
-        // Unregister decoder.
-        IDecoder* pDecoder = (IDecoder*)iter->second;
-        const vector<string>& list = pDecoder->GetFileSuffix();
-        for (size_t i = 0; i < list.size(); ++i) {
-            string suffix = ToLower(list[i]);
-            DecoderMapIter iter = m_DecoderMap.find(suffix);
-            if (iter != m_DecoderMap.end()) {
-                vector<IDecoder*>* dlist = iter->second;
-                for (size_t i = 0; i < dlist->size(); ++i) {
-                    if ((*dlist)[i] == pDecoder) {
-                        dlist->erase(dlist->begin()+i);
-                        break;
-                    }
-                }
-                if (dlist->empty()) {
-                    delete dlist;
-                    m_DecoderMap.erase(iter);
-                }
+    // get suffix
+    IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
+    const vector<string>& list = pDecoder->GetFileSuffix();
+    pAgent->FreeObject(pDecoder);
+
+    // find plugin
+    for (size_t i = 0; i < list.size(); ++i) {
+        string suffix = ToLower(list[i]);
+        DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
+        if (iter != m_DecoderPluginMap.end()) {
+            DecoderPluginNode* node = iter->second;
+            if (node->agent == pAgent) {
+                pAgent->FreeObject(node->decoder);
+                delete node;
+                m_DecoderPluginMap.erase(iter);
             }
         }
-
-        // Unregister agent.
-        pAgent->FreeObject(pDecoder);
-        m_AgentMap.erase(iter);
     }
 }
 
-void Player::SetRenderer(const IPluginAgent* pAgent)
+void Player::SetRendererPlugin(const IPluginAgent* pAgent)
 {
-    m_Renderer = (IRenderer*)pAgent->CreateObject();
-    m_AgentMap.insert(AgentMapPair(pAgent, m_Renderer));
+    if (pAgent == NULL || m_RendererPlugin != NULL)
+        return;
 
+    m_RendererPlugin = pAgent;
+    m_Renderer = (IRenderer*)pAgent->CreateObject();
     m_Renderer->Open();
 }
 
-void Player::UnsetRenderer(const IPluginAgent* pAgent)
+void Player::UnsetRendererPlugin(const IPluginAgent* pAgent)
 {
-    m_SigStopped.Post();
+    if (pAgent != m_RendererPlugin && m_RendererPlugin != NULL)
+        return;
 
-    AgentMapIter iter = m_AgentMap.find(pAgent);
-    if (iter != m_AgentMap.end()) {
-        m_AgentMap.erase(iter);
-
-        if (m_Renderer != NULL) {
-            m_Renderer->Close();
-            pAgent->FreeObject(m_Renderer);
-            m_Renderer = NULL;
-        }
-    }
+    m_Renderer->Close();
+    m_RendererPlugin->FreeObject(m_Renderer);
+    m_Renderer = NULL;
+    m_RendererPlugin = NULL;
 }
 
 void Player::UnregisterAll()
 {
-    while (!m_AgentMap.empty()) {
-        AgentMapIter iter = m_AgentMap.begin();
-        UnregisterPluginAgent(iter->first);
+    while (!m_DecoderPluginMap.empty()) {
+        DecoderPluginMapIter iter = m_DecoderPluginMap.begin();
+        DecoderPluginNode* node = iter->second;
+        node->agent->FreeObject(node->decoder);
+        delete node;
+        m_DecoderPluginMap.erase(iter);
     }
+
+    UnsetRendererPlugin(m_RendererPlugin);
 }
 
-int Player::GetRendererVolume() const
+int Player::GetVolume() const
 {
     return m_Renderer != NULL ? m_Renderer->GetVolumeLevel() : -1;
 }
 
-void Player::SetRendererVolume(int level)
+void Player::SetVolume(int level)
 {
     if (m_Renderer != NULL)
         m_Renderer->SetVolumeLevel(level);
@@ -196,9 +190,9 @@ EmErrorCode Player::Open(const string& path)
 {
     string suffix = ToLower(FileHelper::FileSuffix(path));
     cout << "Suffix:" << suffix << endl;
-    DecoderMapIter iter = m_DecoderMap.find(suffix);
-    if (iter != m_DecoderMap.end()) {
-        m_Decoder = (*(iter->second))[0];
+    DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
+    if (iter != m_DecoderPluginMap.end()) {
+        m_Decoder = iter->second->decoder;
     } else {
         return ErrorCode::PlayerNoDecoder;
     }
@@ -309,8 +303,6 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
     m_SemWakeDecoder.Post();
 
     m_Status = PlayerStatus::Playing;
-
-    m_SigStartPlay.Post();
 }
 
 void Player::Pause()
@@ -335,8 +327,6 @@ void Player::Pause()
     m_UnitBuffers.ResetPV();
 
     m_Status = PlayerStatus::Paused;
-
-    m_SigStopPlaying.Post();
 }
 
 void Player::Resume()
@@ -428,63 +418,40 @@ EmAudioMode Player::GetAudioMode() const
     return (m_Decoder != NULL) ? m_Decoder->GetAudioMode() : AudioMode::None;
 }
 
-bool Player::GetPluginOption(std::vector<PluginOption>& list) const
+bool Player::GetDecoderPluginOption(std::vector<PluginOption>& list) const
 {
     list.clear();
-    bool hasOpt;
     PluginOption optionItem;
 
-    for (AgentMapConstIter iter = m_AgentMap.begin(); 
-            iter != m_AgentMap.end(); ++iter) {
+    DecoderPluginMapConstIter iter = m_DecoderPluginMap.begin();
+    DecoderPluginMapConstIter end = m_DecoderPluginMap.end();
+    for (; iter != end; ++iter) {
+        DecoderPluginNode* node = iter->second;
 
-        const IPluginAgent* agent = iter->first;
-
-        optionItem.pluginType = agent->GetType();
-        optionItem.pluginInfo = agent->GetInfo();
-        switch (agent->GetType()) {
-            case PluginType::Decoder:
-            {
-                IDecoder* decoder = (IDecoder*)iter->second;
-                hasOpt = decoder->GetOptions(optionItem.options);
-            }
-                break;
-
-            case PluginType::Renderer:
-            {
-                IRenderer* renderer = (IRenderer*)iter->second;
-                hasOpt = renderer->GetOptions(optionItem.options);
-            }
-                break;
-
-            default:
-                hasOpt = false;
-                break;
-        }
-
-        if (hasOpt)
+        optionItem.pluginType = node->agent->GetType();
+        optionItem.pluginInfo = node->agent->GetInfo();
+        if (node->decoder->GetOptions(optionItem.options))
             list.push_back(optionItem);
     }
-    return true;
+
+    return !list.empty();
 }
 
-const AsyncSignal<void (void)>* Player::SigFinished() const
+bool Player::GetRendererPluginOption(PluginOption& option) const
+{
+    if (m_RendererPlugin != NULL) {
+        option.pluginType = m_RendererPlugin->GetType();
+        option.pluginInfo = m_RendererPlugin->GetInfo();
+        if (m_Renderer->GetOptions(option.options))
+            return true;
+    }
+
+    return false;
+}
+
+const Signal<void (void)>* Player::SigFinished() const
 {
     return &m_SigFinished;
-}
-
-const AsyncSignal<void (void)>* Player::SigStopped() const
-{
-    return &m_SigStopped;
-}
-
-const AsyncSignal<void (void)>* Player::SigStartPlay() const
-{
-    return &m_SigStartPlay;
-}
-
-const AsyncSignal<void (void)>* Player::SigStopPlaying() const
-{
-    return &m_SigStopPlaying;
 }
 
 void Player::WorkForDecoder()
@@ -550,7 +517,7 @@ void Player::WorkForRenderer()
 
         if (m_RendererIndex >= m_UnitEnd) {
             m_Status = PlayerStatus::Stopped;
-            m_SigFinished.Post();
+            m_SigFinished();
         }
     }
 }
