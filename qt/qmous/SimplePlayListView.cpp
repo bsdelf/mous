@@ -109,7 +109,7 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
          }
      }
 
-    mMediaList.SetPlayMode(PlaylistMode::Repeat);
+    mMediaList.SetMode(PlaylistMode::Repeat);
 }
 
 SimplePlayListView::~SimplePlayListView()

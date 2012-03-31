@@ -2,7 +2,7 @@
 #include "ui_MainWindow.h"
 #include "MidClickTabBar.hpp"
 #include "CustomHeadTabWidget.hpp"
-#include <scx/AsyncSignal.hpp>
+#include <scx/Signal.hpp>
 #include <util/MediaItem.h>
 #include "SimplePlayListView.h"
 using namespace std;
@@ -41,7 +41,7 @@ MainWindow::~MainWindow()
 
     mPlayer->UnregisterAll();
     mMediaLoader->UnregisterAll();
-    mPluginMgr->UnloadAllPlugins();
+    mPluginMgr->UnloadAll();
 
     IPluginManager::Free(mPluginMgr);
     IMediaLoader::Free(mMediaLoader);
@@ -56,24 +56,24 @@ void MainWindow::initMousCore()
 
     vector<const IPluginAgent*> packAgentList;
     vector<const IPluginAgent*> tagAgentList;
-    mPluginMgr->GetPluginAgents(packAgentList, PluginType::MediaPack);
-    mPluginMgr->GetPluginAgents(tagAgentList, PluginType::TagParser);
+    mPluginMgr->GetPlugins(packAgentList, PluginType::MediaPack);
+    mPluginMgr->GetPlugins(tagAgentList, PluginType::TagParser);
 
     for (size_t i = 0; i < packAgentList.size(); ++i) {
-        mMediaLoader->RegisterPluginAgent(packAgentList[i]);
+        mMediaLoader->RegisterMediaPackPlugin(packAgentList[i]);
     }
     for (size_t i = 0; i < tagAgentList.size(); ++i) {
-        mMediaLoader->RegisterPluginAgent(tagAgentList[i]);
+        mMediaLoader->RegisterTagParserPlugin(tagAgentList[i]);
     }
 
     vector<const IPluginAgent*> decoderAgentList;
     vector<const IPluginAgent*> rendererAgentList;
-    mPluginMgr->GetPluginAgents(decoderAgentList, PluginType::Decoder);
-    mPluginMgr->GetPluginAgents(rendererAgentList, PluginType::Renderer);
+    mPluginMgr->GetPlugins(decoderAgentList, PluginType::Decoder);
+    mPluginMgr->GetPlugins(rendererAgentList, PluginType::Renderer);
 
-    mPlayer->RegisterPluginAgent(rendererAgentList[0]);
+    mPlayer->RegisterRendererPlugin(rendererAgentList[0]);
     for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-        mPlayer->RegisterPluginAgent(decoderAgentList[i]);
+        mPlayer->RegisterDecoderPlugin(decoderAgentList[i]);
     }
 
     mPlayer->SigFinished()->Connect(&MainWindow::slotPlayerStopped, this);
@@ -93,7 +93,7 @@ void MainWindow::initMyUi()
     // Play mode button
 
     // Volume
-    ui->sliderVolume->setValue(mPlayer->GetRendererVolume());
+    ui->sliderVolume->setValue(mPlayer->GetVolume());
 
     // PlayList View
     mBarPlayList = new MidClickTabBar(this);
@@ -213,7 +213,7 @@ void MainWindow::slotBtnStop()
 
 void MainWindow::slotSliderVolumeValueChanged(int val)
 {
-    mPlayer->SetRendererVolume(val);
+    mPlayer->SetVolume(val);
 }
 
 void MainWindow::slotSliderPlayingPressed()
