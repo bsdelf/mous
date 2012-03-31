@@ -16,6 +16,7 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
 
     QList<QAction*> actionList;
     QAction* action = NULL;
+    QActionGroup* group = NULL;
     QMenu* menu = NULL;
 
     // Action append
@@ -79,6 +80,32 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
     action = new QAction(tr("Save As"), this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered()), this, SLOT(slotPlaylistSaveAs()));
+
+    // Action play mode menu
+    action = new QAction(tr("Play Mode"), this);
+    actionList << action;
+    menu = new QMenu(this);
+    action->setMenu(menu);
+    group = new QActionGroup(this);
+
+    action = new QAction(tr("Normal"), this);
+    action->setCheckable(true);
+    group->addAction(action);
+    action = new QAction(tr("Repeat"), this);
+    action->setCheckable(true);
+    group->addAction(action);
+    action->setChecked(true);
+    action = new QAction(tr("Shuffle"), this);
+    action->setCheckable(true);
+    group->addAction(action);
+    action = new QAction(tr("Shuffle Repeat"), this);
+    action->setCheckable(true);
+    group->addAction(action);
+    action = new QAction(tr("Repeat One"), this);
+    action->setCheckable(true);
+    group->addAction(action);
+    menu->addActions(group->actions());
+    //group->setExclusive(true);
 
     // Style
     setActionSeparator(actionList);
