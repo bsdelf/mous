@@ -3,4 +3,5 @@ misc
 *.session
 *.swp
 *.pro.user
+*.qm
 .clang_complete
