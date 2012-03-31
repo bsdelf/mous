@@ -17,8 +17,13 @@ public:
     virtual ~ConvTaskFactory();
 
     virtual void RegisterDecoderPlugin(const IPluginAgent* pAgent);
+    virtual void RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents);
+
     virtual void RegisterEncoderPlugin(const IPluginAgent* pAgent);
+    virtual void RegisterEncoderPlugin(std::vector<const IPluginAgent*>& agents);
+
     virtual void UnregisterPlugin(const IPluginAgent* pAgent);
+    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents);
     virtual void UnregisterAll();
 
     virtual vector<string> GetEncoderNames() const;

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <core/IMediaLoader.h>
+using namespace std;
 
 namespace mous {
 
@@ -18,8 +19,14 @@ public:
     ~MediaLoader();
 
     void RegisterMediaPackPlugin(const IPluginAgent* pAgent);
+    void RegisterMediaPackPlugin(std::vector<const IPluginAgent*>& agents);
+
     void RegisterTagParserPlugin(const IPluginAgent* pAgent);
+    void RegisterTagParserPlugin(std::vector<const IPluginAgent*>& agents);
+
     void UnregisterPlugin(const IPluginAgent* pAgent);
+    void UnregisterPlugin(vector<const IPluginAgent*>& agents);
+    
     void UnregisterAll();
 
     EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const;

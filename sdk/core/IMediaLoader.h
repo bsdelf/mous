@@ -1,6 +1,7 @@
 #ifndef MOUS_IMEDIALOADER_H
 #define MOUS_IMEDIALOADER_H
 
+#include <vector>
 #include <deque>
 #include <string>
 #include <util/ErrorCode.h>
@@ -20,8 +21,14 @@ public:
     virtual ~IMediaLoader() { }
 
     virtual void RegisterMediaPackPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterMediaPackPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+
     virtual void RegisterTagParserPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterTagParserPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+
     virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+
     virtual void UnregisterAll() = 0;
 
     virtual EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const = 0;

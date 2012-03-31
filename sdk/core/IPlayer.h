@@ -41,8 +41,12 @@ public:
     virtual EmPlayerStatus GetStatus() const = 0;
 
     virtual void RegisterDecoderPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+
     virtual void RegisterRendererPlugin(const IPluginAgent* pAgent) = 0;
+
     virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
     virtual int GetVolume() const = 0;

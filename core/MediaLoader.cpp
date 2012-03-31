@@ -37,10 +37,24 @@ void MediaLoader::RegisterMediaPackPlugin(const IPluginAgent* pAgent)
         AddMediaPack(pAgent);
 }
 
+void MediaLoader::RegisterMediaPackPlugin(vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        RegisterMediaPackPlugin(agents[i]);
+    }
+}
+
 void MediaLoader::RegisterTagParserPlugin(const IPluginAgent* pAgent)
 {
     if (pAgent->GetType() == PluginType::TagParser)
         AddTagParser(pAgent);
+}
+
+void MediaLoader::RegisterTagParserPlugin(vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        RegisterTagParserPlugin(agents[i]);
+    }
 }
 
 void MediaLoader::UnregisterPlugin(const IPluginAgent* pAgent)
@@ -56,6 +70,13 @@ void MediaLoader::UnregisterPlugin(const IPluginAgent* pAgent)
 
     default:
         break;
+    }
+}
+
+void MediaLoader::UnregisterPlugin(vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        UnregisterPlugin(agents[i]);
     }
 }
 

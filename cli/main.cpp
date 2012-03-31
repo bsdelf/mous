@@ -164,12 +164,8 @@ int main(int argc, char** argv)
 
     // Setup loader
     IMediaLoader* loader = IMediaLoader::Create();
-    for (size_t i = 0; i < packAgentList.size(); ++i) {
-        loader->RegisterMediaPackPlugin(packAgentList[i]);
-    }
-    for (size_t i = 0; i < tagAgentList.size(); ++i) {
-        loader->RegisterTagParserPlugin(tagAgentList[i]);
-    }
+    loader->RegisterMediaPackPlugin(packAgentList);
+    loader->RegisterTagParserPlugin(tagAgentList);
 
     // Setup playlist
     Playlist<MediaItem*> playlist;
@@ -185,12 +181,8 @@ int main(int argc, char** argv)
     if (false)
     {
         IConvTaskFactory* factory = IConvTaskFactory::Create();
-        for (size_t i = 0; i < encoderAgentList.size(); ++i) {
-            factory->RegisterDecoderPlugin(encoderAgentList[i]);
-        }
-        for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-            factory->RegisterEncoderPlugin(decoderAgentList[i]);
-        }
+        factory->RegisterDecoderPlugin(encoderAgentList);
+        factory->RegisterEncoderPlugin(decoderAgentList);
 
         vector<string> encoders = factory->GetEncoderNames();
         if (encoders.empty()) {
@@ -236,9 +228,7 @@ int main(int argc, char** argv)
     IPlayer* player = IPlayer::Create();
     player->SigFinished()->Connect(&OnFinished);
     player->RegisterRendererPlugin(rendererAgentList[0]);
-    for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-        player->RegisterDecoderPlugin(decoderAgentList[i]);
-    }
+    player->RegisterDecoderPlugin(decoderAgentList);
     for (size_t i = 0; i < pelAgentList.size(); ++i) {
         //player->RegisterPlugin(pelAgentList[i]);
     }

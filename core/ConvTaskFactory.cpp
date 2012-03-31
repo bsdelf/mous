@@ -32,10 +32,24 @@ void ConvTaskFactory::RegisterDecoderPlugin(const IPluginAgent* pAgent)
     }
 }
 
+void ConvTaskFactory::RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        RegisterDecoderPlugin(agents[i]);
+    }
+}
+
 void ConvTaskFactory::RegisterEncoderPlugin(const IPluginAgent* pAgent)
 {
     if (pAgent->GetType() == PluginType::Encoder) {
         AddEncAgent(pAgent);
+    }
+}
+
+void ConvTaskFactory::RegisterEncoderPlugin(std::vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        RegisterEncoderPlugin(agents[i]);
     }
 }
 
@@ -52,6 +66,13 @@ void ConvTaskFactory::UnregisterPlugin(const IPluginAgent* pAgent)
 
         default:
             break;
+    }
+}
+
+void ConvTaskFactory::UnregisterPlugin(std::vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        UnregisterPlugin(agents[i]);
     }
 }
 

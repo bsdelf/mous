@@ -71,6 +71,13 @@ void Player::RegisterDecoderPlugin(const IPluginAgent* pAgent)
         AddDecoderPlugin(pAgent);
 }
 
+void Player::RegisterDecoderPlugin(vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        RegisterDecoderPlugin(agents[i]);
+    }
+}
+
 void Player::RegisterRendererPlugin(const IPluginAgent* pAgent)
 {
     if (pAgent->GetType() == PluginType::Renderer)
@@ -90,6 +97,13 @@ void Player::UnregisterPlugin(const IPluginAgent* pAgent)
 
         default:
             break;
+    }
+}
+
+void Player::UnregisterPlugin(vector<const IPluginAgent*>& agents)
+{
+    for (size_t i = 0; i < agents.size(); ++i) {
+        UnregisterPlugin(agents[i]);
     }
 }
 

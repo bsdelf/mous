@@ -9,6 +9,7 @@
 #include <scx/Mutex.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/Thread.hpp>
+using namespace std;
 
 namespace mous {
 
@@ -26,8 +27,12 @@ public:
     EmPlayerStatus GetStatus() const;
 
     void RegisterDecoderPlugin(const IPluginAgent* pAgent);
+    void RegisterDecoderPlugin(vector<const IPluginAgent*>& agents);
+
     void RegisterRendererPlugin(const IPluginAgent* pAgent);
+
     void UnregisterPlugin(const IPluginAgent* pAgent);
+    void UnregisterPlugin(vector<const IPluginAgent*>& agents);
     void UnregisterAll();
 
     int GetVolume() const;
