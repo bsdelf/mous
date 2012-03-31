@@ -22,12 +22,14 @@ public:
 
     virtual void setMediaLoader(const mous::IMediaLoader* loader);
 
-    virtual const mous::MediaItem* getNextItem();
-    virtual const mous::MediaItem* getPreviousItem();
+    virtual const mous::MediaItem* getNextItem() const;
+    virtual const mous::MediaItem* getPreviousItem() const;
     virtual size_t getItemCount() const;
 
 signals:
     void sigPlayMediaItem(IPlayListView *view, const mous::MediaItem* item);
+    void sigConvertMediaItem(const mous::MediaItem* item);
+    void sigConvertMediaItems(QList<const mous::MediaItem*> items);
 
 private:
     void mouseDoubleClickEvent(QMouseEvent * event);

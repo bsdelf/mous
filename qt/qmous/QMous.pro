@@ -16,16 +16,19 @@ SOURCES += main.cpp\
         MainWindow.cpp \
         SimplePlayListView.cpp \
     CustomHeadTabWidget.cpp \
-    MidClickTabBar.cpp
+    MidClickTabBar.cpp \
+    DlgListSelect.cpp
 
 HEADERS  += MainWindow.h \
     SimplePlayListView.h \
     IPlayListView.h \
     CustomHeadTabWidget.hpp \
     MidClickTabBar.hpp \
-    UiHelper.hpp
+    UiHelper.hpp \
+    DlgListSelect.h
 
-FORMS    += MainWindow.ui
+FORMS    += MainWindow.ui \
+    DlgListSelect.ui
 
 TRANSLATIONS = QMous.ts
 

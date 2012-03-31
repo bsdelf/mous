@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 #include "MidClickTabBar.hpp"
 #include "CustomHeadTabWidget.hpp"
+#include "DlgListSelect.h"
 #include <scx/Signal.hpp>
 #include <util/MediaItem.h>
 #include "SimplePlayListView.h"
@@ -17,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mPluginMgr(IPluginManager::Create()),
     mMediaLoader(IMediaLoader::Create()),
     mPlayer(IPlayer::Create()),
+    mConvFactory(IConvTaskFactory::Create()),
     mMediaItem(NULL),
     mSliderPlayingPreempted(false)
 {
@@ -28,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    mPlayer->SigFinished()->DisconnectReceiver(this);
+
     if (mPlayer->GetStatus() == PlayerStatus::Playing) {
         mPlayer->Close();
     }
@@ -39,6 +43,7 @@ MainWindow::~MainWindow()
 
     delete ui;
 
+    mConvFactory->UnregisterAll();
     mPlayer->UnregisterAll();
     mMediaLoader->UnregisterAll();
     mPluginMgr->UnloadAll();
@@ -46,6 +51,7 @@ MainWindow::~MainWindow()
     IPluginManager::Free(mPluginMgr);
     IMediaLoader::Free(mMediaLoader);
     IPlayer::Free(mPlayer);
+    IConvTaskFactory::Free(mConvFactory);
 }
 
 void MainWindow::initMousCore()
@@ -63,18 +69,23 @@ void MainWindow::initMousCore()
     mMediaLoader->RegisterTagParserPlugin(tagAgentList);
 
     vector<const IPluginAgent*> decoderAgentList;
+    vector<const IPluginAgent*> encoderAgentList;
     vector<const IPluginAgent*> rendererAgentList;
     mPluginMgr->GetPlugins(decoderAgentList, PluginType::Decoder);
+    mPluginMgr->GetPlugins(encoderAgentList, PluginType::Encoder);
     mPluginMgr->GetPlugins(rendererAgentList, PluginType::Renderer);
 
     mPlayer->RegisterRendererPlugin(rendererAgentList[0]);
     mPlayer->RegisterDecoderPlugin(decoderAgentList);
-
     mPlayer->SigFinished()->Connect(&MainWindow::slotPlayerStopped, this);
+
+    mConvFactory->RegisterDecoderPlugin(decoderAgentList);
+    mConvFactory->RegisterEncoderPlugin(encoderAgentList);
 
     qDebug() << ">> MediaPack count:" << packAgentList.size();
     qDebug() << ">> TagParser count:" << tagAgentList.size();
     qDebug() << ">> Decoder count:" << decoderAgentList.size();
+    qDebug() << ">> Encoder count:" << encoderAgentList.size();
     qDebug() << ">> Renderer count:" << rendererAgentList.size();
 }
 
@@ -148,7 +159,7 @@ void MainWindow::slotUpdateUi()
     int ms = mPlayer->GetOffsetMs();
     int kbps = mPlayer->GetBitRate();
 
-    mStatusMsg.sprintf("%d kbps | %.2d:%.2d/%.2d:%.2d",
+    mStatusMsg.sprintf("%.3d kbps | %.2d:%.2d/%.2d:%.2d",
                  kbps,
                  ms/1000/60, ms/1000%60, total/1000/60, total/1000%60);
 
@@ -232,8 +243,9 @@ void MainWindow::slotBarPlayListMidClick(int index)
 {
     SimplePlayListView* view = (SimplePlayListView*)mWidgetPlayList->widget(index);
     mWidgetPlayList->removeTab(index);
-    disconnect(view, SIGNAL(sigPlayMediaItem(const mous::MediaItem*)),
-            this, SLOT(slotPlayMediaItem(const mous::MediaItem*)));
+
+    disconnect(view, 0, this, 0);
+
     delete view;
 
     mBarPlayList->setFocus();
@@ -243,8 +255,13 @@ void MainWindow::slotWidgetPlayListDoubleClick()
 {
     SimplePlayListView* view = new SimplePlayListView(this);
     view->setMediaLoader(mMediaLoader);
+
     connect(view, SIGNAL(sigPlayMediaItem(IPlayListView*, const mous::MediaItem*)),
             this, SLOT(slotPlayMediaItem(IPlayListView*, const mous::MediaItem*)));
+    connect(view, SIGNAL(sigConvertMediaItem(const mous::MediaItem*)),
+            this, SLOT(slotConvertMediaItem(const mous::MediaItem*)));
+    connect(view, SIGNAL(sigConvertMediaItems(QList<const mous::MediaItem*>)),
+            this, SLOT(slotConvertMediaItems(QList<const mous::MediaItem*>)));
 
     mWidgetPlayList->addTab(view, QString::number(mWidgetPlayList->count()));
     mWidgetPlayList->setCurrentIndex(mWidgetPlayList->count()-1);
@@ -270,5 +287,32 @@ void MainWindow::slotPlayMediaItem(IPlayListView *view, const MediaItem *item)
         mPlayer->Play();
     ui->btnPlay->setIcon(mIconPaused);
 
+    setWindowTitle(QString(item->title.c_str()));
+
     mPlaylistView = view;
+}
+
+void MainWindow::slotConvertMediaItem(const MediaItem *item)
+{
+    vector<string> encoderNames = mConvFactory->GetEncoderNames();
+    QStringList list;
+    for (size_t i = 0; i < encoderNames.size(); ++i) {
+        list << encoderNames[i].c_str();
+        qDebug() << ">> encoder:" << i+1 << encoderNames[i].c_str();
+    }
+
+    DlgListSelect dlg(this);
+    dlg.setWindowTitle(tr("Available Encoders"));
+    dlg.SetItems(list);
+    dlg.SetSelectedIndex(0);
+    dlg.exec();
+
+    if (dlg.IsOk()) {
+        qDebug() << "ok";
+    }
+}
+
+void MainWindow::slotConvertMediaItems(QList<const MediaItem*> items)
+{
+
 }

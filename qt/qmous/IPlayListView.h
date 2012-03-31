@@ -13,8 +13,8 @@ public:
 
     virtual void setMediaLoader(const mous::IMediaLoader* loader) = 0;
 
-    virtual const mous::MediaItem* getNextItem() = 0;
-    virtual const mous::MediaItem* getPreviousItem() = 0;
+    virtual const mous::MediaItem* getNextItem() const = 0;
+    virtual const mous::MediaItem* getPreviousItem() const = 0;
     virtual size_t getItemCount() const = 0;
 };
 

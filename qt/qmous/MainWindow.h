@@ -6,6 +6,8 @@
 #include <core/IPluginManager.h>
 #include <core/IMediaLoader.h>
 #include <core/IPlayer.h>
+#include <core/IConvTask.h>
+#include <core/IConvTaskFactory.h>
 #include "IPlayListView.h"
 
 namespace Ui {
@@ -55,6 +57,8 @@ private slots:
     void slotWidgetPlayListDoubleClick();
 
     void slotPlayMediaItem(IPlayListView* view, const mous::MediaItem* item);
+    void slotConvertMediaItem(const mous::MediaItem *item);
+    void slotConvertMediaItems(QList<const mous::MediaItem*> items);
 
 private:
     Ui::MainWindow *ui;
@@ -74,6 +78,7 @@ private:
     mous::IPluginManager* mPluginMgr;
     mous::IMediaLoader* mMediaLoader;
     mous::IPlayer* mPlayer;
+    mous::IConvTaskFactory* mConvFactory;
     const mous::MediaItem* mMediaItem;
 
     bool mSliderPlayingPreempted;

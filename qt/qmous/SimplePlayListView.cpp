@@ -157,7 +157,7 @@ void SimplePlayListView::setMediaLoader(const IMediaLoader* loader)
     mMediaLoader = loader;
 }
 
-const MediaItem* SimplePlayListView::getNextItem()
+const MediaItem* SimplePlayListView::getNextItem() const
 {
     MediaItem* item = NULL;
     if (mMediaList.SeqCurrent(item, 1)) {
@@ -167,7 +167,7 @@ const MediaItem* SimplePlayListView::getNextItem()
     return item;
 }
 
-const MediaItem* SimplePlayListView::getPreviousItem()
+const MediaItem* SimplePlayListView::getPreviousItem() const
 {
     MediaItem* item = NULL;
     if (mMediaList.SeqCurrent(item, -1)) {
@@ -186,8 +186,8 @@ void SimplePlayListView::mouseDoubleClickEvent(QMouseEvent * event)
 {
     QTreeView::mouseDoubleClickEvent(event);
 
-    //if (selectedIndexes().size() != 1)
-    //    return;
+    if (mMediaList.Empty())
+        return;
 
     QModelIndex index(selectedIndexes()[0]);
     qDebug() << index.row();
@@ -287,7 +287,15 @@ void SimplePlayListView::slotTagging()
 
 void SimplePlayListView::slotConvert()
 {
+    if (mMediaList.Empty())
+        return;
 
+    QModelIndex index(selectedIndexes()[0]);
+    qDebug() << index.row();
+
+    MediaItem* item = mMediaList.GetItem(index.row());;
+
+    emit sigConvertMediaItem(item);
 }
 
 void SimplePlayListView::slotProperties()
