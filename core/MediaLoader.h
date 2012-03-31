@@ -26,7 +26,6 @@ public:
 
     void UnregisterPlugin(const IPluginAgent* pAgent);
     void UnregisterPlugin(vector<const IPluginAgent*>& agents);
-    
     void UnregisterAll();
 
     EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const;

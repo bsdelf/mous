@@ -106,7 +106,8 @@ private:
         }
     };
 
-    struct DecoderPluginNode {
+    struct DecoderPluginNode
+    {
         const IPluginAgent* agent;
         IDecoder* decoder;
     };
