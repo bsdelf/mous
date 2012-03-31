@@ -113,7 +113,6 @@ void MainWindow::initQtSlots()
     connect(mTimerUpdateUi, SIGNAL(timeout()), this, SLOT(slotUpdateUi()));
 
     connect(ui->btnPlay, SIGNAL(clicked()), this, SLOT(slotBtnPlay()));
-    connect(ui->btnStop, SIGNAL(clicked()), this, SLOT(slotBtnStop()));
 
     connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(slotSliderVolumeValueChanged(int)));
 
