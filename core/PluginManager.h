@@ -23,22 +23,15 @@ public:
     size_t LoadPluginDir(const std::string& dir);
     EmErrorCode LoadPlugin(const std::string& path);
     void UnloadPlugin(const std::string& path);
-    void UnloadAllPlugins();
+    void UnloadAll();
 
-    void GetPluginAgents(std::vector<const IPluginAgent*>& list, EmPluginType) const;
+    void GetPlugins(std::vector<const IPluginAgent*>& list, EmPluginType) const;
     void GetPluginPath(std::vector<std::string>& list) const;
     const PluginInfo* GetPluginInfo(const std::string& path) const;
-
-    //void GetDecoders(std::vector<IPluginAgent*>& list);
-    //void GetRenderers(std::vector<IPluginAgent*>& list);
-    //void GetMediaPacks(std::vector<IMediaPack*>& list);
-    //void GetTagParsers(std::vector<ITagParser*>& list);
 
 private:
     static std::vector<std::string>* gFtwFiles;
     static int OnFtw(const char* file, const struct stat* s, int);
-
-private:
 
 private:
     std::map<std::string, IPluginAgent*> m_PluginMap;

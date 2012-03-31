@@ -31,23 +31,19 @@ MediaLoader::~MediaLoader()
 
 }
 
-void MediaLoader::RegisterPluginAgent(const IPluginAgent* pAgent)
+void MediaLoader::RegisterMediaPackPlugin(const IPluginAgent* pAgent)
 {
-    switch (pAgent->GetType()) {
-    case PluginType::MediaPack:
+    if (pAgent->GetType() == PluginType::MediaPack)
         AddMediaPack(pAgent);
-        break;
-    
-    case PluginType::TagParser:
-        AddTagParser(pAgent);
-        break;
-
-    default:
-        break;
-    }
 }
 
-void MediaLoader::UnregisterPluginAgent(const IPluginAgent* pAgent)
+void MediaLoader::RegisterTagParserPlugin(const IPluginAgent* pAgent)
+{
+    if (pAgent->GetType() == PluginType::TagParser)
+        AddTagParser(pAgent);
+}
+
+void MediaLoader::UnregisterPlugin(const IPluginAgent* pAgent)
 {
     switch (pAgent->GetType()) {
     case PluginType::MediaPack:
@@ -67,7 +63,7 @@ void MediaLoader::UnregisterAll()
 {
     while (!m_AgentMap.empty()) {
         AgentMapIter iter = m_AgentMap.begin();
-        UnregisterPluginAgent(iter->first);
+        UnregisterPlugin(iter->first);
     }
 }
 

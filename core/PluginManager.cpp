@@ -64,7 +64,7 @@ void PluginManager::UnloadPlugin(const string& path)
     }
 }
 
-void PluginManager::UnloadAllPlugins()
+void PluginManager::UnloadAll()
 {
     for (PluginMapIter iter = m_PluginMap.begin();
             iter != m_PluginMap.end(); ++iter) {
@@ -75,7 +75,7 @@ void PluginManager::UnloadAllPlugins()
     m_PluginMap.clear();
 }
 
-void PluginManager::GetPluginAgents(vector<const IPluginAgent*>& list, EmPluginType type) const
+void PluginManager::GetPlugins(vector<const IPluginAgent*>& list, EmPluginType type) const
 {
     list.clear();
     for (PluginMapConstIter iter = m_PluginMap.begin();

@@ -19,8 +19,9 @@ public:
 public:
     virtual ~IMediaLoader() { }
 
-    virtual void RegisterPluginAgent(const IPluginAgent* pAgent) = 0;
-    virtual void UnregisterPluginAgent(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterMediaPackPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterTagParserPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
     virtual void UnregisterAll() = 0;
 
     virtual EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const = 0;

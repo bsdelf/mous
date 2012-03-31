@@ -25,23 +25,21 @@ ConvTaskFactory::~ConvTaskFactory()
     UnregisterAll();
 }
 
-void ConvTaskFactory::RegisterPluginAgent(const IPluginAgent* pAgent)
+void ConvTaskFactory::RegisterDecoderPlugin(const IPluginAgent* pAgent)
 {
-    switch (pAgent->GetType()) {
-        case PluginType::Decoder:
-            AddDecAgent(pAgent);
-            break;
-
-        case PluginType::Encoder:
-            AddEncAgent(pAgent);
-            break;
-
-        default:
-            break;
+    if (pAgent->GetType() == PluginType::Decoder) {
+        AddDecAgent(pAgent);
     }
 }
 
-void ConvTaskFactory::UnregisterPluginAgent(const IPluginAgent* pAgent)
+void ConvTaskFactory::RegisterEncoderPlugin(const IPluginAgent* pAgent)
+{
+    if (pAgent->GetType() == PluginType::Encoder) {
+        AddEncAgent(pAgent);
+    }
+}
+
+void ConvTaskFactory::UnregisterPlugin(const IPluginAgent* pAgent)
 {
     switch (pAgent->GetType()) {
         case PluginType::Decoder:

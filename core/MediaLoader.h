@@ -17,8 +17,9 @@ public:
     MediaLoader();
     ~MediaLoader();
 
-    void RegisterPluginAgent(const IPluginAgent* pAgent);
-    void UnregisterPluginAgent(const IPluginAgent* pAgent);
+    void RegisterMediaPackPlugin(const IPluginAgent* pAgent);
+    void RegisterTagParserPlugin(const IPluginAgent* pAgent);
+    void UnregisterPlugin(const IPluginAgent* pAgent);
     void UnregisterAll();
 
     EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const;

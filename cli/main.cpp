@@ -134,28 +134,28 @@ int main(int argc, char** argv)
 
     // Get all plugin agents.
     vector<const IPluginAgent*> decoderAgentList;
-    mgr->GetPluginAgents(decoderAgentList, PluginType::Decoder);
+    mgr->GetPlugins(decoderAgentList, PluginType::Decoder);
     cout << ">> Decoder count:" << decoderAgentList.size() << endl;
 
     vector<const IPluginAgent*> encoderAgentList;
-    mgr->GetPluginAgents(encoderAgentList, PluginType::Encoder);
+    mgr->GetPlugins(encoderAgentList, PluginType::Encoder);
     cout << ">> Encoder count:" << encoderAgentList.size() << endl;
 
     vector<const IPluginAgent*> rendererAgentList;
-    mgr->GetPluginAgents(rendererAgentList, PluginType::Renderer);
+    mgr->GetPlugins(rendererAgentList, PluginType::Renderer);
     cout << ">> Renderer count:" << rendererAgentList.size() << endl;
 
     vector<const IPluginAgent*> packAgentList;
-    mgr->GetPluginAgents(packAgentList, PluginType::MediaPack);
+    mgr->GetPlugins(packAgentList, PluginType::MediaPack);
     cout << ">> MediaPack count:" << packAgentList.size() << endl;
 
     vector<const IPluginAgent*> tagAgentList;
-    mgr->GetPluginAgents(tagAgentList, PluginType::TagParser);
+    mgr->GetPlugins(tagAgentList, PluginType::TagParser);
     cout << ">> TagParser count:" << tagAgentList.size() << endl;
     cout << endl;
 
     vector<const IPluginAgent*> pelAgentList;
-    mgr->GetPluginAgents(pelAgentList, PluginType::EventWatcher);
+    mgr->GetPlugins(pelAgentList, PluginType::EventWatcher);
     cout << ">> EventWatcher count:" << pelAgentList.size() << endl;
 
     // Check plugins enough.
@@ -165,10 +165,10 @@ int main(int argc, char** argv)
     // Setup loader
     IMediaLoader* loader = IMediaLoader::Create();
     for (size_t i = 0; i < packAgentList.size(); ++i) {
-        loader->RegisterPluginAgent(packAgentList[i]);
+        loader->RegisterMediaPackPlugin(packAgentList[i]);
     }
     for (size_t i = 0; i < tagAgentList.size(); ++i) {
-        loader->RegisterPluginAgent(tagAgentList[i]);
+        loader->RegisterTagParserPlugin(tagAgentList[i]);
     }
 
     // Setup playlist
@@ -186,10 +186,10 @@ int main(int argc, char** argv)
     {
         IConvTaskFactory* factory = IConvTaskFactory::Create();
         for (size_t i = 0; i < encoderAgentList.size(); ++i) {
-            factory->RegisterPluginAgent(encoderAgentList[i]);
+            factory->RegisterDecoderPlugin(encoderAgentList[i]);
         }
         for (size_t i = 0; i < decoderAgentList.size(); ++i) {
-            factory->RegisterPluginAgent(decoderAgentList[i]);
+            factory->RegisterEncoderPlugin(decoderAgentList[i]);
         }
 
         vector<string> encoders = factory->GetEncoderNames();
@@ -317,7 +317,7 @@ int main(int argc, char** argv)
 
     loader->UnregisterAll();
     player->UnregisterAll();
-    mgr->UnloadAllPlugins();
+    mgr->UnloadAll();
     
     for (size_t i = 0; i < mediaList.size(); ++i) {
         delete mediaList[i];
