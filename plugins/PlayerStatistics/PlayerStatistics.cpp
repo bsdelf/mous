@@ -16,13 +16,13 @@ PlayerStatistics::~PlayerStatistics()
 
 void PlayerStatistics::SetPlayer(const IPlayer* player)
 {
-    player->SigStartPlay()->Connect(&PlayerStatistics::SlotStartPlay, this);
+    //player->SigStartPlay()->Connect(&PlayerStatistics::SlotStartPlay, this);
     m_Player = player;
 }
 
 void PlayerStatistics::UnsetPlayer()
 {
-    m_Player->SigStartPlay()->DisconnectReceiver(this);
+    //m_Player->SigStartPlay()->DisconnectReceiver(this);
     m_Player = NULL;
 }
 
