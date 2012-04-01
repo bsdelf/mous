@@ -5,11 +5,14 @@
 #include <QtGui>
 #include <deque>
 #include "IPlayListView.h"
+#include "DlgLoadingMedia.h"
 #include <util/Playlist.h>
+#include <scx/Thread.hpp>
 
 namespace mous {
     struct MediaItem;
 }
+
 
 class SimplePlayListView : public QTreeView, public IPlayListView
 {
@@ -32,6 +35,13 @@ signals:
     void sigConvertMediaItems(QList<const mous::MediaItem*> items);
 
 private:
+    struct MediaRow
+    {
+        mous::MediaItem* item;
+        QList<QStandardItem *> row;
+    };
+
+private:
     void mouseDoubleClickEvent(QMouseEvent * event);
 
 private slots:
@@ -50,14 +60,32 @@ private slots:
     void slotPlaylistRename();
     void slotPlaylistSaveAs();
 
+    void SlotReadyToLoad();
+    void SlotLoadFinished();
+    void SlotMediaRowGot(MediaRow *mediaRow);
+
+signals:
+    void SigReadyToLoad();
+    void SigMediaRowGot(MediaRow* mediaRow);
+    void SigLoadFinished();
+
 private:
-    const mous::IMediaLoader* mMediaLoader;
+    void LoadMediaItem(const QStringList& pathList);
 
-    QString mOldMediaPath;
+private:
+    const mous::IMediaLoader* m_MediaLoader;
 
-    QStandardItemModel mModel;
+    QString m_OldMediaPath;
 
-    mous::Playlist<mous::MediaItem*> mMediaList;
+    QStandardItemModel m_StModel;
+    mous::Playlist<mous::MediaItem*> m_Playlist;
+
+    QTimer m_PickMediaItemTimer;
+    DlgLoadingMedia m_DlgLoadingMedia;
+    scx::Thread m_LoadMediaThread;
+    QMutex m_TmpLoadMutex;
+    QList<MediaRow> m_TmpLoadList;
+    bool m_LoadFinished;
 };
 
 #endif // SIMPLEPLAYLISTVIEW_H

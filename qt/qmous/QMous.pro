@@ -17,7 +17,8 @@ SOURCES += main.cpp\
         SimplePlayListView.cpp \
     CustomHeadTabWidget.cpp \
     MidClickTabBar.cpp \
-    DlgListSelect.cpp
+    DlgListSelect.cpp \
+    DlgLoadingMedia.cpp
 
 HEADERS  += MainWindow.h \
     SimplePlayListView.h \
@@ -25,10 +26,12 @@ HEADERS  += MainWindow.h \
     CustomHeadTabWidget.hpp \
     MidClickTabBar.hpp \
     UiHelper.hpp \
-    DlgListSelect.h
+    DlgListSelect.h \
+    DlgLoadingMedia.h
 
 FORMS    += MainWindow.ui \
-    DlgListSelect.ui
+    DlgListSelect.ui \
+    DlgLoadingMedia.ui
 
 TRANSLATIONS = QMous.ts
 

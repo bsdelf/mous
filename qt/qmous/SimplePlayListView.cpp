@@ -3,6 +3,8 @@
 #include <QtGui>
 #include <util/MediaItem.h>
 #include <core/IMediaLoader.h>
+#include <scx/Thread.hpp>
+#include <scx/IconvHelper.hpp>
 #include "UiHelper.hpp"
 using namespace std;
 using namespace sqt;
@@ -10,7 +12,7 @@ using namespace mous;
 
 SimplePlayListView::SimplePlayListView(QWidget *parent) :
     QTreeView(parent),
-    mMediaLoader(NULL)
+    m_MediaLoader(NULL)
 {
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -117,26 +119,38 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
     setRootIsDecorated(false);
     setItemsExpandable(false);
     setAlternatingRowColors(true);
-    setModel(&mModel);
+    setUniformRowHeights(true);
+
+    setModel(&m_StModel);
     header()->setResizeMode(QHeaderView::Stretch);
 
     // Header
     QStringList headList;
     headList << tr("Artist") << tr("Album") << tr("Title") << tr("Track") << tr("Duration");
-    mModel.setHorizontalHeaderLabels(headList);
+    m_StModel.setHorizontalHeaderLabels(headList);
+    m_StModel.setColumnCount(headList.size());
 
     // Test
-    mModel.setRowCount(0);
-    for (int row = 0; row < mModel.rowCount(); ++row) {
-        for (int column = 0; column < mModel.columnCount(); ++column) {
+    /*
+    m_StModel.setRowCount(0);
+    for (int row = 0; row < m_StModel.rowCount(); ++row) {
+        for (int column = 0; column < m_StModel.columnCount(); ++column) {
              QStandardItem *item = new QStandardItem(QString("row %0, column %1").arg(row).arg(column));
              item->setEditable(false);
              item->setSizeHint(QSize(-1, 25));
-             mModel.setItem(row, column, item);
+             m_StModel.setItem(row, column, item);
          }
-     }
+    }
+    */
 
-    mMediaList.SetMode(PlaylistMode::Repeat);
+    m_Playlist.SetMode(PlaylistMode::Repeat);
+
+    // connect
+    connect(this, SIGNAL(SigReadyToLoad()), this, SLOT(SlotReadyToLoad()), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(SigLoadFinished()), this, SLOT(SlotLoadFinished()), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(SigMediaRowGot(MediaRow*)), this, SLOT(SlotMediaRowGot(MediaRow*)), Qt::BlockingQueuedConnection);
+
+    //connect(&m_PickMediaItemTimer, SIGNAL(timeout()), this, SLOT(SlotPickMediaItem()));
 }
 
 SimplePlayListView::~SimplePlayListView()
@@ -149,20 +163,33 @@ SimplePlayListView::~SimplePlayListView()
             delete action->menu();
         delete action;
     }
+
+    while (m_StModel.rowCount() > 0) {
+        QList<QStandardItem*> list = m_StModel.takeRow(0);
+        foreach(QStandardItem* item, list)
+            delete item;
+    }
+
+    for (int i = 0; i < m_Playlist.GetItemCount(); ++i) {
+        delete m_Playlist.GetItem(i);
+    }
+    m_Playlist.Clear();
+
+    //m_LoadThread.jooin();
 }
 
 /* IPlayListView interfaces */
 void SimplePlayListView::setMediaLoader(const IMediaLoader* loader)
 {
-    mMediaLoader = loader;
+    m_MediaLoader = loader;
 }
 
 const MediaItem* SimplePlayListView::getNextItem() const
 {
     MediaItem* item = NULL;
-    if (mMediaList.SeqCurrent(item, 1)) {
-        mMediaList.SeqMoveNext();
-        mMediaList.SeqCurrent(item);
+    if (m_Playlist.SeqCurrent(item, 1)) {
+        m_Playlist.SeqMoveNext();
+        m_Playlist.SeqCurrent(item);
     }
     return item;
 }
@@ -170,31 +197,31 @@ const MediaItem* SimplePlayListView::getNextItem() const
 const MediaItem* SimplePlayListView::getPreviousItem() const
 {
     MediaItem* item = NULL;
-    if (mMediaList.SeqCurrent(item, -1)) {
-        mMediaList.SeqMoveNext(-1);
-        mMediaList.SeqCurrent(item);
+    if (m_Playlist.SeqCurrent(item, -1)) {
+        m_Playlist.SeqMoveNext(-1);
+        m_Playlist.SeqCurrent(item);
     }
     return NULL;
 }
 
 size_t SimplePlayListView::getItemCount() const
 {
-    return mMediaList.GetItemCount();
+    return m_Playlist.GetItemCount();
 }
 
 void SimplePlayListView::mouseDoubleClickEvent(QMouseEvent * event)
 {
     QTreeView::mouseDoubleClickEvent(event);
 
-    if (mMediaList.Empty())
+    if (m_Playlist.Empty())
         return;
 
     QModelIndex index(selectedIndexes()[0]);
     qDebug() << index.row();
 
-    mMediaList.SeqJumpTo(index.row());
+    m_Playlist.SeqJumpTo(index.row());
     MediaItem* item = NULL;
-    mMediaList.SeqCurrent(item);
+    m_Playlist.SeqCurrent(item);
 
     emit sigPlayMediaItem(this, item);
 }
@@ -204,60 +231,18 @@ void SimplePlayListView::slotAppend()
 {
     // Get media path
     QString oldPath("~");
-    if (!mOldMediaPath.isEmpty()) {
-        QFileInfo info(mOldMediaPath);
+    if (!m_OldMediaPath.isEmpty()) {
+        QFileInfo info(m_OldMediaPath);
         oldPath = info.dir().dirName();
     }
-    QStringList pathList = QFileDialog::getOpenFileNames(this,
-         tr("Open Media"), oldPath, tr("*"));
+    QStringList pathList = QFileDialog::getOpenFileNames(
+                this, tr("Open Media"), oldPath, tr("*"));
     if (pathList.isEmpty())
         return;
 
-    mOldMediaPath = pathList.first();
-
-    deque<MediaItem*> itemList;
-    deque<MediaItem*> tmpItemList;
-    for (int i = 0; i < pathList.size(); ++i) {
-        mMediaLoader->LoadMedia(pathList.at(i).toUtf8().data(), tmpItemList);
-        itemList.insert(itemList.end(), tmpItemList.begin(), tmpItemList.end());
-    }
-
-    for(size_t i = 0; i < itemList.size(); ++i) {
-        MediaItem* item = itemList[i];
-
-        mMediaList.AppendItem(item);
-
-        // Check sec duration
-        int secDuration = 0;
-        if (item->hasRange) {
-            if (item->msEnd != (uint64_t)-1)
-                secDuration = (item->msEnd - item->msBeg)/1000;
-            else
-                secDuration = (item->duration - item->msBeg)/1000;
-        } else {
-            secDuration = item->duration/1000;
-        }
-        QString strDuration;
-        strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
-
-        // Build row
-        QList<QStandardItem *> row;
-        row << new QStandardItem(QString::fromUtf8(item->artist.c_str()));
-        row << new QStandardItem(QString::fromUtf8(item->album.c_str()));
-        row << new QStandardItem(QString::fromUtf8(item->title.c_str()));
-        row << new QStandardItem(QString::number(item->track));
-        row << new QStandardItem(strDuration);
-        for (int i = 0; i < row.size(); ++i) {
-            QStandardItem* item = row[i];
-            item->setEditable(false);
-            item->setSizeHint(QSize(-1, 22));
-        }
-        mModel.appendRow(row);
-        //qDebug() << QString::fromUtf8(itemList[i]->url.c_str());
-    }
-
-    // Update view
-
+    m_OldMediaPath = pathList.first();
+    scx::Function<void (const QStringList&)> fn(&SimplePlayListView::LoadMediaItem, this);
+    m_LoadMediaThread.Run(fn, pathList);
 }
 
 void SimplePlayListView::slotRemove()
@@ -287,13 +272,13 @@ void SimplePlayListView::slotTagging()
 
 void SimplePlayListView::slotConvert()
 {
-    if (mMediaList.Empty())
+    if (m_Playlist.Empty())
         return;
 
     QModelIndex index(selectedIndexes()[0]);
     qDebug() << index.row();
 
-    MediaItem* item = mMediaList.GetItem(index.row());;
+    MediaItem* item = m_Playlist.GetItem(index.row());;
 
     emit sigConvertMediaItem(item);
 }
@@ -316,4 +301,127 @@ void SimplePlayListView::slotPlaylistRename()
 void SimplePlayListView::slotPlaylistSaveAs()
 {
 
+}
+
+void SimplePlayListView::SlotReadyToLoad()
+{
+    setUpdatesEnabled(false);
+
+    m_DlgLoadingMedia.setWindowTitle(tr("Loading"));
+    m_DlgLoadingMedia.show();
+    //m_PickMediaItemTimer.start(1);
+}
+
+
+void SimplePlayListView::SlotLoadFinished()
+{
+    setUpdatesEnabled(true);
+    m_DlgLoadingMedia.hide();
+}
+
+void SimplePlayListView::SlotMediaRowGot(MediaRow* mediaRow)
+{
+    /*
+    if (m_TmpLoadList.isEmpty()) {
+        m_DlgLoadingMedia.SetFileName("");
+        if (m_LoadFinished) {
+            m_PickMediaItemTimer.stop();
+            m_DlgLoadingMedia.hide();
+            setUpdatesEnabled(true);
+        }
+        return;
+    }
+    m_TmpLoadMutex.lock();
+    MediaRow mediaRow = m_TmpLoadList.takeFirst();
+    m_TmpLoadMutex.unlock();
+    */
+
+    QFileInfo info(QString::fromUtf8(mediaRow->item->url.c_str()));
+    QString fileName(info.fileName());
+
+    m_DlgLoadingMedia.SetFileName(fileName);
+
+    m_Playlist.AppendItem(mediaRow->item);
+    m_StModel.appendRow(mediaRow->row);
+}
+
+void SimplePlayListView::LoadMediaItem(const QStringList& pathList)
+{
+    m_LoadFinished = false;
+    m_TmpLoadList.clear();
+
+    emit SigReadyToLoad();
+
+    std::deque<mous::MediaItem*> mediaItemList;
+
+    for (int i = 0; i < pathList.size(); ++i) {
+        m_MediaLoader->LoadMedia(pathList.at(i).toUtf8().data(), mediaItemList);
+
+        for(size_t j = 0; j < mediaItemList.size(); ++j) {
+            MediaItem* item = mediaItemList[j];
+
+            MediaRow mediaRow;
+            mediaRow.item = item;
+
+            // Check sec duration
+            int secDuration = 0;
+            if (item->hasRange) {
+                if (item->msEnd != (uint64_t)-1)
+                    secDuration = (item->msEnd - item->msBeg)/1000;
+                else
+                    secDuration = (item->duration - item->msBeg)/1000;
+            } else {
+                secDuration = item->duration/1000;
+            }
+            QString strDuration;
+            strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
+
+
+            string tmp;
+
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->artist.data(), item->artist.size(), tmp))
+                item->artist = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->artist.data(), item->artist.size(), tmp))
+                item->artist = tmp;
+            else if (scx::IconvHelper::ConvFromTo("BIG5", "UTF-8", item->artist.data(), item->artist.size(), tmp))
+                item->artist = tmp;
+
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->album.c_str(), item->album.size()+1, tmp))
+                item->album = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->album.c_str(), item->album.size()+1, tmp))
+                item->album = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->album.c_str(), item->album.size()+1, tmp))
+                item->album = tmp;
+
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->title.c_str(), item->title.size()+1, tmp))
+                item->title = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->title.c_str(), item->title.size()+1, tmp))
+                item->title = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->title.c_str(), item->title.size()+1, tmp))
+                item->title = tmp;
+
+
+            // Build row
+            mediaRow.row << new QStandardItem(QString::fromUtf8(item->artist.c_str()));
+            mediaRow.row << new QStandardItem(QString::fromUtf8(item->album.c_str()));
+            mediaRow.row << new QStandardItem(QString::fromUtf8(item->title.c_str()));
+            mediaRow.row << new QStandardItem(QString::number(item->track));
+            mediaRow.row << new QStandardItem(strDuration);
+            for (int i = 0; i < mediaRow.row.size(); ++i) {
+                QStandardItem* item = mediaRow.row[i];
+                item->setEditable(false);
+                item->setSizeHint(QSize(-1, 22));
+            }
+
+            emit SigMediaRowGot(&mediaRow);
+            /*
+            m_TmpLoadMutex.lock();
+            m_TmpLoadList.append(mediaRow);
+            m_TmpLoadMutex.unlock();
+            */
+        }
+    }
+
+    emit SigLoadFinished();
+    m_LoadFinished = true;
 }
