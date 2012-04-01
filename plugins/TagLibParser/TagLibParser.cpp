@@ -41,10 +41,29 @@ void TagLibParser::Close()
     }
 }
 
+#include <iostream>
+using namespace std;
+string WStringToString(const wstring& str)
+{
+    const size_t buflen = (str.size()+1) * MB_LEN_MAX;
+    char* buf = new char[buflen];
+    size_t ret = wcstombs(buf, str.c_str(), buflen);
+    string target;
+    if (ret != (size_t)-1) {
+        target.assign(buf, ret);
+        cout << '[' << ret << ']'<< endl;
+    } else
+        cout << "ws2str failed" << endl;
+
+    delete[] buf;
+    return target;
+}
+
 string TagLibParser::GetTitle() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->title().toCString();
+        return m_pTag->title().to8Bit();
+        //return WStringToString(m_pTag->title().toWString());
     } else {
         return "";
     }
@@ -53,7 +72,8 @@ string TagLibParser::GetTitle() const
 string TagLibParser::GetArtist() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->artist().toCString();
+        return m_pTag->artist().to8Bit();
+        //return WStringToString(m_pTag->artist().toWString());
     } else {
         return "";
     }
@@ -62,7 +82,8 @@ string TagLibParser::GetArtist() const
 string TagLibParser::GetAlbum() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->album().toCString();
+        return m_pTag->album().to8Bit();
+        //return WStringToString(m_pTag->album().toWString());
     } else {
         return "";
     }
@@ -71,7 +92,8 @@ string TagLibParser::GetAlbum() const
 string TagLibParser::GetComment() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->comment().toCString();
+        return m_pTag->comment().to8Bit();
+        //return WStringToString(m_pTag->comment().toWString());
     } else {
         return "";
     }
@@ -80,7 +102,8 @@ string TagLibParser::GetComment() const
 string TagLibParser::GetGenre() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->genre().toCString();
+        return m_pTag->genre().to8Bit();
+        //return WStringToString(m_pTag->genre().toWString());
     } else {
         return "";
     }
