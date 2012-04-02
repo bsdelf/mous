@@ -259,12 +259,14 @@ private:
         assert(m_ItemQue.size() == m_SeqShuffleQue.size());
 
         // debug
+        /*
         using namespace std;
         cout << "shuffle:";
         for (size_t i = 0; i < m_SeqShuffleQue.size(); ++i) {
             cout << m_SeqShuffleQue[i] << ", ";
         }
         cout << endl;
+        */
     }
 
 private:
