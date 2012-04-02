@@ -32,6 +32,20 @@ private:
 private:
     Ui::FrmProgressBar *ui;
     void* key;
+
+    struct SpeedRecord
+    {
+        qint64 time[2];
+        int progress[2];
+
+        SpeedRecord()
+        {
+            progress[0] = time[0] = -1;
+            progress[1] = time[1] = -1;
+        }
+    };
+
+    SpeedRecord m_SpeedRecord;
 };
 
 #endif // FRMPROGRESSBAR_H

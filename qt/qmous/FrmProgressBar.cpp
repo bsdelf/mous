@@ -1,5 +1,6 @@
 #include "FrmProgressBar.h"
 #include "ui_FrmProgressBar.h"
+#include <QDateTime>
 
 FrmProgressBar::FrmProgressBar(QWidget *parent) :
     QWidget(parent),
@@ -41,5 +42,16 @@ void FrmProgressBar::SlotBtnCancel()
 
 void FrmProgressBar::UpdateResetTime()
 {
+    m_SpeedRecord.time[m_SpeedRecord.time[0] != -1 ? 1 : 0] = QDateTime::currentMSecsSinceEpoch();
+    m_SpeedRecord.progress[m_SpeedRecord.progress[0] != -1 ? 1 : 0] = ui->barProgress->value();
 
+    if (m_SpeedRecord.time[1] > 0 && m_SpeedRecord.progress[1] > 0) {
+        qint64 deltaTime = m_SpeedRecord.time[1] - m_SpeedRecord.time[0];
+        int deltaProgress = m_SpeedRecord.progress[1] - m_SpeedRecord.progress[0];
+        double speed = (double)deltaProgress / deltaTime;
+        qint64 restSec = (ui->barProgress->maximum() - ui->barProgress->value()) / speed / 1000;
+        QString restSecSrc;
+        restSecSrc.sprintf("%.2d : %.2d", restSec/60, restSec%60);
+        ui->labelRestTime->setText(restSecSrc);
+    }
 }
