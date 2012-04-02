@@ -41,29 +41,32 @@ void TagLibParser::Close()
     }
 }
 
-#include <iostream>
-using namespace std;
-string WStringToString(const wstring& str)
+string WStringToStdString(const wstring& str)
 {
     const size_t buflen = (str.size()+1) * MB_LEN_MAX;
     char* buf = new char[buflen];
     size_t ret = wcstombs(buf, str.c_str(), buflen);
-    string target;
     if (ret != (size_t)-1) {
-        target.assign(buf, ret);
-        cout << '[' << ret << ']'<< endl;
-    } else
-        cout << "ws2str failed" << endl;
+        string target(buf, ret);
+        delete[] buf;
+        return target;
+    } else {
+        delete[] buf;
+        return "";
+    }
+}
 
-    delete[] buf;
-    return target;
+string StringToStdString(const TagLib::String& str)
+{
+    return ( str.isLatin1() || str.isAscii() ) ? 
+        str.to8Bit() : WStringToStdString(str.toWString());
 }
 
 string TagLibParser::GetTitle() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->title().to8Bit();
-        //return WStringToString(m_pTag->title().toWString());
+        //return m_pTag->title().to8Bit();
+        return StringToStdString(m_pTag->title());
     } else {
         return "";
     }
@@ -72,8 +75,8 @@ string TagLibParser::GetTitle() const
 string TagLibParser::GetArtist() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->artist().to8Bit();
-        //return WStringToString(m_pTag->artist().toWString());
+        //return m_pTag->artist().to8Bit();
+        return StringToStdString(m_pTag->artist());
     } else {
         return "";
     }
@@ -82,8 +85,8 @@ string TagLibParser::GetArtist() const
 string TagLibParser::GetAlbum() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->album().to8Bit();
-        //return WStringToString(m_pTag->album().toWString());
+        //return m_pTag->album().to8Bit();
+        return StringToStdString(m_pTag->album());
     } else {
         return "";
     }
@@ -92,8 +95,8 @@ string TagLibParser::GetAlbum() const
 string TagLibParser::GetComment() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->comment().to8Bit();
-        //return WStringToString(m_pTag->comment().toWString());
+        //return m_pTag->comment().to8Bit();
+        return StringToStdString(m_pTag->comment());
     } else {
         return "";
     }
@@ -102,8 +105,8 @@ string TagLibParser::GetComment() const
 string TagLibParser::GetGenre() const
 {
     if (m_pTag != NULL) {
-        return m_pTag->genre().to8Bit();
-        //return WStringToString(m_pTag->genre().toWString());
+        //return m_pTag->genre().to8Bit();
+        return StringToStdString(m_pTag->genre());
     } else {
         return "";
     }
