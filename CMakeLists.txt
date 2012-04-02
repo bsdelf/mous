@@ -123,6 +123,11 @@ if (EnablePluginMpg123Decoder)
     add_library(Mpg123Decoder SHARED ${SRC_MPG123_DECODER})
     target_link_libraries(Mpg123Decoder -lmpg123)
 endif()
+if (EnablePluginLameEncoder)
+    file(GLOB SRC_LAME_ENCODER plugins/LameEncoder/*)
+    add_library(LameEncoder SHARED ${SRC_LAME_ENCODER})
+    target_link_libraries(LameEncoder -lmp3lame)
+endif()
 
 # Mac plugin
 if (EnablePluginMacDecoder)
