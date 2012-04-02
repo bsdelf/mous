@@ -41,7 +41,7 @@ public:
     virtual EmErrorCode OpenOutput(const std::string& path);
     virtual void CloseOutput();
 
-    virtual EmErrorCode Encode(const char* buf, uint32_t len);
+    virtual EmErrorCode Encode(char* buf, uint32_t len);
     virtual EmErrorCode FlushRest();
 
     virtual void SetChannels(int32_t channels);

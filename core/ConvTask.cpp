@@ -100,16 +100,12 @@ void ConvTask::DoConvert(const string& output)
 
     if (m_Item.hasRange) {
         unitBeg = m_Item.msBeg * unitPerMs;
-        unitEnd = m_Item.msEnd * unitPerMs;
+        unitEnd = (m_Item.msEnd != (uint64_t)-1 ? m_Item.msEnd : unitEnd) * unitPerMs;
 
-        if (unitBeg < 0)
-            unitBeg = 0;
-        else if (unitBeg > m_Decoder->GetUnitCount())
+        if (unitBeg > m_Decoder->GetUnitCount())
             unitBeg = m_Decoder->GetUnitCount();
 
-        if (unitEnd < 0)
-            unitEnd = 0;
-        else if (unitEnd > m_Decoder->GetUnitCount())
+        if (unitEnd > m_Decoder->GetUnitCount())
             unitEnd = m_Decoder->GetUnitCount();
     }
 
@@ -125,6 +121,7 @@ void ConvTask::DoConvert(const string& output)
     }
 
     m_Encoder->FlushRest();
+
     m_Encoder->CloseOutput();
     m_Decoder->Close();
 

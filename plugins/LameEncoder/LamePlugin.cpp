@@ -9,4 +9,3 @@ static const PluginInfo info = {
 };
 
 MOUS_DEF_PLUGIN(PluginType::Encoder, &info, LameEncoder);
-

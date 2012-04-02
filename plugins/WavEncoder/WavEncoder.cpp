@@ -23,18 +23,6 @@ EmErrorCode WavEncoder::OpenOutput(const std::string& path)
 
 void WavEncoder::CloseOutput()
 {
-    if (m_OutputFile.is_open())
-        m_OutputFile.close();
-}
-
-EmErrorCode WavEncoder::Encode(const char* buf, uint32_t len)
-{
-    m_OutputFile.write(buf, len);
-    return ErrorCode::Ok;
-}
-
-EmErrorCode WavEncoder::FlushRest()
-{
     m_WavHeader.dataChunkLen = (uint32_t)m_OutputFile.tellg() - (uint32_t)sizeof(WavHeader);
     m_WavHeader.lenAfterRiff = m_WavHeader.dataChunkLen + 36;
     m_WavHeader.formatChunkLen = 16;//m_WavHeader.dataChunkLen + 24;
@@ -42,6 +30,19 @@ EmErrorCode WavEncoder::FlushRest()
     m_WavHeader.avgBytesPerSec = m_WavHeader.blockAlign * m_WavHeader.sampleRate;
     m_OutputFile.seekg(0, ios::beg);
     m_OutputFile.write((char*)&m_WavHeader, sizeof(WavHeader));
+
+    if (m_OutputFile.is_open())
+        m_OutputFile.close();
+}
+
+EmErrorCode WavEncoder::Encode(char* buf, uint32_t len)
+{
+    m_OutputFile.write(buf, len);
+    return ErrorCode::Ok;
+}
+
+EmErrorCode WavEncoder::FlushRest()
+{
     return ErrorCode::Ok;
 }
 

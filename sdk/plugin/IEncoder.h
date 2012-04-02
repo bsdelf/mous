@@ -18,7 +18,7 @@ public:
     virtual EmErrorCode OpenOutput(const std::string& path) = 0;
     virtual void CloseOutput() = 0;
 
-    virtual EmErrorCode Encode(const char* buf, uint32_t len) = 0;
+    virtual EmErrorCode Encode(char* buf, uint32_t len) = 0;
     virtual EmErrorCode FlushRest() = 0;
 
     virtual void SetChannels(int32_t channels) = 0;
@@ -26,7 +26,11 @@ public:
     virtual void SetBitsPerSample(int32_t bitsPerSample) = 0;
 
     // reimplement this to provide options
-    virtual bool GetOptions(std::vector<const BaseOption*>& list) const { return false; };
+    virtual bool GetOptions(std::vector<const BaseOption*>& list) const 
+    { 
+        list.clear(); 
+        return false; 
+    };
 };
 
 }
