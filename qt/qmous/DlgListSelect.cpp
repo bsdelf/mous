@@ -6,6 +6,7 @@ DlgListSelect::DlgListSelect(QWidget *parent) :
     ui(new Ui::DlgListSelect)
 {
     ui->setupUi(this);
+    ui->listWidget->setAlternatingRowColors(true);
 
     connect(ui->btnOk, SIGNAL(clicked()), this, SLOT(accept()));
     connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
@@ -17,8 +18,6 @@ DlgListSelect::DlgListSelect(QWidget *parent) :
                    | Qt::Tool)
                    & ~Qt::WindowMaximizeButtonHint);
     setFixedSize(width(), height());
-
-    setResult(QDialog::Rejected);
 }
 
 DlgListSelect::~DlgListSelect()
@@ -28,7 +27,11 @@ DlgListSelect::~DlgListSelect()
 
 void DlgListSelect::SetItems(const QStringList &items)
 {
-    ui->listWidget->addItems(items);
+    for (int i = 0; i < items.size(); ++i) {
+        QListWidgetItem* widgetItem = new QListWidgetItem(items.at(i));
+        widgetItem->setSizeHint(QSize(-1, 22));
+        ui->listWidget->addItem(widgetItem);
+    }
 }
 
 void DlgListSelect::SetSelectedIndex(int index)

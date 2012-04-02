@@ -43,7 +43,7 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="labelRestTime">
+        <widget class="QLabel" name="labelTime">
          <property name="text">
           <string>-- : --</string>
          </property>

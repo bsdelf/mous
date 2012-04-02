@@ -61,6 +61,12 @@ void DlgConvertTask::SlotUpdateProgress()
             IConvTask::Free(task);
         }
     }
+
+    if (ui->listAllTask->count() == 0) {
+        m_ProgressTimer.stop();
+        if (ui->boxAutoClose->isChecked())
+            close();
+    }
 }
 
 void DlgConvertTask::SlotCancelTask(void* key)

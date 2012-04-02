@@ -24,20 +24,7 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QListWidget" name="listWidget">
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
-     <property name="gridSize">
-      <size>
-       <width>0</width>
-       <height>25</height>
-      </size>
-     </property>
-    </widget>
+    <widget class="QListWidget" name="listWidget"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

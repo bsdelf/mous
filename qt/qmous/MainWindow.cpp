@@ -325,6 +325,8 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
     newTask->GetEncoderOptions(opts);
 
     DlgConvertOption dlgOption(this);
+    dlgOption.SetDir(QDir::homePath());
+    dlgOption.SetFileName(QString::fromUtf8((item->artist + " - " + item->title).c_str()));
     dlgOption.BuildOptionUi(opts);
     dlgOption.setWindowTitle(tr("Config"));
     dlgOption.exec();
@@ -335,8 +337,8 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
     }
 
     //==== do work
-    m_DlgConvertTask.AddTask(newTask, "/home/shen/output.wav");
     m_DlgConvertTask.show();
+    m_DlgConvertTask.AddTask(newTask, "/home/shen/output.wav");
 }
 
 void MainWindow::SlotConvertMediaItems(QList<const MediaItem*> items)

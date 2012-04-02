@@ -27,7 +27,7 @@ private slots:
     void SlotBtnCancel();
 
 private:
-    void UpdateResetTime();
+    void UpdatePassedTime();
 
 private:
     Ui::FrmProgressBar *ui;

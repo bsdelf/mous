@@ -32,7 +32,7 @@ void FrmProgressBar::SetProgress(int progress)
 {
     ui->barProgress->setValue(progress);
 
-    UpdateResetTime();
+    UpdatePassedTime();
 }
 
 void FrmProgressBar::SlotBtnCancel()
@@ -40,8 +40,15 @@ void FrmProgressBar::SlotBtnCancel()
     emit SigCanceled(key);
 }
 
-void FrmProgressBar::UpdateResetTime()
+void FrmProgressBar::UpdatePassedTime()
 {
+    m_SpeedRecord.time[m_SpeedRecord.time[0] != -1 ? 1 : 0] = QDateTime::currentMSecsSinceEpoch();
+    qint64 passedSec = (m_SpeedRecord.time[1] - m_SpeedRecord.time[0]) / 1000;
+    if (m_SpeedRecord.time[1] > 0)
+        ui->labelTime->setText(QString("%1 : %2").arg(int(passedSec/60), 2, 10, QChar('0'))
+                               .arg(int(passedSec%60), 2, 10, QChar('0')));
+
+    /* rest time estimate
     m_SpeedRecord.time[m_SpeedRecord.time[0] != -1 ? 1 : 0] = QDateTime::currentMSecsSinceEpoch();
     m_SpeedRecord.progress[m_SpeedRecord.progress[0] != -1 ? 1 : 0] = ui->barProgress->value();
 
@@ -54,4 +61,5 @@ void FrmProgressBar::UpdateResetTime()
         restSecSrc.sprintf("%.2d : %.2d", int(restSec/60), int(restSec%60));
         ui->labelRestTime->setText(restSecSrc);
     }
+    */
 }

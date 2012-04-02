@@ -19,7 +19,10 @@ class DlgConvertOption : public QDialog
 public:
     explicit DlgConvertOption(QWidget *parent = 0);
     ~DlgConvertOption();
-    
+
+    void SetDir(const QString& dir);
+    void SetFileName(const QString& name);
+
     void BuildOptionUi(const std::vector<const mous::BaseOption *> &opts);
 
 private:
