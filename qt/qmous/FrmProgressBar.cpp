@@ -48,10 +48,10 @@ void FrmProgressBar::UpdateResetTime()
     if (m_SpeedRecord.time[1] > 0 && m_SpeedRecord.progress[1] > 0) {
         qint64 deltaTime = m_SpeedRecord.time[1] - m_SpeedRecord.time[0];
         int deltaProgress = m_SpeedRecord.progress[1] - m_SpeedRecord.progress[0];
-        double speed = (double)deltaProgress / deltaTime;
-        qint64 restSec = (ui->barProgress->maximum() - ui->barProgress->value()) / speed / 1000;
+        double secSpeed = (double)deltaProgress / (deltaTime / 1000);
+        qint64 restSec = (ui->barProgress->maximum() - ui->barProgress->value()) / secSpeed;
         QString restSecSrc;
-        restSecSrc.sprintf("%.2d : %.2d", restSec/60, restSec%60);
+        restSecSrc.sprintf("%.2d : %.2d", int(restSec/60), int(restSec%60));
         ui->labelRestTime->setText(restSecSrc);
     }
 }

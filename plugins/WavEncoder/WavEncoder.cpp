@@ -12,7 +12,7 @@ WavEncoder::~WavEncoder()
 
 EmErrorCode WavEncoder::OpenOutput(const std::string& path)
 {
-    m_OutputFile.open(path.c_str(), ios::binary | ios::out | ios::in);
+    m_OutputFile.open(path.c_str(), ios::binary | ios::out );
     if (!m_OutputFile.is_open())
         return ErrorCode::EncoderFailedToOpen;
 

@@ -9,6 +9,10 @@ namespace Ui {
 class DlgConvertTask;
 }
 
+namespace mous {
+class IConvTask;
+}
+
 class DlgConvertTask : public QDialog
 {
     Q_OBJECT
@@ -17,7 +21,7 @@ public:
     explicit DlgConvertTask(QWidget *parent = 0);
     ~DlgConvertTask();
     
-    void AddTask();
+    void AddTask(mous::IConvTask* newTask, const QString& output);
 
 private slots:
     void SlotUpdateProgress();

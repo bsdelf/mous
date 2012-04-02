@@ -18,7 +18,10 @@ SOURCES += main.cpp\
     CustomHeadTabWidget.cpp \
     MidClickTabBar.cpp \
     DlgListSelect.cpp \
-    DlgLoadingMedia.cpp
+    DlgLoadingMedia.cpp \
+    FrmProgressBar.cpp \
+    DlgConvertTask.cpp \
+    DlgConvertOption.cpp
 
 HEADERS  += MainWindow.h \
     SimplePlayListView.h \
@@ -27,11 +30,17 @@ HEADERS  += MainWindow.h \
     MidClickTabBar.hpp \
     UiHelper.hpp \
     DlgListSelect.h \
-    DlgLoadingMedia.h
+    DlgLoadingMedia.h \
+    FrmProgressBar.h \
+    DlgConvertTask.h \
+    DlgConvertOption.h
 
 FORMS    += MainWindow.ui \
     DlgListSelect.ui \
-    DlgLoadingMedia.ui
+    DlgLoadingMedia.ui \
+    FrmProgressBar.ui \
+    DlgConvertTask.ui \
+    DlgConvertOption.ui
 
 TRANSLATIONS = QMous.ts
 

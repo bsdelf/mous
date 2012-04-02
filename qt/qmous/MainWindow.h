@@ -9,6 +9,7 @@
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
 #include "IPlayListView.h"
+#include "DlgConvertTask.h"
 
 namespace Ui {
     class MainWindow;
@@ -39,26 +40,26 @@ private:
     void formatTime(QString& str, int ms);
 
 private:
-    void slotPlayerStopped();
+    void SlotPlayerStopped();
 
 private slots:
-    void slotUpdateUi();
+    void SlotUpdateUi();
 
-    void slotBtnPlay();
-    void slotBtnStop();
+    void SlotBtnPlay();
+    void SlotBtnStop();
 
-    void slotSliderVolumeValueChanged(int);
+    void SlotSliderVolumeValueChanged(int);
 
-    void slotSliderPlayingPressed();
-    void slotSliderPlayingReleased();
-    void slotSliderPlayingValueChanged(int);
+    void SlotSliderPlayingPressed();
+    void SlotSliderPlayingReleased();
+    void SlotSliderPlayingValueChanged(int);
 
-    void slotBarPlayListMidClick(int index);
-    void slotWidgetPlayListDoubleClick();
+    void SlotBarPlayListMidClick(int index);
+    void SlotWidgetPlayListDoubleClick();
 
-    void slotPlayMediaItem(IPlayListView* view, const mous::MediaItem* item);
-    void slotConvertMediaItem(const mous::MediaItem *item);
-    void slotConvertMediaItems(QList<const mous::MediaItem*> items);
+    void SlotPlayMediaItem(IPlayListView* view, const mous::MediaItem* item);
+    void SlotConvertMediaItem(const mous::MediaItem *item);
+    void SlotConvertMediaItems(QList<const mous::MediaItem*> items);
 
 private:
     Ui::MainWindow *ui;
@@ -72,18 +73,20 @@ private:
     QString mStatusMsg;
     QToolButton* mBtnPreference;
 
-    QTimer* mTimerUpdateUi;
-    const int mUpdateInterval;
+    QTimer* m_TimerUpdateUi;
+    const int m_UpdateInterval;
 
-    mous::IPluginManager* mPluginMgr;
-    mous::IMediaLoader* mMediaLoader;
-    mous::IPlayer* mPlayer;
-    mous::IConvTaskFactory* mConvFactory;
-    const mous::MediaItem* mMediaItem;
+    mous::IPluginManager* m_PluginManager;
+    mous::IMediaLoader* m_MediaLoader;
+    mous::IPlayer* m_Player;
+    mous::IConvTaskFactory* m_ConvFactory;
+
+    IPlayListView* m_UsedPlaylistView;
+    const mous::MediaItem* m_UsedMediaItem;
 
     bool mSliderPlayingPreempted;
 
-    IPlayListView* mPlaylistView;
+    DlgConvertTask m_DlgConvertTask;
 };
 
 #endif // MAINWINDOW_H

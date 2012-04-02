@@ -383,23 +383,34 @@ void SimplePlayListView::LoadMediaItem(const QStringList& pathList)
                 item->artist = tmp;
             else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->artist.data(), item->artist.size(), tmp))
                 item->artist = tmp;
-            else if (scx::IconvHelper::ConvFromTo("BIG5", "UTF-8", item->artist.data(), item->artist.size(), tmp))
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->artist.data(), item->artist.size(), tmp))
                 item->artist = tmp;
+            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->artist.data(), item->artist.size(), tmp))
+                item->artist = tmp;
+            else
+                qDebug() << "failed:" << QString::fromUtf8(item->artist.c_str());
 
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->album.c_str(), item->album.size()+1, tmp))
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->album.data(), item->album.size(), tmp))
                 item->album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->album.c_str(), item->album.size()+1, tmp))
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->album.data(), item->album.size(), tmp))
                 item->album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->album.c_str(), item->album.size()+1, tmp))
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->album.data(), item->album.size(), tmp))
                 item->album = tmp;
+            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->album.data(), item->album.size(), tmp))
+                item->album = tmp;
+            else
+                qDebug() << "failed:" << QString::fromUtf8(item->album.c_str());
 
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->title.c_str(), item->title.size()+1, tmp))
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->title.data(), item->title.size(), tmp))
                 item->title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->title.c_str(), item->title.size()+1, tmp))
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->title.data(), item->title.size(), tmp))
                 item->title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->title.c_str(), item->title.size()+1, tmp))
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->title.data(), item->title.size(), tmp))
                 item->title = tmp;
-
+            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->title.data(), item->title.size(), tmp))
+                item->title = tmp;
+            else
+                qDebug() << "failed:" << QString::fromUtf8(item->title.c_str());
 
             // Build row
             mediaRow.row << new QStandardItem(QString::fromUtf8(item->artist.c_str()));

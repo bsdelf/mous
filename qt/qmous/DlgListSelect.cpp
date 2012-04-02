@@ -3,14 +3,13 @@
 
 DlgListSelect::DlgListSelect(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DlgListSelect),
-    m_Ok(false)
+    ui(new Ui::DlgListSelect)
 {
     ui->setupUi(this);
 
-    connect(ui->btnOk, SIGNAL(clicked()), this, SLOT(SlotBtnOk()));
-    connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(SlotBtnCancel()));
-    connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(SlotBtnOk()));
+    connect(ui->btnOk, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(reject()));
+    connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(accept()));
 
     setWindowFlags((Qt::CustomizeWindowHint
                    | Qt::WindowTitleHint
@@ -18,6 +17,8 @@ DlgListSelect::DlgListSelect(QWidget *parent) :
                    | Qt::Tool)
                    & ~Qt::WindowMaximizeButtonHint);
     setFixedSize(width(), height());
+
+    setResult(QDialog::Rejected);
 }
 
 DlgListSelect::~DlgListSelect()
@@ -38,21 +39,4 @@ void DlgListSelect::SetSelectedIndex(int index)
 int DlgListSelect::GetSelectedIndex() const
 {
     return ui->listWidget->currentIndex().row();
-}
-
-bool DlgListSelect::IsOk() const
-{
-    return m_Ok;
-}
-
-void DlgListSelect::SlotBtnOk()
-{
-    m_Ok = true;
-    close();
-}
-
-void DlgListSelect::SlotBtnCancel()
-{
-    m_Ok = false;
-    close();
 }

@@ -75,6 +75,7 @@ void ConvTask::DoConvert(const string& output)
     if (err != ErrorCode::Ok) {
         m_Progress = -1;
         m_Finished = true;
+        cout << "Decoder open failed!" << endl;
         return;
     }
 
@@ -82,6 +83,7 @@ void ConvTask::DoConvert(const string& output)
     if (err != ErrorCode::Ok) {
         m_Progress = -1;
         m_Finished = true;
+        cout << "Encoder open failed!" << endl;
         return;
     }
 

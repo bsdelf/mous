@@ -6,6 +6,7 @@
 #include <scx/Signal.hpp>
 #include <util/MediaItem.h>
 #include "SimplePlayListView.h"
+#include "DlgConvertOption.h"
 using namespace std;
 using namespace sqt;
 using namespace mous;
@@ -13,13 +14,14 @@ using namespace mous;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    mTimerUpdateUi(new QTimer),
-    mUpdateInterval(500),
-    mPluginMgr(IPluginManager::Create()),
-    mMediaLoader(IMediaLoader::Create()),
-    mPlayer(IPlayer::Create()),
-    mConvFactory(IConvTaskFactory::Create()),
-    mMediaItem(NULL),
+    m_TimerUpdateUi(new QTimer),
+    m_UpdateInterval(500),
+    m_PluginManager(IPluginManager::Create()),
+    m_MediaLoader(IMediaLoader::Create()),
+    m_Player(IPlayer::Create()),
+    m_ConvFactory(IConvTaskFactory::Create()),
+    m_UsedPlaylistView(NULL),
+    m_UsedMediaItem(NULL),
     mSliderPlayingPreempted(false)
 {
     ui->setupUi(this);    
@@ -30,57 +32,57 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    mPlayer->SigFinished()->DisconnectReceiver(this);
+    m_Player->SigFinished()->DisconnectReceiver(this);
 
-    if (mPlayer->GetStatus() == PlayerStatus::Playing) {
-        mPlayer->Close();
+    if (m_Player->GetStatus() == PlayerStatus::Playing) {
+        m_Player->Close();
     }
-    if (mTimerUpdateUi != NULL) {
-        if (mTimerUpdateUi->isActive())
-            mTimerUpdateUi->stop();
-        delete mTimerUpdateUi;
+    if (m_TimerUpdateUi != NULL) {
+        if (m_TimerUpdateUi->isActive())
+            m_TimerUpdateUi->stop();
+        delete m_TimerUpdateUi;
     }
 
     delete ui;
 
-    mConvFactory->UnregisterAll();
-    mPlayer->UnregisterAll();
-    mMediaLoader->UnregisterAll();
-    mPluginMgr->UnloadAll();
+    m_ConvFactory->UnregisterAll();
+    m_Player->UnregisterAll();
+    m_MediaLoader->UnregisterAll();
+    m_PluginManager->UnloadAll();
 
-    IPluginManager::Free(mPluginMgr);
-    IMediaLoader::Free(mMediaLoader);
-    IPlayer::Free(mPlayer);
-    IConvTaskFactory::Free(mConvFactory);
+    IPluginManager::Free(m_PluginManager);
+    IMediaLoader::Free(m_MediaLoader);
+    IPlayer::Free(m_Player);
+    IConvTaskFactory::Free(m_ConvFactory);
 }
 
 void MainWindow::initMousCore()
 {
-    mPluginMgr->LoadPluginDir("./plugins");
+    m_PluginManager->LoadPluginDir("./plugins");
     vector<string> pathList;
-    mPluginMgr->GetPluginPath(pathList);
+    m_PluginManager->GetPluginPath(pathList);
 
     vector<const IPluginAgent*> packAgentList;
     vector<const IPluginAgent*> tagAgentList;
-    mPluginMgr->GetPlugins(packAgentList, PluginType::MediaPack);
-    mPluginMgr->GetPlugins(tagAgentList, PluginType::TagParser);
+    m_PluginManager->GetPlugins(packAgentList, PluginType::MediaPack);
+    m_PluginManager->GetPlugins(tagAgentList, PluginType::TagParser);
 
-    mMediaLoader->RegisterMediaPackPlugin(packAgentList);
-    mMediaLoader->RegisterTagParserPlugin(tagAgentList);
+    m_MediaLoader->RegisterMediaPackPlugin(packAgentList);
+    m_MediaLoader->RegisterTagParserPlugin(tagAgentList);
 
     vector<const IPluginAgent*> decoderAgentList;
     vector<const IPluginAgent*> encoderAgentList;
     vector<const IPluginAgent*> rendererAgentList;
-    mPluginMgr->GetPlugins(decoderAgentList, PluginType::Decoder);
-    mPluginMgr->GetPlugins(encoderAgentList, PluginType::Encoder);
-    mPluginMgr->GetPlugins(rendererAgentList, PluginType::Renderer);
+    m_PluginManager->GetPlugins(decoderAgentList, PluginType::Decoder);
+    m_PluginManager->GetPlugins(encoderAgentList, PluginType::Encoder);
+    m_PluginManager->GetPlugins(rendererAgentList, PluginType::Renderer);
 
-    mPlayer->RegisterRendererPlugin(rendererAgentList[0]);
-    mPlayer->RegisterDecoderPlugin(decoderAgentList);
-    mPlayer->SigFinished()->Connect(&MainWindow::slotPlayerStopped, this);
+    m_Player->RegisterRendererPlugin(rendererAgentList[0]);
+    m_Player->RegisterDecoderPlugin(decoderAgentList);
+    m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerStopped, this);
 
-    mConvFactory->RegisterDecoderPlugin(decoderAgentList);
-    mConvFactory->RegisterEncoderPlugin(encoderAgentList);
+    m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
+    m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
 
     qDebug() << ">> MediaPack count:" << packAgentList.size();
     qDebug() << ">> TagParser count:" << tagAgentList.size();
@@ -98,7 +100,7 @@ void MainWindow::initMyUi()
     // Play mode button
 
     // Volume
-    ui->sliderVolume->setValue(mPlayer->GetVolume());
+    ui->sliderVolume->setValue(m_Player->GetVolume());
 
     // PlayList View
     mBarPlayList = new MidClickTabBar(this);
@@ -116,23 +118,23 @@ void MainWindow::initMyUi()
     ui->barStatus->addPermanentWidget(mBtnPreference, 0);
 
     // Default playlist
-    slotWidgetPlayListDoubleClick();
+    SlotWidgetPlayListDoubleClick();
 }
 
 void MainWindow::initQtSlots()
 {
-    connect(mTimerUpdateUi, SIGNAL(timeout()), this, SLOT(slotUpdateUi()));
+    connect(m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
 
-    connect(ui->btnPlay, SIGNAL(clicked()), this, SLOT(slotBtnPlay()));
+    connect(ui->btnPlay, SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
 
-    connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(slotSliderVolumeValueChanged(int)));
+    connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(SlotSliderVolumeValueChanged(int)));
 
-    connect(ui->sliderPlaying, SIGNAL(sliderPressed()), this, SLOT(slotSliderPlayingPressed()));
-    connect(ui->sliderPlaying, SIGNAL(sliderReleased()), this, SLOT(slotSliderPlayingReleased()));
-    connect(ui->sliderPlaying, SIGNAL(valueChanged(int)), this, SLOT(slotSliderPlayingValueChanged(int)));
+    connect(ui->sliderPlaying, SIGNAL(sliderPressed()), this, SLOT(SlotSliderPlayingPressed()));
+    connect(ui->sliderPlaying, SIGNAL(sliderReleased()), this, SLOT(SlotSliderPlayingReleased()));
+    connect(ui->sliderPlaying, SIGNAL(valueChanged(int)), this, SLOT(SlotSliderPlayingValueChanged(int)));
 
-    connect(mBarPlayList, SIGNAL(sigMidClick(int)), this, SLOT(slotBarPlayListMidClick(int)));
-    connect(mWidgetPlayList, SIGNAL(sigDoubleClick()), this, SLOT(slotWidgetPlayListDoubleClick()));
+    connect(mBarPlayList, SIGNAL(sigMidClick(int)), this, SLOT(SlotBarPlayListMidClick(int)));
+    connect(mWidgetPlayList, SIGNAL(sigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
 }
 
 void MainWindow::formatTime(QString& str, int ms)
@@ -142,22 +144,22 @@ void MainWindow::formatTime(QString& str, int ms)
 }
 
 /* MousCore slots */
-void MainWindow::slotPlayerStopped()
+void MainWindow::SlotPlayerStopped()
 {
     qDebug() << "Stopped!";
-    if (mPlaylistView != NULL) {
-        const MediaItem* item = mPlaylistView->getNextItem();
-        slotPlayMediaItem(mPlaylistView, item);
+    if (m_UsedPlaylistView != NULL) {
+        const MediaItem* item = m_UsedPlaylistView->getNextItem();
+        SlotPlayMediaItem(m_UsedPlaylistView, item);
     }
 }
 
 /* Qt slots */
-void MainWindow::slotUpdateUi()
+void MainWindow::SlotUpdateUi()
 {
-    // Update statusbar.
-    int total = mPlayer->GetRangeDuration();
-    int ms = mPlayer->GetOffsetMs();
-    int kbps = mPlayer->GetBitRate();
+    //==== Update statusbar.
+    int total = m_Player->GetRangeDuration();
+    int ms = m_Player->GetOffsetMs();
+    int kbps = m_Player->GetBitRate();
 
     mStatusMsg.sprintf("%.3d kbps | %.2d:%.2d/%.2d:%.2d",
                  kbps,
@@ -165,81 +167,81 @@ void MainWindow::slotUpdateUi()
 
     ui->barStatus->showMessage(mStatusMsg);
 
-    // Update slider.
+    //==== Update slider.
     if (!mSliderPlayingPreempted) {
         int percent = (double)ms / total * ui->sliderPlaying->maximum();
         ui->sliderPlaying->setSliderPosition(percent);
     }
 }
 
-void MainWindow::slotBtnPlay()
+void MainWindow::SlotBtnPlay()
 {
-    qDebug() << mPlayer->GetStatus();
+    qDebug() << m_Player->GetStatus();
 
-    switch (mPlayer->GetStatus()) {
+    switch (m_Player->GetStatus()) {
     case PlayerStatus::Closed:
-        if (mMediaItem != NULL) {
-            mPlayer->Open(mMediaItem->url);
-            slotBtnPlay();
+        if (m_UsedMediaItem != NULL) {
+            m_Player->Open(m_UsedMediaItem->url);
+            SlotBtnPlay();
         }
         break;
 
     case PlayerStatus::Playing:
-        mPlayer->Pause();
-        mTimerUpdateUi->stop();
+        m_Player->Pause();
+        m_TimerUpdateUi->stop();
         ui->btnPlay->setIcon(mIconPlaying);
         break;
 
     case PlayerStatus::Paused:
-        mTimerUpdateUi->start(mUpdateInterval);
-        mPlayer->Resume();
+        m_TimerUpdateUi->start(m_UpdateInterval);
+        m_Player->Resume();
         ui->btnPlay->setIcon(mIconPaused);
         break;
 
     case PlayerStatus::Stopped:
-        mTimerUpdateUi->start(mUpdateInterval);
-        if (mMediaItem->hasRange)
-            mPlayer->Play(mMediaItem->msBeg, mMediaItem->msEnd);
+        m_TimerUpdateUi->start(m_UpdateInterval);
+        if (m_UsedMediaItem->hasRange)
+            m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
         else
-            mPlayer->Play();
+            m_Player->Play();
         ui->btnPlay->setIcon(mIconPaused);
         break;
     }
 }
 
-void MainWindow::slotBtnStop()
+void MainWindow::SlotBtnStop()
 {
-    qDebug() << mPlayer->GetStatus();
+    qDebug() << m_Player->GetStatus();
 
-    mPlayer->Pause();
-    mTimerUpdateUi->stop();
+    m_Player->Pause();
+    m_TimerUpdateUi->stop();
 }
 
-void MainWindow::slotSliderVolumeValueChanged(int val)
+void MainWindow::SlotSliderVolumeValueChanged(int val)
 {
-    mPlayer->SetVolume(val);
+    m_Player->SetVolume(val);
 }
 
-void MainWindow::slotSliderPlayingPressed()
+void MainWindow::SlotSliderPlayingPressed()
 {
     mSliderPlayingPreempted = true;
 }
 
-void MainWindow::slotSliderPlayingReleased()
+void MainWindow::SlotSliderPlayingReleased()
 {
     mSliderPlayingPreempted = false;
 }
 
-void MainWindow::slotSliderPlayingValueChanged(int val)
+void MainWindow::SlotSliderPlayingValueChanged(int val)
 {
     if (!mSliderPlayingPreempted)
         return;
 
-    uint64_t ms = (double)val / ui->sliderPlaying->maximum() * mPlayer->GetRangeDuration();
-    mPlayer->Seek(mPlayer->GetRangeBegin() + ms);
+    uint64_t ms = (double)val / ui->sliderPlaying->maximum() * m_Player->GetRangeDuration();
+    m_Player->Seek(m_Player->GetRangeBegin() + ms);
 }
 
-void MainWindow::slotBarPlayListMidClick(int index)
+void MainWindow::SlotBarPlayListMidClick(int index)
 {
     SimplePlayListView* view = (SimplePlayListView*)mWidgetPlayList->widget(index);
     mWidgetPlayList->removeTab(index);
@@ -251,68 +253,93 @@ void MainWindow::slotBarPlayListMidClick(int index)
     mBarPlayList->setFocus();
 }
 
-void MainWindow::slotWidgetPlayListDoubleClick()
+void MainWindow::SlotWidgetPlayListDoubleClick()
 {
     SimplePlayListView* view = new SimplePlayListView(this);
-    view->setMediaLoader(mMediaLoader);
+    view->setMediaLoader(m_MediaLoader);
 
     connect(view, SIGNAL(sigPlayMediaItem(IPlayListView*, const mous::MediaItem*)),
-            this, SLOT(slotPlayMediaItem(IPlayListView*, const mous::MediaItem*)));
+            this, SLOT(SlotPlayMediaItem(IPlayListView*, const mous::MediaItem*)));
     connect(view, SIGNAL(sigConvertMediaItem(const mous::MediaItem*)),
-            this, SLOT(slotConvertMediaItem(const mous::MediaItem*)));
+            this, SLOT(SlotConvertMediaItem(const mous::MediaItem*)));
     connect(view, SIGNAL(sigConvertMediaItems(QList<const mous::MediaItem*>)),
-            this, SLOT(slotConvertMediaItems(QList<const mous::MediaItem*>)));
+            this, SLOT(SlotConvertMediaItems(QList<const mous::MediaItem*>)));
 
     mWidgetPlayList->addTab(view, QString::number(mWidgetPlayList->count()));
     mWidgetPlayList->setCurrentIndex(mWidgetPlayList->count()-1);
 }
 
-void MainWindow::slotPlayMediaItem(IPlayListView *view, const MediaItem *item)
+void MainWindow::SlotPlayMediaItem(IPlayListView *view, const MediaItem *item)
 {
-    if (mPlayer->GetStatus() == PlayerStatus::Playing) {
-        mPlayer->Close();
+    if (m_Player->GetStatus() == PlayerStatus::Playing) {
+        m_Player->Close();
     }
-    if (mPlayer->GetStatus() != PlayerStatus::Closed) {
-        mPlayer->Close();
-        mTimerUpdateUi->stop();
+    if (m_Player->GetStatus() != PlayerStatus::Closed) {
+        m_Player->Close();
+        m_TimerUpdateUi->stop();
     }
 
-    mMediaItem = item;
-    mPlayer->Open(mMediaItem->url);
+    m_UsedMediaItem = item;
+    m_Player->Open(m_UsedMediaItem->url);
 
-    mTimerUpdateUi->start(mUpdateInterval);
-    if (mMediaItem->hasRange)
-        mPlayer->Play(mMediaItem->msBeg, mMediaItem->msEnd);
+    m_TimerUpdateUi->start(m_UpdateInterval);
+    if (m_UsedMediaItem->hasRange)
+        m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
     else
-        mPlayer->Play();
+        m_Player->Play();
     ui->btnPlay->setIcon(mIconPaused);
 
-    setWindowTitle(QString(item->title.c_str()));
+    setWindowTitle(QString::fromUtf8(item->title.c_str()));
 
-    mPlaylistView = view;
+    m_UsedPlaylistView = view;
 }
 
-void MainWindow::slotConvertMediaItem(const MediaItem *item)
+void MainWindow::SlotConvertMediaItem(const MediaItem *item)
 {
-    vector<string> encoderNames = mConvFactory->GetEncoderNames();
+    //==== show encoders
+    vector<string> encoderNames = m_ConvFactory->GetEncoderNames();
+    if (encoderNames.empty())
+        return;
     QStringList list;
     for (size_t i = 0; i < encoderNames.size(); ++i) {
-        list << encoderNames[i].c_str();
+        list << QString::fromUtf8(encoderNames[i].c_str());
         qDebug() << ">> encoder:" << i+1 << encoderNames[i].c_str();
     }
 
-    DlgListSelect dlg(this);
-    dlg.setWindowTitle(tr("Available Encoders"));
-    dlg.SetItems(list);
-    dlg.SetSelectedIndex(0);
-    dlg.exec();
+    DlgListSelect dlgEncoders(this);
+    dlgEncoders.setWindowTitle(tr("Available Encoders"));
+    dlgEncoders.SetItems(list);
+    dlgEncoders.SetSelectedIndex(0);
+    dlgEncoders.exec();
 
-    if (dlg.IsOk()) {
-        qDebug() << "ok";
+    if (dlgEncoders.result() != QDialog::Accepted)
+        return;
+
+    int encoderIndex = dlgEncoders.GetSelectedIndex();
+    IConvTask* newTask = m_ConvFactory->CreateTask(item, encoderNames[encoderIndex]);
+    if (newTask == NULL)
+        return;
+
+    //==== show options
+    vector<const BaseOption*> opts;
+    newTask->GetEncoderOptions(opts);
+
+    DlgConvertOption dlgOption(this);
+    dlgOption.BuildOptionUi(opts);
+    dlgOption.setWindowTitle(tr("Config"));
+    dlgOption.exec();
+
+    if (dlgOption.result() != QDialog::Accepted) {
+        IConvTask::Free(newTask);
+        return;
     }
+
+    //==== do work
+    m_DlgConvertTask.AddTask(newTask, "/home/shen/output.wav");
+    m_DlgConvertTask.show();
 }
 
-void MainWindow::slotConvertMediaItems(QList<const MediaItem*> items)
+void MainWindow::SlotConvertMediaItems(QList<const MediaItem*> items)
 {
 
 }

@@ -18,15 +18,9 @@ public:
     void SetItems(const QStringList& items);
     void SetSelectedIndex(int index);
     int GetSelectedIndex() const;
-    bool IsOk() const;
-
-private slots:
-    void SlotBtnOk();
-    void SlotBtnCancel();
 
 private:
     Ui::DlgListSelect *ui;
-    bool m_Ok;
 };
 
 #endif // DLGLISTSELECT_H
