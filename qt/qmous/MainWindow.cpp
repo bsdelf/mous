@@ -324,10 +324,11 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
     vector<const BaseOption*> opts;
     newTask->GetEncoderOptions(opts);
 
+    std::string fileName(item->artist + " - " + item->title + "." + newTask->GetEncoderFileSuffix());
     DlgConvertOption dlgOption(this);
     dlgOption.SetDir(QDir::homePath());
-    dlgOption.SetFileName(QString::fromUtf8((item->artist + " - " + item->title).c_str()));
-    dlgOption.BuildOptionUi(opts);
+    dlgOption.SetFileName(fileName.c_str());
+    dlgOption.BindWidgetAndOption(opts);
     dlgOption.setWindowTitle(tr("Config"));
     dlgOption.exec();
 
