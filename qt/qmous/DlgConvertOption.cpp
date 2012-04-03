@@ -1,11 +1,10 @@
 #include "DlgConvertOption.h"
 #include "ui_DlgConvertOption.h"
-#include <QtCore>
-#include <QtGui>
+#include <cassert>
 #include <util/Option.h>
 using namespace mous;
 
-#define DEF_AND_CAST(type, to, from)\
+#define DEF_FROM_CAST(type, to, from)\
     type to = static_cast<type>(from)
 
 DlgConvertOption::DlgConvertOption(QWidget *parent) :
@@ -36,7 +35,7 @@ void DlgConvertOption::SetFileName(const QString &name)
     ui->editFile->setText(name);
 }
 
-void DlgConvertOption::BuildOptionUi(const std::vector<const BaseOption*>& opts)
+void DlgConvertOption::BindWidgetAndOption(const std::vector<const BaseOption*>& opts)
 {
     if (opts.empty()) {
         ui->boxOptions->hide();
@@ -53,7 +52,7 @@ void DlgConvertOption::BuildOptionUi(const std::vector<const BaseOption*>& opts)
         switch (baseOpt->type) {
         case OptionType::RangedInt:
         {
-            DEF_AND_CAST(const RangedIntOption*, opt, baseOpt);
+            DEF_FROM_CAST(const RangedIntOption*, opt, baseOpt);
             QSlider* slider = new QSlider(Qt::Horizontal);
             slider->setMinimum(opt->min);
             slider->setMaximum(opt->max);
@@ -68,22 +67,61 @@ void DlgConvertOption::BuildOptionUi(const std::vector<const BaseOption*>& opts)
             connect(slider, SIGNAL(valueChanged(int)), box, SLOT(setValue(int)));
             connect(box, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
             layout->addLayout(row);
+
+            m_WidgetOptionHash[box] = opt;
+            connect(box, SIGNAL(valueChanged(int)), this, SLOT(SlotIntValChanged(int)));
         }
             break;
 
         case OptionType::EnumedInt:
         {
-            DEF_AND_CAST(const EnumedIntOption*, opt, baseOpt);
+            DEF_FROM_CAST(const EnumedIntOption*, opt, baseOpt);
             QComboBox* box = new QComboBox();
             for (size_t i = 0; i < opt->enumedVal.size(); ++i) {
                 box->addItem(QString::number(opt->enumedVal[i]));
             }
             box->setCurrentIndex(opt->defaultChoice);
             layout->addWidget(box);
+
+            m_WidgetOptionHash[box] = opt;
+            connect(box, SIGNAL(currentIndexChanged(int)), this, SLOT(SlotIntValChanged(int)));
         }
+            break;
+
+        default:
             break;
         }
     }
+
     ui->boxOptions->setLayout(layout);
     ui->btnOk->setFocus();
+}
+
+void DlgConvertOption::SlotIntValChanged(int val)
+{
+    QObject* widget = sender();
+    assert(widget != NULL);
+
+    const BaseOption* baseOpt = m_WidgetOptionHash[widget];
+    if (baseOpt == NULL)
+        return;
+
+    switch (baseOpt->type) {
+    case OptionType::RangedInt:
+    {
+        DEF_FROM_CAST(const RangedIntOption*, opt, baseOpt);
+        opt->userVal = val;
+    }
+        break;
+
+    case OptionType::EnumedInt:
+    {
+        DEF_FROM_CAST(const EnumedIntOption*, opt, baseOpt);
+        opt->userChoice = val;
+    }
+        break;
+
+    default:
+        break;
+    }
 }
