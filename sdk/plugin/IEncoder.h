@@ -15,6 +15,8 @@ class IEncoder
 public:
     virtual ~IEncoder() { }
 
+    virtual const char* GetSuffix() const = 0;
+
     virtual EmErrorCode OpenOutput(const std::string& path) = 0;
     virtual void CloseOutput() = 0;
 

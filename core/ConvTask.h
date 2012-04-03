@@ -20,6 +20,7 @@ public:
 
     virtual bool GetDecoderOptions(std::vector<const BaseOption*>& list) const;
     virtual bool GetEncoderOptions(std::vector<const BaseOption*>& list) const;
+    virtual const char* GetEncoderSuffix() const;
 
     virtual void Run(const string& output);
     virtual void Cancel();

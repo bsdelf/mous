@@ -10,6 +10,11 @@ WavEncoder::~WavEncoder()
     CloseOutput();
 }
 
+const char* WavEncoder::GetSuffix() const
+{
+    return "wav";
+}
+
 EmErrorCode WavEncoder::OpenOutput(const std::string& path)
 {
     m_OutputFile.open(path.c_str(), ios::binary | ios::out );

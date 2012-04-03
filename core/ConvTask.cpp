@@ -43,6 +43,11 @@ bool ConvTask::GetEncoderOptions(std::vector<const BaseOption*>& list) const
     return m_Encoder != NULL ? m_Encoder->GetOptions(list) : false;
 }
 
+const char* ConvTask::GetEncoderSuffix() const
+{
+    return m_Encoder != NULL ? m_Encoder->GetSuffix() : NULL;
+}
+
 void ConvTask::Run(const string& output)
 {
     m_Progress = 0.0000001;
