@@ -36,15 +36,15 @@ endif()
 option(EnablePluginOssRenderer "OSS Output" on)
 option(EnablePluginAlsaRenderer "ALSA output" on)
 
-option(EnablePluginWavEncoder "WAV Encoder" on)
-option(EnablePluginLameEncoder "LAME Encoder" on)
-option(EnablePluginFlacEncoder "FLAC Encoder" on)
-
 option(EnablePluginWavDecoder "WAV Decoder" on)
+option(EnablePluginWavEncoder "WAV Encoder" on)
 option(EnablePluginMacDecoder "MAC Decoder" on)
 option(EnablePluginMpg123Decoder "MPG123 Decoder" on)
+option(EnablePluginLameEncoder "LAME Encoder" on)
 option(EnablePluginFlacDecoder "FLAC Decoder" on)
+option(EnablePluginFlacEncoder "FLAC Encoder" on)
 option(EnablePluginFaadDecoder "FAAD Decoder" on)
+option(EnablePluginFaacEncoder "FAAC Encoder" on)
 
 option(EnablePluginTagLibParser "TagLib Parser" on)
 option(EnablePluginCuePack "Cue sheet Parser" on)
@@ -117,7 +117,7 @@ if (EnablePluginWavEncoder)
     add_library(WavEncoder SHARED ${SRC_WAV_ENCODER})
 endif()
 
-# Mpg123 plugin
+# MPG123 & Lame plugin
 if (EnablePluginMpg123Decoder)
     file(GLOB SRC_MPG123_DECODER plugins/Mpg123Decoder/*)
     add_library(Mpg123Decoder SHARED ${SRC_MPG123_DECODER})
@@ -143,11 +143,16 @@ if (EnablePluginFlacDecoder)
     target_link_libraries(FlacDecoder -lFLAC)
 endif()
 
-# Faad plugin
+# FAAD & FAAC plugin
 if (EnablePluginFaadDecoder)
     file(GLOB SRC_FAAD_DECODER plugins/FaadDecoder/*)
     add_library(FaadDecoder SHARED ${SRC_FAAD_DECODER})
     target_link_libraries(FaadDecoder -lfaad -lmp4ff)
+endif()
+if (EnablePluginFaacEncoder)
+    file(GLOB SRC_FAAC_ENCODER plugins/FaacEncoder/*)
+    add_library(FaacEncoder SHARED ${SRC_FAAC_ENCODER})
+    target_link_libraries(FaacEncoder -lfaac)
 endif()
 
 # TagLib plugin
