@@ -1,8 +1,8 @@
 #include "LameEncoder.h"
-#include <stdio.h>
 
 LameEncoder::LameEncoder():
     m_gfp(NULL),
+    m_OutputFile(NULL),
     m_BitsPerSample(0),
     m_EncodeBuffer(NULL),
     m_EncodeBufferSize(0)
@@ -21,8 +21,6 @@ LameEncoder::LameEncoder():
     m_BitRate.enumedVal.assign(rates, rates + sizeof(rates)/sizeof(int));
     m_BitRate.defaultChoice = sizeof(rates)/sizeof(int) - 4;
     m_BitRate.userChoice = sizeof(rates)/sizeof(int) - 4;
-
-    //==== init lame
 }
 
 LameEncoder::~LameEncoder()
@@ -31,18 +29,24 @@ LameEncoder::~LameEncoder()
         delete[] m_EncodeBuffer;
 }
 
+const char* LameEncoder::GetSuffix() const
+{
+    return "mp3";
+}
+
 EmErrorCode LameEncoder::OpenOutput(const std::string& path)
 {
-    m_FileName = path;
+    m_OutputFile = ::fopen(path.c_str(), "wb+");
 
-    m_OutputFile.open(path.c_str(), ios::binary | ios::out );
-    if (!m_OutputFile.is_open())
+    if (m_OutputFile == NULL)
         return ErrorCode::EncoderFailedToOpen;
 
     m_gfp = ::lame_init();
     ::lame_set_quality(m_gfp, m_Quality.userVal);
     ::lame_set_brate(m_gfp, m_BitRate.enumedVal[m_BitRate.userChoice]);
     ::lame_set_mode(m_gfp, ::JOINT_STEREO);
+    ::lame_set_asm_optimizations(m_gfp, MMX, 1);
+    ::lame_set_asm_optimizations(m_gfp, SSE, 1);
     int ret = ::lame_init_params(m_gfp);
     if (ret < 0)
         return ErrorCode::EncoderFailedToInit;
@@ -52,11 +56,8 @@ EmErrorCode LameEncoder::OpenOutput(const std::string& path)
 
 void LameEncoder::CloseOutput()
 {
-    if (m_OutputFile.is_open()) {
-        m_OutputFile.close();
-        FILE* file = ::fopen(m_FileName.c_str(), "aw");
-        lame_mp3_tags_fid(m_gfp, file);
-        ::fclose(file);
+    if (m_OutputFile != NULL) {
+        ::fclose(m_OutputFile);
     }
 
     if (m_gfp != NULL) {
@@ -64,7 +65,6 @@ void LameEncoder::CloseOutput()
         m_gfp = NULL;
     }
 }
-
 
 EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
 {
@@ -84,14 +84,15 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
             m_gfp,
             (short int*)buf, samplesPerChannel,
             m_EncodeBuffer, m_EncodeBufferSize);
-    m_OutputFile.write((char*)m_EncodeBuffer, ret);
+    ::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile);
     return ret >= 0 ? ErrorCode::Ok : ErrorCode::EncoderFailedToEncode;
 }
 
 EmErrorCode LameEncoder::FlushRest()
 {
     int ret = lame_encode_flush(m_gfp, m_EncodeBuffer, m_EncodeBufferSize);
-    m_OutputFile.write((char*)m_EncodeBuffer, ret);
+    ::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile);
+    ::lame_mp3_tags_fid(m_gfp, m_OutputFile);
     return ret >= 0 ? ErrorCode::Ok : ErrorCode::EncoderFailedToFlush;
 }
 

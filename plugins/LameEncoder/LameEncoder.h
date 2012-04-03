@@ -3,8 +3,8 @@
 
 #include <plugin/IEncoder.h>
 #include <lame/lame.h>
+#include <stdio.h>
 #include <string>
-#include <fstream>
 using namespace std;
 using namespace mous;
 
@@ -13,6 +13,8 @@ class LameEncoder: public IEncoder
 public:
     LameEncoder();
     virtual ~LameEncoder();
+
+    virtual const char* GetSuffix() const;
 
     virtual EmErrorCode OpenOutput(const std::string& path);
     virtual void CloseOutput();
@@ -31,8 +33,7 @@ private:
     EnumedIntOption m_BitRate;
 
     lame_global_flags* m_gfp;
-    fstream m_OutputFile;
-    string m_FileName;
+    FILE* m_OutputFile;
 
     int m_BitsPerSample;
 
