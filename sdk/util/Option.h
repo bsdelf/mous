@@ -15,6 +15,7 @@ enum e {
     Int,            // int32_t
     Float,          // double
     String,
+    Boolean,
 
     EnumedInt,
     EnumedFloat,
@@ -40,6 +41,9 @@ inline const char* ToString(EmOptionType type)
 
         case OptionType::String:
             return "String";
+
+        case OptionType::Boolean:
+            return "Boolean";
 
         case OptionType::EnumedInt:
             return "EnumedInt";
@@ -81,6 +85,13 @@ struct StringOption: public BaseOption
 {
     std::string defaultVal;
     mutable std::string userVal; 
+};
+
+struct BooleanOption: public BaseOption
+{
+    std::string detail;
+    bool defaultChoice;
+    mutable bool userChoice;
 };
 
 struct EnumedIntOption: public BaseOption
