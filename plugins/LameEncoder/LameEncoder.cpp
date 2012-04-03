@@ -7,9 +7,8 @@ LameEncoder::LameEncoder():
     m_EncodeBuffer(NULL),
     m_EncodeBufferSize(0)
 {
-    //==== options
     m_Quality.type = OptionType::RangedInt;
-    m_Quality.desc = "Quality:\n0=best(very slow), 9 worst.";
+    m_Quality.desc = "Quality:\n0=best(very slow), 9 worst";
     m_Quality.min = 0;
     m_Quality.max = 9;
     m_Quality.defaultVal = 5;
@@ -21,12 +20,17 @@ LameEncoder::LameEncoder():
     m_BitRate.enumedVal.assign(rates, rates + sizeof(rates)/sizeof(int));
     m_BitRate.defaultChoice = sizeof(rates)/sizeof(int) - 4;
     m_BitRate.userChoice = sizeof(rates)/sizeof(int) - 4;
+
+    m_ReplayGain.type = OptionType::Boolean;
+    m_ReplayGain.desc = "ReplayGain:";
+    m_ReplayGain.detail = "Perform ReplayGain Analysis";
+    m_ReplayGain.defaultChoice = true;
+    m_ReplayGain.userChoice = true;
 }
 
 LameEncoder::~LameEncoder()
 {
-    if (m_EncodeBuffer != NULL)
-        delete[] m_EncodeBuffer;
+    CloseOutput();
 }
 
 const char* LameEncoder::GetFileSuffix() const
@@ -41,10 +45,12 @@ EmErrorCode LameEncoder::OpenOutput(const std::string& path)
     if (m_OutputFile == NULL)
         return ErrorCode::EncoderFailedToOpen;
 
+    // init lame
     m_gfp = ::lame_init();
     ::lame_set_quality(m_gfp, m_Quality.userVal);
     ::lame_set_brate(m_gfp, m_BitRate.enumedVal[m_BitRate.userChoice]);
     ::lame_set_mode(m_gfp, ::JOINT_STEREO);
+    ::lame_set_findReplayGain(m_gfp, m_ReplayGain.userChoice ? 1 : 0);
     ::lame_set_asm_optimizations(m_gfp, MMX, 1);
     ::lame_set_asm_optimizations(m_gfp, SSE, 1);
     int ret = ::lame_init_params(m_gfp);
@@ -58,17 +64,24 @@ void LameEncoder::CloseOutput()
 {
     if (m_OutputFile != NULL) {
         ::fclose(m_OutputFile);
+        m_OutputFile = NULL;
     }
 
     if (m_gfp != NULL) {
         ::lame_close(m_gfp);
         m_gfp = NULL;
     }
+
+    if (m_EncodeBuffer != NULL) {
+        delete[] m_EncodeBuffer;
+        m_EncodeBuffer = NULL;
+        m_EncodeBufferSize = 0;
+    }
 }
 
 EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
 {
-    //==== prepare buffer
+    // prepare buffer
     int samplesPerChannel = 
         len / ::lame_get_num_channels(m_gfp) / (m_BitsPerSample / 8); 
     int minBufferSize = 1.25 * samplesPerChannel + 7200;
@@ -79,21 +92,27 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
         m_EncodeBufferSize = minBufferSize;
     }
 
-    //==== encode
+    // encode
     int ret = lame_encode_buffer_interleaved(
             m_gfp,
             (short int*)buf, samplesPerChannel,
             m_EncodeBuffer, m_EncodeBufferSize);
+
     ::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile);
+
     return ret >= 0 ? ErrorCode::Ok : ErrorCode::EncoderFailedToEncode;
 }
 
 EmErrorCode LameEncoder::FlushRest()
 {
     int ret = lame_encode_flush(m_gfp, m_EncodeBuffer, m_EncodeBufferSize);
-    ::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile);
-    ::lame_mp3_tags_fid(m_gfp, m_OutputFile);
-    return ret >= 0 ? ErrorCode::Ok : ErrorCode::EncoderFailedToFlush;
+    if (ret >= 0) {
+        ::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile);
+        ::lame_mp3_tags_fid(m_gfp, m_OutputFile);
+        return ErrorCode::Ok;
+    } else {
+        return ErrorCode::EncoderFailedToFlush;
+    }
 }
 
 void LameEncoder::SetChannels(int32_t channels)
@@ -114,9 +133,10 @@ void LameEncoder::SetBitsPerSample(int32_t bitsPerSample)
 bool LameEncoder::GetOptions(std::vector<const BaseOption*>& list) const 
 {
     list.clear();
-    list.resize(2);
+    list.resize(3);
     list[0] = &m_Quality;
     list[1] = &m_BitRate;
+    list[2] = &m_ReplayGain;
     return true;
 }
 

@@ -4,7 +4,6 @@
 #include <plugin/IEncoder.h>
 #include <lame/lame.h>
 #include <stdio.h>
-#include <string>
 using namespace std;
 using namespace mous;
 
@@ -31,6 +30,7 @@ public:
 private:
     RangedIntOption m_Quality;
     EnumedIntOption m_BitRate;
+    BooleanOption m_ReplayGain;
 
     lame_global_flags* m_gfp;
     FILE* m_OutputFile;
