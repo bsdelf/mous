@@ -14,7 +14,7 @@ public:
     LameEncoder();
     virtual ~LameEncoder();
 
-    virtual const char* GetSuffix() const;
+    virtual const char* GetFileSuffix() const;
 
     virtual EmErrorCode OpenOutput(const std::string& path);
     virtual void CloseOutput();

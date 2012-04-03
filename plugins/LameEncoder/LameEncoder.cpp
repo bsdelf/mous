@@ -29,7 +29,7 @@ LameEncoder::~LameEncoder()
         delete[] m_EncodeBuffer;
 }
 
-const char* LameEncoder::GetSuffix() const
+const char* LameEncoder::GetFileSuffix() const
 {
     return "mp3";
 }

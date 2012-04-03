@@ -43,9 +43,9 @@ bool ConvTask::GetEncoderOptions(std::vector<const BaseOption*>& list) const
     return m_Encoder != NULL ? m_Encoder->GetOptions(list) : false;
 }
 
-const char* ConvTask::GetEncoderSuffix() const
+const char* ConvTask::GetEncoderFileSuffix() const
 {
-    return m_Encoder != NULL ? m_Encoder->GetSuffix() : NULL;
+    return m_Encoder != NULL ? m_Encoder->GetFileSuffix() : NULL;
 }
 
 void ConvTask::Run(const string& output)

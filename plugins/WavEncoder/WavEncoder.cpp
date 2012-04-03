@@ -10,7 +10,7 @@ WavEncoder::~WavEncoder()
     CloseOutput();
 }
 
-const char* WavEncoder::GetSuffix() const
+const char* WavEncoder::GetFileSuffix() const
 {
     return "wav";
 }
