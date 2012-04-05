@@ -41,7 +41,7 @@ void TagLibParser::Close()
     }
 }
 
-string WStringToStdString(const wstring& str)
+string WStringToStdString(const std::wstring& str)
 {
     const size_t buflen = (str.size()+1) * MB_LEN_MAX;
     char* buf = new char[buflen];

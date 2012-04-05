@@ -2,7 +2,9 @@
 #define FAACENCODER_H
 
 #include <plugin/IEncoder.h>
+#include <stdio.h>
 #include <faac.h>
+#include <mp4v2/mp4v2.h>
 using namespace std;
 using namespace mous;
 
@@ -29,7 +31,26 @@ public:
 private:
     RangedIntOption m_Quality;
     EnumedIntOption m_BitRate;
-    BooleanOption m_ReplayGain;
+
+    string m_FileName;
+
+    MP4FileHandle m_Mp4File;
+    MP4TrackId m_Mp4Track;
+
+    faacEncHandle m_EncHandle;
+    unsigned long m_SampleRate;
+    unsigned int m_Channels;
+    unsigned long m_InputSamples;
+    unsigned long m_MaxOutputBytes;
+
+    int32_t m_BitsPerSample;
+
+    char* m_InputBuffer;
+    int m_InputBufferSize;
+    int m_InputBufferUsed;
+    char* m_OutputBuffer;
+    int m_OutputBufferSize;
+    int m_OutputBufferUsed;
 };
 
 #endif
