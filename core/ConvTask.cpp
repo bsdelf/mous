@@ -84,6 +84,10 @@ void ConvTask::DoConvert(const string& output)
         return;
     }
 
+    m_Encoder->SetChannels(m_Decoder->GetChannels());
+    m_Encoder->SetSampleRate(m_Decoder->GetSampleRate());
+    m_Encoder->SetBitsPerSample(m_Decoder->GetBitsPerSample());
+
     err = m_Encoder->OpenOutput(output);
     if (err != ErrorCode::Ok) {
         m_Progress = -1;
@@ -91,10 +95,6 @@ void ConvTask::DoConvert(const string& output)
         cout << "Encoder open failed!" << endl;
         return;
     }
-
-    m_Encoder->SetChannels(m_Decoder->GetChannels());
-    m_Encoder->SetSampleRate(m_Decoder->GetSampleRate());
-    m_Encoder->SetBitsPerSample(m_Decoder->GetBitsPerSample());
 
     char* unitBuffer = new char[m_Decoder->GetMaxBytesPerUnit()];
     uint32_t unitBufferUsed = 0;
