@@ -1,5 +1,6 @@
 #include "TagLibParser.h"
 #include <stdlib.h>
+#include <limits.h>
 
 TagLibParser::TagLibParser():
     m_pFileRef(NULL),
