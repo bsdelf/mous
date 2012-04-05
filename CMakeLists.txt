@@ -152,7 +152,7 @@ endif()
 if (EnablePluginFaacEncoder)
     file(GLOB SRC_FAAC_ENCODER plugins/FaacEncoder/*)
     add_library(FaacEncoder SHARED ${SRC_FAAC_ENCODER})
-    target_link_libraries(FaacEncoder -lfaac)
+    target_link_libraries(FaacEncoder -lfaac -lmp4v2)
 endif()
 
 # TagLib plugin

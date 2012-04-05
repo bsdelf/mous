@@ -50,6 +50,18 @@ void DlgConvertOption::BindWidgetAndOption(const std::vector<const BaseOption*>&
         layout->addWidget(desc);
 
         switch (baseOpt->type) {
+        case OptionType::Boolean:
+        {
+            DEF_FROM_CAST(const BooleanOption*, opt, baseOpt);
+            QCheckBox* box = new QCheckBox(QString::fromUtf8(opt->detail.c_str()));
+            box->setChecked(opt->defaultChoice);
+            layout->addWidget(box);
+
+            m_WidgetOptionHash[box] = opt;
+            connect(box, SIGNAL(stateChanged(int)), this, SLOT(SlotIntValChanged(int)));
+        }
+            break;
+
         case OptionType::RangedInt:
         {
             DEF_FROM_CAST(const RangedIntOption*, opt, baseOpt);
@@ -107,6 +119,13 @@ void DlgConvertOption::SlotIntValChanged(int val)
         return;
 
     switch (baseOpt->type) {
+    case OptionType::Boolean:
+    {
+        DEF_FROM_CAST(const BooleanOption*, opt, baseOpt);
+        opt->userChoice = val == Qt::Checked ? true : false;
+    }
+        break;
+
     case OptionType::RangedInt:
     {
         DEF_FROM_CAST(const RangedIntOption*, opt, baseOpt);

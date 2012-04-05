@@ -324,10 +324,11 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
     vector<const BaseOption*> opts;
     newTask->GetEncoderOptions(opts);
 
-    std::string fileName(item->artist + " - " + item->title + "." + newTask->GetEncoderFileSuffix());
+    QString fileName =
+            QString::fromUtf8((item->artist + " - " + item->title + "." + newTask->GetEncoderFileSuffix()).c_str());
     DlgConvertOption dlgOption(this);
     dlgOption.SetDir(QDir::homePath());
-    dlgOption.SetFileName(fileName.c_str());
+    dlgOption.SetFileName(fileName);
     dlgOption.BindWidgetAndOption(opts);
     dlgOption.setWindowTitle(tr("Config"));
     dlgOption.exec();
@@ -339,7 +340,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
 
     //==== do work
     m_DlgConvertTask.show();
-    m_DlgConvertTask.AddTask(newTask, "/home/shen/output.wav");
+    m_DlgConvertTask.AddTask(newTask, fileName);
 }
 
 void MainWindow::SlotConvertMediaItems(QList<const MediaItem*> items)

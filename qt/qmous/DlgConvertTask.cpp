@@ -13,7 +13,7 @@ DlgConvertTask::DlgConvertTask(QWidget *parent) :
     ui->setupUi(this);
     ui->listAllTask->setAlternatingRowColors(true);
 
-    m_ProgressTimer.setInterval(10);
+    m_ProgressTimer.setInterval(20);
     connect(&m_ProgressTimer, SIGNAL(timeout()), this, SLOT(SlotUpdateProgress()));
 }
 
@@ -47,8 +47,7 @@ void DlgConvertTask::SlotUpdateProgress()
     for (int i = 0; i < ui->listAllTask->count(); ++i) {
         QListWidgetItem* item = ui->listAllTask->item(i);
         FrmProgressBar* bar = (FrmProgressBar*)ui->listAllTask->itemWidget(item);
-        QVariant var(item->data(Qt::UserRole));
-        IConvTask* task = var.value<IConvTask*>();
+        IConvTask* task = item->data(Qt::UserRole).value<IConvTask*>();
 
         bar->SetProgress(task->GetProgress()*100);
 
