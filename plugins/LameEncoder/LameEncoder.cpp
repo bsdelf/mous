@@ -7,21 +7,18 @@ LameEncoder::LameEncoder():
     m_EncodeBuffer(NULL),
     m_EncodeBufferSize(0)
 {
-    m_Quality.type = OptionType::RangedInt;
     m_Quality.desc = "Quality:\n0=best(very slow), 9 worst";
     m_Quality.min = 0;
     m_Quality.max = 9;
     m_Quality.defaultVal = 5;
     m_Quality.userVal = 5;
 
-    m_BitRate.type = OptionType::EnumedInt;
     m_BitRate.desc = "Bit Rate:";
     int rates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
     m_BitRate.enumedVal.assign(rates, rates + sizeof(rates)/sizeof(int));
     m_BitRate.defaultChoice = sizeof(rates)/sizeof(int) - 4;
     m_BitRate.userChoice = sizeof(rates)/sizeof(int) - 4;
 
-    m_ReplayGain.type = OptionType::Boolean;
     m_ReplayGain.desc = "ReplayGain:";
     m_ReplayGain.detail = "Perform ReplayGain Analysis";
     m_ReplayGain.defaultChoice = true;

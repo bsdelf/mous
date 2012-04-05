@@ -15,7 +15,6 @@ OssRenderer::OssRenderer():
     m_SampleRate(-1),
     m_BitsPerSample(-1)
 {
-    m_OptDevicePath.type = OptionType::String;
     m_OptDevicePath.desc = "Output device.";
     m_OptDevicePath.userVal = m_OptDevicePath.defaultVal = "/dev/dsp";
 }

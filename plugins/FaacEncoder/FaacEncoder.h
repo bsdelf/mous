@@ -29,8 +29,11 @@ public:
     virtual bool GetOptions(std::vector<const BaseOption*>& list) const;
 
 private:
-    RangedIntOption m_Quality;
     EnumedIntOption m_BitRate;
+    RangedIntOption m_Quality;
+    BooleanOption m_Tns;
+    BooleanOption m_MidSide;
+    BooleanOption m_Optimize;
 
     string m_FileName;
 

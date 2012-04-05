@@ -18,6 +18,20 @@ FaacEncoder::FaacEncoder():
     m_OutputBufferSize(0),
     m_OutputBufferUsed(0)
 {
+    m_Tns.desc = "TNS";
+    m_Tns.detail = "Use Temporal Noise Shaping";
+    m_Tns.defaultChoice = false;
+    m_Tns.userChoice = false;
+
+    m_MidSide.desc = "Mid/Side";
+    m_MidSide.detail = "Allow mid/side coding";
+    m_MidSide.defaultChoice = true;
+    m_MidSide.userChoice = true;
+
+    m_Optimize.desc = "Optimize";
+    m_Optimize.detail = "Optimize MP4 container layout after encoding.";
+    m_Optimize.defaultChoice = true;
+    m_Optimize.userChoice = true;
 }
 
 FaacEncoder::~FaacEncoder()
@@ -39,7 +53,7 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
     if (m_EncHandle == NULL)
         return ErrorCode::EncoderFailedToInit;
 
-    m_InputBufferSize = m_InputSamples * (m_BitsPerSample/8);// *  m_Channels;
+    m_InputBufferSize = m_InputSamples * (m_BitsPerSample/8);
     m_InputBuffer = new char[m_InputBufferSize];
     m_InputBufferUsed = 0;
 
@@ -58,17 +72,17 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
     m_Mp4Track = MP4AddAudioTrack(m_Mp4File, m_SampleRate, MP4_INVALID_DURATION, MP4_MPEG4_AUDIO_TYPE);
     MP4SetAudioProfileLevel(m_Mp4File, 0x0F);
 
-    // set faac conf 
     unsigned char *ASC = NULL;
     unsigned long ASCLength = 0;
     faacEncGetDecoderSpecificInfo(m_EncHandle, &ASC, &ASCLength);
     MP4SetTrackESConfiguration(m_Mp4File, m_Mp4Track, ASC, ASCLength);
     free(ASC);
 
+    // set faac conf 
     faacEncConfigurationPtr conf = faacEncGetCurrentConfiguration(m_EncHandle);
     conf->aacObjectType = LOW;
     conf->mpegVersion = MPEG4;
-    conf->useTns = 0;
+    conf->useTns = m_Tns.userChoice ? 1 : 0;
     conf->inputFormat = FAAC_INPUT_16BIT;
     conf->outputFormat = 0; // raw stream
     faacEncSetConfiguration(m_EncHandle, conf);
@@ -160,7 +174,8 @@ EmErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
 
 EmErrorCode FaacEncoder::FlushRest()
 {
-    MP4Optimize(m_FileName.c_str(), NULL, 0);
+    if (m_Optimize.userChoice)
+        MP4Optimize(m_FileName.c_str(), NULL, 0);
     return ErrorCode::Ok;
 }
 
@@ -181,5 +196,8 @@ void FaacEncoder::SetBitsPerSample(int32_t bitsPerSample)
 
 bool FaacEncoder::GetOptions(std::vector<const BaseOption*>& list) const
 {
+    list.resize(2);
+    list[0] = &m_Tns;
+    list[1] = &m_Optimize;
     return true;
 }

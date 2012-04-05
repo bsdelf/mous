@@ -65,26 +65,37 @@ inline const char* ToString(EmOptionType type)
 
 struct BaseOption
 {
-    EmOptionType type;
+    const EmOptionType type;
     std::string desc;
+
+    explicit BaseOption(EmOptionType _type):
+        type(_type)
+    {
+    }
 };
 
 struct IntOption: public BaseOption
 {
     int32_t defaultVal;
     mutable int32_t userVal; 
+
+    IntOption(): BaseOption(OptionType::Int) {}
 };
 
 struct FloatOption: public BaseOption
 {
     double defaultVal;
     mutable double userVal; 
+
+    FloatOption(): BaseOption(OptionType::Float) {}
 };
 
 struct StringOption: public BaseOption
 {
     std::string defaultVal;
     mutable std::string userVal; 
+
+    StringOption(): BaseOption(OptionType::String) {}
 };
 
 struct BooleanOption: public BaseOption
@@ -92,6 +103,8 @@ struct BooleanOption: public BaseOption
     std::string detail;
     bool defaultChoice;
     mutable bool userChoice;
+
+    BooleanOption(): BaseOption(OptionType::Boolean) {}
 };
 
 struct EnumedIntOption: public BaseOption
@@ -99,6 +112,8 @@ struct EnumedIntOption: public BaseOption
     std::vector<int32_t> enumedVal;
     size_t defaultChoice;
     mutable size_t userChoice; 
+
+    EnumedIntOption(): BaseOption(OptionType::EnumedInt) {}
 };
 
 struct EnumedFloatOption: public BaseOption
@@ -106,6 +121,8 @@ struct EnumedFloatOption: public BaseOption
     std::vector<double> enumedtVal;
     size_t defaultChoice;
     mutable size_t userChoice; 
+
+    EnumedFloatOption(): BaseOption(OptionType::EnumedFloat) {}
 };
 
 struct EnumedStringOption: public BaseOption
@@ -113,6 +130,8 @@ struct EnumedStringOption: public BaseOption
     std::vector<std::string> enumedVal;
     size_t defaultChoice;
     mutable size_t userChoice; 
+
+    EnumedStringOption(): BaseOption(OptionType::EnumedString) {}
 };
 
 struct RangedIntOption: public BaseOption
@@ -121,6 +140,8 @@ struct RangedIntOption: public BaseOption
     int32_t max;
     int32_t defaultVal;
     mutable int32_t userVal; 
+
+    RangedIntOption(): BaseOption(OptionType::RangedInt) {}
 };
 
 struct RangedFloatOption: public BaseOption
@@ -129,6 +150,8 @@ struct RangedFloatOption: public BaseOption
     double max;
     double defaultVal;
     mutable double userVal; 
+
+    RangedFloatOption(): BaseOption(OptionType::RangedFloat) {}
 };
 
 }
