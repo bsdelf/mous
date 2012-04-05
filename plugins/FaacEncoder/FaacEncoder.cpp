@@ -5,6 +5,10 @@
 FaacEncoder::FaacEncoder():
     m_Mp4File(MP4_INVALID_FILE_HANDLE),
     m_Mp4Track(0),
+    m_TotalSamples(0),
+    m_EncodedSamples(0),
+    m_FrameSize(0),
+    m_DelaySamples(0),
     m_EncHandle(NULL),
     m_SampleRate(0),
     m_Channels(0),
@@ -18,20 +22,32 @@ FaacEncoder::FaacEncoder():
     m_OutputBufferSize(0),
     m_OutputBufferUsed(0)
 {
-    m_Tns.desc = "TNS";
-    m_Tns.detail = "Use Temporal Noise Shaping";
-    m_Tns.defaultChoice = false;
-    m_Tns.userChoice = false;
+    m_OptQuality.desc = "Quantizer quality(VBR)";
+    m_OptQuality.min = 10;
+    m_OptQuality.max = 500;
+    m_OptQuality.defaultVal = 100;
+    m_OptQuality.userVal = 100;
 
-    m_MidSide.desc = "Mid/Side";
-    m_MidSide.detail = "Allow mid/side coding";
-    m_MidSide.defaultChoice = true;
-    m_MidSide.userChoice = true;
+    m_OptBitRate.desc = "Bit Rate(ABR, 0=disabled)";
+    m_OptBitRate.min = 0;
+    m_OptBitRate.max = 480;
+    m_OptBitRate.defaultVal = 0;
+    m_OptBitRate.userVal = 0;
 
-    m_Optimize.desc = "Optimize";
-    m_Optimize.detail = "Optimize MP4 container layout after encoding.";
-    m_Optimize.defaultChoice = true;
-    m_Optimize.userChoice = true;
+    m_OptTns.desc = "TNS";
+    m_OptTns.detail = "Use Temporal Noise Shaping";
+    m_OptTns.defaultChoice = false;
+    m_OptTns.userChoice = false;
+
+    m_OptMidSide.desc = "Mid/Side";
+    m_OptMidSide.detail = "Allow mid/side coding";
+    m_OptMidSide.defaultChoice = true;
+    m_OptMidSide.userChoice = true;
+
+    m_OptOptimize.desc = "Optimize";
+    m_OptOptimize.detail = "Optimize MP4 container layout after encoding.";
+    m_OptOptimize.defaultChoice = true;
+    m_OptOptimize.userChoice = true;
 }
 
 FaacEncoder::~FaacEncoder()
@@ -46,6 +62,9 @@ const char* FaacEncoder::GetFileSuffix() const
 
 EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
 {
+    if (m_BitsPerSample != 16)
+        return ErrorCode::EncoderFailedToOpen;
+
     m_FileName = path;
 
     // init faac & buffer
@@ -61,11 +80,28 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
     m_OutputBuffer = new char[m_OutputBufferSize];
     m_OutputBufferUsed = 0;
 
+    //m_FloatBuffer = new float[m_InputSamples*sizeof(float)];
+
     printf("input buf:%d\n", (int)m_InputBufferSize);
     printf("output buf:%d\n", (int)m_OutputBufferSize);
 
+    // set faac conf 
+    faacEncConfigurationPtr conf = faacEncGetCurrentConfiguration(m_EncHandle);
+    conf->aacObjectType = LOW;
+    conf->mpegVersion = MPEG4;
+    conf->quantqual = m_OptQuality.userVal;
+    conf->bitRate = (m_OptBitRate.userVal * 1000) / m_Channels;
+    conf->allowMidside = m_OptMidSide.userChoice ? 1 : 0;
+    conf->useTns = m_OptTns.userChoice ? 1 : 0;
+    conf->bandWidth = 0; // disable cutoff
+    conf->shortctl = SHORTCTL_NORMAL;
+    conf->inputFormat = FAAC_INPUT_16BIT;
+    conf->outputFormat = 0; // raw stream
+    faacEncSetConfiguration(m_EncHandle, conf);
+
     // init mp4 file
-    m_Mp4File = MP4Create(path.c_str(), MP4_DETAILS_ERROR, 0);
+    //MP4LogSetLevel(MP4_LOG_ERROR);
+    m_Mp4File = MP4Create(path.c_str());
     if (m_Mp4File == MP4_INVALID_FILE_HANDLE)
         return ErrorCode::EncoderFailedToOpen;
     MP4SetTimeScale(m_Mp4File, 90000);
@@ -77,35 +113,13 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
     faacEncGetDecoderSpecificInfo(m_EncHandle, &ASC, &ASCLength);
     MP4SetTrackESConfiguration(m_Mp4File, m_Mp4Track, ASC, ASCLength);
     free(ASC);
+    
+    SaveTag();
 
-    // set faac conf 
-    faacEncConfigurationPtr conf = faacEncGetCurrentConfiguration(m_EncHandle);
-    conf->aacObjectType = LOW;
-    conf->mpegVersion = MPEG4;
-    conf->useTns = m_Tns.userChoice ? 1 : 0;
-    conf->inputFormat = FAAC_INPUT_16BIT;
-    conf->outputFormat = 0; // raw stream
-    faacEncSetConfiguration(m_EncHandle, conf);
+    m_FrameSize = m_InputSamples / m_Channels;
+    m_DelaySamples = m_FrameSize;
 
-    // set version tag
-    char* faac_id_string;
-    char* faac_copyright_string;
-    char* version_string;
-    faacEncGetVersion(&faac_id_string, &faac_copyright_string);
-    int version_len = strlen(faac_id_string) + 6;
-    version_string = (char*)malloc(version_len);
-    strcpy(version_string, "FAAC ");
-    strcpy(version_string + 5, faac_id_string);
-    version_string[version_len-1] = '\n';
-
-    const MP4Tags* tag = MP4TagsAlloc();
-    MP4TagsFetch(tag, m_Mp4File);
-    MP4TagsSetEncodingTool(tag, version_string);
-    MP4TagsStore(tag, m_Mp4File);
-    MP4TagsFree(tag);
-
-    free(version_string);
-
+        
     return ErrorCode::Ok;
 }
 
@@ -114,6 +128,9 @@ void FaacEncoder::CloseOutput()
     if (m_Mp4File != MP4_INVALID_FILE_HANDLE) {
         MP4Close(m_Mp4File);
         m_Mp4File = MP4_INVALID_FILE_HANDLE;
+
+        if (m_OptOptimize.userChoice && !m_FileName.empty())
+            MP4Optimize(m_FileName.c_str(), NULL, 0);
     }
 
     if (m_EncHandle != NULL) {
@@ -144,23 +161,28 @@ EmErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
             // eat up
             memcpy(m_InputBuffer+m_InputBufferUsed, buf+used, rest);
             m_InputBufferUsed += rest;
-            break;
+            used = rest;
+            rest = 0;
         } else {
-            // flush out
+            // write out
             memcpy(m_InputBuffer+m_InputBufferUsed, buf+used, need);
 
-            int ret = faacEncEncode(m_EncHandle, 
+            //WavReadFloat32();
+            int bytes = faacEncEncode(m_EncHandle, 
                     (int32_t*)m_InputBuffer, m_InputSamples,
                     (unsigned char*)m_OutputBuffer, m_OutputBufferSize);
-            if (ret >= 0) {
-                //u_int64_t samples_left = total_samples - encoded_samples + delay_samples;
-                MP4Duration dur = MP4_INVALID_DURATION;//samples_left > frameSize ? frameSize : samples_left;
-                MP4Duration ofs = 0;//encoded_samples > 0 ? 0 : delay_samples;
+            if (bytes > 0) {
+                m_TotalSamples += m_InputSamples / m_Channels;
+                u_int64_t samples_left = m_TotalSamples - m_EncodedSamples + m_DelaySamples;
+                MP4Duration dur = samples_left > m_FrameSize ? m_FrameSize : samples_left;
+                MP4Duration ofs = m_EncodedSamples > 0 ? 0 : m_DelaySamples;
                 MP4WriteSample(m_Mp4File, m_Mp4Track, 
-                        (const uint8_t *)m_OutputBuffer, ret, 
+                        (const uint8_t *)m_OutputBuffer, bytes, 
                         dur, ofs, true);
+                m_EncodedSamples += dur;
+            } else if (bytes == 0){
+                printf("bytes == 0\n");
             } else {
-                printf("Failed!\n");
                 return ErrorCode::EncoderFailedToEncode;
             }
 
@@ -174,8 +196,33 @@ EmErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
 
 EmErrorCode FaacEncoder::FlushRest()
 {
-    if (m_Optimize.userChoice)
-        MP4Optimize(m_FileName.c_str(), NULL, 0);
+    // this maybe unnecessary
+    int need = m_InputBufferSize - m_InputBufferUsed;
+    if (need > 0 && need != m_InputBufferSize) {
+        printf("need pad: %d\n", need);
+        char* empty = (char*)calloc(need, sizeof(char));
+        Encode(empty, need);
+        free(empty);
+    }
+
+    // flush
+    int bytes = faacEncEncode(m_EncHandle, 
+            (int32_t*)m_InputBuffer, 0,
+            (unsigned char*)m_OutputBuffer, m_OutputBufferSize);
+    if (bytes > 0) {
+        printf("flushed: %d\n", bytes);
+        m_TotalSamples += m_InputSamples / m_Channels;
+        u_int64_t samples_left = m_TotalSamples - m_EncodedSamples + m_DelaySamples;
+        MP4Duration dur = samples_left > m_FrameSize ? m_FrameSize : samples_left;
+        MP4Duration ofs = m_EncodedSamples > 0 ? 0 : m_DelaySamples;
+        MP4WriteSample(m_Mp4File, m_Mp4Track, 
+                (const uint8_t *)m_OutputBuffer, bytes, 
+                dur, ofs, true);
+        m_EncodedSamples += dur;
+    } else if (bytes < 0) {
+        return ErrorCode::EncoderFailedToFlush;
+    }
+
     return ErrorCode::Ok;
 }
 
@@ -196,8 +243,80 @@ void FaacEncoder::SetBitsPerSample(int32_t bitsPerSample)
 
 bool FaacEncoder::GetOptions(std::vector<const BaseOption*>& list) const
 {
-    list.resize(2);
-    list[0] = &m_Tns;
-    list[1] = &m_Optimize;
+    list.resize(5);
+    list[0] = &m_OptQuality;
+    list[1] = &m_OptBitRate;
+    list[2] = &m_OptTns;
+    list[3] = &m_OptMidSide;
+    list[4] = &m_OptOptimize;
     return true;
+}
+
+/*
+size_t FaacEncoder::WavReadFloat32()
+{
+    size_t i = 0;
+    unsigned char* bufi = (unsigned char*)m_InputBuffer;
+
+    while (i < m_InputSamples) {
+        switch (m_BitsPerSample/8) {
+            case 1:
+            {
+                m_FloatBuffer[i] = ((float)bufi[0] - 128) * (float)256;
+                bufi += 1;
+            }
+                break;
+
+            case 2:
+            {
+                int s = ((int16_t*)bufi)[0];
+                m_FloatBuffer[i] = (float)s;
+                bufi += 2;
+            }
+                break;
+
+            case 3:
+            {
+                int s = bufi[0] | (bufi[1] << 8) | (bufi[2] << 16);
+                if (s & 0x800000)
+                    s |= 0xff000000;
+                m_FloatBuffer[i] = (float)s / 256;
+                bufi += 3;
+            }
+                break;
+
+            default:
+                return 0;
+        }
+        ++i;
+    }
+    return i;
+}
+*/
+
+void FaacEncoder::SaveTag()
+{
+    // set version tag
+    char* faac_id_string;
+    char* faac_copyright_string;
+    char* version_string;
+    faacEncGetVersion(&faac_id_string, &faac_copyright_string);
+    int version_len = strlen(faac_id_string) + 6;
+    version_string = new char[version_len];
+    strcpy(version_string, "FAAC ");
+    strcpy(version_string + 5, faac_id_string);
+    version_string[version_len-1] = '\0';
+
+    MP4SetMetadataTool(m_Mp4File, version_string);
+
+    /*
+    const MP4Tags* tag = MP4TagsAlloc();
+    MP4TagsFetch(tag, m_Mp4File);
+    MP4TagsSetEncodingTool(tag, version_string);
+    MP4TagsSetArtist(tag, "hello");
+    MP4TagsStore(tag, m_Mp4File);
+    MP4TagsFree(tag);
+    */
+
+    delete[] version_string;
 }

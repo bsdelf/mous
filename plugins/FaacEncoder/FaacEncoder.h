@@ -29,16 +29,24 @@ public:
     virtual bool GetOptions(std::vector<const BaseOption*>& list) const;
 
 private:
-    EnumedIntOption m_BitRate;
-    RangedIntOption m_Quality;
-    BooleanOption m_Tns;
-    BooleanOption m_MidSide;
-    BooleanOption m_Optimize;
+    //size_t WavReadFloat32();
+    void SaveTag();
+
+private:
+    RangedIntOption m_OptQuality;
+    RangedIntOption m_OptBitRate;
+    BooleanOption m_OptTns;
+    BooleanOption m_OptMidSide;
+    BooleanOption m_OptOptimize;
 
     string m_FileName;
 
     MP4FileHandle m_Mp4File;
     MP4TrackId m_Mp4Track;
+    u_int64_t m_TotalSamples;
+    u_int64_t m_EncodedSamples;
+    unsigned int m_FrameSize;
+    unsigned int m_DelaySamples;
 
     faacEncHandle m_EncHandle;
     unsigned long m_SampleRate;
@@ -54,6 +62,8 @@ private:
     char* m_OutputBuffer;
     int m_OutputBufferSize;
     int m_OutputBufferUsed;
+
+    //float* m_FloatBuffer;
 };
 
 #endif
