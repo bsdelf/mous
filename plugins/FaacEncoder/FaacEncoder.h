@@ -43,8 +43,8 @@ private:
 
     MP4FileHandle m_Mp4File;
     MP4TrackId m_Mp4Track;
-    u_int64_t m_TotalSamples;
-    u_int64_t m_EncodedSamples;
+    uint64_t m_TotalSamples;
+    uint64_t m_EncodedSamples;
     unsigned int m_FrameSize;
     unsigned int m_DelaySamples;
 

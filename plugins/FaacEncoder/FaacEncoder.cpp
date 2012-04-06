@@ -173,7 +173,7 @@ EmErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
                     (unsigned char*)m_OutputBuffer, m_OutputBufferSize);
             if (bytes > 0) {
                 m_TotalSamples += m_InputSamples / m_Channels;
-                u_int64_t samples_left = m_TotalSamples - m_EncodedSamples + m_DelaySamples;
+                uint64_t samples_left = m_TotalSamples - m_EncodedSamples + m_DelaySamples;
                 MP4Duration dur = samples_left > m_FrameSize ? m_FrameSize : samples_left;
                 MP4Duration ofs = m_EncodedSamples > 0 ? 0 : m_DelaySamples;
                 MP4WriteSample(m_Mp4File, m_Mp4Track, 
@@ -212,7 +212,7 @@ EmErrorCode FaacEncoder::FlushRest()
     if (bytes > 0) {
         printf("flushed: %d\n", bytes);
         m_TotalSamples += m_InputSamples / m_Channels;
-        u_int64_t samples_left = m_TotalSamples - m_EncodedSamples + m_DelaySamples;
+        uint64_t samples_left = m_TotalSamples - m_EncodedSamples + m_DelaySamples;
         MP4Duration dur = samples_left > m_FrameSize ? m_FrameSize : samples_left;
         MP4Duration ofs = m_EncodedSamples > 0 ? 0 : m_DelaySamples;
         MP4WriteSample(m_Mp4File, m_Mp4Track, 
