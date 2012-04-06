@@ -5,9 +5,17 @@
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/audioproperties.h>
+#include <map>
 using namespace std;
 using namespace TagLib;
 using namespace mous;
+
+namespace TagLib{
+namespace ID3v2
+{
+    class Tag;
+}
+}
 
 class TagLibParser: public ITagParser
 {
@@ -20,6 +28,7 @@ public:
     virtual EmErrorCode Open(const string& path);
     virtual void Close();
 
+    virtual bool HasTag() const;
     virtual string GetTitle() const;
     virtual string GetArtist() const;
     virtual string GetAlbum() const;
@@ -28,9 +37,8 @@ public:
     virtual int32_t GetYear() const;
     virtual int32_t GetTrack() const;
 
-    virtual int32_t GetDuration() const;
-    virtual int32_t GetBitRate() const;
-
+    virtual bool CanEditTag() const;
+    virtual bool SaveTag();
     virtual void SetTitle(const string& title);
     virtual void SetArtist(const string& artist); 
     virtual void SetAlbum(const string& album); 
@@ -39,13 +47,27 @@ public:
     virtual void SetYear(int32_t year);
     virtual void SetTrack(int32_t track);
 
-    virtual bool HasTag() const;
+    virtual bool DumpCoverArt(char*& buf, size_t& len);
+    virtual bool StoreCoverArt(const char* buf, size_t len);
+
     virtual bool HasProperties() const;
+    virtual int32_t GetDuration() const;
+    virtual int32_t GetBitRate() const;
 
 private:
+    typedef void (*FnDumpCover)(const string& path, char*& buf, size_t& len);
+    static void DumpID3v2Cover(ID3v2::Tag* mp3Tag, char*& buf, size_t& len);
+    static void DumpMp3Cover(const string& path, char*& buf, size_t& len);
+    static void DumpMp4Cover(const string& path, char*& buf, size_t& len);
+
+private:
+    std::string m_FileName;
+
     FileRef* m_pFileRef;
     Tag* m_pTag;
     AudioProperties* m_pProp;
+
+    std::map<std::string, FnDumpCover> m_Dumpers;
 };
 
 #endif
