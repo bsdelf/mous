@@ -126,7 +126,7 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
 
     // Header
     QStringList headList;
-    headList << tr("tag.artist") << tr("tag.album") << tr("tag.title") << tr("Track") << tr("Duration");
+    headList << tr("Artist") << tr("Album") << tr("Title") << tr("Track") << tr("Duration");
     m_StModel.setHorizontalHeaderLabels(headList);
     m_StModel.setColumnCount(headList.size());
 
