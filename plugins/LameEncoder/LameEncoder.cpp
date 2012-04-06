@@ -111,7 +111,7 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
             m_EncodeBuffer, m_EncodeBufferSize);
 
     if (ret >= 0) {
-        if (::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile) == ret) {
+        if ((int)::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile) == ret) {
             return ErrorCode::Ok;
         }
     }
@@ -123,7 +123,7 @@ EmErrorCode LameEncoder::FlushRest()
 {
     int ret = lame_encode_flush(m_gfp, m_EncodeBuffer, m_EncodeBufferSize);
     if (ret >= 0) {
-        if (::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile) == ret) {
+        if ((int)::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile) == ret) {
             ::lame_mp3_tags_fid(m_gfp, m_OutputFile);
             return ErrorCode::Ok;
         }
