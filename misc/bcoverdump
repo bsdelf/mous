@@ -1,0 +1,1 @@
+g++ -o coverdump -O2 coverdump.cpp -ltag -I /usr/local/include/ -L /usr/local/lib
