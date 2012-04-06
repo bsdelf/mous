@@ -41,13 +41,13 @@ public:
     virtual void SetTrack(int32_t track) { };
 
     // cover art calls
-    virtual bool DumpCoverArt(char*& buf, size_t& len) { }
-    virtual bool StoreCoverArt(const char* buf, size_t len) { }
+    virtual bool DumpCoverArt(char*& buf, size_t& len) { return false; }
+    virtual bool StoreCoverArt(const char* buf, size_t len) { return false; }
 
     // property related calls
-    virtual bool HasProperties() const = 0;
-    virtual int32_t GetDuration() const = 0;
-    virtual int32_t GetBitRate() const = 0;
+    virtual bool HasProperties() const { return false; }
+    virtual int32_t GetDuration() const { return -1; }
+    virtual int32_t GetBitRate() const { return -1; }
 
     // reimplement this to provide options
     virtual bool GetOptions(std::vector<const BaseOption*>& list) const
