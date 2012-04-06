@@ -1,25 +1,27 @@
 #include "LameEncoder.h"
+#include <scx/Conv.hpp>
 
 LameEncoder::LameEncoder():
     m_gfp(NULL),
     m_OutputFile(NULL),
     m_BitsPerSample(0),
     m_EncodeBuffer(NULL),
-    m_EncodeBufferSize(0)
+    m_EncodeBufferSize(0),
+    m_MediaTag(NULL)
 {
-    m_Quality.desc = "Quality:\n0=best(very slow), 9 worst";
+    m_Quality.desc = "Quality\n0=best(very slow), 9 worst";
     m_Quality.min = 0;
     m_Quality.max = 9;
     m_Quality.defaultVal = 5;
     m_Quality.userVal = 5;
 
-    m_BitRate.desc = "Bit Rate:";
+    m_BitRate.desc = "Bit Rate";
     int rates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
     m_BitRate.enumedVal.assign(rates, rates + sizeof(rates)/sizeof(int));
     m_BitRate.defaultChoice = sizeof(rates)/sizeof(int) - 4;
     m_BitRate.userChoice = sizeof(rates)/sizeof(int) - 4;
 
-    m_ReplayGain.desc = "ReplayGain:";
+    m_ReplayGain.desc = "ReplayGain";
     m_ReplayGain.detail = "Perform ReplayGain Analysis";
     m_ReplayGain.defaultChoice = true;
     m_ReplayGain.userChoice = true;
@@ -44,12 +46,25 @@ EmErrorCode LameEncoder::OpenOutput(const std::string& path)
 
     // init lame
     m_gfp = ::lame_init();
+
     ::lame_set_quality(m_gfp, m_Quality.userVal);
     ::lame_set_brate(m_gfp, m_BitRate.enumedVal[m_BitRate.userChoice]);
     ::lame_set_mode(m_gfp, ::JOINT_STEREO);
     ::lame_set_findReplayGain(m_gfp, m_ReplayGain.userChoice ? 1 : 0);
     ::lame_set_asm_optimizations(m_gfp, MMX, 1);
     ::lame_set_asm_optimizations(m_gfp, SSE, 1);
+    if (m_MediaTag != NULL) {
+        lame_set_write_id3tag_automatic(m_gfp, 1);
+        id3tag_init(m_gfp);
+        id3tag_v2_only(m_gfp);
+        id3tag_set_title(m_gfp, m_MediaTag->title.c_str());
+        id3tag_set_artist(m_gfp, m_MediaTag->artist.c_str());
+        id3tag_set_album(m_gfp, m_MediaTag->album.c_str());
+        id3tag_set_comment(m_gfp, m_MediaTag->comment.c_str());
+        id3tag_set_genre(m_gfp, m_MediaTag->genre.c_str());
+        id3tag_set_year(m_gfp, scx::NumToStr(m_MediaTag->year).c_str());
+        id3tag_set_track(m_gfp, scx::NumToStr(m_MediaTag->track).c_str());
+    }
     int ret = ::lame_init_params(m_gfp);
     if (ret < 0)
         return ErrorCode::EncoderFailedToInit;
@@ -125,6 +140,11 @@ void LameEncoder::SetSampleRate(int32_t sampleRate)
 void LameEncoder::SetBitsPerSample(int32_t bitsPerSample)
 {
     m_BitsPerSample = bitsPerSample;
+}
+
+void LameEncoder::SetMediaTag(const MediaTag* tag)
+{
+    m_MediaTag = tag;
 }
 
 bool LameEncoder::GetOptions(std::vector<const BaseOption*>& list) const 

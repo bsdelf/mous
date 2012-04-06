@@ -25,6 +25,8 @@ public:
     virtual void SetSampleRate(int32_t sampleRate);
     virtual void SetBitsPerSample(int32_t bitsPerSample);
 
+    virtual void SetMediaTag(const MediaTag* tag);
+
     virtual bool GetOptions(std::vector<const BaseOption*>& list) const;
 
 private:
@@ -39,6 +41,8 @@ private:
 
     unsigned char* m_EncodeBuffer;
     int m_EncodeBufferSize;
+
+    const MediaTag* m_MediaTag;
 };
 
 #endif
