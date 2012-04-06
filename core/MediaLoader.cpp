@@ -211,20 +211,20 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list) const
         ITagParser* parser = iter->second;
         parser->Open(item->url);
         if (parser->HasTag()) {
-            if (item->title.empty())
-                item->title = parser->GetTitle();
-            if (item->artist.empty())
-                item->artist = parser->GetArtist();
-            if (item->album.empty())
-                item->album = parser->GetAlbum();
-            if (item->comment.empty())
-                item->comment = parser->GetComment();
-            if (item->genre.empty())
-                item->genre = parser->GetGenre();
-            if (item->year < 0)
-                item->year = parser->GetYear();
-            if (item->track < 0)
-                item->track = parser->GetTrack();
+            if (item->tag.title.empty())
+                item->tag.title = parser->GetTitle();
+            if (item->tag.artist.empty())
+                item->tag.artist = parser->GetArtist();
+            if (item->tag.album.empty())
+                item->tag.album = parser->GetAlbum();
+            if (item->tag.comment.empty())
+                item->tag.comment = parser->GetComment();
+            if (item->tag.genre.empty())
+                item->tag.genre = parser->GetGenre();
+            if (item->tag.year < 0)
+                item->tag.year = parser->GetYear();
+            if (item->tag.track < 0)
+                item->tag.track = parser->GetTrack();
         } else {
             cout << "WARN: no tag!!" << endl;
         }

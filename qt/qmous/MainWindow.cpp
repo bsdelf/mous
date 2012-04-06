@@ -289,7 +289,7 @@ void MainWindow::SlotPlayMediaItem(IPlayListView *view, const MediaItem *item)
         m_Player->Play();
     ui->btnPlay->setIcon(mIconPaused);
 
-    setWindowTitle(QString::fromUtf8(item->title.c_str()));
+    setWindowTitle(QString::fromUtf8(item->tag.title.c_str()));
 
     m_UsedPlaylistView = view;
 }
@@ -325,7 +325,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
     newTask->GetEncoderOptions(opts);
 
     QString fileName =
-            QString::fromUtf8((item->artist + " - " + item->title + "." + newTask->GetEncoderFileSuffix()).c_str());
+            QString::fromUtf8((item->tag.artist + " - " + item->tag.title + "." + newTask->GetEncoderFileSuffix()).c_str());
     DlgConvertOption dlgOption(this);
     dlgOption.SetDir(QDir::homePath());
     dlgOption.SetFileName(fileName);

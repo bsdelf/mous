@@ -126,7 +126,7 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
 
     // Header
     QStringList headList;
-    headList << tr("Artist") << tr("Album") << tr("Title") << tr("Track") << tr("Duration");
+    headList << tr("tag.artist") << tr("tag.album") << tr("tag.title") << tr("Track") << tr("Duration");
     m_StModel.setHorizontalHeaderLabels(headList);
     m_StModel.setColumnCount(headList.size());
 
@@ -379,44 +379,44 @@ void SimplePlayListView::LoadMediaItem(const QStringList& pathList)
 
             string tmp;
 
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->artist.data(), item->artist.size(), tmp))
-                item->artist = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->artist.data(), item->artist.size(), tmp))
-                item->artist = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->artist.data(), item->artist.size(), tmp))
-                item->artist = tmp;
-            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->artist.data(), item->artist.size(), tmp))
-                item->artist = tmp;
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
+                item->tag.artist = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
+                item->tag.artist = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
+                item->tag.artist = tmp;
+            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
+                item->tag.artist = tmp;
             else
-                qDebug() << "failed:" << QString::fromUtf8(item->artist.c_str());
+                qDebug() << "failed:" << QString::fromUtf8(item->tag.artist.c_str());
 
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->album.data(), item->album.size(), tmp))
-                item->album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->album.data(), item->album.size(), tmp))
-                item->album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->album.data(), item->album.size(), tmp))
-                item->album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->album.data(), item->album.size(), tmp))
-                item->album = tmp;
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
+                item->tag.album = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
+                item->tag.album = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
+                item->tag.album = tmp;
+            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
+                item->tag.album = tmp;
             else
-                qDebug() << "failed:" << QString::fromUtf8(item->album.c_str());
+                qDebug() << "failed:" << QString::fromUtf8(item->tag.album.c_str());
 
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->title.data(), item->title.size(), tmp))
-                item->title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->title.data(), item->title.size(), tmp))
-                item->title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->title.data(), item->title.size(), tmp))
-                item->title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->title.data(), item->title.size(), tmp))
-                item->title = tmp;
+            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
+                item->tag.title = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
+                item->tag.title = tmp;
+            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
+                item->tag.title = tmp;
+            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
+                item->tag.title = tmp;
             else
-                qDebug() << "failed:" << QString::fromUtf8(item->title.c_str());
+                qDebug() << "failed:" << QString::fromUtf8(item->tag.title.c_str());
 
             // Build row
-            mediaRow.row << new QStandardItem(QString::fromUtf8(item->artist.c_str()));
-            mediaRow.row << new QStandardItem(QString::fromUtf8(item->album.c_str()));
-            mediaRow.row << new QStandardItem(QString::fromUtf8(item->title.c_str()));
-            mediaRow.row << new QStandardItem(QString::number(item->track));
+            mediaRow.row << new QStandardItem(QString::fromUtf8(item->tag.artist.c_str()));
+            mediaRow.row << new QStandardItem(QString::fromUtf8(item->tag.album.c_str()));
+            mediaRow.row << new QStandardItem(QString::fromUtf8(item->tag.title.c_str()));
+            mediaRow.row << new QStandardItem(QString::number(item->tag.track));
             mediaRow.row << new QStandardItem(strDuration);
             for (int i = 0; i < mediaRow.row.size(); ++i) {
                 QStandardItem* item = mediaRow.row[i];

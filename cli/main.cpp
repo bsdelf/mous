@@ -255,13 +255,13 @@ int main(int argc, char** argv)
     playlist.SeqCurrent(item);
     assert(item != NULL);
     cout << ">>>> Tag Info" << endl;
-    cout << "\ttitle:" << item->title << endl;
-    cout << "\tartist:" << item->artist << endl;
-    cout << "\talbum:" << item->album << endl;
-    cout << "\tcomment:" << item->comment << endl;
-    cout << "\tgenre:" << item->genre << endl;
-    cout << "\tyear:" << item->year << endl;
-    cout << "\ttrack:" << item->track << endl;
+    cout << "\ttitle:" << item->tag.title << endl;
+    cout << "\tartist:" << item->tag.artist << endl;
+    cout << "\talbum:" << item->tag.album << endl;
+    cout << "\tcomment:" << item->tag.comment << endl;
+    cout << "\tgenre:" << item->tag.genre << endl;
+    cout << "\tyear:" << item->tag.year << endl;
+    cout << "\ttrack:" << item->tag.track << endl;
 
     cout << "item->url:" << item->url << endl;
     player->Open(item->url);

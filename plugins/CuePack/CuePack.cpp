@@ -104,32 +104,32 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem*>& list) const
 
         Cdtext* text = track_get_cdtext(track);
 
-        item->album = album;
-        item->year = year;
+        item->tag.album = album;
+        item->tag.year = year;
 
         data = cdtext_get(PTI_TITLE, text);
         if (data != NULL) {
-            item->title = data;
+            item->tag.title = data;
             delete data;
         }
 
         data = cdtext_get(PTI_PERFORMER, text);
         if (data != NULL) {
-            item->artist = data;
+            item->tag.artist = data;
             delete data;
         } else {
-            item->artist = artist;
+            item->tag.artist = artist;
         }
 
         data = cdtext_get(PTI_GENRE, text);
         if (data != NULL) {
-            item->genre = data;
+            item->tag.genre = data;
             delete data;
         } else {
-            item->genre = genre;
+            item->tag.genre = genre;
         }
 
-        item->track = i;
+        item->tag.track = i;
 
         //cdtext_delete(text);
 
