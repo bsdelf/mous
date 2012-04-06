@@ -87,6 +87,7 @@ void ConvTask::DoConvert(const string& output)
     m_Encoder->SetChannels(m_Decoder->GetChannels());
     m_Encoder->SetSampleRate(m_Decoder->GetSampleRate());
     m_Encoder->SetBitsPerSample(m_Decoder->GetBitsPerSample());
+    m_Encoder->SetMediaTag(&m_Item.tag);
 
     err = m_Encoder->OpenOutput(output);
     if (err != ErrorCode::Ok) {

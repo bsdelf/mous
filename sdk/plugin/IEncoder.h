@@ -24,12 +24,15 @@ public:
     virtual EmErrorCode Encode(char* buf, uint32_t len) = 0;
     virtual EmErrorCode FlushRest() = 0;
 
+    // these will be called before OpenOutput()
     virtual void SetChannels(int32_t channels) = 0;
     virtual void SetSampleRate(int32_t sampleRate) = 0;
     virtual void SetBitsPerSample(int32_t bitsPerSample) = 0;
 
     // reimplement this to support tagging
-    virtual void WriteTag(const MediaTag& tag) const
+    // called befor OpenOutput()
+    // you can write tag after open but before close
+    virtual void SetMediaTag(const MediaTag* tag)
     {
     }
 
