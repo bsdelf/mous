@@ -1,21 +1,21 @@
 1.Sub Project
-Started	    Name	    Description
-O	    libMousCore	    mous core/sdk
-O	    mous-cli	    Only for test
-X	    qmous	    Qt based front
-X	    nmous	    ncurses based font
-X	    gmous	    Gtk based font?
+Started     Name            Description
+O           libMousCore     mous core/sdk
+O           mous-cli        Only for test
+X           qmous           Qt based front
+X           nmous           ncurses based font
+X           gmous           Gtk based font?
 
 2.Features
 Supported   Description
-O	    Decode media
-X	    Format convert
-X	    Media management
-X	    Sound Effect
-X	    Dynamic Normalizer
-X	    FFTW
-X	    Tag/Cover edit
-X	    Auto detect charset
+O           Decode media
+O           Format convert
+X           Media management
+X           Sound Effect
+X           Dynamic Normalizer
+X           FFTW
+X           Tag/Cover edit
+X           Auto detect charset
 
 3.Plugin Dependence(FreeBSD ports)
 You can use ccmake to turn ON/OFF the following plugins.
@@ -23,21 +23,22 @@ All plugins will be dynamically loaded at runtime.
 Even NONE of them are built, mous will still be able to launch,
 but of course it will be useless!
 
-Supported   Dependence		Reason
-X	    NONE		Alsa Renderer
-O	    NONE		Oss Renderer
+Supported   Dependence          Reason
+X           NONE                ALSA Renderer
+O           NONE                OSS Renderer
 
-O	    NONE		    Wav Decoder
-O	    audio/mpg123	Mp3 Decoder
-O	    audio/mac		Ape Decoder
-O	    audio/flac		Flac Decoder
-O	    audio/faad		Mp4 Decoder
+O           NONE                WAV Decoder
+O           audio/mpg123        MP3 Decoder
+O           audio/mac           APE Decoder
+O           audio/flac          FLAC Decoder
+O           audio/faad          MP4 Decoder(not support aac yet)
 
-O	    NONE		    Wav Encoder
-X	    audio/lame		Mp3 Encoder
-X	    audio/faac		Mp4 Encoder
-X	    audio/flac		Flac Encoder
+O           NONE                WAV Encoder
+O           audio/lame          MP3 Encoder
+O           audio/faac          MP4 Encoder(not support aac yet)
+X           audio/flac          FLAC Encoder
+X           audio/wavpack       WavPack Encoder
 
-O	    audio/taglib	Tag support
-O	    textproc/libcue	CUE sheet parser
-X	    databases/sqlite3	Media management
+O           audio/taglib        Tag support
+O           textproc/libcue     CUE sheet parser
+X           databases/sqlite3   Media management
