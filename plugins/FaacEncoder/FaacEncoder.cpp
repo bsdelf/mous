@@ -1,6 +1,7 @@
 #include "FaacEncoder.h"
 #include <stdlib.h>
 #include <string.h>
+#include <scx/Conv.hpp>
 
 FaacEncoder::FaacEncoder():
     m_Mp4File(MP4_INVALID_FILE_HANDLE),
@@ -20,7 +21,8 @@ FaacEncoder::FaacEncoder():
     m_InputBufferUsed(0),
     m_OutputBuffer(NULL),
     m_OutputBufferSize(0),
-    m_OutputBufferUsed(0)
+    m_OutputBufferUsed(0),
+    m_MediaTag(NULL)
 {
     m_OptQuality.desc = "Quantizer quality(VBR)";
     m_OptQuality.min = 10;
@@ -114,7 +116,7 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
     MP4SetTrackESConfiguration(m_Mp4File, m_Mp4Track, ASC, ASCLength);
     free(ASC);
     
-    SaveTag();
+    WriteToolVersion();
 
     m_FrameSize = m_InputSamples / m_Channels;
     m_DelaySamples = m_FrameSize;
@@ -128,6 +130,8 @@ void FaacEncoder::CloseOutput()
     if (m_Mp4File != MP4_INVALID_FILE_HANDLE) {
         MP4Close(m_Mp4File);
         m_Mp4File = MP4_INVALID_FILE_HANDLE;
+
+        UpdateMediaTag();
 
         if (m_OptOptimize.userChoice && !m_FileName.empty())
             MP4Optimize(m_FileName.c_str(), NULL, 0);
@@ -241,6 +245,11 @@ void FaacEncoder::SetBitsPerSample(int32_t bitsPerSample)
     m_BitsPerSample = bitsPerSample;
 }
 
+void FaacEncoder::SetMediaTag(const MediaTag* tag)
+{
+    m_MediaTag = tag;
+}
+
 bool FaacEncoder::GetOptions(std::vector<const BaseOption*>& list) const
 {
     list.resize(5);
@@ -294,7 +303,7 @@ size_t FaacEncoder::WavReadFloat32()
 }
 */
 
-void FaacEncoder::SaveTag()
+void FaacEncoder::WriteToolVersion()
 {
     // set version tag
     char* faac_id_string;
@@ -319,4 +328,30 @@ void FaacEncoder::SaveTag()
     */
 
     delete[] version_string;
+}
+
+void FaacEncoder::UpdateMediaTag()
+{
+    if (m_FileName.empty() || m_MediaTag == NULL)
+        return;
+
+    MP4FileHandle file = MP4Modify(m_FileName.c_str());
+    if (file == MP4_INVALID_FILE_HANDLE)
+        return;
+    const MP4Tags* tag = MP4TagsAlloc();
+    MP4TagsFetch(tag, file);
+
+    MP4TagsSetName(tag, m_MediaTag->title.c_str());
+    MP4TagsSetArtist(tag, m_MediaTag->artist.c_str());
+    MP4TagsSetAlbumArtist(tag, m_MediaTag->artist.c_str());
+    MP4TagsSetAlbum(tag, m_MediaTag->album.c_str());
+    MP4TagsSetComments(tag, m_MediaTag->comment.c_str());
+    MP4TagsSetGenre(tag, m_MediaTag->genre.c_str());
+    MP4TagsSetReleaseDate(tag, scx::NumToStr(m_MediaTag->year).c_str());
+    MP4TagTrack track = { m_MediaTag->track, 0 };
+    MP4TagsSetTrack(tag, &track);
+
+    MP4TagsStore(tag, file);
+    MP4TagsFree(tag);
+    MP4Close(file);
 }

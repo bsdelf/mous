@@ -26,11 +26,13 @@ public:
     virtual void SetSampleRate(int32_t sampleRate);
     virtual void SetBitsPerSample(int32_t bitsPerSample);
 
+    virtual void SetMediaTag(const MediaTag* tag);
     virtual bool GetOptions(std::vector<const BaseOption*>& list) const;
 
 private:
     //size_t WavReadFloat32();
-    void SaveTag();
+    void WriteToolVersion();
+    void UpdateMediaTag();
 
 private:
     RangedIntOption m_OptQuality;
@@ -62,6 +64,8 @@ private:
     char* m_OutputBuffer;
     int m_OutputBufferSize;
     int m_OutputBufferUsed;
+
+    const MediaTag* m_MediaTag;
 
     //float* m_FloatBuffer;
 };
