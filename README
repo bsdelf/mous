@@ -2,9 +2,9 @@
 Started     Name            Description
 O           libMousCore     mous core/sdk
 O           mous-cli        Only for test
-X           qmous           Qt based front
-X           nmous           ncurses based font
-X           gmous           Gtk based font?
+O           mous-qt         Qt based front
+X           mous-ncurses    ncurses based font
+X           mous-gtk        Gtk+ based font??
 
 2.Features
 Supported   Description
@@ -14,7 +14,7 @@ X           Media management
 X           Sound Effect
 X           Dynamic Normalizer
 X           FFTW
-X           Tag/Cover edit
+X           Tag/CoverArt edit
 X           Auto detect charset
 
 3.Plugin Dependence(FreeBSD ports)
@@ -31,11 +31,11 @@ O           NONE                WAV Decoder
 O           audio/mpg123        MP3 Decoder
 O           audio/mac           APE Decoder
 O           audio/flac          FLAC Decoder
-O           audio/faad          MP4 Decoder(not support aac yet)
+O           audio/faad          MP4 Decoder(m4a only, no aac)
 
 O           NONE                WAV Encoder
 O           audio/lame          MP3 Encoder
-O           audio/faac          MP4 Encoder(not support aac yet)
+O           audio/faac          MP4 Encoder(m4a only, no aac)
 X           audio/flac          FLAC Encoder
 X           audio/wavpack       WavPack Encoder
 
