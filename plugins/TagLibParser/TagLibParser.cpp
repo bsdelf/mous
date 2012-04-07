@@ -17,7 +17,7 @@ TagLibParser::TagLibParser():
     m_pProp(NULL)
 {
     m_Dumpers["mp3"] = &TagLibParser::DumpMp3Cover;
-    m_Dumpers["mp4"] = &TagLibParser::DumpMp4Cover;
+    m_Dumpers["m4a"] = &TagLibParser::DumpMp4Cover;
 }
 
 TagLibParser::~TagLibParser()
@@ -232,7 +232,8 @@ bool TagLibParser::DumpCoverArt(char*& buf, size_t& len)
     if (m_FileName.empty())
         return false;
 
-    const string ext(scx::FileHelper::FileSuffix(m_FileName));
+    const string& ext = scx::FileHelper::FileSuffix(m_FileName);
+    cout << "ext:" << ext << endl;
     if (m_Dumpers.find(ext) == m_Dumpers.end())
         return false;
 
