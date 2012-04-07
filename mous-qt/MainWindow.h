@@ -8,7 +8,9 @@
 #include <core/IPlayer.h>
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
+#include <core/ITagParserFactory.h>
 #include "FrmToolBar.h"
+#include "FrmTagEditor.h"
 #include "IPlaylistView.h"
 #include "DlgConvertTask.h"
 
@@ -36,6 +38,7 @@ public:
 private:
     void initMyUi();
     void initMousCore();
+    void clearMousCore();
     void initQtSlots();
 
     void formatTime(QString& str, int ms);
@@ -65,6 +68,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     FrmToolBar m_FrmToolBar;
+    FrmTagEditor m_FrmTagEditor;
     sqt::MidClickTabBar* m_TabBarPlaylist;
     sqt::CustomHeadTabWidget* m_TabWidgetPlaylist;
 
@@ -80,6 +84,7 @@ private:
     mous::IMediaLoader* m_MediaLoader;
     mous::IPlayer* m_Player;
     mous::IConvTaskFactory* m_ConvFactory;
+    mous::ITagParserFactory* m_ParserFactory;
 
     IPlaylistView* m_UsedPlaylistView;
     const mous::MediaItem* m_UsedMediaItem;

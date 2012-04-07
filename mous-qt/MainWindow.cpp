@@ -16,10 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_TimerUpdateUi(new QTimer),
     m_UpdateInterval(500),
-    m_PluginManager(IPluginManager::Create()),
-    m_MediaLoader(IMediaLoader::Create()),
-    m_Player(IPlayer::Create()),
-    m_ConvFactory(IConvTaskFactory::Create()),
     m_UsedPlaylistView(NULL),
     m_UsedMediaItem(NULL),
     m_SliderPlayingPreempted(false)
@@ -45,19 +41,17 @@ MainWindow::~MainWindow()
 
     delete ui;
 
-    m_ConvFactory->UnregisterAll();
-    m_Player->UnregisterAll();
-    m_MediaLoader->UnregisterAll();
-    m_PluginManager->UnloadAll();
-
-    IPluginManager::Free(m_PluginManager);
-    IMediaLoader::Free(m_MediaLoader);
-    IPlayer::Free(m_Player);
-    IConvTaskFactory::Free(m_ConvFactory);
+    clearMousCore();
 }
 
 void MainWindow::initMousCore()
 {
+    m_PluginManager = IPluginManager::Create();
+    m_MediaLoader = IMediaLoader::Create();
+    m_Player = IPlayer::Create();
+    m_ConvFactory = IConvTaskFactory::Create();
+    m_ParserFactory = ITagParserFactory::Create();
+
     m_PluginManager->LoadPluginDir("./plugins");
     vector<string> pathList;
     m_PluginManager->GetPluginPath(pathList);
@@ -84,6 +78,9 @@ void MainWindow::initMousCore()
     m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
     m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
 
+    m_ParserFactory->RegisterTagParserPlugin(tagAgentList);
+    m_FrmTagEditor.SetTagParserFactory(m_ParserFactory);
+
     qDebug() << ">> MediaPack count:" << packAgentList.size();
     qDebug() << ">> TagParser count:" << tagAgentList.size();
     qDebug() << ">> Decoder count:" << decoderAgentList.size();
@@ -91,13 +88,26 @@ void MainWindow::initMousCore()
     qDebug() << ">> Renderer count:" << rendererAgentList.size();
 }
 
+void MainWindow::clearMousCore()
+{
+    m_Player->UnregisterAll();
+    m_MediaLoader->UnregisterAll();
+    m_ConvFactory->UnregisterAll();
+    m_ParserFactory->UnregisterAll();
+    m_PluginManager->UnloadAll();
+
+    IPluginManager::Free(m_PluginManager);
+    IMediaLoader::Free(m_MediaLoader);
+    IPlayer::Free(m_Player);
+    IConvTaskFactory::Free(m_ConvFactory);
+    ITagParserFactory::Free(m_ParserFactory);
+}
+
 void MainWindow::initMyUi()
 {
     // Playing & Paused icon
     m_IconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
     m_IconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
-
-    // Play mode button
 
     // Volume
     m_FrmToolBar.GetSliderVolume()->setValue(m_Player->GetVolume());
@@ -117,17 +127,17 @@ void MainWindow::initMyUi()
 
     ui->statusBar->addPermanentWidget(m_BtnPreference, 0);
 
-    // Default playlist
+    // Show default playlist
     SlotWidgetPlayListDoubleClick();
 
-    QDockWidget* dock = new QDockWidget("Info");
-    this->addDockWidget(Qt::LeftDockWidgetArea, dock);
+    QDockWidget* dock = new QDockWidget("Metadata");
+    dock->setWidget(&m_FrmTagEditor);
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
     dock->setFeatures(QDockWidget::NoDockWidgetFeatures | QDockWidget::DockWidgetMovable);
 
     ui->toolBar->addWidget(&m_FrmToolBar);
     ui->toolBar->setMovable(false);
-    ui->toolBar->setContextMenuPolicy(Qt::NoContextMenu);
-    //setContextMenuPolicy(Qt::NoContextMenu);
+    setContextMenuPolicy(Qt::NoContextMenu);
 }
 
 void MainWindow::initQtSlots()
@@ -301,6 +311,8 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
     setWindowTitle(QString::fromUtf8(item->tag.title.c_str()));
 
     m_UsedPlaylistView = view;
+
+    m_FrmTagEditor.ShowFileTag(item->url);
 }
 
 void MainWindow::SlotConvertMediaItem(const MediaItem *item)
