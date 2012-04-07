@@ -14,18 +14,18 @@ LIBS += -L./ -Wl,-rpath,./ -lMousCore
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-        SimplePlayListView.cpp \
     CustomHeadTabWidget.cpp \
     MidClickTabBar.cpp \
     DlgListSelect.cpp \
     DlgLoadingMedia.cpp \
     FrmProgressBar.cpp \
     DlgConvertTask.cpp \
-    DlgConvertOption.cpp
+    DlgConvertOption.cpp \
+    FrmToolBar.cpp \
+    FrmTagEditor.cpp \
+    SimplePlaylistView.cpp
 
 HEADERS  += MainWindow.h \
-    SimplePlayListView.h \
-    IPlayListView.h \
     CustomHeadTabWidget.hpp \
     MidClickTabBar.hpp \
     UiHelper.hpp \
@@ -33,14 +33,20 @@ HEADERS  += MainWindow.h \
     DlgLoadingMedia.h \
     FrmProgressBar.h \
     DlgConvertTask.h \
-    DlgConvertOption.h
+    DlgConvertOption.h \
+    FrmToolBar.h \
+    FrmTagEditor.h \
+    IPlaylistView.h \
+    SimplePlaylistView.h
 
 FORMS    += MainWindow.ui \
     DlgListSelect.ui \
     DlgLoadingMedia.ui \
     FrmProgressBar.ui \
     DlgConvertTask.ui \
-    DlgConvertOption.ui
+    DlgConvertOption.ui \
+    FrmToolBar.ui \
+    FrmTagEditor.ui
 
 TRANSLATIONS = QMous.ts
 

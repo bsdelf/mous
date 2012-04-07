@@ -13,7 +13,7 @@ public:
     MidClickTabBar(QWidget * parent = 0);
 
 signals:
-    void sigMidClick(int id);
+    void SigMidClick(int id);
 
 private:
     virtual void mouseReleaseEvent(QMouseEvent* event);

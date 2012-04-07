@@ -8,7 +8,8 @@
 #include <core/IPlayer.h>
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
-#include "IPlayListView.h"
+#include "FrmToolBar.h"
+#include "IPlaylistView.h"
 #include "DlgConvertTask.h"
 
 namespace Ui {
@@ -57,21 +58,20 @@ private slots:
     void SlotBarPlayListMidClick(int index);
     void SlotWidgetPlayListDoubleClick();
 
-    void SlotPlayMediaItem(IPlayListView* view, const mous::MediaItem* item);
+    void SlotPlayMediaItem(IPlaylistView* view, const mous::MediaItem* item);
     void SlotConvertMediaItem(const mous::MediaItem *item);
     void SlotConvertMediaItems(QList<const mous::MediaItem*> items);
 
 private:
     Ui::MainWindow *ui;
+    FrmToolBar m_FrmToolBar;
+    sqt::MidClickTabBar* m_TabBarPlaylist;
+    sqt::CustomHeadTabWidget* m_TabWidgetPlaylist;
 
-    sqt::MidClickTabBar* mBarPlayList;
-    sqt::CustomHeadTabWidget* mWidgetPlayList;
+    QIcon m_IconPlaying;
+    QIcon m_IconPaused;
 
-    QIcon mIconPlaying;
-    QIcon mIconPaused;
-
-    QString mStatusMsg;
-    QToolButton* mBtnPreference;
+    QToolButton* m_BtnPreference;
 
     QTimer* m_TimerUpdateUi;
     const int m_UpdateInterval;
@@ -81,10 +81,10 @@ private:
     mous::IPlayer* m_Player;
     mous::IConvTaskFactory* m_ConvFactory;
 
-    IPlayListView* m_UsedPlaylistView;
+    IPlaylistView* m_UsedPlaylistView;
     const mous::MediaItem* m_UsedMediaItem;
 
-    bool mSliderPlayingPreempted;
+    bool m_SliderPlayingPreempted;
 
     DlgConvertTask m_DlgConvertTask;
 };

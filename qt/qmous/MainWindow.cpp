@@ -5,7 +5,7 @@
 #include "DlgListSelect.h"
 #include <scx/Signal.hpp>
 #include <util/MediaItem.h>
-#include "SimplePlayListView.h"
+#include "SimplePlaylistView.h"
 #include "DlgConvertOption.h"
 using namespace std;
 using namespace sqt;
@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ConvFactory(IConvTaskFactory::Create()),
     m_UsedPlaylistView(NULL),
     m_UsedMediaItem(NULL),
-    mSliderPlayingPreempted(false)
+    m_SliderPlayingPreempted(false)
 {
     ui->setupUi(this);    
     initMousCore();
@@ -94,47 +94,56 @@ void MainWindow::initMousCore()
 void MainWindow::initMyUi()
 {
     // Playing & Paused icon
-    mIconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
-    mIconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_IconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
+    m_IconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
 
     // Play mode button
 
     // Volume
-    ui->sliderVolume->setValue(m_Player->GetVolume());
+    m_FrmToolBar.GetSliderVolume()->setValue(m_Player->GetVolume());
 
     // PlayList View
-    mBarPlayList = new MidClickTabBar(this);
-    mWidgetPlayList = new CustomHeadTabWidget(this);
-    mWidgetPlayList->setTabBar(mBarPlayList);
-    mWidgetPlayList->setMovable(true);
-    ui->layoutPlayList->addWidget(mWidgetPlayList);
+    m_TabBarPlaylist = new MidClickTabBar(this);
+    m_TabWidgetPlaylist = new CustomHeadTabWidget(this);
+    m_TabWidgetPlaylist->setTabBar(m_TabBarPlaylist);
+    m_TabWidgetPlaylist->setMovable(true);
+    ui->layoutPlaylist->addWidget(m_TabWidgetPlaylist);
 
     // Status bar buttons
-    mBtnPreference = new QToolButton(ui->barStatus);
-    mBtnPreference->setAutoRaise(true);
-    mBtnPreference->setText("P");
-    mBtnPreference->setToolTip(tr("Preference"));
+    m_BtnPreference = new QToolButton(ui->statusBar);
+    m_BtnPreference->setAutoRaise(true);
+    m_BtnPreference->setText("P");
+    m_BtnPreference->setToolTip(tr("Preference"));
 
-    ui->barStatus->addPermanentWidget(mBtnPreference, 0);
+    ui->statusBar->addPermanentWidget(m_BtnPreference, 0);
 
     // Default playlist
     SlotWidgetPlayListDoubleClick();
+
+    QDockWidget* dock = new QDockWidget("Info");
+    this->addDockWidget(Qt::LeftDockWidgetArea, dock);
+    dock->setFeatures(QDockWidget::NoDockWidgetFeatures | QDockWidget::DockWidgetMovable);
+
+    ui->toolBar->addWidget(&m_FrmToolBar);
+    ui->toolBar->setMovable(false);
+    ui->toolBar->setContextMenuPolicy(Qt::NoContextMenu);
+    //setContextMenuPolicy(Qt::NoContextMenu);
 }
 
 void MainWindow::initQtSlots()
 {
     connect(m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
 
-    connect(ui->btnPlay, SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
+    connect(m_FrmToolBar.GetBtnPlay(), SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
 
-    connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(SlotSliderVolumeValueChanged(int)));
+    connect(m_FrmToolBar.GetSliderVolume(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderVolumeValueChanged(int)));
 
-    connect(ui->sliderPlaying, SIGNAL(sliderPressed()), this, SLOT(SlotSliderPlayingPressed()));
-    connect(ui->sliderPlaying, SIGNAL(sliderReleased()), this, SLOT(SlotSliderPlayingReleased()));
-    connect(ui->sliderPlaying, SIGNAL(valueChanged(int)), this, SLOT(SlotSliderPlayingValueChanged(int)));
+    connect(m_FrmToolBar.GetSliderPlaying(), SIGNAL(sliderPressed()), this, SLOT(SlotSliderPlayingPressed()));
+    connect(m_FrmToolBar.GetSliderPlaying(), SIGNAL(sliderReleased()), this, SLOT(SlotSliderPlayingReleased()));
+    connect(m_FrmToolBar.GetSliderPlaying(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderPlayingValueChanged(int)));
 
-    connect(mBarPlayList, SIGNAL(sigMidClick(int)), this, SLOT(SlotBarPlayListMidClick(int)));
-    connect(mWidgetPlayList, SIGNAL(sigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
+    connect(m_TabBarPlaylist, SIGNAL(SigMidClick(int)), this, SLOT(SlotBarPlayListMidClick(int)));
+    connect(m_TabWidgetPlaylist, SIGNAL(sigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
 }
 
 void MainWindow::formatTime(QString& str, int ms)
@@ -148,7 +157,7 @@ void MainWindow::SlotPlayerStopped()
 {
     qDebug() << "Stopped!";
     if (m_UsedPlaylistView != NULL) {
-        const MediaItem* item = m_UsedPlaylistView->getNextItem();
+        const MediaItem* item = m_UsedPlaylistView->GetNextItem();
         SlotPlayMediaItem(m_UsedPlaylistView, item);
     }
 }
@@ -161,16 +170,16 @@ void MainWindow::SlotUpdateUi()
     int ms = m_Player->GetOffsetMs();
     int kbps = m_Player->GetBitRate();
 
-    mStatusMsg.sprintf("%.3d kbps | %.2d:%.2d/%.2d:%.2d",
-                 kbps,
-                 ms/1000/60, ms/1000%60, total/1000/60, total/1000%60);
+    const QString& status = QString("%1 kbps | %2:%3/%4:%5").arg(kbps).
+            arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0')).
+            arg(total/1000/60, 2, 10, QChar('0')).arg(total/1000%60, 2, 10, QChar('0'));
 
-    ui->barStatus->showMessage(mStatusMsg);
+    ui->statusBar->showMessage(status);
 
     //==== Update slider.
-    if (!mSliderPlayingPreempted) {
-        int percent = (double)ms / total * ui->sliderPlaying->maximum();
-        ui->sliderPlaying->setSliderPosition(percent);
+    if (!m_SliderPlayingPreempted) {
+        int percent = (double)ms / total * m_FrmToolBar.GetSliderPlaying()->maximum();
+        m_FrmToolBar.GetSliderPlaying()->setSliderPosition(percent);
     }
 }
 
@@ -189,13 +198,13 @@ void MainWindow::SlotBtnPlay()
     case PlayerStatus::Playing:
         m_Player->Pause();
         m_TimerUpdateUi->stop();
-        ui->btnPlay->setIcon(mIconPlaying);
+        m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPlaying);
         break;
 
     case PlayerStatus::Paused:
         m_TimerUpdateUi->start(m_UpdateInterval);
         m_Player->Resume();
-        ui->btnPlay->setIcon(mIconPaused);
+        m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPaused);
         break;
 
     case PlayerStatus::Stopped:
@@ -204,7 +213,7 @@ void MainWindow::SlotBtnPlay()
             m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
         else
             m_Player->Play();
-        ui->btnPlay->setIcon(mIconPaused);
+        m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPaused);
         break;
     }
 }
@@ -224,52 +233,52 @@ void MainWindow::SlotSliderVolumeValueChanged(int val)
 
 void MainWindow::SlotSliderPlayingPressed()
 {
-    mSliderPlayingPreempted = true;
+    m_SliderPlayingPreempted = true;
 }
 
 void MainWindow::SlotSliderPlayingReleased()
 {
-    mSliderPlayingPreempted = false;
+    m_SliderPlayingPreempted = false;
 }
 
 void MainWindow::SlotSliderPlayingValueChanged(int val)
 {
-    if (!mSliderPlayingPreempted)
+    if (!m_SliderPlayingPreempted)
         return;
 
-    uint64_t ms = (double)val / ui->sliderPlaying->maximum() * m_Player->GetRangeDuration();
+    uint64_t ms = (double)val / m_FrmToolBar.GetSliderPlaying()->maximum() * m_Player->GetRangeDuration();
     m_Player->Seek(m_Player->GetRangeBegin() + ms);
 }
 
 void MainWindow::SlotBarPlayListMidClick(int index)
 {
-    SimplePlayListView* view = (SimplePlayListView*)mWidgetPlayList->widget(index);
-    mWidgetPlayList->removeTab(index);
+    SimplePlaylistView* view = (SimplePlaylistView*)m_TabWidgetPlaylist->widget(index);
+    m_TabWidgetPlaylist->removeTab(index);
 
     disconnect(view, 0, this, 0);
 
     delete view;
 
-    mBarPlayList->setFocus();
+    m_TabBarPlaylist->setFocus();
 }
 
 void MainWindow::SlotWidgetPlayListDoubleClick()
 {
-    SimplePlayListView* view = new SimplePlayListView(this);
-    view->setMediaLoader(m_MediaLoader);
+    SimplePlaylistView* view = new SimplePlaylistView(this);
+    view->SetMediaLoader(m_MediaLoader);
 
-    connect(view, SIGNAL(sigPlayMediaItem(IPlayListView*, const mous::MediaItem*)),
-            this, SLOT(SlotPlayMediaItem(IPlayListView*, const mous::MediaItem*)));
-    connect(view, SIGNAL(sigConvertMediaItem(const mous::MediaItem*)),
+    connect(view, SIGNAL(SigPlayMediaItem(IPlaylistView*, const mous::MediaItem*)),
+            this, SLOT(SlotPlayMediaItem(IPlaylistView*, const mous::MediaItem*)));
+    connect(view, SIGNAL(SigConvertMediaItem(const mous::MediaItem*)),
             this, SLOT(SlotConvertMediaItem(const mous::MediaItem*)));
-    connect(view, SIGNAL(sigConvertMediaItems(QList<const mous::MediaItem*>)),
+    connect(view, SIGNAL(SigConvertMediaItems(QList<const mous::MediaItem*>)),
             this, SLOT(SlotConvertMediaItems(QList<const mous::MediaItem*>)));
 
-    mWidgetPlayList->addTab(view, QString::number(mWidgetPlayList->count()));
-    mWidgetPlayList->setCurrentIndex(mWidgetPlayList->count()-1);
+    m_TabWidgetPlaylist->addTab(view, QString::number(m_TabWidgetPlaylist->count()));
+    m_TabWidgetPlaylist->setCurrentIndex(m_TabWidgetPlaylist->count()-1);
 }
 
-void MainWindow::SlotPlayMediaItem(IPlayListView *view, const MediaItem *item)
+void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
 {
     if (m_Player->GetStatus() == PlayerStatus::Playing) {
         m_Player->Close();
@@ -287,7 +296,7 @@ void MainWindow::SlotPlayMediaItem(IPlayListView *view, const MediaItem *item)
         m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
     else
         m_Player->Play();
-    ui->btnPlay->setIcon(mIconPaused);
+    m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPaused);
 
     setWindowTitle(QString::fromUtf8(item->tag.title.c_str()));
 

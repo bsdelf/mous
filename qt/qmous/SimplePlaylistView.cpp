@@ -1,4 +1,4 @@
-#include "SimplePlayListView.h"
+#include "SimplePlaylistView.h"
 #include <QtCore>
 #include <QtGui>
 #include <util/MediaItem.h>
@@ -10,7 +10,7 @@ using namespace std;
 using namespace sqt;
 using namespace mous;
 
-SimplePlayListView::SimplePlayListView(QWidget *parent) :
+SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
     m_MediaLoader(NULL)
 {
@@ -23,44 +23,44 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
 
     // Action append
     action = new QAction(tr("Append"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotAppend()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotAppend()));
     actionList << action;
 
     // Action remove
     action = new QAction(tr("Remove"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotRemove()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotRemove()));
     actionList << action;
 
     // Action copy
     action = new QAction(tr("Copy"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotCopy()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotCopy()));
     actionList << action;
 
     // Action cut
     action = new QAction(tr("Cut"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotCut()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotCut()));
     actionList << action;
 
     // Action paste
     action = new QAction(tr("Paste"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotPaste()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotPaste()));
     actionList << action;
 
     actionList << new QAction(this);
 
     // Action tagging
     action = new QAction(tr("Tagging"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotTagging()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotTagging()));
     actionList << action;
 
     // Action convert
     action = new QAction(tr("Convert"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotConvert()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotConvert()));
     actionList << action;
 
     // Action properties
     action = new QAction(tr("Properties"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotProperties()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotProperties()));
     actionList << action;
 
     actionList << new QAction(this);
@@ -73,15 +73,15 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
 
     action = new QAction(tr("Load"), this);
     menu->addAction(action);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotPlaylistLoad()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotPlaylistLoad()));
 
     action = new QAction(tr("Rename"), this);
     menu->addAction(action);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotPlaylistRename()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotPlaylistRename()));
 
     action = new QAction(tr("Save As"), this);
     menu->addAction(action);
-    connect(action, SIGNAL(triggered()), this, SLOT(slotPlaylistSaveAs()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotPlaylistSaveAs()));
 
     // Action play mode menu
     action = new QAction(tr("Play Mode"), this);
@@ -153,7 +153,7 @@ SimplePlayListView::SimplePlayListView(QWidget *parent) :
     //connect(&m_PickMediaItemTimer, SIGNAL(timeout()), this, SLOT(SlotPickMediaItem()));
 }
 
-SimplePlayListView::~SimplePlayListView()
+SimplePlaylistView::~SimplePlaylistView()
 {
     QList<QAction*> actionList = actions();
     while (!actionList.isEmpty()) {
@@ -179,12 +179,12 @@ SimplePlayListView::~SimplePlayListView()
 }
 
 /* IPlayListView interfaces */
-void SimplePlayListView::setMediaLoader(const IMediaLoader* loader)
+void SimplePlaylistView::SetMediaLoader(const IMediaLoader* loader)
 {
     m_MediaLoader = loader;
 }
 
-const MediaItem* SimplePlayListView::getNextItem() const
+const MediaItem* SimplePlaylistView::GetNextItem() const
 {
     MediaItem* item = NULL;
     if (m_Playlist.SeqCurrent(item, 1)) {
@@ -194,7 +194,7 @@ const MediaItem* SimplePlayListView::getNextItem() const
     return item;
 }
 
-const MediaItem* SimplePlayListView::getPreviousItem() const
+const MediaItem* SimplePlaylistView::GetPreviousItem() const
 {
     MediaItem* item = NULL;
     if (m_Playlist.SeqCurrent(item, -1)) {
@@ -204,12 +204,12 @@ const MediaItem* SimplePlayListView::getPreviousItem() const
     return NULL;
 }
 
-size_t SimplePlayListView::getItemCount() const
+size_t SimplePlaylistView::GetItemCount() const
 {
     return m_Playlist.GetItemCount();
 }
 
-void SimplePlayListView::mouseDoubleClickEvent(QMouseEvent * event)
+void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
 {
     QTreeView::mouseDoubleClickEvent(event);
 
@@ -223,11 +223,11 @@ void SimplePlayListView::mouseDoubleClickEvent(QMouseEvent * event)
     MediaItem* item = NULL;
     m_Playlist.SeqCurrent(item);
 
-    emit sigPlayMediaItem(this, item);
+    emit SigPlayMediaItem(this, item);
 }
 
 /* Action menus */
-void SimplePlayListView::slotAppend()
+void SimplePlaylistView::SlotAppend()
 {
     // Get media path
     QString oldPath("~");
@@ -241,36 +241,36 @@ void SimplePlayListView::slotAppend()
         return;
 
     m_OldMediaPath = pathList.first();
-    scx::Function<void (const QStringList&)> fn(&SimplePlayListView::LoadMediaItem, this);
+    scx::Function<void (const QStringList&)> fn(&SimplePlaylistView::LoadMediaItem, this);
     m_LoadMediaThread.Run(fn, pathList);
 }
 
-void SimplePlayListView::slotRemove()
+void SimplePlaylistView::SlotRemove()
 {
 
 }
 
-void SimplePlayListView::slotCopy()
+void SimplePlaylistView::SlotCopy()
 {
 
 }
 
-void SimplePlayListView::slotCut()
+void SimplePlaylistView::SlotCut()
 {
 
 }
 
-void SimplePlayListView::slotPaste()
+void SimplePlaylistView::SlotPaste()
 {
 
 }
 
-void SimplePlayListView::slotTagging()
+void SimplePlaylistView::SlotTagging()
 {
 
 }
 
-void SimplePlayListView::slotConvert()
+void SimplePlaylistView::SlotConvert()
 {
     if (m_Playlist.Empty())
         return;
@@ -280,30 +280,30 @@ void SimplePlayListView::slotConvert()
 
     MediaItem* item = m_Playlist.GetItem(index.row());;
 
-    emit sigConvertMediaItem(item);
+    emit SigConvertMediaItem(item);
 }
 
-void SimplePlayListView::slotProperties()
+void SimplePlaylistView::SlotProperties()
 {
 
 }
 
-void SimplePlayListView::slotPlaylistLoad()
+void SimplePlaylistView::SlotPlaylistLoad()
 {
 
 }
 
-void SimplePlayListView::slotPlaylistRename()
+void SimplePlaylistView::SlotPlaylistRename()
 {
 
 }
 
-void SimplePlayListView::slotPlaylistSaveAs()
+void SimplePlaylistView::SlotPlaylistSaveAs()
 {
 
 }
 
-void SimplePlayListView::SlotReadyToLoad()
+void SimplePlaylistView::SlotReadyToLoad()
 {
     setUpdatesEnabled(false);
 
@@ -313,13 +313,13 @@ void SimplePlayListView::SlotReadyToLoad()
 }
 
 
-void SimplePlayListView::SlotLoadFinished()
+void SimplePlaylistView::SlotLoadFinished()
 {
     setUpdatesEnabled(true);
     m_DlgLoadingMedia.hide();
 }
 
-void SimplePlayListView::SlotMediaRowGot(MediaRow* mediaRow)
+void SimplePlaylistView::SlotMediaRowGot(MediaRow* mediaRow)
 {
     /*
     if (m_TmpLoadList.isEmpty()) {
@@ -345,7 +345,7 @@ void SimplePlayListView::SlotMediaRowGot(MediaRow* mediaRow)
     m_StModel.appendRow(mediaRow->row);
 }
 
-void SimplePlayListView::LoadMediaItem(const QStringList& pathList)
+void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
 {
     m_LoadFinished = false;
     m_TmpLoadList.clear();

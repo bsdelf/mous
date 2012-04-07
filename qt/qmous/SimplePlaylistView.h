@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <QtGui>
 #include <deque>
-#include "IPlayListView.h"
+#include "IPlaylistView.h"
 #include "DlgLoadingMedia.h"
 #include <util/Playlist.h>
 #include <scx/Thread.hpp>
@@ -14,25 +14,25 @@ namespace mous {
 }
 
 
-class SimplePlayListView : public QTreeView, public IPlayListView
+class SimplePlaylistView : public QTreeView, public IPlaylistView
 {
     Q_OBJECT
 public:
-    explicit SimplePlayListView(QWidget *parent = 0);
+    explicit SimplePlaylistView(QWidget *parent = 0);
 
 public:
-    virtual ~SimplePlayListView();
+    virtual ~SimplePlaylistView();
 
-    virtual void setMediaLoader(const mous::IMediaLoader* loader);
+    virtual void SetMediaLoader(const mous::IMediaLoader* loader);
 
-    virtual const mous::MediaItem* getNextItem() const;
-    virtual const mous::MediaItem* getPreviousItem() const;
-    virtual size_t getItemCount() const;
+    virtual const mous::MediaItem* GetNextItem() const;
+    virtual const mous::MediaItem* GetPreviousItem() const;
+    virtual size_t GetItemCount() const;
 
 signals:
-    void sigPlayMediaItem(IPlayListView *view, const mous::MediaItem* item);
-    void sigConvertMediaItem(const mous::MediaItem* item);
-    void sigConvertMediaItems(QList<const mous::MediaItem*> items);
+    void SigPlayMediaItem(IPlaylistView *view, const mous::MediaItem* item);
+    void SigConvertMediaItem(const mous::MediaItem* item);
+    void SigConvertMediaItems(QList<const mous::MediaItem*> items);
 
 private:
     struct MediaRow
@@ -45,20 +45,20 @@ private:
     void mouseDoubleClickEvent(QMouseEvent * event);
 
 private slots:
-    void slotAppend();
-    void slotRemove();
+    void SlotAppend();
+    void SlotRemove();
 
-    void slotCopy();
-    void slotCut();
-    void slotPaste();
+    void SlotCopy();
+    void SlotCut();
+    void SlotPaste();
 
-    void slotTagging();
-    void slotConvert();
-    void slotProperties();
+    void SlotTagging();
+    void SlotConvert();
+    void SlotProperties();
 
-    void slotPlaylistLoad();
-    void slotPlaylistRename();
-    void slotPlaylistSaveAs();
+    void SlotPlaylistLoad();
+    void SlotPlaylistRename();
+    void SlotPlaylistSaveAs();
 
     void SlotReadyToLoad();
     void SlotLoadFinished();
