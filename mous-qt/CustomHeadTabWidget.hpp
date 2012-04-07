@@ -11,10 +11,10 @@ class CustomHeadTabWidget: public QTabWidget
 
 public:
     CustomHeadTabWidget(QWidget * parent = 0);
-    void setTabBar(QTabBar* tb);
+    void SetTabBar(QTabBar* tb);
 
 signals:
-    void sigDoubleClick();
+    void SigDoubleClick();
 
 private:
     void mouseDoubleClickEvent(QMouseEvent* evt);

@@ -105,7 +105,7 @@ void MainWindow::initMyUi()
     // PlayList View
     m_TabBarPlaylist = new MidClickTabBar(this);
     m_TabWidgetPlaylist = new CustomHeadTabWidget(this);
-    m_TabWidgetPlaylist->setTabBar(m_TabBarPlaylist);
+    m_TabWidgetPlaylist->SetTabBar(m_TabBarPlaylist);
     m_TabWidgetPlaylist->setMovable(true);
     ui->layoutPlaylist->addWidget(m_TabWidgetPlaylist);
 
@@ -143,7 +143,7 @@ void MainWindow::initQtSlots()
     connect(m_FrmToolBar.GetSliderPlaying(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderPlayingValueChanged(int)));
 
     connect(m_TabBarPlaylist, SIGNAL(SigMidClick(int)), this, SLOT(SlotBarPlayListMidClick(int)));
-    connect(m_TabWidgetPlaylist, SIGNAL(sigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
+    connect(m_TabWidgetPlaylist, SIGNAL(SigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
 }
 
 void MainWindow::formatTime(QString& str, int ms)

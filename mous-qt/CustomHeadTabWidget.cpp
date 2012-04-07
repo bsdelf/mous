@@ -9,7 +9,7 @@ CustomHeadTabWidget::CustomHeadTabWidget(QWidget *parent):
 
 }
 
-void CustomHeadTabWidget::setTabBar(QTabBar *tb)
+void CustomHeadTabWidget::SetTabBar(QTabBar *tb)
 {
     QTabWidget::setTabBar(tb);
 }
@@ -19,5 +19,5 @@ void CustomHeadTabWidget::mouseDoubleClickEvent(QMouseEvent* evt)
     QTabWidget::mouseDoubleClickEvent(evt);
 
     if (!tabBar()->underMouse())
-        emit sigDoubleClick();
+        emit SigDoubleClick();
 }
