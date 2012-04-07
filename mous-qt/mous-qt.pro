@@ -6,10 +6,10 @@
 
 QT       += core gui
 
-TARGET = qmous
+TARGET = mous-qt
 TEMPLATE = app
 
-INCLUDEPATH += ../../sdk
+INCLUDEPATH += ../sdk
 LIBS += -L./ -Wl,-rpath,./ -lMousCore
 
 SOURCES += main.cpp\
@@ -48,7 +48,7 @@ FORMS    += MainWindow.ui \
     FrmToolBar.ui \
     FrmTagEditor.ui
 
-TRANSLATIONS = QMous.ts
+TRANSLATIONS = mous-qt.ts
 
 RESOURCES += \
     AllRes.qrc

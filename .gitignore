@@ -1,4 +1,5 @@
 build
+build*
 *.session
 *.swp
 *.pro.user

@@ -34,7 +34,7 @@ endif()
 
 #==== Optional ====#
 option(EnablePluginOssRenderer "OSS Output" on)
-option(EnablePluginAlsaRenderer "ALSA output" on)
+option(EnablePluginAlsaRenderer "ALSA output" off)
 
 option(EnablePluginWavDecoder "WAV Decoder" on)
 option(EnablePluginWavEncoder "WAV Encoder" on)
@@ -81,7 +81,7 @@ else()
 endif()
 
 # mous-cli
-file(GLOB_RECURSE EXE_MOUS_CLI cli/*)
+file(GLOB_RECURSE EXE_MOUS_CLI mous-cli/*)
 add_executable(mous-cli ${EXE_MOUS_CLI})
 if (IS_FREEBSD)
     target_link_libraries(mous-cli MousCore CharsetConv)
