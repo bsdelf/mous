@@ -6,6 +6,7 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FrmTagEditor),
     factory(NULL),
+    m_CurrentParser(NULL),
     m_LabelImage(NULL)
 {
     ui->setupUi(this);
@@ -15,11 +16,25 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     ui->scrollAreaCover->setWidget(m_LabelImage);
     ui->scrollAreaCover->setWidgetResizable(true);
 
-    ui->treeTags->setRootIsDecorated(false);
-    ui->treeTags->setHeaderHidden(true);
-    ui->treeTags->setUniformRowHeights(true);
-
     //ShowBottomBtns(false);
+    ui->tableTag->horizontalHeader()->setStretchLastSection(true);
+    ui->tableTag->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    ui->tableTag->setColumnCount(2);
+    ui->tableTag->setRowCount(7);
+    QList<QString> heads;
+    heads << tr("Album") << tr("Title") << tr("Artist")
+          << tr("Genre") << tr("Year") << tr("Track") << tr("Comment");
+    for (int i = 0; i < heads.size(); ++i) {
+        QTableWidgetItem* key = new QTableWidgetItem(heads[i]);
+        ui->tableTag->setItem(i, 0, key);
+        key->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
+
+        QTableWidgetItem* val = new QTableWidgetItem("");
+        ui->tableTag->setItem(i, 1, val);
+        val->setFlags(val->flags() | Qt::ItemIsEditable);
+
+        ui->tableTag->setRowHeight(i, 22);
+    }
 
     connect(ui->btnSave, SIGNAL(clicked()), this, SLOT(SlotBtnSave()));
     connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(SlotBtnCancel()));
@@ -34,6 +49,10 @@ FrmTagEditor::~FrmTagEditor()
 
 void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *_factory)
 {
+    if (_factory == NULL && factory != NULL && m_CurrentParser != NULL) {
+        m_CurrentParser->Close();
+        factory->FreeParser(m_CurrentParser);
+    }
     factory = _factory;
 }
 
@@ -42,20 +61,26 @@ void FrmTagEditor::ShowFileTag(const std::string &fileName)
     if (factory == NULL)
         return;
 
-    ITagParser* parser = factory->CreateParser(fileName);
-    if (parser == NULL) return;
+    if (m_CurrentParser != NULL) {
+        m_CurrentParser->Close();
+        factory->FreeParser(m_CurrentParser);
+    }
+    m_CurrentParser = factory->CreateParser(fileName);
+    if (m_CurrentParser == NULL) {
+        return;
+    }
+    m_CurrentParser->Open(fileName);
+    UpdateTag();
+
     char* buf = NULL; size_t len = 0;
-    parser->Open(fileName);
-    parser->DumpCoverArt(buf, len);
-    parser->Close();
-    factory->FreeParser(parser);
+    m_CurrentParser->DumpCoverArt(buf, len);
 
     qDebug() << fileName.c_str();
     qDebug() << "cover art size:" << len;
 
     if (buf != NULL && len != 0) {
         if (m_CurrentImage.loadFromData((const uchar *)buf, (uint)len)) {
-            UpdateImage();
+            UpdateCoverArt();
             ui->scrollAreaCover->show();
         } else {
             delete[] buf;
@@ -84,10 +109,30 @@ void FrmTagEditor::SlotBtnCancel()
 
 void FrmTagEditor::SlotSplitterMoved(int pos, int index)
 {
-    UpdateImage();
+    UpdateCoverArt();
 }
 
-void FrmTagEditor::UpdateImage()
+void FrmTagEditor::UpdateTag()
+{
+    if (m_CurrentParser == NULL)
+        return;
+
+    QList<QTableWidgetItem*> valList;
+    for (int i = 0; i < ui->tableTag->rowCount(); ++i) {
+        QTableWidgetItem* val = ui->tableTag->item(i, 1);
+        valList << val;
+    }
+
+    valList[0]->setText(QString::fromUtf8(m_CurrentParser->GetAlbum().c_str()));
+    valList[1]->setText(QString::fromUtf8(m_CurrentParser->GetTitle().c_str()));
+    valList[2]->setText(QString::fromUtf8(m_CurrentParser->GetArtist().c_str()));
+    valList[3]->setText(QString::fromUtf8(m_CurrentParser->GetGenre().c_str()));
+    valList[4]->setText(QString::number(m_CurrentParser->GetYear()));
+    valList[5]->setText(QString::number(m_CurrentParser->GetTrack()));
+    valList[6]->setText(QString::fromUtf8(m_CurrentParser->GetComment().c_str()));
+}
+
+void FrmTagEditor::UpdateCoverArt()
 {
     if (m_CurrentImage.isNull() || m_LabelImage == NULL)
         return;
@@ -103,5 +148,5 @@ void FrmTagEditor::resizeEvent(QResizeEvent *event)
     QWidget::resizeEvent(event);
 
     if (event->size() != event->oldSize())
-        UpdateImage();
+        UpdateCoverArt();
 }

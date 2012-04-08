@@ -21,9 +21,9 @@ MainWindow::MainWindow(QWidget *parent) :
     m_SliderPlayingPreempted(false)
 {
     ui->setupUi(this);    
-    initMousCore();
-    initMyUi();
-    initQtSlots();
+    InitMousCore();
+    InitMyUi();
+    InitQtSlots();
 }
 
 MainWindow::~MainWindow()
@@ -41,10 +41,10 @@ MainWindow::~MainWindow()
 
     delete ui;
 
-    clearMousCore();
+    ClearMousCore();
 }
 
-void MainWindow::initMousCore()
+void MainWindow::InitMousCore()
 {
     m_PluginManager = IPluginManager::Create();
     m_MediaLoader = IMediaLoader::Create();
@@ -88,8 +88,11 @@ void MainWindow::initMousCore()
     qDebug() << ">> Renderer count:" << rendererAgentList.size();
 }
 
-void MainWindow::clearMousCore()
+void MainWindow::ClearMousCore()
 {
+    m_Player->SigFinished()->DisconnectReceiver(this);
+    m_FrmTagEditor.SetTagParserFactory(NULL);
+
     m_Player->UnregisterAll();
     m_MediaLoader->UnregisterAll();
     m_ConvFactory->UnregisterAll();
@@ -103,7 +106,7 @@ void MainWindow::clearMousCore()
     ITagParserFactory::Free(m_ParserFactory);
 }
 
-void MainWindow::initMyUi()
+void MainWindow::InitMyUi()
 {
     // Playing & Paused icon
     m_IconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
@@ -140,7 +143,7 @@ void MainWindow::initMyUi()
     setContextMenuPolicy(Qt::NoContextMenu);
 }
 
-void MainWindow::initQtSlots()
+void MainWindow::InitQtSlots()
 {
     connect(m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
 
@@ -156,7 +159,7 @@ void MainWindow::initQtSlots()
     connect(m_TabWidgetPlaylist, SIGNAL(SigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
 }
 
-void MainWindow::formatTime(QString& str, int ms)
+void MainWindow::FormatTime(QString& str, int ms)
 {
     int sec = ms/1000;
     str.sprintf("%.2d:%.2d", (int)(sec/60), (int)(sec%60));

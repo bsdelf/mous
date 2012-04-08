@@ -36,12 +36,12 @@ public:
     ~MainWindow();
 
 private:
-    void initMyUi();
-    void initMousCore();
-    void clearMousCore();
-    void initQtSlots();
+    void InitMyUi();
+    void InitMousCore();
+    void ClearMousCore();
+    void InitQtSlots();
 
-    void formatTime(QString& str, int ms);
+    void FormatTime(QString& str, int ms);
 
 private:
     void SlotPlayerStopped();

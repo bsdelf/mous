@@ -23,7 +23,8 @@ public:
 
 private:
     void ShowBottomBtns(bool show);
-    void UpdateImage();
+    void UpdateTag();
+    void UpdateCoverArt();
     void resizeEvent(QResizeEvent * event);
 
 private slots:
@@ -33,8 +34,9 @@ private slots:
 
 private:
     Ui::FrmTagEditor *ui;
-    const mous::ITagParserFactory* factory;
 
+    const mous::ITagParserFactory* factory;
+    mous::ITagParser* m_CurrentParser;
     QPixmap m_CurrentImage;
     QLabel* m_LabelImage;
     //QPixmap img;
