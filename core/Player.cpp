@@ -27,11 +27,9 @@ Player::Player():
     m_StopDecoder(false),
     m_SuspendDecoder(true),
     m_Decoder(NULL),
-    m_SemWakeDecoder(SemVar(0, 0)),
     m_StopRenderer(false),
     m_SuspendRenderer(true),
     m_Renderer(NULL),
-    m_SemWakeRenderer(SemVar(0, 0)),
     m_UnitBeg(0),
     m_UnitEnd(0),
     m_DecoderIndex(0),
@@ -41,9 +39,9 @@ Player::Player():
 {
     m_UnitBuffers.AllocBuffer(5);
 
-    m_ThreadForDecoder.Run(Function<void (void)>(&Player::WorkForDecoder, this));
+    m_ThreadForDecoder.Run(Function<void (void)>(&Player::ThDoDecoder, this));
 
-    m_ThreadForRenderer.Run(Function<void (void)>(&Player::WorkForRenderer, this));
+    m_ThreadForRenderer.Run(Function<void (void)>(&Player::ThDoRenderer, this));
 }
 
 Player::~Player()
@@ -313,9 +311,10 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
     m_SuspendRenderer = false;
     m_SemWakeRenderer.Post();
-
     m_SuspendDecoder = false;
     m_SemWakeDecoder.Post();
+    m_SemRendererBegin.Wait();
+    m_SemDecoderBegin.Wait();
 
     m_Status = PlayerStatus::Playing;
 }
@@ -329,15 +328,17 @@ void Player::Pause()
         m_SuspendRenderer = true;
         m_UnitBuffers.RecycleFree(NULL);
     }
-    m_MutexRendererSuspended.Lock();
-    m_MutexRendererSuspended.Unlock();
+    //m_MutexRendererSuspended.Lock();
+    //m_MutexRendererSuspended.Unlock();
+    m_SemRendererEnd.Wait();
 
     if (!m_SuspendDecoder) {
         m_SuspendDecoder = true;
         m_UnitBuffers.RecycleData(NULL);
     }
-    m_MutexDecoderSuspended.Lock();
-    m_MutexDecoderSuspended.Unlock();
+    //m_MutexDecoderSuspended.Lock();
+    //m_MutexDecoderSuspended.Unlock();
+    m_SemDecoderEnd.Wait();
 
     m_UnitBuffers.ResetPV();
 
@@ -352,9 +353,11 @@ void Player::Resume()
     m_UnitBuffers.ResetPV();
 
     m_SuspendRenderer = false;
-    m_SuspendDecoder = false;
     m_SemWakeRenderer.Post();
+    m_SuspendDecoder = false;
     m_SemWakeDecoder.Post();
+    m_SemRendererBegin.Wait();
+    m_SemDecoderBegin.Wait();
 
     m_Status = PlayerStatus::Playing;
 }
@@ -385,7 +388,22 @@ void Player::SeekPercent(double percent)
         unit = m_UnitBeg;
     if (unit > m_UnitEnd)
         unit = m_UnitEnd;
-    DoSeekUnit(unit);
+
+    switch (m_Status) {
+        case PlayerStatus::Playing:
+            Pause();
+            DoSeekUnit(unit);
+            Resume();
+            break;
+
+        case PlayerStatus::Paused:
+        case PlayerStatus::Stopped:
+            DoSeekUnit(unit);
+            break;
+
+        default:
+            break;
+    }
 }
 
 void Player::DoSeekTime(uint64_t msPos)
@@ -482,14 +500,17 @@ const Signal<void (void)>* Player::SigFinished() const
     return &m_SigFinished;
 }
 
-void Player::WorkForDecoder()
+void Player::ThDoDecoder()
 {
     while (true) {
         m_SemWakeDecoder.Wait();
         if (m_StopDecoder)
             break;
 
-        m_MutexDecoderSuspended.Lock();
+        m_SemDecoderBegin.Clear();
+        m_SemDecoderEnd.Clear();
+
+        m_SemDecoderBegin.Post();
 
         for (UnitBuffer* buf = NULL; ; ) {
             buf = m_UnitBuffers.TakeFree();
@@ -509,18 +530,21 @@ void Player::WorkForDecoder()
             }
         }
 
-        m_MutexDecoderSuspended.Unlock();
+        m_SemDecoderEnd.Post();
     };
 }
 
-void Player::WorkForRenderer()
+void Player::ThDoRenderer()
 {
     while (true) {
         m_SemWakeRenderer.Wait();
         if (m_StopRenderer)
             break;
 
-        m_MutexRendererSuspended.Lock();
+        m_SemRendererBegin.Clear();
+        m_SemRendererEnd.Clear();
+
+        m_SemRendererBegin.Post();
 
         for (UnitBuffer* buf = NULL; ; ) {
             //cout << m_UnitBuffers->GetDataCount() << flush;
@@ -541,7 +565,7 @@ void Player::WorkForRenderer()
             }
         }
 
-        m_MutexRendererSuspended.Unlock();
+        m_SemRendererEnd.Post();
 
         if (m_RendererIndex >= m_UnitEnd) {
             m_Status = PlayerStatus::Stopped;

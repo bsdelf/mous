@@ -6,7 +6,6 @@
 #include <core/IPlayer.h>
 #include <scx/LPVBuffer.hpp>
 #include <scx/Signal.hpp>
-#include <scx/Mutex.hpp>
 #include <scx/SemVar.hpp>
 #include <scx/Thread.hpp>
 using namespace std;
@@ -77,8 +76,9 @@ private:
     void PlayRange(uint64_t beg, uint64_t end);
     inline void DoSeekTime(uint64_t msPos);
     inline void DoSeekUnit(uint64_t unit);
-    void WorkForDecoder();
-    void WorkForRenderer();
+
+    void ThDoDecoder();
+    void ThDoRenderer();
 
 private:
     struct UnitBuffer
@@ -122,14 +122,16 @@ private:
     IDecoder* m_Decoder;
     scx::Thread m_ThreadForDecoder;
     scx::SemVar m_SemWakeDecoder;
-    scx::Mutex m_MutexDecoderSuspended;
+    scx::SemVar m_SemDecoderBegin;
+    scx::SemVar m_SemDecoderEnd;
 
     bool m_StopRenderer;
     bool m_SuspendRenderer;
     IRenderer* m_Renderer;
     scx::Thread m_ThreadForRenderer;
     scx::SemVar m_SemWakeRenderer;
-    scx::Mutex m_MutexRendererSuspended;
+    scx::SemVar m_SemRendererBegin;
+    scx::SemVar m_SemRendererEnd;
 
     scx::LPVBuffer<UnitBuffer> m_UnitBuffers;
 

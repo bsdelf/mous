@@ -8,7 +8,12 @@ namespace scx {
 class SemVar
 {
 public:
-    explicit SemVar(int pshared, int value)
+    explicit SemVar(int value = 0)
+    {
+        sem_init(&m_Sem, 0, value);
+    }
+
+    SemVar(int pshared, int value)
     {
         sem_init(&m_Sem, pshared, value);
     }
