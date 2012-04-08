@@ -39,9 +39,9 @@ Player::Player():
 {
     m_UnitBuffers.AllocBuffer(5);
 
-    m_ThreadForDecoder.Run(Function<void (void)>(&Player::ThDoDecoder, this));
+    m_ThreadForDecoder.Run(Function<void (void)>(&Player::ThDecoder, this));
 
-    m_ThreadForRenderer.Run(Function<void (void)>(&Player::ThDoRenderer, this));
+    m_ThreadForRenderer.Run(Function<void (void)>(&Player::ThRenderer, this));
 }
 
 Player::~Player()
@@ -500,7 +500,7 @@ const Signal<void (void)>* Player::SigFinished() const
     return &m_SigFinished;
 }
 
-void Player::ThDoDecoder()
+void Player::ThDecoder()
 {
     while (true) {
         m_SemWakeDecoder.Wait();
@@ -534,7 +534,7 @@ void Player::ThDoDecoder()
     };
 }
 
-void Player::ThDoRenderer()
+void Player::ThRenderer()
 {
     while (true) {
         m_SemWakeRenderer.Wait();
@@ -567,9 +567,16 @@ void Player::ThDoRenderer()
 
         m_SemRendererEnd.Post();
 
-        if (m_RendererIndex >= m_UnitEnd) {
-            m_Status = PlayerStatus::Stopped;
-            m_SigFinished();
-        }
+        scx::Thread th;
+        th.Run(Function<void (void)>(&Player::ThPostSigFinished, this));
+        th.Detach();
+    }
+}
+
+void Player::ThPostSigFinished()
+{
+    if (m_RendererIndex >= m_UnitEnd) {
+        m_Status = PlayerStatus::Stopped;
+        m_SigFinished();
     }
 }
