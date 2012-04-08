@@ -262,8 +262,8 @@ void MainWindow::SlotSliderPlayingValueChanged(int val)
     if (!m_SliderPlayingPreempted)
         return;
 
-    uint64_t ms = (double)val / m_FrmToolBar.GetSliderPlaying()->maximum() * m_Player->GetRangeDuration();
-    m_Player->Seek(m_Player->GetRangeBegin() + ms);
+    const double& percent = (double)val / m_FrmToolBar.GetSliderPlaying()->maximum();
+    m_Player->SeekPercent(percent);
 }
 
 void MainWindow::SlotBarPlayListMidClick(int index)

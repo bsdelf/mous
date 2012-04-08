@@ -14,8 +14,6 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     m_LabelImage->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     ui->scrollAreaCover->setWidget(m_LabelImage);
     ui->scrollAreaCover->setWidgetResizable(true);
-    //ui->scrollAreaCover->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //ui->scrollAreaCover->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     ui->treeTags->setRootIsDecorated(false);
     ui->treeTags->setHeaderHidden(true);
@@ -31,6 +29,7 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
 FrmTagEditor::~FrmTagEditor()
 {
     delete ui;
+    delete m_LabelImage;
 }
 
 void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *_factory)
