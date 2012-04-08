@@ -46,6 +46,7 @@ public:
     void Pause();
     void Resume();
     void Seek(uint64_t msPos);
+    void SeekPercent(double percent);
 
     int32_t GetBitRate() const;
     int32_t GetSamleRate() const;

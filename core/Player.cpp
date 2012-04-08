@@ -377,6 +377,16 @@ void Player::Seek(uint64_t msPos)
     }
 }
 
+void Player::SeekPercent(double percent)
+{
+    uint64_t pos = m_UnitBeg + (m_UnitEnd - m_UnitBeg) * percent;
+    if (pos < m_UnitBeg) 
+        pos = m_UnitBeg;
+    if (pos > m_UnitEnd)
+        pos = m_UnitEnd;
+    Seek(pos);
+}
+
 void Player::DoSeek(uint64_t msPos)
 {
     uint64_t unitPos = m_UnitPerMs * msPos;

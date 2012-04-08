@@ -60,6 +60,7 @@ public:
     virtual void Pause() = 0;
     virtual void Resume() = 0;
     virtual void Seek(uint64_t msPos) = 0;
+    virtual void SeekPercent(double percent) = 0;
 
     virtual int32_t GetBitRate() const = 0;
     virtual int32_t GetSamleRate() const = 0;
