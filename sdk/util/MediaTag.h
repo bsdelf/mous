@@ -1,5 +1,5 @@
-#ifndef MEDIATAG_H
-#define MEDIATAG_H
+#ifndef MOUS_MEDIATAG_H
+#define MOUS_MEDIATAG_H
 
 #include <string>
 #include <inttypes.h>
