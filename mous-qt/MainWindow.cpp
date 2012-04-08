@@ -165,6 +165,12 @@ void MainWindow::formatTime(QString& str, int ms)
 /* MousCore slots */
 void MainWindow::SlotPlayerStopped()
 {
+    QMetaObject::invokeMethod(this, "SlotUiPlayerStopped", Qt::QueuedConnection);
+}
+
+void MainWindow::SlotUiPlayerStopped()
+{
+
     qDebug() << "Stopped!";
     if (m_UsedPlaylistView != NULL) {
         const MediaItem* item = m_UsedPlaylistView->GetNextItem();

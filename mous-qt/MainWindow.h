@@ -45,6 +45,8 @@ private:
 
 private:
     void SlotPlayerStopped();
+private slots:
+    void SlotUiPlayerStopped();
 
 private slots:
     void SlotUpdateUi();
