@@ -45,7 +45,7 @@ public:
     void Play(uint64_t msBegin, uint64_t msEnd);
     void Pause();
     void Resume();
-    void Seek(uint64_t msPos);
+    void SeekTime(uint64_t msPos);
     void SeekPercent(double percent);
 
     int32_t GetBitRate() const;
@@ -75,7 +75,8 @@ private:
     void RemoveEventListener(const IPluginAgent* pAgent);
 
     void PlayRange(uint64_t beg, uint64_t end);
-    void DoSeek(uint64_t msPos);
+    inline void DoSeekTime(uint64_t msPos);
+    inline void DoSeekUnit(uint64_t unit);
     void WorkForDecoder();
     void WorkForRenderer();
 

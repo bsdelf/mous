@@ -1,6 +1,7 @@
 #include "Player.h"
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 #include <scx/Conv.hpp>
 #include <scx/FileHelper.hpp>
 #include <plugin/IDecoder.h>
@@ -358,18 +359,18 @@ void Player::Resume()
     m_Status = PlayerStatus::Playing;
 }
 
-void Player::Seek(uint64_t msPos)
+void Player::SeekTime(uint64_t msPos)
 {
     switch (m_Status) {
         case PlayerStatus::Playing:
             Pause();
-            DoSeek(msPos);
+            DoSeekTime(msPos);
             Resume();
             break;
 
         case PlayerStatus::Paused:
         case PlayerStatus::Stopped:
-            DoSeek(msPos);
+            DoSeekTime(msPos);
             break;
 
         default:
@@ -379,22 +380,25 @@ void Player::Seek(uint64_t msPos)
 
 void Player::SeekPercent(double percent)
 {
-    uint64_t pos = m_UnitBeg + (m_UnitEnd - m_UnitBeg) * percent;
-    if (pos < m_UnitBeg) 
-        pos = m_UnitBeg;
-    if (pos > m_UnitEnd)
-        pos = m_UnitEnd;
-    Seek(pos);
+    uint64_t unit = m_UnitBeg + (m_UnitEnd - m_UnitBeg) * percent;
+    if (unit < m_UnitBeg) 
+        unit = m_UnitBeg;
+    if (unit > m_UnitEnd)
+        unit = m_UnitEnd;
+    DoSeekUnit(unit);
 }
 
-void Player::DoSeek(uint64_t msPos)
+void Player::DoSeekTime(uint64_t msPos)
 {
-    uint64_t unitPos = m_UnitPerMs * msPos;
-    if (unitPos > m_Decoder->GetUnitCount())
-        unitPos = m_Decoder->GetUnitCount();
-    m_Decoder->SetUnitIndex(unitPos);
-    m_DecoderIndex = unitPos;
-    m_RendererIndex = unitPos;
+    uint64_t unitPos = std::min((uint64_t)(m_UnitPerMs*msPos), m_Decoder->GetUnitCount());
+    DoSeekUnit(unitPos);
+}
+
+void Player::DoSeekUnit(uint64_t unit)
+{
+    m_Decoder->SetUnitIndex(unit);
+    m_DecoderIndex = unit;
+    m_RendererIndex = unit;
 }
 
 int32_t Player::GetBitRate() const

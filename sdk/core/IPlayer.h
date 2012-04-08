@@ -59,7 +59,7 @@ public:
     virtual void Play(uint64_t msBegin, uint64_t msEnd) = 0;
     virtual void Pause() = 0;
     virtual void Resume() = 0;
-    virtual void Seek(uint64_t msPos) = 0;
+    virtual void SeekTime(uint64_t msPos) = 0;
     virtual void SeekPercent(double percent) = 0;
 
     virtual int32_t GetBitRate() const = 0;
