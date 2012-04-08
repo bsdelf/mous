@@ -138,13 +138,22 @@ void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
     pAgent->FreeObject(pDecoder);
 
     // find plugin
+    bool freedOnce = false;
     for (size_t i = 0; i < list.size(); ++i) {
         string suffix = ToLower(list[i]);
         DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
         if (iter != m_DecoderPluginMap.end()) {
             const DecoderPluginNode& node = iter->second;
             if (node.agent == pAgent) {
-                pAgent->FreeObject(node.decoder);
+                if (!freedOnce) {
+                    if (node.decoder == m_Decoder) {
+                        Pause();
+                        Close();
+                        m_Decoder = NULL;
+                    }
+                    pAgent->FreeObject(node.decoder);
+                    freedOnce = true;
+                }
                 m_DecoderPluginMap.erase(iter);
             }
         }
@@ -176,9 +185,7 @@ void Player::UnregisterAll()
 {
     while (!m_DecoderPluginMap.empty()) {
         DecoderPluginMapIter iter = m_DecoderPluginMap.begin();
-        const DecoderPluginNode& node = iter->second;
-        node.agent->FreeObject(node.decoder);
-        m_DecoderPluginMap.erase(iter);
+        RemoveDecoderPlugin(iter->second.agent);
     }
 
     UnsetRendererPlugin(m_RendererPlugin);
