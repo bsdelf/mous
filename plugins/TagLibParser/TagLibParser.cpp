@@ -1,5 +1,6 @@
 #include "TagLibParser.h"
 #include <stdlib.h>
+#include <string.h>
 #include <limits.h>
 #include <iostream>
 #include <scx/FileHelper.hpp>
