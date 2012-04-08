@@ -46,7 +46,7 @@ Player::Player():
 
 Player::~Player()
 {
-    Pause();
+    Close();
 
     m_StopDecoder = true;
     m_StopRenderer = true;
@@ -57,6 +57,8 @@ Player::~Player()
     m_ThreadForRenderer.Join();
 
     m_UnitBuffers.ClearBuffer();
+
+    UnregisterAll();
 }
 
 EmPlayerStatus Player::GetStatus() const
@@ -115,7 +117,7 @@ void Player::AddDecoderPlugin(const IPluginAgent* pAgent)
     // try add
     bool usedAtLeastOnce = false;
     for (size_t i = 0; i < list.size(); ++i) {
-        string suffix = ToLower(list[i]);
+        const string& suffix = ToLower(list[i]);
         DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
         if (iter == m_DecoderPluginMap.end()) {
             DecoderPluginNode node = { pAgent, pDecoder };
@@ -140,16 +142,14 @@ void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
     // find plugin
     bool freedOnce = false;
     for (size_t i = 0; i < list.size(); ++i) {
-        string suffix = ToLower(list[i]);
+        const string& suffix = ToLower(list[i]);
         DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
         if (iter != m_DecoderPluginMap.end()) {
             const DecoderPluginNode& node = iter->second;
             if (node.agent == pAgent) {
                 if (!freedOnce) {
                     if (node.decoder == m_Decoder) {
-                        Pause();
                         Close();
-                        m_Decoder = NULL;
                     }
                     pAgent->FreeObject(node.decoder);
                     freedOnce = true;
@@ -172,7 +172,7 @@ void Player::SetRendererPlugin(const IPluginAgent* pAgent)
 
 void Player::UnsetRendererPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent != m_RendererPlugin && m_RendererPlugin != NULL)
+    if (pAgent != m_RendererPlugin || m_RendererPlugin == NULL)
         return;
 
     m_Renderer->Close();
@@ -261,9 +261,14 @@ EmErrorCode Player::Open(const string& path)
 
 void Player::Close()
 {
+    if (m_Status == PlayerStatus::Closed)
+        return;
+
     Pause();
 
     m_Decoder->Close();
+    m_Decoder = NULL;
+
     m_Status = PlayerStatus::Closed;
 }
 
@@ -331,16 +336,12 @@ void Player::Pause()
         m_SuspendRenderer = true;
         m_UnitBuffers.RecycleFree(NULL);
     }
-    //m_MutexRendererSuspended.Lock();
-    //m_MutexRendererSuspended.Unlock();
     m_SemRendererEnd.Wait();
 
     if (!m_SuspendDecoder) {
         m_SuspendDecoder = true;
         m_UnitBuffers.RecycleData(NULL);
     }
-    //m_MutexDecoderSuspended.Lock();
-    //m_MutexDecoderSuspended.Unlock();
     m_SemDecoderEnd.Wait();
 
     m_UnitBuffers.ResetPV();
@@ -533,7 +534,7 @@ void Player::ThDecoder()
         }
 
         m_SemDecoderEnd.Post();
-    };
+    }
 }
 
 void Player::ThRenderer()
