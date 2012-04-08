@@ -147,10 +147,10 @@ private:
 
     const IPluginAgent* m_RendererPlugin;
 
-    std::map<std::string, DecoderPluginNode*> m_DecoderPluginMap;
-    typedef std::pair<std::string, DecoderPluginNode*> DecoderPluginMapPair;
-    typedef std::map<std::string, DecoderPluginNode*>::iterator DecoderPluginMapIter;
-    typedef std::map<std::string, DecoderPluginNode*>::const_iterator DecoderPluginMapConstIter;
+    std::map<std::string, DecoderPluginNode> m_DecoderPluginMap;
+    typedef std::pair<std::string, DecoderPluginNode> DecoderPluginMapPair;
+    typedef std::map<std::string, DecoderPluginNode>::iterator DecoderPluginMapIter;
+    typedef std::map<std::string, DecoderPluginNode>::const_iterator DecoderPluginMapConstIter;
 
     scx::Signal<void (void)> m_SigFinished;
 };

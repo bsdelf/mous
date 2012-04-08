@@ -118,9 +118,7 @@ void Player::AddDecoderPlugin(const IPluginAgent* pAgent)
         string suffix = ToLower(list[i]);
         DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
         if (iter == m_DecoderPluginMap.end()) {
-            DecoderPluginNode* node = new DecoderPluginNode;
-            node->agent = pAgent;
-            node->decoder = pDecoder;
+            DecoderPluginNode node = { pAgent, pDecoder };
             m_DecoderPluginMap.insert(DecoderPluginMapPair(suffix, node));
             usedAtLeastOnce = true;
         }
@@ -144,10 +142,9 @@ void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
         string suffix = ToLower(list[i]);
         DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
         if (iter != m_DecoderPluginMap.end()) {
-            DecoderPluginNode* node = iter->second;
-            if (node->agent == pAgent) {
-                pAgent->FreeObject(node->decoder);
-                delete node;
+            const DecoderPluginNode& node = iter->second;
+            if (node.agent == pAgent) {
+                pAgent->FreeObject(node.decoder);
                 m_DecoderPluginMap.erase(iter);
             }
         }
@@ -179,9 +176,8 @@ void Player::UnregisterAll()
 {
     while (!m_DecoderPluginMap.empty()) {
         DecoderPluginMapIter iter = m_DecoderPluginMap.begin();
-        DecoderPluginNode* node = iter->second;
-        node->agent->FreeObject(node->decoder);
-        delete node;
+        const DecoderPluginNode& node = iter->second;
+        node.agent->FreeObject(node.decoder);
         m_DecoderPluginMap.erase(iter);
     }
 
@@ -205,7 +201,7 @@ EmErrorCode Player::Open(const string& path)
     cout << "Suffix:" << suffix << endl;
     DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
     if (iter != m_DecoderPluginMap.end()) {
-        m_Decoder = iter->second->decoder;
+        m_Decoder = iter->second.decoder;
     } else {
         return ErrorCode::PlayerNoDecoder;
     }
@@ -472,11 +468,10 @@ bool Player::GetDecoderPluginOption(std::vector<PluginOption>& list) const
     DecoderPluginMapConstIter iter = m_DecoderPluginMap.begin();
     DecoderPluginMapConstIter end = m_DecoderPluginMap.end();
     for (; iter != end; ++iter) {
-        DecoderPluginNode* node = iter->second;
-
-        optionItem.pluginType = node->agent->GetType();
-        optionItem.pluginInfo = node->agent->GetInfo();
-        if (node->decoder->GetOptions(optionItem.options))
+        const DecoderPluginNode& node = iter->second;
+        optionItem.pluginType = node.agent->GetType();
+        optionItem.pluginInfo = node.agent->GetInfo();
+        if (node.decoder->GetOptions(optionItem.options))
             list.push_back(optionItem);
     }
 
