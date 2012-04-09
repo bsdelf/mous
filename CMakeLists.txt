@@ -34,6 +34,7 @@ endif()
 
 #==== Optional ====#
 option(EnablePluginOssRenderer "OSS Output" on)
+option(EnablePluginAoRenderer "AO output" on)
 option(EnablePluginAlsaRenderer "ALSA output" off)
 
 option(EnablePluginWavDecoder "WAV Decoder" on)
@@ -93,14 +94,21 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/plugins)
 
-# Oss plugin
+# OSS plugin
 if (EnablePluginOssRenderer)
     file(GLOB SRC_OSS_RENDERER plugins/OssRenderer/*)
     add_library(OssRenderer SHARED ${SRC_OSS_RENDERER})
     target_link_libraries(OssRenderer)
 endif()
 
-# Alsa plugin
+# AO plugin
+if (EnablePluginAoRenderer)
+    file(GLOB SRC_AO_RENDERER plugins/AoRenderer/*)
+    add_library(AoRenderer SHARED ${SRC_AO_RENDERER})
+    target_link_libraries(AoRenderer -lao)
+endif()
+
+# ALSA plugin
 if (EnablePluginAlsaRenderer)
     file(GLOB SRC_ALSA_RENDERER plugins/AlsaRenderer/*)
     add_library(AlsaRenderer SHARED ${SRC_ALSA_RENDERER})
