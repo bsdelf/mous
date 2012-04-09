@@ -570,9 +570,9 @@ void Player::ThRenderer()
 
         m_SemRendererEnd.Post();
 
-        scx::Thread th;
-        th.Run(Function<void (void)>(&Player::ThPostSigFinished, this));
-        th.Detach();
+        Function<void (void)> fn(&Player::ThPostSigFinished, this);
+        m_ThPostSigFinished.Run(fn);
+        m_ThPostSigFinished.Detach();
     }
 }
 

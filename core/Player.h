@@ -6,8 +6,14 @@
 #include <core/IPlayer.h>
 #include <scx/LPVBuffer.hpp>
 #include <scx/Signal.hpp>
-#include <scx/SemVar.hpp>
 #include <scx/Thread.hpp>
+
+#ifndef __MACH__
+#include <scx/SemVar.hpp>
+#else
+#include <scx/FakeSemVar.hpp>
+#endif
+
 using namespace std;
 
 namespace mous {
@@ -117,23 +123,29 @@ private:
     };
 
 private:
+#ifndef __MACH__
+    typedef scx::SemVar Semaphore;
+#else
+    typedef scx::FakeSemVar Semaphore;
+#endif
+
     EmPlayerStatus m_Status;
 
     bool m_StopDecoder;
     bool m_SuspendDecoder;
     IDecoder* m_Decoder;
     scx::Thread m_ThreadForDecoder;
-    scx::SemVar m_SemWakeDecoder;
-    scx::SemVar m_SemDecoderBegin;
-    scx::SemVar m_SemDecoderEnd;
+    Semaphore m_SemWakeDecoder;
+    Semaphore m_SemDecoderBegin;
+    Semaphore m_SemDecoderEnd;
 
     bool m_StopRenderer;
     bool m_SuspendRenderer;
     IRenderer* m_Renderer;
     scx::Thread m_ThreadForRenderer;
-    scx::SemVar m_SemWakeRenderer;
-    scx::SemVar m_SemRendererBegin;
-    scx::SemVar m_SemRendererEnd;
+    Semaphore m_SemWakeRenderer;
+    Semaphore m_SemRendererBegin;
+    Semaphore m_SemRendererEnd;
 
     scx::LPVBuffer<UnitBuffer> m_UnitBuffers;
 
@@ -152,6 +164,7 @@ private:
     typedef std::map<std::string, DecoderPluginNode>::iterator DecoderPluginMapIter;
     typedef std::map<std::string, DecoderPluginNode>::const_iterator DecoderPluginMapConstIter;
 
+    scx::Thread m_ThPostSigFinished;
     scx::Signal<void (void)> m_SigFinished;
 };
 
