@@ -2,7 +2,11 @@
 #define SCX_LPVBUFFER_HPP
 
 #include "Mutex.hpp"
+#ifndef __MACH__
 #include "SemVar.hpp"
+#else
+#include "FakeSemVar.hpp"
+#endif
 
 namespace scx {
 
@@ -11,8 +15,8 @@ class LPVBuffer
 {
 public:
     LPVBuffer():
-        m_FreeListSemVar(SemVar(0, 0)),
-        m_DataListSemVar(SemVar(0, 0)),
+        m_FreeListSemVar(0),
+        m_DataListSemVar(0),
         m_BufferCount(0),
         m_BufferArray(NULL),
         m_FreeIndex(-1),
@@ -152,8 +156,16 @@ public:
     }
 
 private:
-    SemVar m_FreeListSemVar;
-    SemVar m_DataListSemVar;
+#ifndef __MACH__
+#include "SemVar.hpp"
+    typedef SemVar Semaphore;
+#else
+#include "FakeSemVar.hpp"
+    typedef FakeSemVar Semaphore;
+#endif
+
+    Semaphore m_FreeListSemVar;
+    Semaphore m_DataListSemVar;
     Mutex m_FreeListMutex;
     Mutex m_DataListMutex;
 
