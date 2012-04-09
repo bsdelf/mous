@@ -106,9 +106,9 @@ const PluginInfo* PluginManager::GetPluginInfo(const std::string& path) const
 
 vector<string>* PluginManager::gFtwFiles = NULL;
 
-int PluginManager::OnFtw(const char* file, const struct stat* s, int)
+int PluginManager::OnFtw(const char* file, const struct stat* s, int type)
 {
-    if (!(s->st_mode & S_IFDIR))
+    if (type == FTW_F && !(s->st_mode & S_IFDIR) && file != NULL)
         gFtwFiles->push_back(file);
     return 0;
 }
