@@ -18,10 +18,14 @@ public:
     explicit FrmTagEditor(QWidget *parent = 0);
     ~FrmTagEditor();
     
-    void SetTagParserFactory(const mous::ITagParserFactory* _factory);
-    void ShowFileTag(const std::string& fileName);
+    void SetTagParserFactory(const mous::ITagParserFactory* _factory);    
+    void WaitForLoadFinished();
+
+public slots:
+    void SlotLoadFileTag(const QString &fileName);
 
 private:
+    void LoadFileTag(const std::string& fileName);
     void ShowBottomBtns(bool show);
     void UpdateTag();
     void UpdateCoverArt();
@@ -39,8 +43,8 @@ private:
     mous::ITagParser* m_CurrentParser;
     QPixmap m_CurrentImage;
     QLabel* m_LabelImage;
-    //QPixmap img;
 
+    QSemaphore m_SemLoadFinished;
 };
 
 #endif // FRMTAGEDITOR_H

@@ -13,7 +13,6 @@ namespace mous {
     struct MediaItem;
 }
 
-
 class SimplePlaylistView : public QTreeView, public IPlaylistView
 {
     Q_OBJECT

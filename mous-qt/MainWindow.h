@@ -9,6 +9,7 @@
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
 #include <core/ITagParserFactory.h>
+#include <string>
 #include "FrmToolBar.h"
 #include "FrmTagEditor.h"
 #include "IPlaylistView.h"
@@ -34,6 +35,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+signals:
+    void SigLoadFileTag(QString fileName);
 
 private:
     void InitMyUi();

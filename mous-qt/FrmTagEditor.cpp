@@ -7,7 +7,8 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     ui(new Ui::FrmTagEditor),
     factory(NULL),
     m_CurrentParser(NULL),
-    m_LabelImage(NULL)
+    m_LabelImage(NULL),
+    m_SemLoadFinished(1)
 {
     ui->setupUi(this);
 
@@ -17,15 +18,21 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     ui->scrollAreaCover->setWidgetResizable(true);
 
     //ShowBottomBtns(false);
+    ui->tableTag->setAlternatingRowColors(true);
+    ui->tableTag->setShowGrid(false);
+    ui->tableTag->setColumnCount(2);
+    ui->tableTag->setHorizontalHeaderLabels(QStringList(tr("Name")) << tr("Value"));
+    ui->tableTag->horizontalHeader()->setVisible(true);
     ui->tableTag->horizontalHeader()->setStretchLastSection(true);
     ui->tableTag->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    ui->tableTag->setColumnCount(2);
-    ui->tableTag->setRowCount(7);
-    QList<QString> heads;
-    heads << tr("Album") << tr("Title") << tr("Artist")
+
+    QList<QString> names;
+    names << tr("Album") << tr("Title") << tr("Artist")
           << tr("Genre") << tr("Year") << tr("Track") << tr("Comment");
-    for (int i = 0; i < heads.size(); ++i) {
-        QTableWidgetItem* key = new QTableWidgetItem(heads[i]);
+    ui->tableTag->setRowCount(names.size());
+
+    for (int i = 0; i < names.size(); ++i) {
+        QTableWidgetItem* key = new QTableWidgetItem(names[i]);
         ui->tableTag->setItem(i, 0, key);
         key->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
 
@@ -56,7 +63,15 @@ void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *_factory)
     factory = _factory;
 }
 
-void FrmTagEditor::ShowFileTag(const std::string &fileName)
+void FrmTagEditor::SlotLoadFileTag(const QString &fileName)
+{
+    if (!m_SemLoadFinished.tryAcquire())
+        return;
+    LoadFileTag(fileName.toUtf8().data());
+    m_SemLoadFinished.release();
+}
+
+void FrmTagEditor::LoadFileTag(const std::string &fileName)
 {
     if (factory == NULL)
         return;
@@ -82,13 +97,11 @@ void FrmTagEditor::ShowFileTag(const std::string &fileName)
         if (m_CurrentImage.loadFromData((const uchar *)buf, (uint)len)) {
             UpdateCoverArt();
             ui->scrollAreaCover->show();
-        } else {
-            delete[] buf;
         }
+        delete[] buf;
     } else {
         ui->scrollAreaCover->hide();
     }
-
 }
 
 void FrmTagEditor::ShowBottomBtns(bool show)
@@ -149,4 +162,9 @@ void FrmTagEditor::resizeEvent(QResizeEvent *event)
 
     if (event->size() != event->oldSize())
         UpdateCoverArt();
+}
+
+void FrmTagEditor::WaitForLoadFinished()
+{
+    m_SemLoadFinished.acquire();
 }

@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    m_FrmTagEditor.WaitForLoadFinished();
+
     m_Player->SigFinished()->DisconnectReceiver(this);
 
     if (m_Player->GetStatus() == PlayerStatus::Playing) {
@@ -147,6 +149,9 @@ void MainWindow::InitQtSlots()
 {
     connect(m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
 
+    connect(this, SIGNAL(SigLoadFileTag(QString)),
+            &m_FrmTagEditor, SLOT(SlotLoadFileTag(QString)), Qt::QueuedConnection);
+
     connect(m_FrmToolBar.GetBtnPlay(), SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
 
     connect(m_FrmToolBar.GetSliderVolume(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderVolumeValueChanged(int)));
@@ -173,7 +178,6 @@ void MainWindow::SlotPlayerStopped()
 
 void MainWindow::SlotUiPlayerStopped()
 {
-
     qDebug() << "Stopped!";
     if (m_UsedPlaylistView != NULL) {
         const MediaItem* item = m_UsedPlaylistView->GetNextItem();
@@ -321,7 +325,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
 
     m_UsedPlaylistView = view;
 
-    m_FrmTagEditor.ShowFileTag(item->url);
+    emit SigLoadFileTag(QString::fromUtf8(item->url.c_str()));
 }
 
 void MainWindow::SlotConvertMediaItem(const MediaItem *item)
