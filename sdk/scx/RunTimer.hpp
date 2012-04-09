@@ -27,7 +27,7 @@
         scx_sum += scx_timer.DiffMS();		    \
         afterStop;				                \
     }						                    \
-    std::cout << tag << (scx_sum / times) << std::endl;	\
+    std::cout << tag << (scx_sum / times) << "ms" << std::endl;	\
 }; class __END__
 
 #define SCX_BENCH0(tag, times, count, onLoop)	\
@@ -50,12 +50,26 @@
 	    , ,					                    \
 	    , afterStop)
 
+#define SCX_BENCH134(tag, times, count, onLoop,	\
+	beforeStart, beforeStop, afterStop)			\
+    SCX_BENCH(tag, times, count, i, j,		    \
+	    onLoop,				                    \
+	    beforeStart, ,			                \
+	    beforeStop, afterStop)
+
 #define SCX_BENCH14(tag, times, count, onLoop,	\
 	beforeStart, afterStop)			            \
     SCX_BENCH(tag, times, count, i, j,		    \
 	    onLoop,				                    \
 	    beforeStart, ,			                \
 	    , afterStop)
+
+#define SCX_BENCH13(tag, times, count, onLoop,	\
+	beforeStart, beforeStop)			        \
+    SCX_BENCH(tag, times, count, i, j,		    \
+	    onLoop,				                    \
+	    beforeStart, ,			                \
+	    beforeStop, )
 
 namespace scx {
 

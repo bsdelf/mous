@@ -3,7 +3,14 @@
 
 #include <deque>
 #include "Mutex.hpp"
+#ifndef __MACH__
 #include "SemVar.hpp"
+#else
+#include "FakeSemVar.hpp"
+namespace scx {
+typedef FakeSemVar SemVar;
+}
+#endif
 
 namespace scx {
 
@@ -12,18 +19,13 @@ class PVBuffer
 {
 public:
     PVBuffer():
-        m_pFreeListSemVar(new SemVar(0, 0)),
-        m_pDataListSemVar(new SemVar(0, 0))
+        m_FreeListSemVar(0),
+        m_DataListSemVar(0)
     {
     }
 
     ~PVBuffer()
     {
-        if (m_pFreeListSemVar != NULL)
-            delete m_pFreeListSemVar;
-
-        if (m_pDataListSemVar != NULL)
-            delete m_pDataListSemVar;
     }
 
     void AllocBuffer(size_t bufCount)
@@ -34,10 +36,10 @@ public:
         for (size_t i = 0; i < bufCount; ++i) {
             m_BufferQueue[i] = new item_t;
             m_FreeQueue[i] = m_BufferQueue[i];
-            m_pFreeListSemVar->Post(); 
+            m_FreeListSemVar.Post(); 
         }
 
-        m_pDataListSemVar->Clear();
+        m_DataListSemVar.Clear();
     }
 
     void ClearBuffer()
@@ -50,8 +52,8 @@ public:
         m_FreeQueue.clear();
         m_DataQueue.clear();
 
-        m_pFreeListSemVar->Clear();
-        m_pDataListSemVar->Clear();
+        m_FreeListSemVar.Clear();
+        m_DataListSemVar.Clear();
     }
 
     /**
@@ -67,17 +69,17 @@ public:
         // No mutex here, 
         // because we assume both thread has been suspended.
         m_DataQueue.clear();
-        m_pDataListSemVar->Clear();
+        m_DataListSemVar.Clear();
 
         // Lock the FreeQueue first,
         // because after SemVar::Post() the producer will begin to work,
         // and it will take the first item in FreeQueue.
         //m_FreeListMutex.Lock();
         m_FreeQueue.resize(bufCount);
-        m_pFreeListSemVar->Clear();
+        m_FreeListSemVar.Clear();
         for (size_t i = 0; i < bufCount; ++i) {
             m_FreeQueue[i] = m_BufferQueue[i];
-            m_pFreeListSemVar->Post();
+            m_FreeListSemVar.Post();
         }
         //m_FreeListMutex.Unlock();
     }
@@ -89,12 +91,12 @@ public:
 
     size_t GetFreeCount() const
     {
-        return m_pFreeListSemVar->GetValue();
+        return m_FreeListSemVar.GetValue();
     }
 
     size_t GetDataCount() const
     {
-        return m_pDataListSemVar->GetValue();
+        return m_DataListSemVar.GetValue();
     }
 
     /**
@@ -107,7 +109,7 @@ public:
 
     item_t* TakeFree()
     {
-        m_pFreeListSemVar->Wait(); 
+        m_FreeListSemVar.Wait(); 
         m_FreeListMutex.Lock();
         item_t* pItem = m_FreeQueue.front();
         m_FreeQueue.pop_front();
@@ -120,12 +122,12 @@ public:
         m_DataListMutex.Lock();
         m_DataQueue.push_back(pItem);
         m_DataListMutex.Unlock();
-        m_pDataListSemVar->Post();
+        m_DataListSemVar.Post();
     }
 
     item_t* TakeData()
     {
-        m_pDataListSemVar->Wait(); 
+        m_DataListSemVar.Wait(); 
         m_DataListMutex.Lock();
         item_t* pItem = m_DataQueue.front();
         m_DataQueue.pop_front();
@@ -138,7 +140,7 @@ public:
         m_FreeListMutex.Lock();
         m_FreeQueue.push_back(pItem);
         m_FreeListMutex.Unlock();
-        m_pFreeListSemVar->Post();
+        m_FreeListSemVar.Post();
     }
 
     /**
@@ -153,7 +155,7 @@ public:
      */
     void ClearFree()
     {
-        m_pFreeListSemVar->Clear();
+        m_FreeListSemVar.Clear();
         m_FreeListMutex.Lock();
         m_FreeQueue.clear();
         m_FreeListMutex.Unlock();
@@ -164,7 +166,7 @@ public:
      */
     void ClearData()
     {
-        m_pDataListSemVar->Clear();
+        m_DataListSemVar.Clear();
         m_DataListMutex.Lock();
         m_DataQueue.clear();
         m_DataListMutex.Unlock();
@@ -175,11 +177,11 @@ private:
 
     std::deque<item_t*> m_FreeQueue;
     Mutex m_FreeListMutex;
-    SemVar* m_pFreeListSemVar;
+    SemVar m_FreeListSemVar;
 
     std::deque<item_t*> m_DataQueue;
     Mutex m_DataListMutex;
-    SemVar* m_pDataListSemVar;
+    SemVar m_DataListSemVar;
 };
 
 }

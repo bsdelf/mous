@@ -269,7 +269,8 @@ class FunctionPtr<ret_t (arg1_t, arg2_t)>:
     SCX_FUNCTION_COPY_FUNCTION_PTR_COMMON(arg1_t, arg2_t);
 
 public:
-    ret_t operator()(arg1_t arg1, arg2_t arg2) const {
+    ret_t operator()(arg1_t arg1, arg2_t arg2) const
+    {
         return m_Function(arg1, arg2);
     }
 };

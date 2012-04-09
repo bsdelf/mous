@@ -1,10 +1,11 @@
-#ifndef SCX_SEM_VAR_HPP
-#define SCX_SEM_VAR_HPP
+#ifndef SCX_SEMVAR_HPP
+#define SCX_SEMVAR_HPP
 
 #include <semaphore.h>
 
 namespace scx {
 
+/* POSIX unnamed semphore */
 class SemVar
 {
 public:
@@ -23,25 +24,27 @@ public:
         sem_destroy(&m_Sem);
     }
 
-    int Post()
+    void Post()
     {
-        return sem_post(&m_Sem);
+        sem_post(&m_Sem);
     }
 
-    int TryWait()
+    bool TryWait()
     {
-        return sem_trywait(&m_Sem);
+        return sem_trywait(&m_Sem) == 0;
     }
 
-    int Wait()
+    void Wait()
     {
-        return sem_wait(&m_Sem);
+        sem_wait(&m_Sem);
     }
 
+    /*
     void TimeWait()
     {
         //return sem_timewait(&m_Sem, timeout);
     }
+    */
 
     int GetValue() const
     {
@@ -50,7 +53,7 @@ public:
         return sval;
     }
 
-    void Clear() const
+    void Clear()
     {
         while (sem_trywait(&m_Sem) == 0);
     }

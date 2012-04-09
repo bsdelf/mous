@@ -1,5 +1,5 @@
-#ifndef SCX_COND_VAR_HPP
-#define SCX_COND_VAR_HPP
+#ifndef SCX_CONDVAR_HPP
+#define SCX_CONDVAR_HPP
 
 #include <pthread.h>
 
@@ -10,40 +10,40 @@ class Mutex;
 class CondVar
 {
 public:
-    explicit CondVar(Mutex& refMutex):
-    m_refMutex(refMutex)
+    CondVar()
     {
-        pthread_cond_init(&m_Cond, NULL);
+        pthread_cond_init(&cond, NULL);
     }
 
     ~CondVar()
     {
-        pthread_cond_destroy(&m_Cond);
+        pthread_cond_destroy(&cond);
     }
 
-    int Wait()
+    int Wait(Mutex* mutex)
     {
-        return pthread_cond_wait(&m_Cond, &(m_refMutex.m_Mutex));
+        return pthread_cond_wait(&cond, &(mutex->mutex));
     }
 
     int Signal()
     {
-        return pthread_cond_signal(&m_Cond);
+        return pthread_cond_signal(&cond);
     }
 
-    int SignalAll()
+    int Broadcast()
     {
-        return pthread_cond_broadcast(&m_Cond);
+        return pthread_cond_broadcast(&cond);
     }
 
+    /*
     void TimeWait()
     {
-        //pthread_cond_timewait(&m_Cond, &(m_refMutex.m_Mutex));
+        //pthread_cond_timewait(&cond, &(m_Mutex.m_Mutex));
     }
+    */
 
 private:
-    pthread_cond_t m_Cond;
-    Mutex& m_refMutex;
+    pthread_cond_t cond;
 };
 
 }

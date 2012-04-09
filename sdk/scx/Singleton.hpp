@@ -12,33 +12,33 @@ public:
     static T& Instance()
     {
         pthread_once(&control, &Singleton::Init);
-        return *pInstance;
+        return *sInstance;
     }
 
     static void Cleanup()
     {
-        if (pInstance != NULL) {
-            delete pInstance;
-            pInstance = NULL;
+        if (sInstance != NULL) {
+            delete sInstance;
+            sInstance = NULL;
         }
     }
 
 private:
     static void Init()
     {
-        pInstance = new T;
+        sInstance = new T;
     }
 
 private:
     static pthread_once_t control;
-    static T* pInstance;
+    static T* sInstance;
 };
 
 template<typename T>
 pthread_once_t Singleton<T>::control = PTHREAD_ONCE_INIT;
 
 template<typename T>
-T* Singleton<T>::pInstance = NULL;
+T* Singleton<T>::sInstance = NULL;
 
 }
 #endif
