@@ -1,4 +1,5 @@
 #include "AoRenderer.h"
+#include <iostream>
 #include <string.h>
 
 AoRenderer::AoRenderer():
@@ -13,6 +14,18 @@ AoRenderer::AoRenderer():
     int rate = 44100;
     int bits = 16;
     Setup(channels, rate, bits);
+
+    {
+        int count;
+        ao_info** info = ao_driver_info_list(&count);
+        cout << "  driver count:" << count << endl;
+        for (int i = 0; i < count; ++i) {
+            cout << " " << i << " " << info[i]->name << endl;
+            for (int j = 0; j < info[i]->option_count; ++j) {
+                cout << "   " << j << " " <<  info[i]->options[j] << endl;
+            }
+        }
+    }
 }
 
 AoRenderer::~AoRenderer()
@@ -63,6 +76,7 @@ void AoRenderer::SetVolumeLevel(int level)
 
 bool AoRenderer::GetOptions(std::vector<const BaseOption*>& list) const
 {
+    list.clear();
     return false;
 }
 
