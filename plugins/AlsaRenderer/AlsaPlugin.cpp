@@ -4,7 +4,7 @@
 static const PluginInfo info = {
     "Yanhui Shen",
     "ALSA Renderer",
-    "ALSA output for Linux.",
+    "The Advanced Linux Sound Architecture.",
     1
 };
 

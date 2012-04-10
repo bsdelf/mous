@@ -33,17 +33,21 @@ public:
     virtual bool GetOptions(std::vector<const BaseOption*>& list) const;
 
 private:
+    bool SetupHwParams();
+    void SetupSwParams();
+
+private:
     string m_DeviceName;
 
     snd_pcm_t* m_PcmHandle;
-    snd_pcm_hw_params_t* m_HwParams;
-    snd_pcm_sw_params_t* m_SwParams;
 
     int m_Dir;
     int m_Resample;
     snd_pcm_access_t m_Access;
     snd_pcm_format_t m_Format;
 
+    int m_FrameLength;
+    int m_BitsPerSample;
     Tuple<unsigned int> m_Channels;
     Tuple<unsigned int> m_SampleRate;
     Tuple<unsigned int> m_BufferTime;

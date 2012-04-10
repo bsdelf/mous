@@ -112,7 +112,7 @@ endif()
 if (EnablePluginAlsaRenderer)
     file(GLOB SRC_ALSA_RENDERER plugins/AlsaRenderer/*)
     add_library(AlsaRenderer SHARED ${SRC_ALSA_RENDERER})
-    target_link_libraries(AlsaRenderer)
+    target_link_libraries(AlsaRenderer -lasound)
 endif()
 
 # WAV plugin
