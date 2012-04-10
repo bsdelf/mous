@@ -56,6 +56,8 @@ option(EnablePluginPlayerStatistics "Player activity statistics" on)
 # include and link
 include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
+include_directories(SYSTEM /opt/local/include)
+link_directories(/opt/local/lib)
 include_directories(BEFORE sdk)
 
 #==== build output dir ====#
