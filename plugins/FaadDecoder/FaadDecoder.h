@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <neaacdec.h>
+#define HAVE_STDINT_H
 #include <mp4ff.h>
 using namespace mous;
 using namespace std;
