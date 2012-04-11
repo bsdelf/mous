@@ -12,6 +12,13 @@ TEMPLATE = app
 INCLUDEPATH += ../sdk
 LIBS += -L./ -Wl,-rpath,./ -lMousCore
 
+macx {
+   QMAKE_CXXFLAGS_RELEASE += -fvisibility=hidden
+   QMAKE_CXXFLAGS_DEBUG += -fvisibility=hidden
+   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
+}
+
+
 SOURCES += main.cpp\
         MainWindow.cpp \
     CustomHeadTabWidget.cpp \
