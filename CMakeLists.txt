@@ -39,7 +39,8 @@ option(EnablePluginAlsaRenderer "ALSA output" off)
 
 option(EnablePluginWavDecoder "WAV Decoder" on)
 option(EnablePluginWavEncoder "WAV Encoder" on)
-option(EnablePluginMacDecoder "MAC Decoder" on)
+option(EnablePluginMacDecoder "MAC Decoder" off)
+option(EnablePluginMac4Decoder "MAC4.x Decoder" on)
 option(EnablePluginMpg123Decoder "MPG123 Decoder" on)
 option(EnablePluginLameEncoder "LAME Encoder" on)
 option(EnablePluginFlacDecoder "FLAC Decoder" on)
@@ -58,7 +59,8 @@ include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
 include_directories(SYSTEM /opt/local/include)
 link_directories(/opt/local/lib)
-include_directories(BEFORE sdk)
+include_directories(AFTER sdk)
+include_directories(AFTER contrib)
 
 #==== build output dir ====#
 set(OUTPUT_DIR ${MOUS_SOURCE_DIR}/build)
@@ -144,6 +146,12 @@ if (EnablePluginMacDecoder)
     file(GLOB SRC_MAC_DECODER plugins/MacDecoder/*)
     add_library(MacDecoder SHARED ${SRC_MAC_DECODER})
     target_link_libraries(MacDecoder -lmac)
+endif()
+
+# Mac4 plugin
+if (EnablePluginMac4Decoder)
+    file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/* contrib/MACLib/*)
+    add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER})
 endif()
 
 # Flac plugin
