@@ -23,7 +23,7 @@ vector<string> MacDecoder::GetFileSuffix() const
 
 EmErrorCode MacDecoder::Open(const string& url)
 {
-    int err;
+    int err = ERROR_SUCCESS;
 
     m_pDecompress = CreateIAPEDecompress(url.c_str(), &err);
 
