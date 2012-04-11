@@ -1,6 +1,7 @@
 #ifndef SCX_ICONV_HELPER_HPP
 #define SCX_ICONV_HELPER_HPP
 
+#include <errno.h>
 #include <iconv.h>
 #include <string>
 
@@ -12,6 +13,9 @@ bool ConvFromTo(const std::string& from, const std::string& wanted,
         const char* originalBuf, size_t originalLen, std::string& convertedContent,
         char* workBuf = NULL, size_t workLen = 0)
 {
+    typedef size_t (*StdIconv)(iconv_t, const char**, size_t*, char**, size_t*);
+    StdIconv std_iconv = (StdIconv)iconv;
+
     if (from.empty() || wanted.empty())
         return false;
     if (from == wanted)
@@ -44,7 +48,7 @@ bool ConvFromTo(const std::string& from, const std::string& wanted,
         }
 
         errno = 0;
-        converted = iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
+        converted = std_iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
         if (converted != (size_t)-1) {
             break;
         } else if (errno != E2BIG) {
