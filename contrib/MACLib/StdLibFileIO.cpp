@@ -190,7 +190,7 @@ int CStdLibFileIO::GetPosition()
     memset(&fPosition, 0, sizeof(fPosition));
     fgetpos(m_pFile, &fPosition);
     //return _FPOSOFF(fPosition);
-    return fPosition;
+    return *((__off_t*)&fPosition);
 }
 
 int CStdLibFileIO::GetSize()
