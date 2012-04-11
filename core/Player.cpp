@@ -329,7 +329,7 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
 void Player::Pause()
 {
-    if (m_Status != PlayerStatus::Playing)
+    if (m_Status == PlayerStatus::Paused)
         return;
 
     if (!m_SuspendRenderer) {
