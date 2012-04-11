@@ -10,12 +10,14 @@ TARGET = mous-qt
 TEMPLATE = app
 
 INCLUDEPATH += ../sdk
-LIBS += -L./ -Wl,-rpath,./ -lMousCore
+LIBS += -liconv -L./ -Wl,-rpath,./ -lMousCore
 
 macx {
-   #QMAKE_CXXFLAGS_RELEASE += -fvisibility=hidden
-   #QMAKE_CXXFLAGS_DEBUG += -fvisibility=hidden
-   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
+    #QMAKE_CXXFLAGS_RELEASE += -fvisibility=hidden
+    #QMAKE_CXXFLAGS_DEBUG += -fvisibility=hidden
+    LIBS += -framework
+    CONFIG += x86_64
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
 }
 
 
