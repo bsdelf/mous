@@ -164,10 +164,11 @@ bool AlsaRenderer::SetupHwParams()
     snd_pcm_hw_params_set_period_time_near(m_PcmHandle, params, &m_PeriodTime.val, &m_Dir);
 
     int ret = snd_pcm_hw_params(m_PcmHandle, params);
-    snd_pcm_hw_params_free(params);
 
-    if (ret != 0)
+    if (ret != 0) {
+        snd_pcm_hw_params_free(params);
         return false;
+    }
 
     // get period size again
     snd_pcm_hw_params_get_period_size(params, &m_PeriodSize.val, &m_Dir);
@@ -176,6 +177,8 @@ bool AlsaRenderer::SetupHwParams()
     m_BitsPerSample = snd_pcm_format_physical_width(SND_PCM_FORMAT_S16_LE);
     m_FrameLength = (m_BitsPerSample/8 * m_Channels.val);
     //mPeriodBufferLength = m_PeriodSize.val * m_FrameLength ;
+
+    snd_pcm_hw_params_free(params);
 
     return true;
 }
