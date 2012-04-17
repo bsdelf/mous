@@ -96,6 +96,17 @@ else()
     target_link_libraries(mous-cli MousCore CharsetConv)
 endif()
 
+# mous-ncurses
+file(GLOB_RECURSE EXE_MOUS_NCURSES mous-ncurses/*)
+add_executable(mous-ncurses ${EXE_MOUS_NCURSES})
+if (IS_FREEBSD)
+    target_link_libraries(mous-ncurses MousCore CharsetConv -pthread)
+elseif (IS_LINUX)
+    target_link_libraries(mous-ncurses MousCore CharsetConv -ldl -pthread)
+else()
+    target_link_libraries(mous-ncurses MousCore CharsetConv -pthread)
+endif()
+
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR}/plugins)
 
 # OSS plugin
