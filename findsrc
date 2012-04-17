@@ -1,5 +1,5 @@
 #!/bin/sh
 find \
-    ./sdk/util/ ./sdk/core/ ./sdk/plugin/ ./plugins/ ./core/ ./mous-cli/ ./mous-qt/ \
-    -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.cxx" \
+    ./sdk/util/ ./sdk/core/ ./sdk/plugin/ ./plugins/ ./core/ ./mous-cli/ ./mous-qt/ ./mous-ncurses/ \
+    -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.cc" \
     | xargs wc | sort -k 4
