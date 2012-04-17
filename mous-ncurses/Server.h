@@ -1,10 +1,18 @@
 #ifndef SERVER_H
-#define Server_h
+#define SERVER_H
+
+struct ServerPrivate;
 
 class Server
 {
 public:
+    Server();
+    ~Server();
+
     int Exec();
+
+private:
+    ServerPrivate* d;
 };
 
 #endif
