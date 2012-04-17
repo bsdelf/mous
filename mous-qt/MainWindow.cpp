@@ -149,9 +149,6 @@ void MainWindow::InitQtSlots()
 {
     connect(m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
 
-    connect(this, SIGNAL(SigLoadFileTag(QString)),
-            &m_FrmTagEditor, SLOT(SlotLoadFileTag(QString)), Qt::QueuedConnection);
-
     connect(m_FrmToolBar.GetBtnPlay(), SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
 
     connect(m_FrmToolBar.GetSliderVolume(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderVolumeValueChanged(int)));
@@ -325,7 +322,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
 
     m_UsedPlaylistView = view;
 
-    emit SigLoadFileTag(QString::fromUtf8(item->url.c_str()));
+    //m_FrmTagEditor.LoadFileTag(item->url);
 }
 
 void MainWindow::SlotConvertMediaItem(const MediaItem *item)

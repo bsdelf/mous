@@ -36,9 +36,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-signals:
-    void SigLoadFileTag(QString fileName);
-
 private:
     void InitMyUi();
     void InitMousCore();

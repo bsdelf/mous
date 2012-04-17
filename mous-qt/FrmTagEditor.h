@@ -20,12 +20,10 @@ public:
     
     void SetTagParserFactory(const mous::ITagParserFactory* _factory);    
     void WaitForLoadFinished();
-
-public slots:
-    void SlotLoadFileTag(const QString &fileName);
-
-private:
     void LoadFileTag(const std::string& fileName);
+
+private:   
+    void DoLoadFileTag(const std::string& fileName);
     void ShowBottomBtns(bool show);
     void UpdateTag();
     void UpdateCoverArt();

@@ -63,15 +63,15 @@ void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *_factory)
     factory = _factory;
 }
 
-void FrmTagEditor::SlotLoadFileTag(const QString &fileName)
+void FrmTagEditor::LoadFileTag(const std::string &fileName)
 {
     if (!m_SemLoadFinished.tryAcquire())
         return;
-    LoadFileTag(fileName.toUtf8().data());
+    DoLoadFileTag(fileName);
     m_SemLoadFinished.release();
 }
 
-void FrmTagEditor::LoadFileTag(const std::string &fileName)
+void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
 {
     if (factory == NULL)
         return;
