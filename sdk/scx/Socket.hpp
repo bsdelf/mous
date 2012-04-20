@@ -17,189 +17,239 @@ struct SocketOpt
     bool keepAlive;
 
     SocketOpt():
-    reuseAddr(true),
-    reusePort(true),
-    keepAlive(true) {}
+        reuseAddr(false),
+        reusePort(false),
+        keepAlive(true)
+    { }
 };
 
+class BaseSocket;
 class UdpSocket;
 class TcpSocket;
 
 class InetAddr
 {
+friend class BaseSocket;
 friend class UdpSocket;
 friend class TcpSocket;
 
 public:
     InetAddr(): 
-        mAddrLen(sizeof(sockaddr_in))
+        m_AddrLen(sizeof(sockaddr_in))
     {
-        bzero(&mAddr, sizeof(mAddr));
-        mAddr.sin_family = AF_INET;
+        bzero(&m_Addr, sizeof(m_Addr));
+        m_Addr.sin_family = AF_INET;
     }
 
     InetAddr(const std::string& ip, int port): 
-        mAddrLen(sizeof(sockaddr_in))
+        m_AddrLen(sizeof(sockaddr_in))
     {
-        bzero(&mAddr, sizeof(mAddr));
-        mAddr.sin_family = AF_INET;
-        inet_pton(AF_INET, ip.c_str(), &mAddr.sin_addr);
-        mAddr.sin_port = htons(port);
+        bzero(&m_Addr, sizeof(m_Addr));
+        m_Addr.sin_family = AF_INET;
+        inet_pton(AF_INET, ip.c_str(), &m_Addr.sin_addr);
+        m_Addr.sin_port = htons(port);
     }
 
     explicit InetAddr(int port): 
-        mAddrLen(sizeof(sockaddr_in))
+        m_AddrLen(sizeof(sockaddr_in))
     {
-        bzero(&mAddr, sizeof(mAddr));
-        mAddr.sin_family = AF_INET;
-        mAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-        mAddr.sin_port = htons(port);
+        bzero(&m_Addr, sizeof(m_Addr));
+        m_Addr.sin_family = AF_INET;
+        m_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        m_Addr.sin_port = htons(port);
     }
 
     void Assign(const std::string& ip, int port)
     {
-        inet_pton(AF_INET, ip.c_str(), &mAddr.sin_addr);
-        mAddr.sin_port = htons(port);
+        inet_pton(AF_INET, ip.c_str(), &m_Addr.sin_addr);
+        m_Addr.sin_port = htons(port);
     }
 
     void Assign(int port)
     {
-        mAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-        mAddr.sin_port = htons(port);
+        m_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        m_Addr.sin_port = htons(port);
     }
 
     std::string GetIp() const
     {
-        char buf[INET_ADDRSTRLEN];
-        const char* p = inet_ntop(AF_INET, &mAddr.sin_addr, buf, sizeof(buf));
-        return p != NULL ? std::string(p) : "";
+        char buf[INET6_ADDRSTRLEN];
+        const char* p = inet_ntop(AF_INET, &m_Addr.sin_addr, buf, sizeof(buf));
+        return p != NULL ? p : "";
     }
 
     int GetPort() const
     {
-        return ntohs(mAddr.sin_port);
+        return ntohs(m_Addr.sin_port);
     }
 
 private:
-    sockaddr_in mAddr;
-    socklen_t mAddrLen;
+    sockaddr_in m_Addr;
+    socklen_t m_AddrLen;
 };
 
-#define SCX_SOCKET_COPY_SOCKET_COMMON(ClassName)           \
-public:\
-    ~ClassName()            \
-    {                       \
-        if (mFd != -1)      \
-            close(mFd);     \
-    }                       \
-    \
-    int GetFd() const       \
-    {                       \
-        return mFd;         \
-    }                       \
-    \
-    InetAddr& GetAddr()     \
-    {                       \
-        return mInetAddr;   \
-    }                       \
-    \
-    void SetOption(const SocketOpt& opt) {                                      \
-        int ret;                                                                \
-        int on;                                                                 \
-        on = opt.reuseAddr;                                                     \
-        ret = setsockopt(mFd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));       \
-        on = opt.reusePort;                                                     \
-        ret = setsockopt(mFd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));       \
-        on = opt.keepAlive;                                                     \
-        ret = setsockopt(mFd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));       \
-    }                                                                           \
-    \
-    int Bind(const std::string& ip, int port) {                             \
-        mInetAddr.Assign(ip, port);                                         \
-        return bind(mFd, (sockaddr*)&mInetAddr.mAddr, mInetAddr.mAddrLen);  \
-    }                                                                       \
-    \
-    int Bind(int port) {                                                    \
-        mInetAddr.Assign(port);                                             \
-        return bind(mFd, (sockaddr*)&mInetAddr.mAddr, mInetAddr.mAddrLen);  \
-    }                                                                       \
-    \
-    int Bind(const InetAddr& addr) {                                        \
-        mInetAddr = addr;                                                   \
-        return bind(mFd, (sockaddr*)&mInetAddr.mAddr, mInetAddr.mAddrLen);  \
-    }                                                                       \
-    \
-private:\
-    int mFd;                \
-    InetAddr mInetAddr;     \
+namespace HowShutdown {
+    const int Read = SHUT_RD;
+    const int Write = SHUT_WR;
+    const int ReadWrite = SHUT_RDWR;
+}
 
-class UdpSocket
+class BaseSocket
 {
-    SCX_SOCKET_COPY_SOCKET_COMMON(UdpSocket);
+public:
+    ~BaseSocket()
+    {
+        Shutdown();
+        Close();
+    }
 
+    void Shutdown(int how = HowShutdown::ReadWrite)
+    {
+        shutdown(m_Fd, how);
+    }
+
+    void Close()
+    {
+        if (m_Fd != -1) {
+            close(m_Fd);
+            m_Fd = -1;
+        }
+    }
+
+    int GetFd() const
+    {
+        return m_Fd;
+    }
+
+    InetAddr& GetAddr()
+    {
+        return m_InetAddr;
+    }
+
+    void SetOption(const SocketOpt& opt)
+    {
+        int ret;
+        int on;
+        on = opt.reuseAddr;
+        ret = setsockopt(m_Fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+        on = opt.reusePort;
+        ret = setsockopt(m_Fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+        on = opt.keepAlive;
+        ret = setsockopt(m_Fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
+    }
+
+    bool Bind(const std::string& ip, int port)
+    {
+        m_InetAddr.Assign(ip, port);
+        return bind(m_Fd, (sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0;
+    }
+
+    bool Bind(int port)
+    {
+        m_InetAddr.Assign(port);
+        return bind(m_Fd, (sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0;
+    }
+
+    bool Bind(const InetAddr& addr)
+    {
+        m_InetAddr = addr;
+        return bind(m_Fd, (sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0;
+    }
+
+protected:
+    int m_Fd;
+    InetAddr m_InetAddr;
+};
+
+class UdpSocket: public BaseSocket
+{
 public:
     UdpSocket()
     {
-        mFd = socket(AF_INET, SOCK_DGRAM, 0);
+        m_Fd = socket(AF_INET, SOCK_DGRAM, 0);
     }
 
-    ssize_t RecvFrom(void* buf, size_t len, InetAddr& iadr, int flags = 0)
+    ssize_t RecvFrom(void* buf, size_t len, InetAddr& iadr, int flags = 0) const
     {
-        return recvfrom(mFd, buf, len, flags, (sockaddr*)&iadr.mAddr, &iadr.mAddrLen);
+        return recvfrom(m_Fd, buf, len, flags, (sockaddr*)&iadr.m_Addr, &iadr.m_AddrLen);
     }
     
     ssize_t SendTo(const void* buf, size_t len, InetAddr& iadr, int flags = 0) const
     {
-        return sendto(mFd, buf, len, flags, (sockaddr*)&iadr.mAddr, iadr.mAddrLen);
+        return sendto(m_Fd, buf, len, flags, (sockaddr*)&iadr.m_Addr, iadr.m_AddrLen);
     }
     
 };
 
-class TcpSocket
+class TcpSocket: public BaseSocket
 {
-    SCX_SOCKET_COPY_SOCKET_COMMON(TcpSocket);
-
 public:
     TcpSocket()
     {
-        mFd = socket(AF_INET, SOCK_STREAM, 0);
+        m_Fd = socket(AF_INET, SOCK_STREAM, 0);
     }
 
-    int Listen(int backlog) const
+    bool Listen(int backlog = -1) const
     {
-        return listen(mFd, backlog);
+        return listen(m_Fd, backlog) == 0;
     }
 
-    void Accept(TcpSocket& clientSocket) const
+    bool Accept(TcpSocket& clientSocket) const
     {
         InetAddr& clientAddr = clientSocket.GetAddr();
-        int connFd = accept(mFd, (sockaddr*)&clientAddr.mAddr, &clientAddr.mAddrLen);
-        clientSocket.mFd = connFd;
+        int connFd = accept(m_Fd, (sockaddr*)&clientAddr.m_Addr, &clientAddr.m_AddrLen);
+        clientSocket.m_Fd = connFd;
+        return connFd != -1;
     }
 
-    int Connect(const InetAddr& iadr) const
+    bool Connect(const InetAddr& iadr) const
     {
-        return connect(mFd, (sockaddr*)&iadr.mAddr, iadr.mAddrLen);
+        return connect(m_Fd, (sockaddr*)&iadr.m_Addr, iadr.m_AddrLen) == 0;
     }
 
     ssize_t Recv(void* buf, size_t len, int flags = 0) const
     {
-        return recv(mFd, buf, len, flags);
+        return recv(m_Fd, buf, len, flags);
     }
 
     ssize_t Send(const void* buf, size_t len, int flags = 0) const
     {
-        return send(mFd, buf, len, flags);
+        return send(m_Fd, buf, len, flags);
+    }
+
+    bool RecvN(void* buf, size_t rest, int flags = 0) const
+    {
+        while (rest > 0) {
+            ssize_t n = recv(m_Fd, buf, rest, flags);
+            if (n > 0) {
+                rest -= n;
+                buf = (char*)buf + n;
+            } else {
+                break;
+            }
+        }
+        return rest == 0;
+    }
+
+    bool SendN(const void* buf, size_t rest, int flags = 0) const
+    {
+        while (rest > 0) {
+            ssize_t n = send(m_Fd, buf, rest, flags);
+            if (n > 0) {
+                rest -= n;
+                buf = (char*)buf + n;
+            } else {
+                break;
+            }
+        }
+        return rest == 0;
     }
 };
-
-#undef SCX_SOCKET_COPY_SOCKET_COMMON
 
 class UnixSocket
 {
 
 };
-
 
 }
 #endif
