@@ -1,8 +1,12 @@
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
 
 #include <iostream>
+#include <fstream>
 using namespace std;
+
 #include <scx/ConfigFile.hpp>
 using namespace scx;
 
@@ -10,8 +14,12 @@ using namespace scx;
 #include "Server.h"
 #include "MainUi.h"
 
+const char* const PID_FILE = "/home/shen/project/mous/build/server.pid";
+
 bool InitConfig()
 {
+    return true;
+
     ConfigFile config;
     //config.Load("Config::ConfigPath");
 
@@ -43,21 +51,51 @@ bool InitConfig()
     }
 }
 
+pid_t FetchPid()
+{
+    pid_t pid = 0;
+    fstream stream;
+    stream.open(PID_FILE, ios::in);
+    if (stream.is_open()) {
+        stream >> pid;
+    }
+    stream.close();
+    return pid;
+}
+
+void StorePid()
+{
+    fstream stream;
+    stream.open(PID_FILE, ios::out);
+    stream << getpid();
+    stream.close();
+    cout << getpid() << endl;
+}
+
+void ClearPid()
+{
+    unlink(PID_FILE);
+}
+
 int main(int argc, char** argv)
 {
     if (!InitConfig())
         return -1;
 
-    pid_t pid = fork();
+    pid_t pid = FetchPid();
+    if (pid == 0 || (kill(pid, 0) != 0 && errno == ESRCH))
+        pid = fork();
 
     if (pid == 0) {
+        daemon(0, 1);
+        StorePid();
         Server server;
-        return server.Exec();
+        int ret = server.Exec();
+        cout << getpid() << endl;
+        ClearPid();
+        return ret;
     } else if (pid > 0) {
         MainUi ui;
         return ui.Exec();
-    } else {
-        cerr << "main(): Failed to fork()" << endl;
-        return -1;
     }
 }
