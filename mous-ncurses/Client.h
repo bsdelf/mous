@@ -20,7 +20,12 @@ public:
     bool Run(const string& ip, int port);
     void Stop();
 
+    void SetConnectMaxRetry(int max);
+    void SetConnectRetryInterval(int ms);
+
 public:
+    void StopService();
+
     void PlayerPlay(const string& path);
     void PlayerStop();
     void PlayerPause();
@@ -31,16 +36,21 @@ public:
     Signal<void (uint64_t)> SigPlayerCurrentMs;
 
 private:
-    void ThRecvLoop();
-    void HandlePlayer(char* buf, int size);
-    void HandlePlaylist(char* buf, int size);
+    void ThRecvLoop(const string&, int);
+    void HandlePlayer(char*, int);
+    void HandlePlaylist(char*, int);
 
-    char* GetSendOutBuffer(int size);
+    char* GetPayloadBuffer(char, int);
+    void SendOut();
 
 private:
-    Thread m_ListenThread;
-    TcpSocket m_Socket;
+    Thread m_RecvThread;
 
+    int m_ConnectMaxRetry;
+    int m_ConnectRetryInterval;
+    bool m_ConnectStopRetry;
+
+    TcpSocket m_Socket;
     vector<char> m_SendOutBuf;
 };
 

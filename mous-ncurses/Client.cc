@@ -1,5 +1,9 @@
 #include "Client.h"
 
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+
 #include <vector>
 #include <iostream>
 
@@ -9,7 +13,9 @@ using namespace Protocol;
 const int PAYLOADBUF_MAX_SIZE  = 1024;
 const int SENDOUTBUF_MAX_SIZE = 256;
 
-Client::Client()
+Client::Client():
+    m_ConnectMaxRetry(25),
+    m_ConnectRetryInterval(200)
 {
     /*
     char buf[1024];
@@ -30,17 +36,37 @@ Client::~Client()
 
 bool Client::Run(const string& ip, int port)
 {
-    if (!m_Socket.Connect(InetAddr(ip, port)))
-        return false;
-
-    Function<void (void)> fn(&Client::ThRecvLoop, this);
-    return m_ListenThread.Run(fn) == 0;
+    m_ConnectStopRetry = false;
+    Function<void (const string&, int)> fn(&Client::ThRecvLoop, this);
+    return m_RecvThread.Run(fn, ip, port) == 0;
 }
 
 void Client::Stop()
 {
+    m_ConnectStopRetry = true;
     m_Socket.Shutdown();
-    m_ListenThread.Join();
+    m_RecvThread.Join();
+}
+
+void Client::SetConnectMaxRetry(int max)
+{
+    m_ConnectMaxRetry = max;
+}
+
+void Client::SetConnectRetryInterval(int ms)
+{
+    m_ConnectRetryInterval = ms;
+}
+
+void Client::StopService()
+{
+    char op = Op::App::StopService;
+    int payloadSize = (BufObj(NULL) << op).GetOffset();
+
+    char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
+    BufObj(buf) << op;
+
+    SendOut();
 }
 
 void Client::PlayerPlay(const string& path)
@@ -48,18 +74,10 @@ void Client::PlayerPlay(const string& path)
     char op = Op::App::LoadPlay;
     int payloadSize = (BufObj(NULL) << op << path).GetOffset();
 
-    Header header;
-    header.group = Op::Group::Player;
-    header.payloadSize = payloadSize;
-
-    int size = header.GetTotalSize();
-    char* buf = GetSendOutBuffer(size);
-
-    header.Write(buf);
-    buf += Header::GetSize();
+    char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
     BufObj(buf) << op << path;
 
-    m_Socket.SendN(buf, size);
+    SendOut();
 }
 
 void Client::PlayerStop()
@@ -78,11 +96,31 @@ void Client::PlayerSeek(uint64_t ms)
 {
 }
 
-void Client::ThRecvLoop()
+void Client::ThRecvLoop(const string& ip, int port)
 {
+    for (int retryCount = 0; ; ++retryCount) {
+        if (m_Socket.Connect(InetAddr(ip, port))) {
+            cout << "Connected" << endl;
+            break;
+        }
+
+        perror("Error: cannot connect");
+        cout << errno << endl;
+        if (retryCount < m_ConnectMaxRetry && !m_ConnectStopRetry) {
+            cout << "Retry" << endl;
+            cout << "prev fd:" << m_Socket.GetFd();
+            m_Socket = TcpSocket();
+            cout << "new fd:" << m_Socket.GetFd();
+            usleep(m_ConnectRetryInterval*1000);
+        } else {
+            cout << "Failed" << endl;
+            return;
+        }
+    }
+
     vector<char> headerBuf(Header::GetSize());
     vector<char> payloadBuf;
-    Header header;
+    Header header(Op::Group::None, -1);
     char* buf;
     int size;
 
@@ -147,10 +185,20 @@ void Client::HandlePlaylist(char* buf, int size)
         return;
 }
 
-char* Client::GetSendOutBuffer(int size)
+char* Client::GetPayloadBuffer(char group, int payloadSize)
 {
+    Header header(group, payloadSize);
+    int size = header.GetTotalSize();
     if (m_SendOutBuf.size() > SENDOUTBUF_MAX_SIZE && size < SENDOUTBUF_MAX_SIZE)
         vector<char>(SENDOUTBUF_MAX_SIZE).swap(m_SendOutBuf);
     m_SendOutBuf.resize(size);
-    return &m_SendOutBuf[0];
+
+    char* buf = &m_SendOutBuf[0];
+    header.Write(buf);
+    return buf + Header::GetSize();
+}
+
+void Client::SendOut()
+{
+    m_Socket.SendN(&m_SendOutBuf[0], m_SendOutBuf.size());
 }

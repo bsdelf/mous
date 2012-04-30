@@ -91,7 +91,6 @@ int main(int argc, char** argv)
         StorePid();
         Server server;
         int ret = server.Exec();
-        cout << getpid() << endl;
         ClearPid();
         return ret;
     } else if (pid > 0) {

@@ -8,8 +8,7 @@ using namespace std;
 #include <scx/Thread.hpp>
 using namespace scx;
 
-#include "MousData.h"
-
+struct MousData;
 class Session;
 
 class Server
@@ -18,7 +17,7 @@ public:
     Server();
     ~Server();
 
-    bool Exec();
+    int Exec();
 
 private:
     void StopService();
@@ -26,7 +25,7 @@ private:
     void CloseSession(Session*);
 
 private:
-    MousData m_Data;
+    MousData* m_Data;
     TcpSocket m_Socket;
     int m_PipeFd[2];
     set<Session*> m_SessionSet;

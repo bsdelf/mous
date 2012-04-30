@@ -42,6 +42,11 @@ struct Header
     char group;
     int32_t payloadSize;
 
+    Header(char _group, int32_t _payloadSize):
+        group(_group), payloadSize(_payloadSize)
+    {
+    }
+
     static int GetSize()
     {
         return 4 + sizeof(char) + sizeof(int32_t);
@@ -79,7 +84,7 @@ enum e
     None = 0,
 
     // req:op(char)
-    Quit,
+    StopService,
     // req:op(char) path(str); ret:op(char)
     LoadPlay,
 

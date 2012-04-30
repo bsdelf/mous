@@ -2,8 +2,12 @@
 #define MOUSDATA_H
 
 #include <string>
+#include <vector>
 #include <map>
 using namespace std;
+
+#include <scx/Mutex.hpp>
+using namespace scx;
 
 #include <util/MediaItem.h>
 #include <util/Playlist.h>
@@ -13,8 +17,11 @@ using namespace std;
 #include <core/ITagParserFactory.h>
 using namespace mous;
 
+#include "Config.h"
+
 struct MousData
 {
+    Mutex mutex;
     IPluginManager* mgr;
     IMediaLoader* loader;
     IPlayer* player;
@@ -39,6 +46,37 @@ struct MousData
         IPlayer::Free(player);
 
         ClearPlaylist();
+    }
+
+    void Init()
+    {
+        mgr->LoadPluginDir(Config::PluginDir);
+
+        typedef vector<const IPluginAgent*> PluginAgentArray;
+
+        PluginAgentArray decoders;
+        mgr->GetPlugins(decoders, PluginType::Decoder);
+        //PluginAgentArray encoders;
+        //mgr->GetPlugins(encoders, PluginType::Encoder);
+        PluginAgentArray renderers;
+        mgr->GetPlugins(renderers, PluginType::Renderer);
+        PluginAgentArray mediaPacks;
+        mgr->GetPlugins(mediaPacks, PluginType::MediaPack);
+        PluginAgentArray tagParsers;
+        mgr->GetPlugins(tagParsers, PluginType::TagParser);
+
+        loader->RegisterMediaPackPlugin(mediaPacks);
+        loader->RegisterTagParserPlugin(tagParsers);
+
+        player->RegisterRendererPlugin(renderers[0]);
+        player->RegisterDecoderPlugin(decoders);
+    }
+
+    void Cleanup()
+    {
+        loader->UnregisterAll();
+        player->UnregisterAll();
+        mgr->UnloadAll();
     }
 
     void ClearPlaylist()

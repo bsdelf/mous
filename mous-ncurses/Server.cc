@@ -1,6 +1,7 @@
 #include "Server.h"
 #include "Config.h"
 #include "Session.h"
+#include "MousData.h"
 
 #include <unistd.h>
 #include <sys/select.h>
@@ -15,23 +16,28 @@ using namespace std;
 
 Server::Server()
 {
+    m_Data = new MousData;
     pipe(m_PipeFd);
 }
 
 Server::~Server()
 {
+    delete m_Data;
     close(m_PipeFd[0]);
     close(m_PipeFd[1]);
+    m_Socket.Close();
 }
 
-bool Server::Exec()
+int Server::Exec()
 {
+    m_Data->Init();
+
     string serverIp;
     int serverPort = -1;
     {
         ConfigFile conf;
         if (!conf.Load(Config::ConfigPath))
-            return false;
+            return 1;
 
         serverIp = conf[Config::ServerIp];
         serverPort = StrToNum<int>(conf[Config::ServerPort]);
@@ -41,12 +47,12 @@ bool Server::Exec()
     opt.reuseAddr = true;
     opt.reusePort = true;
     opt.keepAlive = true;
-
     m_Socket.SetOption(opt);
+
     if (!m_Socket.Bind(serverIp, serverPort))
-        return false;
+        return 1;
     if (!m_Socket.Listen())
-        return false;
+        return 1;
 
     int maxfd = std::max(m_Socket.GetFd(), m_PipeFd[0]) + 1;
     struct fd_set rset;
@@ -60,11 +66,10 @@ bool Server::Exec()
         if (select(maxfd, &rset, NULL, NULL, NULL) <= 0)
             break;
 
-        if (!m_Socket.Accept(clientSocket))
-            break;
-
         // open session
         if (FD_ISSET(m_Socket.GetFd(), &rset)) {
+            if (!m_Socket.Accept(clientSocket))
+                break;
             OpenSession(clientSocket);
         }
 
@@ -75,7 +80,7 @@ bool Server::Exec()
             switch (cmd) {
                 case 'q':
                 {
-                    unsigned long ptr = 0;
+                    Session::ptr_t ptr = 0;
                     read(m_PipeFd[0], &ptr, sizeof(ptr));
                     CloseSession(reinterpret_cast<Session*>(ptr));
                 }
@@ -92,7 +97,9 @@ bool Server::Exec()
         }
     }
 
-    return true;
+    m_Data->Cleanup();
+
+    return 0;
 }
 
 void Server::StopService()
@@ -114,7 +121,7 @@ void Server::OpenSession(TcpSocket& clientSocket)
 {
     Session* session = new Session();
     m_SessionSet.insert(session);
-    session->Run(clientSocket, &m_Data, m_PipeFd[1]);
+    session->Run(clientSocket, m_Data, m_PipeFd[1]);
 
     cout << "OpenSession()" << endl;
 }

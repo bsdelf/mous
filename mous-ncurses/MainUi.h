@@ -1,15 +1,18 @@
 #ifndef MAINUI_H
 #define MAINUI_H
 
-#include "Client.h"
+class Client;
 
 class MainUi
 {
 public:
+    MainUi();
+    ~MainUi();
+
     int Exec();
 
 private:
-    Client m_Client;
+    Client* m_Client;
 };
 
 #endif

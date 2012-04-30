@@ -11,6 +11,9 @@ struct MousData;
 class Session
 {
 public:
+    typedef unsigned long ptr_t;
+
+public:
     Session();
     ~Session();
 
@@ -19,12 +22,16 @@ public:
 
 private:
     void ThHandleLoop();
+    void HandleApp(char*, int);
+    void HandlePlayer(char*, int);
+    void HandlePlaylist(char*, int);
 
 private:
     Thread m_Thread;
     TcpSocket m_Socket;
     MousData* m_Data;
     int m_NotifyFd;
+    bool m_GotReqStopService;
 };
 
 #endif
