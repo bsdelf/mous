@@ -29,17 +29,17 @@ bool Session::Run(const TcpSocket& socket, MousData* data, int notifyFd)
     m_Socket = socket;
     m_Data = data;
     m_NotifyFd = notifyFd;
-    Function<void ()> fn(&Session::ThHandleLoop, this);
-    return m_Thread.Run(fn) == 0;
+    Function<void ()> fn(&Session::ThRecvLoop, this);
+    return m_RecvThread.Run(fn) == 0;
 }
 
 void Session::Stop()
 {
     m_Socket.Shutdown();
-    m_Thread.Join();
+    m_RecvThread.Join();
 }
 
-void Session::ThHandleLoop()
+void Session::ThRecvLoop()
 {
     vector<char> headerBuf(Header::GetSize());
     vector<char> payloadBuf;

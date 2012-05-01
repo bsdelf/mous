@@ -21,13 +21,13 @@ public:
     void Stop();
 
 private:
-    void ThHandleLoop();
+    void ThRecvLoop();
     void HandleApp(char*, int);
     void HandlePlayer(char*, int);
     void HandlePlaylist(char*, int);
 
 private:
-    Thread m_Thread;
+    Thread m_RecvThread;
     TcpSocket m_Socket;
     MousData* m_Data;
     int m_NotifyFd;

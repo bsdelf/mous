@@ -59,8 +59,7 @@ int Server::Exec()
     FD_ZERO(&rset);
 
     TcpSocket clientSocket;
-    bool stopService = false;
-    while (!stopService) {
+    for (bool stopService = false; !stopService; ) {
         FD_SET(m_Socket.GetFd(), &rset);
         FD_SET(m_PipeFd[0], &rset);
         if (select(maxfd, &rset, NULL, NULL, NULL) <= 0)
@@ -87,8 +86,10 @@ int Server::Exec()
                     break;
 
                 case 'Q':
+                {
                     StopService();
                     stopService = true;
+                }
                     break;
 
                 default:

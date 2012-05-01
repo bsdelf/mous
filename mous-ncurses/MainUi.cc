@@ -35,14 +35,7 @@ int MainUi::Exec()
 
     m_Client->Run(serverIp, serverPort);
 
-    char ch;
-    std::cin >> ch;
-    if (ch == 'q')
-        m_Client->StopService();
 
-    //pause();
-
-    /*
     initscr();
     cbreak();
     noecho();
@@ -54,7 +47,6 @@ int MainUi::Exec()
 
     getch();
     endwin();
-    */
 
     m_Client->Stop();
 

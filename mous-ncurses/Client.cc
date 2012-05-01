@@ -5,7 +5,6 @@
 #include <errno.h>
 
 #include <vector>
-#include <iostream>
 
 #include "Protocol.h"
 using namespace Protocol;
@@ -17,15 +16,6 @@ Client::Client():
     m_ConnectMaxRetry(25),
     m_ConnectRetryInterval(200)
 {
-    /*
-    char buf[1024];
-    cout << WriteString(buf, "hello") << endl;
-    string txt;
-    ReadString(buf, txt);
-    cout << txt << endl;
-    BufCast<int>(buf) = 10;
-    cout << BufCast<int>(buf) << endl;
-    */
 }
 
 Client::~Client()
@@ -100,20 +90,14 @@ void Client::ThRecvLoop(const string& ip, int port)
 {
     for (int retryCount = 0; ; ++retryCount) {
         if (m_Socket.Connect(InetAddr(ip, port))) {
-            cout << "Connected" << endl;
             break;
         }
 
-        perror("Error: cannot connect");
-        cout << errno << endl;
         if (retryCount < m_ConnectMaxRetry && !m_ConnectStopRetry) {
-            cout << "Retry" << endl;
-            cout << "prev fd:" << m_Socket.GetFd();
             m_Socket = TcpSocket();
-            cout << "new fd:" << m_Socket.GetFd();
             usleep(m_ConnectRetryInterval*1000);
         } else {
-            cout << "Failed" << endl;
+            perror("Failed to connect");
             return;
         }
     }
