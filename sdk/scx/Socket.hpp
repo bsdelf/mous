@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <strings.h>
 
 #include <string>
@@ -96,6 +97,23 @@ namespace HowShutdown {
 
 #define SCX_COPY_SOCKETCOMMON(Socket)\
 public:\
+    Socket(const Socket& socket)\
+    {                               \
+        m_Fd = dup(socket.m_Fd);    \
+    }                               \
+\
+    ~Socket()\
+    {               \
+        Shutdown(); \
+        Close();    \
+    }               \
+\
+    Socket& operator=(const Socket& socket)\
+    {                                       \
+        m_Fd = dup2(socket.m_Fd, m_Fd);     \
+        return *this;                       \
+    }                                       \
+\
     void Shutdown(int how = HowShutdown::ReadWrite)\
     {                           \
         shutdown(m_Fd, how);    \
