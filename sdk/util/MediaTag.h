@@ -21,6 +21,16 @@ struct MediaTag
         track(-1)
     {
     }
+
+    template<typename buf_t> void operator>>(buf_t& buf) const
+    {
+        buf << title << artist << album << comment << genre << year << track;
+    }
+
+    template<typename buf_t> void operator<<(buf_t& buf)
+    {
+        buf >> title >> artist >> album >> comment >> genre >> year >> track;
+    }
 };
 
 }

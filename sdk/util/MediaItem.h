@@ -24,6 +24,18 @@ struct MediaItem
     {
 
     }
+
+    template<typename buf_t> void operator>>(buf_t& buf) const
+    {
+        buf << url << duration << hasRange << msBeg << msEnd;
+        tag >> buf;
+    }
+
+    template<typename buf_t> void operator<<(buf_t& buf)
+    {
+        buf >> url >> duration >> hasRange >> msBeg >> msEnd;
+        tag << buf;
+    }
 };
 
 }
