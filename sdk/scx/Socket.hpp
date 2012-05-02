@@ -104,20 +104,21 @@ public:\
 \
     ~Socket()\
     {               \
-        Shutdown(); \
         Close();    \
     }               \
 \
     Socket& operator=(const Socket& socket)\
-    {                                       \
-        m_Fd = dup2(socket.m_Fd, m_Fd);     \
-        return *this;                       \
-    }                                       \
+    {                               \
+        Close();                    \
+        m_Fd = dup(socket.m_Fd);    \
+        return *this;               \
+    }                               \
 \
     void Shutdown(int how = HowShutdown::ReadWrite)\
-    {                           \
-        shutdown(m_Fd, how);    \
-    }                           \
+    {                               \
+        if (m_Fd != -1)             \
+            shutdown(m_Fd, how);    \
+    }                               \
 \
     void Close()\
     {                       \
@@ -133,6 +134,11 @@ public:\
     }                   \
 \
     InetAddr& GetAddr()\
+    {                       \
+        return m_InetAddr;  \
+    }                       \
+\
+    const InetAddr& GetAddr() const\
     {                       \
         return m_InetAddr;  \
     }                       \
