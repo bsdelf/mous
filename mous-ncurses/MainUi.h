@@ -1,7 +1,7 @@
 #ifndef MAINUI_H
 #define MAINUI_H
 
-class Client;
+struct PrivateMainUi;
 
 class MainUi
 {
@@ -12,7 +12,14 @@ public:
     int Exec();
 
 private:
-    Client* m_Client;
+    bool StartClient();
+    void StopClient();
+
+    void BeginNcurses();
+    void EndNcurses();
+
+private:
+    PrivateMainUi* d;
 };
 
 #endif
