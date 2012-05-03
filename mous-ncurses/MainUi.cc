@@ -1,6 +1,6 @@
 #include "MainUi.h"
 
-#include <ncurses.h>
+//#include <ncurses.h>
 
 #include <iostream>
 #include <map>
@@ -12,22 +12,51 @@ using namespace std;
 using namespace scx;
 
 #include <util/MediaItem.h>
-#include <util/Playlist.h>
 using namespace mous;
 
 #include "Config.h"
 #include "Client.h"
+#include "BgWindow.h"
+#include "IView.h"
+#include "ExplorerView.h"
+#include "PlaylistView.h"
+#include "StatusView.h"
+#include "HelpView.h"
+
+namespace ViewType {
+enum e
+{
+    Explorer = 0,
+    Playlist,
+    Help,
+    Status,
+
+    Count
+};
+}
+typedef ViewType::e EmViewType;
+
+const int PLAYLIST_COUNT = 6;
 
 struct PrivateMainUi
 {
     Client client;
 
-    typedef Playlist<MediaItem*> playlist_t;
-    typedef map<string, playlist_t*>::iterator PlaylistMapIter;
-    typedef map<string, playlist_t*>::const_iterator PlaylistMapConstIter;
-    map<string, playlist_t*> playlistMap;
+    BgWindow bgWindow;
 
-    WINDOW* wnd;
+    IView* focusedView;
+    PlaylistView* currentPlaylist;
+
+    ExplorerView explorerView;
+    PlaylistView playlistView[PLAYLIST_COUNT];
+    HelpView helpView;
+    StatusView statusView;
+
+    PrivateMainUi():
+        focusedView(playlistView),
+        currentPlaylist(playlistView)
+    {
+    }
 };
 
 MainUi::MainUi()
@@ -45,12 +74,21 @@ int MainUi::Exec()
     if (!StartClient())
         return 1;
     BeginNcurses();
+    OnResize();
 
-    d->wnd = newwin(3, 10, (LINES-3)/2, (COLS-10)/2);
-    box(d->wnd, 0, 0);
-    wborder(d->wnd, '|', '|', '-', '-', '+', '+', '+', '+');
-    wrefresh(d->wnd);
-    getch();
+    for (bool quit = false; !quit; quit = false) {
+        int key = d->bgWindow.GetInput();
+        if (HandleTopKey(key, quit)) {
+            if (quit)
+                break;
+            else
+                continue;
+         } else if (d->statusView.InjectKey(key)) {
+            continue;
+         } else  {
+            d->focusedView->InjectKey(key);
+         }
+    }
 
     EndNcurses();
     StopClient();
@@ -84,9 +122,82 @@ void MainUi::BeginNcurses()
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
+    refresh();
 }
 
 void MainUi::EndNcurses()
 {
     endwin();
 }
+
+bool MainUi::HandleTopKey(int key, bool& quit)
+{
+    switch (key) {
+        case KEY_RESIZE:
+            OnResize();
+            break;
+
+        case 'E':
+            ShowOrHideExplorer();
+            break;
+
+        case 'H':
+            ShowOrHideHelp();
+            break;
+
+        case '\t':
+            SwitchFocus();
+            break;
+
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+            SwitchPlaylist(StrToNum<int>(string(1, (char)key)));
+            break;
+
+        case 'q':
+            quit = true;
+            break;
+
+        case 'Q':
+            quit = true;
+            break;
+
+        default:
+            return false;
+    }
+    return true;
+}
+
+void MainUi::OnResize()
+{
+    d->bgWindow.OnResize();
+}
+
+void MainUi::ShowOrHideExplorer()
+{
+}
+
+void MainUi::ShowOrHideHelp()
+{
+}
+
+void MainUi::SwitchFocus()
+{
+}
+
+void MainUi::SwitchPlaylist(int n)
+{
+    PlaylistView* v = d->playlistView;
+    PlaylistView*& current = d->currentPlaylist;
+    if (v+n != current) {
+        current = v+n;
+        for (int i = 0; i < PLAYLIST_COUNT; ++i) {
+            v[i].Show(v+i == current);
+        }
+    }
+}
+

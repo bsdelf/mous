@@ -18,6 +18,13 @@ private:
     void BeginNcurses();
     void EndNcurses();
 
+    bool HandleTopKey(int, bool&);
+    void OnResize();
+    void ShowOrHideExplorer();
+    void ShowOrHideHelp();
+    void SwitchFocus();
+    void SwitchPlaylist(int);
+
 private:
     PrivateMainUi* d;
 };

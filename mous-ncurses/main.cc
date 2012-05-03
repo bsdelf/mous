@@ -87,7 +87,7 @@ int main(int argc, char** argv)
         pid = fork();
 
     if (pid == 0) {
-        daemon(0, 1);
+        daemon(0, 0);
         StorePid();
         Server server;
         int ret = server.Exec();
