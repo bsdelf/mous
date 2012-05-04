@@ -17,11 +17,21 @@ public:
 
     bool InjectKey(int key);
 
-    void Show(bool shown);
+    void Show(bool show);
     bool IsShown() const;
 
-    void SetFocus(bool focused);
-    bool HasFocus() const;
+private:
+    void Cleanup();
+
+private:
+    WINDOW* m_Wnd;
+    PANEL* m_Panel;
+    bool m_Shown;
+    bool m_Focused;
+    int m_Width;
+    int m_Height;
+    int m_LineBegin;
+    int m_LineCount;
 };
 
 #endif

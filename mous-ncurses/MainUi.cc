@@ -3,7 +3,6 @@
 //#include <ncurses.h>
 
 #include <iostream>
-#include <map>
 #include <vector>
 #include <stack>
 #include <string>
@@ -276,6 +275,7 @@ void MainUi::ShowOrHideHelp()
         d->viewStack.pop();
     } else {
         d->viewStack.push(View::MaskHelp);
+        d->focusedView = &d->helpView;
     }
     RefreshViews();
 }
