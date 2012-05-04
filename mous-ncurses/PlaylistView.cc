@@ -8,8 +8,11 @@ PlaylistView::~PlaylistView()
 {
 }
 
-
 void PlaylistView::OnResize(int x, int y, int w, int h)
+{
+}
+
+void PlaylistView::Refresh(int x, int y, int w, int h)
 {
 }
 
@@ -18,21 +21,20 @@ bool PlaylistView::InjectKey(int key)
     return true;
 }
 
-void PlaylistView::SetFocus(bool focused)
-{
-}
-
-bool PlaylistView::HasFocus()
-{
-    return true;
-}
-
 void PlaylistView::Show(bool shown)
 {
 }
 
-bool PlaylistView::IsShown()
+bool PlaylistView::IsShown() const
 {
     return true;
 }
 
+void PlaylistView::SetFocus(bool focused)
+{
+}
+
+bool PlaylistView::HasFocus() const
+{
+    return true;
+}

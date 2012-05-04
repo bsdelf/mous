@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
+#include <stack>
 #include <string>
 using namespace std;
 
@@ -23,8 +25,8 @@ using namespace mous;
 #include "StatusView.h"
 #include "HelpView.h"
 
-namespace ViewType {
-enum e
+namespace View {
+enum Type
 {
     Explorer = 0,
     Playlist,
@@ -33,8 +35,16 @@ enum e
 
     Count
 };
+
+typedef unsigned int mask_t;
+
+const mask_t MaskExplorer = 1 << Explorer;
+const mask_t MaskPlaylist = 1 << Playlist;
+const mask_t MaskHelp = 1 << Help;
+const mask_t MaskStatus = 1 << Status;
+
 }
-typedef ViewType::e EmViewType;
+typedef View::Type EmViewType;
 
 const int PLAYLIST_COUNT = 6;
 
@@ -45,17 +55,25 @@ struct PrivateMainUi
     BgWindow bgWindow;
 
     IView* focusedView;
-    PlaylistView* currentPlaylist;
+    int playlistIndex;
 
     ExplorerView explorerView;
     PlaylistView playlistView[PLAYLIST_COUNT];
     HelpView helpView;
     StatusView statusView;
 
+    stack<View::mask_t> viewStack;
+    vector<IView*> viewGroup;
+
     PrivateMainUi():
         focusedView(playlistView),
-        currentPlaylist(playlistView)
+        playlistIndex(1)
     {
+        viewGroup.push_back(&explorerView);
+        viewGroup.push_back(&helpView);
+        viewGroup.push_back(&statusView);
+        for (int i = 0; i < PLAYLIST_COUNT; ++i)
+            viewGroup.push_back(playlistView+i);
     }
 };
 
@@ -175,29 +193,104 @@ bool MainUi::HandleTopKey(int key, bool& quit)
 void MainUi::OnResize()
 {
     d->bgWindow.OnResize();
+
+    const int w = d->bgWindow.GetWidth();
+    const int h = d->bgWindow.GetHeight();
+
+    for (size_t i = 0; i < d->viewGroup.size(); ++i)
+        d->viewGroup[i]->OnResize(0, 0, w, h);
+
+    RefreshViews();
+}
+
+void MainUi::RefreshViews()
+{
+    for (size_t i = 0; i < d->viewGroup.size(); ++i)
+        d->viewGroup[i]->Show(false);
+
+    const int w = d->bgWindow.GetWidth();
+    const int h = d->bgWindow.GetHeight();
+
+    View::mask_t mask = d->viewStack.top();
+    switch (mask) {
+        case View::MaskHelp:
+        {
+            d->helpView.Refresh(0, 0, w, h);
+            d->helpView.Show(true);
+        }
+            break;
+
+        case View::MaskPlaylist | View::MaskStatus:
+        {
+            int x = 0, y = 0;
+            int hsta = d->statusView.GetMinHeight();
+            int hpla = h - hsta;
+
+            for (int i = 0; i < PLAYLIST_COUNT; ++i)
+                d->playlistView[i].Refresh(x, y, w, hpla);
+            d->playlistView[d->playlistIndex].Show(true);
+            y += hpla;
+
+            d->statusView.Refresh(x, y, w, hsta);
+            d->statusView.Show(true);
+        }
+            break;
+
+        case View::MaskExplorer | View::MaskPlaylist | View::MaskStatus:
+        {
+            int wexp = w/2;
+            int wpla = w - wexp;
+            int hsta = d->statusView.GetMinHeight();
+            int hexpla = h - hsta;
+            int x = 0, y = 0;
+
+            d->explorerView.Refresh(x, y, wexp, hexpla);
+            d->explorerView.Show(true);
+            x += wexp;
+
+            for (int i = 0; i < PLAYLIST_COUNT; ++i)
+                d->playlistView[i].Refresh(x, y, wpla, hexpla);
+            d->playlistView[d->playlistIndex].Show(true);
+            x = 0; y += hexpla;
+
+            d->statusView.Refresh(x, y, w, hsta);
+            d->statusView.Show(true);
+        }
+            break;
+
+        default:
+            break;
+    }
 }
 
 void MainUi::ShowOrHideExplorer()
 {
+    RefreshViews();
 }
 
 void MainUi::ShowOrHideHelp()
 {
+    if (d->helpView.IsShown()) {
+        d->viewStack.pop();
+    } else {
+        d->viewStack.push(View::MaskHelp);
+    }
+    RefreshViews();
 }
 
 void MainUi::SwitchFocus()
 {
+    RefreshViews();
 }
 
 void MainUi::SwitchPlaylist(int n)
 {
     PlaylistView* v = d->playlistView;
-    PlaylistView*& current = d->currentPlaylist;
-    if (v+n != current) {
-        current = v+n;
-        for (int i = 0; i < PLAYLIST_COUNT; ++i) {
-            v[i].Show(v+i == current);
-        }
+    if (n == d->playlistIndex)
+        return;
+    d->playlistIndex = n;
+    for (int i = 0; i < PLAYLIST_COUNT; ++i) {
+        v[i].Show(i == n);
     }
 }
 

@@ -24,7 +24,17 @@ public:
         wrefresh(m_Wnd);
     }
 
-    int GetInput()
+    int GetWidth() const
+    {
+        return COLS;
+    }
+
+    int GetHeight() const
+    {
+        return LINES;
+    }
+
+    int GetInput() const
     {
         wmove(m_Wnd, 0, 0);
         curs_set(0);

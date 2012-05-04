@@ -17,14 +17,15 @@ public:
     ~PlaylistView();
 
     void OnResize(int x, int y, int w, int h);
+    void Refresh(int x, int y, int w, int h);
 
     bool InjectKey(int key);
 
-    void SetFocus(bool focused);
-    bool HasFocus();
-
     void Show(bool shown);
-    bool IsShown();
+    bool IsShown() const;
+
+    void SetFocus(bool focused);
+    bool HasFocus() const;
 
 private:
     Playlist<MediaItem*> m_List;

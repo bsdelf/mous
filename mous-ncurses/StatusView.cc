@@ -8,6 +8,14 @@ StatusView::~StatusView()
 {
 }
 
+void StatusView::OnResize(int x, int y, int w, int h)
+{
+}
+
+void StatusView::Refresh(int x, int y, int w, int h)
+{
+}
+
 bool StatusView::InjectKey(int key)
 {
     switch (key) {
@@ -36,4 +44,25 @@ bool StatusView::InjectKey(int key)
             return false;
     }
     return true;
+}
+
+void StatusView::Show(bool shown)
+{
+}
+
+bool StatusView::IsShown() const
+{
+}
+
+void StatusView::SetFocus(bool focused)
+{
+}
+
+bool StatusView::HasFocus() const
+{
+}
+
+int StatusView::GetMinHeight() const
+{
+    return 3;
 }
