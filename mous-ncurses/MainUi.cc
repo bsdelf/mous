@@ -66,9 +66,11 @@ struct PrivateMainUi
     vector<IView*> viewGroup;
 
     PrivateMainUi():
-        focusedView(playlistView),
+        focusedView(playlistView+1),
         playlistIndex(1)
     {
+        viewStack.push(View::MaskPlaylist | View::MaskStatus);
+
         viewGroup.push_back(&explorerView);
         viewGroup.push_back(&helpView);
         viewGroup.push_back(&statusView);
