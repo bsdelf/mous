@@ -1,5 +1,4 @@
 #include "HelpView.h"
-using namespace ViewHelper;
 
 #include <algorithm>
 
@@ -59,10 +58,6 @@ const char* const STR_ARRAY[] =
 };
 
 HelpView::HelpView():
-    m_Wnd(NULL),
-    m_Panel(NULL),
-    m_Width(0),
-    m_Height(0),
     m_LineBegin(0),
     m_LineCount(sizeof(STR_ARRAY)/sizeof(STR_ARRAY[0]))
 {
@@ -70,51 +65,42 @@ HelpView::HelpView():
 
 HelpView::~HelpView()
 {
-    Cleanup();
 }
 
 void HelpView::OnResize(int x, int y, int w, int h)
 {
-    Cleanup();
-
-    m_Wnd = newwin(h, w, y, x);
-    m_Panel = new_panel(m_Wnd);
-    box(m_Wnd, 0, 0);
-
-    m_Width = w;
-    m_Height = h;
+    d.Cleanup();
+    d.Init(x, y, w, h);
 }
 
 void HelpView::Refresh()
 {
-    werase(m_Wnd);
-    box(m_Wnd, 0, 0);
+    d.Clear();
 
-    CenterPrint(m_Wnd, 0, m_Width, "^b[Help]");
-
-    for (int l = 0; l < m_Height-2 && l < m_LineCount - m_LineBegin; ++l) {
+    d.CenterPrint(0, "^b[Help]");
+    for (int l = 0; l < d.height-2 && l < m_LineCount - m_LineBegin; ++l) {
         int index = m_LineBegin+l;
-        mvwprintw(m_Wnd, l+1, 8, STR_ARRAY[index]);
+        d.Print(8, l+1, STR_ARRAY[index]);
     }
 
-    wrefresh(m_Wnd);
+    d.Refresh();
 }
 
 void HelpView::MoveTo(int x, int y)
 {
-    mvwin(m_Wnd, y, x);
+    d.MoveTo(x, y);
 }
 
 void HelpView::Resize(int w, int h)
 {
-    wresize(m_Wnd, h, w);
+    d.Resize(w, h);
 }
 
 bool HelpView::InjectKey(int key)
 {
     switch (key) {
         case 'j':
-            if (m_LineBegin < m_LineCount-(m_Height-2))
+            if (m_LineBegin < m_LineCount-(d.height-2))
                 ++m_LineBegin;
             break;
 
@@ -132,30 +118,10 @@ bool HelpView::InjectKey(int key)
 
 void HelpView::Show(bool show)
 {
-    if (show)
-        show_panel(m_Panel);
-    else
-        hide_panel(m_Panel);
-    update_panels();
-    doupdate();
-
-    m_Shown = show;
+    d.Show(show);
 }
 
 bool HelpView::IsShown() const
 {
-    return m_Shown;
-}
-
-void HelpView::Cleanup()
-{
-    if (m_Panel != NULL) {
-        del_panel(m_Panel);
-        m_Panel = NULL;
-    }
-
-    if (m_Wnd != NULL) {
-        delwin(m_Wnd);
-        m_Wnd = NULL;
-    }
+    return d.shown;
 }

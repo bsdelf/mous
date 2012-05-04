@@ -1,9 +1,6 @@
 #ifndef HELPVIEW_H
 #define HELPVIEW_H
 
-#include <ncurses.h>
-#include <panel.h>
-
 #include "IView.h"
 
 class HelpView: public IView
@@ -27,12 +24,7 @@ private:
     void Cleanup();
 
 private:
-    WINDOW* m_Wnd;
-    PANEL* m_Panel;
-    bool m_Shown;
-    int m_Width;
-    int m_Height;
-
+    ViewData d;
     int m_LineBegin;
     int m_LineCount;
 };
