@@ -20,7 +20,6 @@ public:
     {
         Cleanup();
         m_Wnd = newwin(LINES, COLS, 0, 0);
-        box(m_Wnd, 0, 0);
         wrefresh(m_Wnd);
     }
 
@@ -44,8 +43,10 @@ public:
 private:
     void Cleanup()
     {
-        if (m_Wnd != NULL)
+        if (m_Wnd != NULL) {
             delwin(m_Wnd);
+            m_Wnd = NULL;
+        }
     }
 
 private:
