@@ -39,7 +39,7 @@ const char* const STR_ARRAY[] =
     "j      scroll down",
     "h      show previous playlist",
     "l      show next playlist",
-    "d      remove item"
+    "d      remove item",
     "c      cut item and put it into queue",
     "y      copy item and put it into queue",
     "p      paste the first item of queue to next line",
@@ -61,7 +61,6 @@ const char* const STR_ARRAY[] =
 HelpView::HelpView():
     m_Wnd(NULL),
     m_Panel(NULL),
-    m_Focused(false),
     m_Width(0),
     m_Height(0),
     m_LineBegin(0),
@@ -77,6 +76,7 @@ HelpView::~HelpView()
 void HelpView::OnResize(int x, int y, int w, int h)
 {
     Cleanup();
+
     m_Wnd = newwin(h, w, y, x);
     m_Panel = new_panel(m_Wnd);
     box(m_Wnd, 0, 0);
@@ -85,12 +85,12 @@ void HelpView::OnResize(int x, int y, int w, int h)
     m_Height = h;
 }
 
-void HelpView::Refresh(int x, int y, int w, int h)
+void HelpView::Refresh()
 {
     werase(m_Wnd);
     box(m_Wnd, 0, 0);
 
-    PrintAtCenter(m_Wnd, 0, m_Width, "^b[Help]");
+    CenterPrint(m_Wnd, 0, m_Width, "^b[Help]");
 
     for (int l = 0; l < m_Height-2 && l < m_LineCount - m_LineBegin; ++l) {
         int index = m_LineBegin+l;
@@ -98,6 +98,16 @@ void HelpView::Refresh(int x, int y, int w, int h)
     }
 
     wrefresh(m_Wnd);
+}
+
+void HelpView::MoveTo(int x, int y)
+{
+    mvwin(m_Wnd, y, x);
+}
+
+void HelpView::Resize(int w, int h)
+{
+    wresize(m_Wnd, h, w);
 }
 
 bool HelpView::InjectKey(int key)
@@ -116,7 +126,7 @@ bool HelpView::InjectKey(int key)
         default:
             return false;
     }
-    Refresh(0, 0, 0, 0);
+    Refresh();
     return true;
 }
 

@@ -12,7 +12,10 @@ public:
     virtual ~IView() { }
 
     virtual void OnResize(int x, int y, int w, int h) = 0;
-    virtual void Refresh(int x, int y, int w, int h) = 0;
+
+    virtual void MoveTo(int x, int y) = 0;
+    virtual void Resize(int w, int h) = 0;
+    virtual void Refresh() = 0;
 
     virtual bool InjectKey(int key) = 0;
 
@@ -25,11 +28,9 @@ public:
 
 namespace ViewHelper {
 
-const int LEFT_MARGIN = 4;
-
 using namespace std;
 
-static inline void PrintAtCenter(WINDOW* wnd, int y, int w, const string& str)
+static inline void CenterPrint(WINDOW* wnd, int y, int w, const string& str)
 {
     // NOTE: wide character not considered presently
     int x = (w - str.size()) / 2;

@@ -12,7 +12,15 @@ void StatusView::OnResize(int x, int y, int w, int h)
 {
 }
 
-void StatusView::Refresh(int x, int y, int w, int h)
+void StatusView::Refresh()
+{
+}
+
+void StatusView::MoveTo(int x, int y)
+{
+}
+
+void StatusView::Resize(int w, int h)
 {
 }
 

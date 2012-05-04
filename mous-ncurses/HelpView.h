@@ -13,7 +13,10 @@ public:
     ~HelpView();
 
     void OnResize(int x, int y, int w, int h);
-    void Refresh(int x, int y, int w, int h);
+
+    void MoveTo(int x, int y);
+    void Resize(int w, int h);
+    void Refresh();
 
     bool InjectKey(int key);
 
@@ -27,9 +30,9 @@ private:
     WINDOW* m_Wnd;
     PANEL* m_Panel;
     bool m_Shown;
-    bool m_Focused;
     int m_Width;
     int m_Height;
+
     int m_LineBegin;
     int m_LineCount;
 };

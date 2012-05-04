@@ -12,7 +12,15 @@ void ExplorerView::OnResize(int x, int y, int w, int h)
 {
 }
 
-void ExplorerView::Refresh(int x, int y, int w, int h)
+void ExplorerView::Refresh()
+{
+}
+
+void ExplorerView::MoveTo(int x, int y)
+{
+}
+
+void ExplorerView::Resize(int w, int h)
 {
 }
 

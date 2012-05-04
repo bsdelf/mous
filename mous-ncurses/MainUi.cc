@@ -216,7 +216,8 @@ void MainUi::RefreshViews()
     switch (mask) {
         case View::MaskHelp:
         {
-            d->helpView.Refresh(0, 0, w, h);
+            d->helpView.Resize(w, h);
+            d->helpView.Refresh();
             d->helpView.Show(true);
         }
             break;
@@ -227,12 +228,17 @@ void MainUi::RefreshViews()
             int hsta = d->statusView.GetMinHeight();
             int hpla = h - hsta;
 
-            for (int i = 0; i < PLAYLIST_COUNT; ++i)
-                d->playlistView[i].Refresh(x, y, w, hpla);
+            for (int i = 0; i < PLAYLIST_COUNT; ++i) {
+                d->playlistView[i].MoveTo(x, y);
+                d->playlistView[i].Resize(w, hpla);
+                d->playlistView[i].Refresh();
+            }
             d->playlistView[d->playlistIndex].Show(true);
             y += hpla;
 
-            d->statusView.Refresh(x, y, w, hsta);
+            d->statusView.MoveTo(x, y);
+            d->statusView.Resize(w, hsta);
+            d->statusView.Refresh();
             d->statusView.Show(true);
         }
             break;
@@ -245,16 +251,23 @@ void MainUi::RefreshViews()
             int hexpla = h - hsta;
             int x = 0, y = 0;
 
-            d->explorerView.Refresh(x, y, wexp, hexpla);
+            d->explorerView.MoveTo(x, y);
+            d->explorerView.Resize(wexp, hexpla);
+            d->explorerView.Refresh();
             d->explorerView.Show(true);
             x += wexp;
 
-            for (int i = 0; i < PLAYLIST_COUNT; ++i)
-                d->playlistView[i].Refresh(x, y, wpla, hexpla);
+            for (int i = 0; i < PLAYLIST_COUNT; ++i) {
+                d->playlistView[i].MoveTo(x, y);
+                d->playlistView[i].Resize(wpla, hexpla);
+                d->playlistView[i].Refresh();
+            }
             d->playlistView[d->playlistIndex].Show(true);
             x = 0; y += hexpla;
 
-            d->statusView.Refresh(x, y, w, hsta);
+            d->statusView.MoveTo(x, y);
+            d->statusView.Resize(w, hsta);
+            d->statusView.Refresh();
             d->statusView.Show(true);
         }
             break;
