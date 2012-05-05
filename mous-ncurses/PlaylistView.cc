@@ -1,4 +1,8 @@
 #include "PlaylistView.h"
+#include <sstream>
+using namespace std;
+
+const string STR_TITLE = "Playlist";
 
 PlaylistView::PlaylistView():
     m_Focused(false),
@@ -25,7 +29,10 @@ void PlaylistView::Refresh()
 {
     d.Clear();
 
-    d.CenterPrint(0, "^b[Playlist]");
+    stringstream stream;
+    stream << (m_Focused ? "^b" :  "") 
+        << "[ " << STR_TITLE << " " << m_Index << " ]";
+    d.CenterPrint(0, stream.str());
 
     d.Refresh();
 }

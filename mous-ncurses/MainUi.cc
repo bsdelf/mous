@@ -50,11 +50,30 @@ const int PLAYLIST_COUNT = 6;
 struct LayerInfo
 {
     View::mask_t mask;
-    set<IView*> shown;
+    set<IView*> views;
     stack<IView*> focused;
+
+    typedef set<IView*> ShownSet;
+    typedef set<IView*>::iterator ShownSetIter;
+
+    void RefreshViews()
+    {
+        ShownSetIter iter = views.begin();
+        ShownSetIter end = views.end();
+        for (; iter != end; ++iter) {
+            (*iter)->Refresh();
+        }
+    }
+
+    void ShowViews(bool show)
+    {
+        ShownSetIter iter = views.begin();
+        ShownSetIter end = views.end();
+        for (; iter != end; ++iter) {
+            (*iter)->Show(show);
+        }
+    }
 };
-typedef set<IView*> ShownSet;
-typedef set<IView*>::iterator ShownSetIter;
 
 struct PrivateMainUi
 {
@@ -73,12 +92,18 @@ struct PrivateMainUi
     PrivateMainUi():
         playlistIndex(1)
     {
+        PlaylistView& playlist = playlistView[playlistIndex];
+
         LayerInfo layer;
         layer.mask = View::MaskPlaylist | View::MaskStatus;
-        layer.focused.push(playlistView + playlistIndex);
-        layer.shown.insert(layer.focused.top());
-        layer.shown.insert(&statusView);
+        layer.views.insert(&playlist);
+        layer.views.insert(&statusView);
+        layer.focused.push(&playlist);
         layerStack.push(layer);
+
+        for (int i = 0; i < PLAYLIST_COUNT; ++i)
+            playlistView[i].SetIndex(i);
+        playlist.SetFocus(true);
     }
 };
 
@@ -97,6 +122,7 @@ int MainUi::Exec()
     if (!StartClient())
         return 1;
     BeginNcurses();
+
     OnResize();
 
     for (bool quit = false; !quit; quit = false) {
@@ -153,6 +179,14 @@ void MainUi::EndNcurses()
     endwin();
 }
 
+/* 
+ * NOTE: the best solution is that 
+ * each layer has its own HandleTopKey() 
+ * which is stored in layerStack as a function,
+ * and handle KEY_RESIZE in HandleResize().
+ * by this way,
+ * we do not need to check layerStack.size()!
+ */
 bool MainUi::HandleTopKey(int key, bool& quit)
 {
     switch (key) {
@@ -161,7 +195,8 @@ bool MainUi::HandleTopKey(int key, bool& quit)
             break;
 
         case 'E':
-            ShowOrHideExplorer();
+            if (d->layerStack.size() == 1)
+                ShowOrHideExplorer();
             break;
 
         case 'H':
@@ -169,7 +204,8 @@ bool MainUi::HandleTopKey(int key, bool& quit)
             break;
 
         case '\t':
-            SwitchFocus();
+            if (d->layerStack.size() == 1)
+                SwitchFocus();
             break;
 
         case '0':
@@ -178,14 +214,14 @@ bool MainUi::HandleTopKey(int key, bool& quit)
         case '3':
         case '4':
         case '5':
-            SwitchPlaylist(StrToNum<int>(string(1, (char)key)));
-            break;
-
-        case 'q':
-            quit = true;
+                SwitchPlaylist(StrToNum<int>(string(1, (char)key)));
             break;
 
         case 'Q':
+            quit = true;
+            break;
+
+        case 'X':
             quit = true;
             break;
 
@@ -199,13 +235,17 @@ void MainUi::OnResize()
 {
     d->bgWindow.OnResize();
 
-    UpdateLayout();
+    d->layerStack.top().ShowViews(false);
+    UpdateTopLayout();
 }
 
-void MainUi::UpdateLayout()
+/* update the layout of top layer */
+void MainUi::UpdateTopLayout()
 {
     const int w = d->bgWindow.GetWidth();
     const int h = d->bgWindow.GetHeight();
+
+    d->layerStack.top().ShowViews(true);
 
     View::mask_t mask = d->layerStack.top().mask;
     switch (mask) {
@@ -222,12 +262,9 @@ void MainUi::UpdateLayout()
             int hStatus = d->statusView.GetMinHeight();
             int hPlaylist = h - hStatus;
 
-            for (int i = 0; i < PLAYLIST_COUNT; ++i) {
-                d->playlistView[i].MoveTo(x, y);
-                d->playlistView[i].Resize(w, hPlaylist);
-            }
-            d->playlistView[d->playlistIndex].Show(true);
-            d->playlistView[d->playlistIndex].Refresh();
+            PlaylistView& playlist = d->playlistView[d->playlistIndex];
+            playlist.MoveTo(x, y);
+            playlist.Resize(w, hPlaylist);
             y += hPlaylist;
 
             d->statusView.MoveTo(x, y);
@@ -247,12 +284,9 @@ void MainUi::UpdateLayout()
             d->explorerView.Resize(wExplorer, hExplorer);
             x += wExplorer;
 
-            for (int i = 0; i < PLAYLIST_COUNT; ++i) {
-                d->playlistView[i].MoveTo(x, y);
-                d->playlistView[i].Resize(wPlaylist, hExplorer);
-            }
-            d->playlistView[d->playlistIndex].Show(true);
-            d->playlistView[d->playlistIndex].Refresh();
+            PlaylistView& playlist = d->playlistView[d->playlistIndex];
+            playlist.MoveTo(x, y);
+            playlist.Resize(wPlaylist, hExplorer);
             x = 0; y += hExplorer;
 
             d->statusView.MoveTo(x, y);
@@ -264,63 +298,87 @@ void MainUi::UpdateLayout()
             break;
     }
 
-    ShownSet& shown = d->layerStack.top().shown;
-    ShownSetIter iter = shown.begin();
-    ShownSetIter end = shown.end();
-    for (; iter != end; ++iter) {
-        (*iter)->Show(true);
-        (*iter)->Refresh();
-    }
+    d->layerStack.top().RefreshViews();
 }
 
-// on same layer
+/* on same layer */
 void MainUi::ShowOrHideExplorer()
 {
     LayerInfo& layer = d->layerStack.top();
+    layer.focused.top()->SetFocus(false);
     if (d->explorerView.IsShown()) {
+        // remove view
         d->explorerView.Show(false);
-        // update layer info
-        layer.mask ^= View::MaskExplorer;
-        layer.shown.erase(&d->explorerView);
+        layer.mask &= ~View::MaskExplorer;
+        layer.views.erase(&d->explorerView);
         layer.focused.pop();
+
     } else {
+        // add view
         layer.mask |= View::MaskExplorer;
-        layer.shown.insert(&d->explorerView);
+        layer.views.insert(&d->explorerView);
         layer.focused.push(&d->explorerView);
     }
-    UpdateLayout();
+    layer.focused.top()->SetFocus(true);
+    UpdateTopLayout();
 }
 
-// between different layers
+/* between different layers */
 void MainUi::ShowOrHideHelp()
 {
-    if (d->helpView.IsShown()) {
-        d->helpView.Show(false);
-        // only need to drop
+    bool helpViewShown = d->helpView.IsShown();
+    d->layerStack.top().ShowViews(false);
+    d->layerStack.top().focused.top()->SetFocus(false);
+    if (helpViewShown) {
+        // drop layer
         d->layerStack.pop();
     } else {
+        // push layer
         LayerInfo layer;
         layer.mask = View::MaskHelp;
         layer.focused.push(&d->helpView);
-        layer.shown.insert(&d->helpView);
+        layer.views.insert(&d->helpView);
         d->layerStack.push(layer);
     }
-    UpdateLayout();
+    d->layerStack.top().focused.top()->SetFocus(true);
+    UpdateTopLayout();
 }
 
 // on same layer
 void MainUi::SwitchFocus()
 {
+    if (!d->explorerView.IsShown())
+        return;
+
+    LayerInfo& layer = d->layerStack.top();
+    IView* focused = layer.focused.top();
+    layer.focused.top()->SetFocus(false);
+    layer.focused.top() = 
+        (focused == (IView*)&d->explorerView) ? 
+        (IView*)(d->playlistView+d->playlistIndex) : 
+        (IView*)&d->explorerView;
+    layer.focused.top()->SetFocus(true);
+    layer.RefreshViews();
 }
 
 void MainUi::SwitchPlaylist(int n)
 {
-    PlaylistView* v = d->playlistView;
     if (n == d->playlistIndex)
         return;
+    int oldn = d->playlistIndex;
     d->playlistIndex = n;
-    for (int i = 0; i < PLAYLIST_COUNT; ++i) {
-        v[i].Show(i == n);
+
+    d->playlistView[oldn].Show(false);
+
+    LayerInfo& layer = d->layerStack.top();
+    layer.views.erase(d->playlistView+oldn);
+    layer.views.insert(d->playlistView+n);
+    if (d->playlistView[oldn].HasFocus()) {
+        d->playlistView[oldn].SetFocus(false);
+        layer.focused.top() = d->playlistView + n;
+        layer.focused.top()->SetFocus(true);
     }
+
+    UpdateTopLayout();
 }
 

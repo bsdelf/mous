@@ -8,14 +8,6 @@ StatusView::~StatusView()
 {
 }
 
-void StatusView::OnResize(int x, int y, int w, int h)
-{
-    if (d.shown) {
-        d.Cleanup();
-        d.Init(x, y, w, h, true);
-    }
-}
-
 void StatusView::Refresh()
 {
     d.Clear();

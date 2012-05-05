@@ -1,4 +1,8 @@
 #include "ExplorerView.h"
+#include <string>
+using namespace std;
+
+const string STR_TITLE = "[ Explorer ]";
 
 ExplorerView::ExplorerView():
     m_Focused(false)
@@ -9,19 +13,13 @@ ExplorerView::~ExplorerView()
 {
 }
 
-void ExplorerView::OnResize(int x, int y, int w, int h)
-{
-    if (d.shown) {
-        d.Cleanup();
-        d.Init(x, y, w, h, true);
-    }
-}
-
 void ExplorerView::Refresh()
 {
     d.Clear();
 
-    d.CenterPrint(0, "^b[Explorer]");
+    string title = m_Focused ?
+        ("^b" + STR_TITLE): STR_TITLE;
+    d.CenterPrint(0, title);
 
     d.Refresh();
 }

@@ -12,8 +12,8 @@ const char* const STR_ARRAY[] =
     "^bGlobal Window:",
     "H      show/hide help",
     "E      show/hide file explorer",
-    "q      quit",
-    "Q      quit and stop server",
+    "Q      quit",
+    "X      quit and stop server",
     "0      switch to temporary playlist",
     "1-5    switch to user playlist",
     "",
@@ -71,19 +71,11 @@ HelpView::~HelpView()
 {
 }
 
-void HelpView::OnResize(int x, int y, int w, int h)
-{
-    if (d.shown) {
-        d.Cleanup();
-        d.Init(x, y, w, h, true);
-    }
-}
-
 void HelpView::Refresh()
 {
     d.Clear();
 
-    d.CenterPrint(0, "^b[Help]");
+    d.CenterPrint(0, "^b[ Help ]");
     for (int l = 0; l < d.h-2 && l < m_LineCount - m_LineBegin; ++l) {
         int index = m_LineBegin+l;
         d.Print(8, l+1, STR_ARRAY[index]);
