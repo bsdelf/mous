@@ -10,8 +10,6 @@ class IView
 public:
     virtual ~IView() { }
 
-    virtual void OnResize(int x, int y, int w, int h) = 0;
-
     virtual void MoveTo(int x, int y) = 0;
     virtual void Resize(int w, int h) = 0;
     virtual void Refresh() = 0;
@@ -82,7 +80,7 @@ struct Window
             WCenterPrint(win, y, w, str);
     }
 
-    void Clear(bool boxed = true)
+    void Clear()
     {
         werase(win);
         if (boxed)
@@ -101,15 +99,17 @@ struct Window
     {
         w = _w;
         h = _h;
-        if (win != NULL)
+        if (win != NULL) {
             wresize(win, h, w);
+            mvwin(win, y, x);
+        }
     }
 
     void Show(bool show)
     {
         if (show) {
-            Init(x, y, w, h, boxed);
-            Refresh();
+            if (win == NULL)
+                Init(x, y, w, h, boxed);
         } else {
             Cleanup();
         }
