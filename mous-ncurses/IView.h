@@ -68,16 +68,22 @@ struct Window
             wrefresh(win);
     }
 
-    void Print(int x, int y, const std::string& str)
+    void Print(int x, int y, const std::string& _str)
     {
-        if (win != NULL)
+        if (win != NULL) {
+            const std::string& str = ParseStyle(win, _str);
             mvwprintw(win, y, x, str.c_str());
+            CloseStyle(win);
+        }
     }
 
-    void CenterPrint(int y, const std::string& str)
+    void CenterPrint(int y, const std::string& _str)
     {
-        if (win != NULL)
+        if (win != NULL) {
+            const std::string& str = ParseStyle(win, _str);
             WCenterPrint(win, y, w, str);
+            CloseStyle(win);
+        }
     }
 
     void Clear()
@@ -129,6 +135,27 @@ struct Window
     {
         int x = (w - str.size()) / 2;
         return mvwprintw(win, y, x, str.c_str());
+    }
+
+    static std::string ParseStyle(WINDOW* win, const std::string& str)
+    {
+        if (str[0] != '^')
+            return str;
+
+        switch (str[1]) {
+            case 'b':
+                wattron(win, A_BOLD);
+                break;
+                
+            default:
+                break;
+        }
+        return str.substr(2, str.size());
+    }
+
+    static void CloseStyle(WINDOW* win)
+    {
+        wattrset(win, A_NORMAL);
     }
 };
 
