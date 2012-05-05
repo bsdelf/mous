@@ -2,7 +2,6 @@
 #define IVIEW_H
 
 #include <ncurses.h>
-#include <panel.h>
 
 #include <string>
 
@@ -26,39 +25,39 @@ public:
     virtual bool HasFocus() const { return false; }
 };
 
-struct ViewData
+struct Window
 {
-    ViewData():
+    Window():
         win(NULL),
-        panel(NULL),
-        width(0),
-        height(0)
+        boxed(true),
+        shown(false),
+        x(0),
+        y(0),
+        w(0),
+        h(0)
     {
     }
 
-    ~ViewData()
+    ~Window()
     {
         Cleanup();
     }
 
-    void Init(int x, int y, int w, int h, bool boxed = true)
+    void Init(int _x, int _y, int _w, int _h, bool _boxed)
     {
+        x = _x;
+        y = _y;
+        w = _w;
+        h = _h;
+        boxed = _boxed;
+
         win = newwin(h, w, y, x);
-        panel = new_panel(win);
         if (boxed)
             box(win, 0, 0);
-
-        width = w;
-        height = h;
     }
 
     void Cleanup()
     {
-        if (panel != NULL) {
-            del_panel(panel);
-            panel = NULL;
-        }
-
         if (win != NULL) {
             delwin(win);
             win = NULL;
@@ -67,19 +66,22 @@ struct ViewData
 
     void Refresh()
     {
-        wrefresh(win);
+        if (win != NULL)
+            wrefresh(win);
     }
 
-    void Print(int x, int y, const std::string& data)
+    void Print(int x, int y, const std::string& str)
     {
-        mvwprintw(win, y, x, data.c_str());
+        if (win != NULL)
+            mvwprintw(win, y, x, str.c_str());
     }
 
-        // NOTE: wide character not considered presently
+    // NOTE: wide characters are not considered presently
     void CenterPrint(int y, const std::string& str)
     {
-        int x = (width - str.size()) / 2;
-        mvwprintw(win, y, x, str.c_str());
+        int x = (w - str.size()) / 2;
+        if (win != NULL)
+            mvwprintw(win, y, x, str.c_str());
     }
 
     void Clear(bool boxed = true)
@@ -89,33 +91,44 @@ struct ViewData
             box(win, 0, 0);
     }
 
-    void MoveTo(int x, int y)
+    void MoveTo(int _x, int _y)
     {
-        mvwin(win, y, x);
+        x = _x;
+        y = _y;
+        if (win != NULL)
+            mvwin(win, y, x);
     }
 
-    void Resize(int w, int h)
+    void Resize(int _w, int _h)
     {
-        wresize(win, h, w);
+        w = _w;
+        h = _h;
+        if (win != NULL)
+            wresize(win, h, w);
     }
 
     void Show(bool show)
     {
-        if (show)
-            show_panel(panel);
-        else
-            hide_panel(panel);
-        update_panels();
-        doupdate();
-
+        if (show) {
+            Init(x, y, w, h, boxed);
+            Refresh();
+        } else {
+            Cleanup();
+        }
         shown = show;
     }
 
     WINDOW* win;
-    PANEL* panel;
+    bool boxed;
     bool shown;
-    int width;
-    int height;
+    int x;
+    int y;
+    int w;
+    int h;
+
+    static void WCenterPrint()
+    {
+    }
 };
 
 #endif

@@ -10,18 +10,27 @@ StatusView::~StatusView()
 
 void StatusView::OnResize(int x, int y, int w, int h)
 {
+    if (d.shown) {
+        d.Cleanup();
+        d.Init(x, y, w, h, true);
+    }
 }
 
 void StatusView::Refresh()
 {
+    d.Clear();
+    d.CenterPrint(0, "Status");
+    d.Refresh();
 }
 
 void StatusView::MoveTo(int x, int y)
 {
+    d.MoveTo(x, y);
 }
 
 void StatusView::Resize(int w, int h)
 {
+    d.Resize(w, h);
 }
 
 bool StatusView::InjectKey(int key)
@@ -36,10 +45,10 @@ bool StatusView::InjectKey(int key)
         case '<':
             break;
 
-        case 'n':
+        case 'N':
             break;
 
-        case 'p':
+        case 'P':
             break;
 
         case '+':
@@ -54,23 +63,17 @@ bool StatusView::InjectKey(int key)
     return true;
 }
 
-void StatusView::Show(bool shown)
+void StatusView::Show(bool show)
 {
+    d.Show(show);
 }
 
 bool StatusView::IsShown() const
 {
-}
-
-void StatusView::SetFocus(bool focused)
-{
-}
-
-bool StatusView::HasFocus() const
-{
+    return d.shown;
 }
 
 int StatusView::GetMinHeight() const
 {
-    return 3;
+    return 3+2;
 }

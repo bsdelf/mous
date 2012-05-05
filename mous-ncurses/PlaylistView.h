@@ -24,13 +24,20 @@ public:
 
     bool InjectKey(int key);
 
-    void Show(bool shown);
+    void Show(bool show);
     bool IsShown() const;
 
-    void SetFocus(bool focused);
+    void SetFocus(bool focus);
     bool HasFocus() const;
 
+public:
+    void SetIndex(int i);
+    int GetIndex() const;
+
 private:
+    bool m_Focused;
+    int m_Index;
+    Window d;
     Playlist<MediaItem*> m_List;
 };
 

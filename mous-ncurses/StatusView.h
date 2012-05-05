@@ -20,14 +20,14 @@ public:
 
     bool InjectKey(int key);
 
-    void Show(bool shown);
+    void Show(bool show);
     bool IsShown() const;
-
-    void SetFocus(bool focused);
-    bool HasFocus() const;
 
 public:
     int GetMinHeight() const;
+
+private:
+    Window d;
 };
 
 #endif

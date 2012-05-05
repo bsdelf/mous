@@ -24,7 +24,7 @@ private:
     void Cleanup();
 
 private:
-    ViewData d;
+    Window d;
     int m_LineBegin;
     int m_LineCount;
 };

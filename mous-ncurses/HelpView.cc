@@ -41,8 +41,12 @@ const char* const STR_ARRAY[] =
     "d      remove item",
     "c      cut item and put it into queue",
     "y      copy item and put it into queue",
-    "p      paste the first item of queue to next line",
-    "C      clear queue",
+    "p      pop and paste the first item in queue to next line",
+    "e      clear queue",
+    "C      clear playlist",
+    "J      move item down",
+    "K      move item up"
+    "ENTER  play item",
     "",
 
     "^bHelp View:",
@@ -69,8 +73,10 @@ HelpView::~HelpView()
 
 void HelpView::OnResize(int x, int y, int w, int h)
 {
-    d.Cleanup();
-    d.Init(x, y, w, h);
+    if (d.shown) {
+        d.Cleanup();
+        d.Init(x, y, w, h, true);
+    }
 }
 
 void HelpView::Refresh()
@@ -78,7 +84,7 @@ void HelpView::Refresh()
     d.Clear();
 
     d.CenterPrint(0, "^b[Help]");
-    for (int l = 0; l < d.height-2 && l < m_LineCount - m_LineBegin; ++l) {
+    for (int l = 0; l < d.h-2 && l < m_LineCount - m_LineBegin; ++l) {
         int index = m_LineBegin+l;
         d.Print(8, l+1, STR_ARRAY[index]);
     }
@@ -100,7 +106,7 @@ bool HelpView::InjectKey(int key)
 {
     switch (key) {
         case 'j':
-            if (m_LineBegin < m_LineCount-(d.height-2))
+            if (m_LineBegin < m_LineCount-(d.h-2))
                 ++m_LineBegin;
             break;
 
