@@ -5,11 +5,16 @@ struct PrivateMainUi;
 
 class MainUi
 {
+    friend struct PrivateMainUi;
+
 public:
     MainUi();
     ~MainUi();
 
     int Exec();
+
+private:
+    void SlotSwitchPlaylist(bool);
 
 private:
     bool StartClient();

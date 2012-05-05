@@ -51,9 +51,11 @@ bool PlaylistView::InjectKey(int key)
 {
     switch (key) {
         case 'h':
+            SigSwitchPlaylist(false);
             break;
 
         case 'l':
+            SigSwitchPlaylist(true);
             break;
 
         case 'j':

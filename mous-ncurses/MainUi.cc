@@ -77,6 +77,7 @@ struct LayerInfo
 
 struct PrivateMainUi
 {
+    MainUi* parent;
     Client client;
 
     BgWindow bgWindow;
@@ -86,13 +87,14 @@ struct PrivateMainUi
     HelpView helpView;
     StatusView statusView;
 
-    int playlistIndex;
+    int iPlaylist;
     stack<LayerInfo> layerStack;
 
-    PrivateMainUi():
-        playlistIndex(1)
+    PrivateMainUi(MainUi* p):
+        parent(p),
+        iPlaylist(1)
     {
-        PlaylistView& playlist = playlistView[playlistIndex];
+        PlaylistView& playlist = playlistView[iPlaylist];
 
         LayerInfo layer;
         layer.mask = View::MaskPlaylist | View::MaskStatus;
@@ -101,15 +103,17 @@ struct PrivateMainUi
         layer.focused.push(&playlist);
         layerStack.push(layer);
 
-        for (int i = 0; i < PLAYLIST_COUNT; ++i)
+        for (int i = 0; i < PLAYLIST_COUNT; ++i) {
             playlistView[i].SetIndex(i);
+            playlistView[i].SigSwitchPlaylist.Connect(&MainUi::SlotSwitchPlaylist, parent);
+        }
         playlist.SetFocus(true);
     }
 };
 
 MainUi::MainUi()
 {
-    d = new PrivateMainUi;
+    d = new PrivateMainUi(this);
 }
 
 MainUi::~MainUi()
@@ -143,6 +147,14 @@ int MainUi::Exec()
     StopClient();
 
     return 0;
+}
+
+
+void MainUi::SlotSwitchPlaylist(bool toNext)
+{
+    int n = d->iPlaylist + (toNext ? 1 : -1);
+    n = std::min(std::max(n, 0), PLAYLIST_COUNT-1);
+    SwitchPlaylist(n);
 }
 
 bool MainUi::StartClient()
@@ -262,7 +274,7 @@ void MainUi::UpdateTopLayout()
             int hStatus = d->statusView.GetMinHeight();
             int hPlaylist = h - hStatus;
 
-            PlaylistView& playlist = d->playlistView[d->playlistIndex];
+            PlaylistView& playlist = d->playlistView[d->iPlaylist];
             playlist.MoveTo(x, y);
             playlist.Resize(w, hPlaylist);
             y += hPlaylist;
@@ -284,7 +296,7 @@ void MainUi::UpdateTopLayout()
             d->explorerView.Resize(wExplorer, hExplorer);
             x += wExplorer;
 
-            PlaylistView& playlist = d->playlistView[d->playlistIndex];
+            PlaylistView& playlist = d->playlistView[d->iPlaylist];
             playlist.MoveTo(x, y);
             playlist.Resize(wPlaylist, hExplorer);
             x = 0; y += hExplorer;
@@ -355,7 +367,7 @@ void MainUi::SwitchFocus()
     layer.focused.top()->SetFocus(false);
     layer.focused.top() = 
         (focused == (IView*)&d->explorerView) ? 
-        (IView*)(d->playlistView+d->playlistIndex) : 
+        (IView*)(d->playlistView+d->iPlaylist) : 
         (IView*)&d->explorerView;
     layer.focused.top()->SetFocus(true);
     layer.RefreshViews();
@@ -363,10 +375,10 @@ void MainUi::SwitchFocus()
 
 void MainUi::SwitchPlaylist(int n)
 {
-    if (n == d->playlistIndex)
+    if (n == d->iPlaylist)
         return;
-    int oldn = d->playlistIndex;
-    d->playlistIndex = n;
+    int oldn = d->iPlaylist;
+    d->iPlaylist = n;
 
     d->playlistView[oldn].Show(false);
 
