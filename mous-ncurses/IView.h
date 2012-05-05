@@ -76,12 +76,10 @@ struct Window
             mvwprintw(win, y, x, str.c_str());
     }
 
-    // NOTE: wide characters are not considered presently
     void CenterPrint(int y, const std::string& str)
     {
-        int x = (w - str.size()) / 2;
         if (win != NULL)
-            mvwprintw(win, y, x, str.c_str());
+            WCenterPrint(win, y, w, str);
     }
 
     void Clear(bool boxed = true)
@@ -126,8 +124,11 @@ struct Window
     int w;
     int h;
 
-    static void WCenterPrint()
+    // NOTE: wide characters are not considered presently
+    static int WCenterPrint(WINDOW* win, int y, int w, const std::string& str)
     {
+        int x = (w - str.size()) / 2;
+        return mvwprintw(win, y, x, str.c_str());
     }
 };
 
