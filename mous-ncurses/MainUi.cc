@@ -324,7 +324,8 @@ void MainUi::ShowOrHideExplorer()
         layer.mask &= ~View::MaskExplorer;
         layer.views.erase(&d->explorerView);
         layer.focused.pop();
-
+        layer.focused.top() = d->playlistView + d->iPlaylist;
+        layer.focused.top()->SetFocus(true);
     } else {
         // add view
         layer.mask |= View::MaskExplorer;
