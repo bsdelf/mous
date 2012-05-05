@@ -43,6 +43,7 @@ private:
     bool m_Focused;
     int m_Index;
     Window d;
+    int m_ItemBegin;
     Playlist<MediaItem*> m_List;
 };
 

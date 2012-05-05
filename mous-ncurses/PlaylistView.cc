@@ -1,13 +1,22 @@
 #include "PlaylistView.h"
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 const string STR_TITLE = "Playlist";
 
 PlaylistView::PlaylistView():
     m_Focused(false),
-    m_Index(-1)
+    m_Index(-1),
+    m_ItemBegin(0)
 {
+    for (int i = 0; i < 200; ++i) {
+        MediaItem* item = new MediaItem;
+        stringstream stream;
+        stream << i;
+        item->tag.title = stream.str();
+        m_List.AppendItem(item);
+    }
 }
 
 PlaylistView::~PlaylistView()
@@ -29,10 +38,31 @@ void PlaylistView::Refresh()
 {
     d.Clear();
 
+    // title
     stringstream stream;
     stream << (m_Focused ? "^b" :  "") 
         << "[ " << STR_TITLE << " " << m_Index << " ]";
     d.CenterPrint(0, stream.str());
+
+    // content
+    if (!m_List.Empty()) {
+        int w = d.w - 2;
+        int h = d.h - 2;
+        int xoff = 1;
+        int yoff = 1;
+
+        int lcount = std::min(h, m_List.GetItemCount()-m_ItemBegin);
+        for (int l = 0; l < lcount; ++l) {
+            int index = m_ItemBegin + l;
+            MediaItem* item = m_List.GetItem(index);
+            d.Print(xoff, yoff+l, item->tag.title);
+        }
+
+        if (m_List.GetItemCount() > h) {
+            double percent = (double)(m_ItemBegin) / (m_List.GetItemCount()-h+1);
+            d.Print(w, yoff+h*percent, "^b |");
+        }
+    }
 
     d.Refresh();
 }
@@ -59,9 +89,13 @@ bool PlaylistView::InjectKey(int key)
             break;
 
         case 'j':
+            if (!m_List.Empty() && m_ItemBegin < m_List.GetItemCount()-(d.h-2))
+                ++m_ItemBegin;
             break;
 
         case 'k':
+            if (!m_List.Empty() && m_ItemBegin > 0)
+                --m_ItemBegin;
             break;
 
         case 'd':
