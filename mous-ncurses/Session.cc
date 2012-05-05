@@ -53,7 +53,7 @@ void Session::ThRecvLoop()
         if (!header.Read(&headerBuf[0]))
             break;
 
-        if (payloadBuf.size() <= PAYLOAD_MAX_SIZE || header.payloadSize > PAYLOAD_MAX_SIZE)
+        if ((int)payloadBuf.size() <= PAYLOAD_MAX_SIZE || header.payloadSize > PAYLOAD_MAX_SIZE)
             payloadBuf.resize(header.payloadSize);
         else
             vector<char>(header.payloadSize).swap(payloadBuf);

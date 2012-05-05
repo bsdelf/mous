@@ -114,7 +114,7 @@ void Client::ThRecvLoop(const string& ip, int port)
         if (!header.Read(&headerBuf[0]))
             continue;
 
-        if (payloadBuf.size() <= PAYLOADBUF_MAX_SIZE || header.payloadSize > PAYLOADBUF_MAX_SIZE)
+        if ((int)payloadBuf.size() <= PAYLOADBUF_MAX_SIZE || header.payloadSize > PAYLOADBUF_MAX_SIZE)
             payloadBuf.resize(header.payloadSize);
         else
             vector<char>(header.payloadSize).swap(payloadBuf);
@@ -143,7 +143,7 @@ void Client::HandlePlayer(char* buf, int size)
 {
     using namespace Protocol;
 
-    if (size < sizeof(char))
+    if (size < (int)sizeof(char))
         return;
 
     char op = Op::Player::None;
@@ -165,7 +165,7 @@ void Client::HandlePlayer(char* buf, int size)
 
 void Client::HandlePlaylist(char* buf, int size)
 {
-    if (size < sizeof(char))
+    if (size < (int)sizeof(char))
         return;
 }
 
@@ -173,7 +173,7 @@ char* Client::GetPayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
     int size = header.GetTotalSize();
-    if (m_SendOutBuf.size() > SENDOUTBUF_MAX_SIZE && size < SENDOUTBUF_MAX_SIZE)
+    if ((int)m_SendOutBuf.size() > SENDOUTBUF_MAX_SIZE && size < SENDOUTBUF_MAX_SIZE)
         vector<char>(SENDOUTBUF_MAX_SIZE).swap(m_SendOutBuf);
     m_SendOutBuf.resize(size);
 
