@@ -199,10 +199,10 @@ void MainUi::OnResize()
 {
     d->bgWindow.OnResize();
 
-    LayoutShownViews();
+    UpdateLayout();
 }
 
-void MainUi::LayoutShownViews()
+void MainUi::UpdateLayout()
 {
     const int w = d->bgWindow.GetWidth();
     const int h = d->bgWindow.GetHeight();
@@ -288,7 +288,7 @@ void MainUi::ShowOrHideExplorer()
         layer.shown.insert(&d->explorerView);
         layer.focused.push(&d->explorerView);
     }
-    LayoutShownViews();
+    UpdateLayout();
 }
 
 // between different layers
@@ -305,7 +305,7 @@ void MainUi::ShowOrHideHelp()
         layer.shown.insert(&d->helpView);
         d->layerStack.push(layer);
     }
-    LayoutShownViews();
+    UpdateLayout();
 }
 
 // on same layer

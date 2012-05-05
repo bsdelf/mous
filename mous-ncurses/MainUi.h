@@ -20,7 +20,7 @@ private:
 
     bool HandleTopKey(int, bool&);
     void OnResize();
-    void LayoutShownViews();
+    void UpdateLayout();
     void ShowOrHideExplorer();
     void ShowOrHideHelp();
     void SwitchFocus();
