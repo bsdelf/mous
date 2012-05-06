@@ -1,5 +1,6 @@
 #include "MainUi.h"
 
+#include <locale.h>
 //#include <ncurses.h>
 
 #include <iostream>
@@ -179,7 +180,9 @@ void MainUi::StopClient()
 
 void MainUi::BeginNcurses()
 {  
+    setlocale(LC_ALL,"");
     initscr();
+    start_color();
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
