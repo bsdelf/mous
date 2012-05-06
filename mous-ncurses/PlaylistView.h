@@ -44,6 +44,7 @@ private:
     int m_Index;
     Window d;
     int m_ItemBegin;
+    int m_ItemSelected;
     Playlist<MediaItem*> m_List;
 };
 

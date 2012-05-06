@@ -3,18 +3,33 @@
 #include <algorithm>
 using namespace std;
 
+#include <scx/Conv.hpp>
+#include <scx/CharsetHelper.hpp>
+using namespace scx;
+
 const string STR_TITLE = "Playlist";
 
 PlaylistView::PlaylistView():
     m_Focused(false),
     m_Index(-1),
-    m_ItemBegin(0)
+    m_ItemBegin(0),
+    m_ItemSelected(0)
 {
     for (int i = 0; i < 200; ++i) {
         MediaItem* item = new MediaItem;
+
         stringstream stream;
-        stream << i;
+        stream << "title标题标题标题标题标题标题标题标题标题" << i;
         item->tag.title = stream.str();
+
+        stream.str("artist");
+        stream << "artist" << i;
+        item->tag.artist = stream.str();
+
+        stream.str("album");
+        stream << "album" << i;
+        item->tag.album = stream.str();
+
         m_List.AppendItem(item);
     }
 }
@@ -36,31 +51,70 @@ void PlaylistView::OnResize(int x, int y, int w, int h)
 
 void PlaylistView::Refresh()
 {
+    using namespace CharsetHelper;
+
     d.Clear();
 
     // title
     stringstream stream;
-    stream << (m_Focused ? "^b" :  "") 
-        << "[ " << STR_TITLE << " " << m_Index << " ]";
+    stream << (m_Focused ? "^b" : "") 
+        << "[ " << STR_TITLE << " " << m_Index
+        << " (" << m_List.GetItemCount() << ") ]";
     d.CenterPrint(0, stream.str());
 
     // content
+    // { {title artist album~~00:00 }#}
     if (!m_List.Empty()) {
-        int w = d.w - 2;
-        int h = d.h - 2;
-        int xoff = 1;
-        int yoff = 1;
+        const int w = d.w - 2;
+        const int h = d.h - 2;
+        const int x = 1;
+        const int y = 1;
+        int xoff = x;
+        int yoff = y;
 
-        int lcount = std::min(h, m_List.GetItemCount()-m_ItemBegin);
+        const int wText = w - 2;
+        const int hText = h;
+
+        const int wTime = 5 + 1;
+        const int wField = (wText - wTime) / 3;
+        const int wLastField = (wText - wTime) - wField * 2;
+
+        int x1 = xoff;
+        int x2 = xoff;
+        int lcount = std::min(hText, m_List.GetItemCount()-m_ItemBegin);
         for (int l = 0; l < lcount; ++l) {
             int index = m_ItemBegin + l;
             MediaItem* item = m_List.GetItem(index);
-            d.Print(xoff, yoff+l, item->tag.title);
+
+            xoff = x + 1;
+            const string& style = index != m_ItemSelected ? "^b^c40" : "^c07";
+            if (index == m_ItemSelected) {
+                d.Print(x, yoff+l, "^c07" + string(w, ' '));
+            }
+            const string& field1 = MBStrWidth(item->tag.title) <= wField-1 ?
+                item->tag.title : MBWidthStr(item->tag.title, wField-1-3) + "...";
+            d.Print(xoff, yoff+l, style + field1);
+            xoff += wField;
+
+            const string& field2 = MBStrWidth(item->tag.artist) <= wField-1 ?
+                item->tag.artist : MBWidthStr(item->tag.artist, wField-1-3) + "...";
+            d.Print(xoff, yoff+l, style + field2);
+            xoff += wField;
+
+            const string& field3 = MBStrWidth(item->tag.album) <= wLastField-1 ?
+                item->tag.album : MBWidthStr(item->tag.album, wLastField-1-3) + "...";
+            d.Print(xoff, yoff+l, style + field3);
+            xoff += wLastField;
+
+            d.Print(xoff, yoff+l, style + string("00:00"));
+            xoff += wTime;
         }
 
-        if (m_List.GetItemCount() > h) {
-            double percent = (double)(m_ItemBegin) / (m_List.GetItemCount()-h+1);
-            d.Print(w, yoff+h*percent, "^b |");
+        xoff = x + 1 + wText;
+        if (m_List.GetItemCount() > hText) {
+            double percent = (double)(m_ItemBegin) / (m_List.GetItemCount()-hText+1);
+            yoff = y + hText*percent;
+            d.Print(xoff, yoff, "^b^r^c20 ");
         }
     }
 
