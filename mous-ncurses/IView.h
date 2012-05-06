@@ -71,18 +71,18 @@ struct Window
     void Print(int x, int y, const std::string& _str)
     {
         if (win != NULL) {
-            const std::string& str = ParseStyle(win, _str);
-            mvwprintw(win, y, x, str.c_str());
-            CloseStyle(win);
+            const std::string& str = ParseStyle(win, _str, colorId);
+            mvwprintw(win, y, x, "%s", str.c_str());
+            CloseStyle(win, colorId);
         }
     }
 
     void CenterPrint(int y, const std::string& _str)
     {
         if (win != NULL) {
-            const std::string& str = ParseStyle(win, _str);
+            const std::string& str = ParseStyle(win, _str, colorId);
             WCenterPrint(win, y, w, str);
-            CloseStyle(win);
+            CloseStyle(win, colorId);
         }
     }
 
@@ -134,29 +134,67 @@ struct Window
     static int WCenterPrint(WINDOW* win, int y, int w, const std::string& str)
     {
         int x = (w - str.size()) / 2;
-        return mvwprintw(win, y, x, str.c_str());
+        return mvwprintw(win, y, x, "%s", str.c_str());
     }
 
-    static std::string ParseStyle(WINDOW* win, const std::string& str)
+    // NOTE: very limited usage
+    static std::string ParseStyle(WINDOW* win, const std::string& str, short& colorId)
     {
-        if (str[0] != '^')
-            return str;
+        int off = 0;
+        while (off+1 < str.size()) {
+            if (str[off] != '^')
+                break;
 
-        switch (str[1]) {
-            case 'b':
-                wattron(win, A_BOLD);
-                break;
-                
-            default:
-                break;
+            switch (str[off+1]) {
+                case '^':
+                    off = 1;
+                    goto LABEL_END;
+                    break;
+
+                case 'b':
+                    wattron(win, A_BOLD);
+                    break;
+
+                case 'h':
+                    wattron(win, A_STANDOUT);
+                    break;
+
+                case 'r':
+                    wattron(win, A_REVERSE);
+                    break;
+
+                // F|G, 0-7
+                case 'c':
+                    if (off+1+2 < str.size()) {
+                        char f = str[off+1+1]-48;
+                        char b = str[off+1+2]-48;
+                        colorId = f * 8 + b;
+                        init_pair(colorId, f, b);
+                        wattron(win, COLOR_PAIR(colorId));
+                    }
+                    off += 2;
+                    break;
+
+                default:
+                    break;
+            }
+
+            off += 2;
         }
-        return str.substr(2, str.size());
+
+LABEL_END:
+        return str.substr(off, str.size());
     }
 
-    static void CloseStyle(WINDOW* win)
+    static void CloseStyle(WINDOW* win, short colorId)
     {
         wattrset(win, A_NORMAL);
+        wattroff(win, COLOR_PAIR(colorId));
     }
+
+private:
+    short colorId;
+
 };
 
 #endif
