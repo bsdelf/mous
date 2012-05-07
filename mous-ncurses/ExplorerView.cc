@@ -17,9 +17,10 @@ void ExplorerView::Refresh()
 {
     d.Clear();
 
-    string title = m_Focused ?
-        ("^b" + STR_TITLE): STR_TITLE;
-    d.CenterPrint(0, title);
+    if (m_Focused)
+        d.AttrOn(ncurses::Attr::Bold);
+    d.CenterPrint(0, STR_TITLE);
+    d.ResetAttrColor();
 
     d.Refresh();
 }
