@@ -75,11 +75,11 @@ void HelpView::Refresh()
 {
     d.Clear();
 
-    d.CenterPrint(0, "^b[ Help ]");
+    d.CenterPrint(0, "^b[ Help ]", true);
     int lcount = std::min(d.h-2, m_LineCount-m_LineBegin);
     for (int l = 0; l < lcount; ++l) {
         int index = m_LineBegin + l;
-        d.Print(8, l+1, STR_ARRAY[index]);
+        d.Print(8, l+1, STR_ARRAY[index], true);
     }
 
     d.Refresh();
