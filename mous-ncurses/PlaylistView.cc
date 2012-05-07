@@ -101,7 +101,7 @@ void PlaylistView::Refresh()
                 fieldColorB = timeColorB = Color::White;
 
                 d.AttrSet(Attr::Normal | Attr::Reverse);
-                d.Print(x, yoff+l, string(w, ' '));
+                d.Print(x, yoff+l, string(w-1, ' '));
             }
 
             xoff = x + 1;
@@ -207,6 +207,9 @@ bool PlaylistView::InjectKey(int key)
             break;
 
         case '\n':
+            break;
+
+        case '/':
             break;
 
         default:
