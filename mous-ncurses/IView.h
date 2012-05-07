@@ -23,6 +23,27 @@ public:
     virtual bool HasFocus() const { return false; }
 };
 
+namespace ncurses {
+    namespace Color {
+        const int Black = COLOR_BLACK;
+        const int Red = COLOR_RED;
+        const int Green = COLOR_GREEN;
+        const int Yellow = COLOR_YELLOW;
+        const int Blue = COLOR_BLUE;
+        const int Magenta = COLOR_MAGENTA;
+        const int Cyan = COLOR_CYAN;
+        const int White = COLOR_WHITE;
+    };
+
+    namespace Attr {
+        const int Normal = A_NORMAL;
+        const int Underline = A_UNDERLINE;
+        const int Reverse = A_REVERSE;
+        const int Blink = A_BLINK;
+        const int Bold = A_BOLD;
+    }
+}
+
 struct Window
 {
     Window():
@@ -68,21 +89,29 @@ struct Window
             wrefresh(win);
     }
 
-    void Print(int x, int y, const std::string& _str)
+    void Print(int x, int y, const std::string& _str, bool styled = false)
     {
         if (win != NULL) {
-            const std::string& str = ParseStyle(win, _str, colorId);
-            mvwprintw(win, y, x, "%s", str.c_str());
-            CloseStyle(win, colorId);
+            if (!styled) {
+                mvwprintw(win, y, x, "%s", _str.c_str());
+            } else {
+                const std::string& str = ParseStyle(_str);
+                mvwprintw(win, y, x, "%s", str.c_str());
+                CloseStyle();
+            }
         }
     }
 
-    void CenterPrint(int y, const std::string& _str)
+    void CenterPrint(int y, const std::string& _str, bool styled = false)
     {
         if (win != NULL) {
-            const std::string& str = ParseStyle(win, _str, colorId);
-            WCenterPrint(win, y, w, str);
-            CloseStyle(win, colorId);
+            if (!styled) {
+                DoCenterPrint(y, w, _str);
+            } else {
+                const std::string& str = ParseStyle(_str);
+                DoCenterPrint(y, w, str);
+                CloseStyle();
+            }
         }
     }
 
@@ -130,15 +159,95 @@ struct Window
     int w;
     int h;
 
+    void AttrOn(int attrs)
+    {
+        wattron(win, attrs);
+    }
+
+    void AttrSet(int attrs)
+    {
+        wattrset(win, attrs);
+    }
+
+    void AttrOff(int attrs)
+    {
+        wattroff(win, attrs);
+    }
+
+    void ResetAttrColor()
+    {
+        init_pair(0, ncurses::Color::White, ncurses::Color::Black);
+        wattrset(win, ncurses::Attr::Normal | COLOR_PAIR(0));
+    }
+
+    short ColorOn(int f, int b)
+    {
+        short colorId = f*8 + b + 1;
+        init_pair(colorId, f, b);
+        wattron(win, COLOR_PAIR(colorId));
+        return colorId;
+    }
+
+    void ColorOff(short colorId)
+    {
+        wattroff(win, COLOR_PAIR(colorId));
+        wattroff(win, COLOR_PAIR(0));
+    }
+
+    int OpenStyle(const std::string& style)
+    {
+        if (style.empty())
+            return 0;
+
+        int n = 1;
+        switch (style[0]) {
+            case '^':
+                n = 0;
+                break;
+
+            case 'b':
+                wattron(win, A_BOLD);
+                break;
+
+            case 'h':
+                wattron(win, A_STANDOUT);
+                break;
+
+            case 'r':
+                wattron(win, A_REVERSE);
+                break;
+
+                // F|B, 0-7
+            case 'c':
+                if (style.size() >= 3) {
+                    char f = style[1]-48;
+                    char b = style[2]-48;
+                    ColorOn(f, b);
+                }
+                n += 2;
+                break;
+
+            default:
+                break;
+        }
+        return n;
+    }
+
+    void CloseStyle()
+    {
+        ResetAttrColor();
+    }
+
+private:
     // NOTE: wide characters are not considered presently
-    static int WCenterPrint(WINDOW* win, int y, int w, const std::string& str)
+    int DoCenterPrint(int y, int w, const std::string& str)
     {
         int x = (w - str.size()) / 2;
         return mvwprintw(win, y, x, "%s", str.c_str());
     }
 
     // NOTE: very limited usage
-    static std::string ParseStyle(WINDOW* win, const std::string& str, short& colorId)
+    std::string ParseStyle(const std::string& str)
     {
         int off = 0;
         while (off+1 < str.size()) {
@@ -151,45 +260,15 @@ struct Window
                     goto LABEL_END;
                     break;
 
-                case 'b':
-                    wattron(win, A_BOLD);
-                    break;
-
-                case 'h':
-                    wattron(win, A_STANDOUT);
-                    break;
-
-                case 'r':
-                    wattron(win, A_REVERSE);
-                    break;
-
-                // F|G, 0-7
-                case 'c':
-                    if (off+1+2 < str.size()) {
-                        char f = str[off+1+1]-48;
-                        char b = str[off+1+2]-48;
-                        colorId = f * 8 + b;
-                        init_pair(colorId, f, b);
-                        wattron(win, COLOR_PAIR(colorId));
-                    }
-                    off += 2;
-                    break;
-
                 default:
+                    ++off;
+                    off += OpenStyle(str.substr(off, 3));
                     break;
             }
-
-            off += 2;
         }
 
 LABEL_END:
         return str.substr(off, str.size());
-    }
-
-    static void CloseStyle(WINDOW* win, short colorId)
-    {
-        wattrset(win, A_NORMAL);
-        wattroff(win, COLOR_PAIR(colorId));
     }
 
 private:
