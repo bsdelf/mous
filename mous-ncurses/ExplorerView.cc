@@ -53,7 +53,10 @@ bool ExplorerView::InjectKey(int key)
         case 'a':
             break;
 
-        case KEY_ENTER:
+        case '\n':
+            break;
+
+        case '/':
             break;
 
         default:
