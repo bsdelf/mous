@@ -38,14 +38,17 @@ private:
     {
         std::string name;
         bool isDir;
-        bool isExe;
         long size;
+        mutable bool cacheOk;
+        mutable std::string nameCache;
+        mutable std::string sizeCache;
     };
 
 private:
     bool m_Focused;
     Window d;
     std::string m_Path;
+    std::string m_PathCache;
     bool m_HideDot;
     std::deque<int> m_BeginStack;
     std::deque<int> m_SelectionStack;

@@ -111,9 +111,11 @@ void ExplorerView::Refresh()
                 d.ColorOn(pathRegColorF, pathColorB);
             }
 
-            const string& path = MBStrWidth(item.name) <= wPath-1 ?
-                item.name : MBWidthStr(item.name, wPath-1-3) + "...";
-            d.Print(xoff, yoff+l, path);
+            if (!item.cacheOk) {
+                item.nameCache = MBStrWidth(item.name) <= wPath-1 ?
+                    item.name : MBWidthStr(item.name, wPath-1-3) + "...";
+            }
+            d.Print(xoff, yoff+l, item.nameCache);
             xoff += wPath;
 
             const char* hint = SIZE_HINT;
@@ -124,14 +126,19 @@ void ExplorerView::Refresh()
                     break;
                 size = s;
             }
-            string strSize = NumToStr(size) + *hint;
-            if (strSize.size() < 5)
-            strSize = string(5 - strSize.size(), ' ') + strSize;
+            if (!item.cacheOk) {
+                string& str = item.sizeCache;
+                str = NumToStr(size) + *hint;
+                if (str.size() < 5)
+                    str = string(5 - str.size(), ' ') + str;
+            }
 
             d.AttrSet(boldAttr);
             d.ColorOn(sizeColorF, sizeColorB);
-            d.Print(xoff, yoff+l, strSize);
+            d.Print(xoff, yoff+l, item.sizeCache);
             xoff += wSize;
+
+            item.cacheOk = true;
         }
 
         xoff = x + 1 + wText;
@@ -146,18 +153,20 @@ void ExplorerView::Refresh()
     }
 
     // status bar
-    string path(m_Path);
-    if (MBStrWidth(path) > wText) {
-        do {
-            path = MBSubStr(path, MBStrLen(path)-1, 1);
-        } while (MBStrWidth(path) > (wText - 3));
-        path.insert(0, "...");
+    if (m_PathCache.empty()) {
+        m_PathCache = m_Path;
+        if (MBStrWidth(m_PathCache) > wText) {
+            do {
+                m_PathCache = MBSubStr(m_PathCache, MBStrLen(m_PathCache)-1, 1);
+            } while (MBStrWidth(m_PathCache) > (wText - 3));
+            m_PathCache.insert(0, "...");
+        }
     }
     xoff = x + 1;
     yoff = y + hText;
     d.AttrSet(Attr::Bold);
     d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, path);
+    d.Print(xoff, yoff, m_PathCache);
 
     d.ResetAttrColor();
 
@@ -171,6 +180,12 @@ void ExplorerView::MoveTo(int x, int y)
 
 void ExplorerView::Resize(int w, int h)
 {
+    // invalidate cache
+    m_PathCache.clear();
+    for (size_t i = 0; i < m_FileItems.size(); ++i) {
+        m_FileItems[i].cacheOk = false;
+    }
+
     d.Resize(w, h);
 }
 
@@ -187,6 +202,7 @@ bool ExplorerView::InjectKey(int key)
             }
 
             m_Path = FileInfo(m_Path).AbsPath();
+            m_PathCache.clear();
             BuildFileItems();
             break;
 
@@ -195,6 +211,7 @@ bool ExplorerView::InjectKey(int key)
                 int sel = m_SelectionStack.back();
                 if (m_FileItems[sel].isDir) {
                     m_Path += (m_Path != "/" ? "/" : "") + m_FileItems[sel].name;
+                    m_PathCache.clear();
                     BuildFileItems();
 
                     m_BeginStack.push_back(0);
@@ -292,12 +309,10 @@ void ExplorerView::BuildFileItems()
         FileItem item;
         item.name = files[i];
         item.isDir = info.Type() == FileType::Directory;
-        item.isExe = false;
         item.size = info.Size();
+        item.cacheOk = false;
         m_FileItems.push_back(item);
     }
 
     std::sort(m_FileItems.begin(), m_FileItems.end(), FileItemCmp(m_UniPinYin));
 }
-
-
