@@ -145,11 +145,18 @@ void ExplorerView::Refresh()
     }
 
     // status bar
+    string path(m_Path);
+    if (MBStrWidth(path) > wText) {
+        do {
+            path = MBSubStr(path, MBStrLen(path)-1, 1);
+        } while (MBStrWidth(path) > (wText - 3));
+        path.insert(0, "...");
+    }
     xoff = x + 1;
     yoff = y + hText;
     d.AttrSet(Attr::Bold);
     d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, m_Path);
+    d.Print(xoff, yoff, path);
 
     d.ResetAttrColor();
 
