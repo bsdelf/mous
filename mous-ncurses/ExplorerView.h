@@ -1,13 +1,18 @@
 #ifndef EXPLORERVIEW_H
 #define EXPLORERVIEW_H
 
-#include <ncurses.h>
-#include <panel.h>
-
 #include "IView.h"
+
+#include <string>
+#include <vector>
+
+#include "scx/UniPinYin.hpp"
+class FileItemCmp;
 
 class ExplorerView: public IView
 {
+    friend class FileItemCmp;
+
 public:
     ExplorerView();
     ~ExplorerView();
@@ -25,8 +30,26 @@ public:
     bool HasFocus() const;
 
 private:
+    void BuildFileItems();
+
+private:
+    struct FileItem
+    {
+        std::string name;
+        bool isDir;
+        bool isExe;
+        long size;
+    };
+
+private:
     bool m_Focused;
     Window d;
+    std::string m_Path;
+    bool m_HideDot;
+    int m_ItemBegin;
+    int m_ItemSelected;
+    std::vector<FileItem> m_FileItems;
+    scx::UniPinYin m_UniPinYin;
 };
 
 #endif
