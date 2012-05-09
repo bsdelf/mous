@@ -85,12 +85,11 @@ void ExplorerView::Refresh()
             int pathDirColorF = Color::Blue;
             int pathRegColorF = Color::White;
             int pathColorB = Color::Black;
-            int sizeAttr = Attr::Bold;
             int sizeColorF = Color::Magenta;
             int sizeColorB = Color::Black;
 
             if (index == m_ItemSelected) {
-                boldAttr = sizeAttr = Attr::Normal;
+                boldAttr = Attr::Normal;
                 pathRegColorF = pathDirColorF = sizeColorF = Color::Black;
                 pathColorB = sizeColorB = Color::White;
 
@@ -124,7 +123,7 @@ void ExplorerView::Refresh()
             if (strSize.size() < 5)
             strSize = string(5 - strSize.size(), ' ') + strSize;
 
-            d.AttrSet(sizeAttr);
+            d.AttrSet(boldAttr);
             d.ColorOn(sizeColorF, sizeColorB);
             d.Print(xoff, yoff+l, strSize);
             xoff += wSize;
