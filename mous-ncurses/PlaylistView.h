@@ -19,8 +19,6 @@ public:
     PlaylistView();
     ~PlaylistView();
 
-    void OnResize(int x, int y, int w, int h);
-
     void Refresh();
     void MoveTo(int x, int y);
     void Resize(int w, int h);

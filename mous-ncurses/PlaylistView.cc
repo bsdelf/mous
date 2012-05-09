@@ -41,14 +41,6 @@ PlaylistView::~PlaylistView()
     m_List.Clear();
 }
 
-void PlaylistView::OnResize(int x, int y, int w, int h)
-{
-    if (d.shown) {
-        d.Cleanup();
-        d.Init(x, y, w, h, true);
-    }
-}
-
 void PlaylistView::Refresh()
 {
     using namespace CharsetHelper;
