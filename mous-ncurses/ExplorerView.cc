@@ -37,8 +37,8 @@ ExplorerView::ExplorerView():
 {
     m_UniPinYin.LoadMap("unipy.map");
 
-    m_BeginStack.push(0);
-    m_SelectionStack.push(0);
+    m_BeginStack.push_back(0);
+    m_SelectionStack.push_back(0);
 
     m_Path = Env::GetEnv(Env::Home);
     BuildFileItems();
@@ -76,7 +76,7 @@ void ExplorerView::Refresh()
     const int wSize = 5 + 1;
     const int wPath = wText - wSize;
 
-    const int begin = m_BeginStack.top();
+    const int begin = m_BeginStack.back();
     if (!m_FileItems.empty()) {
         int lcount = std::min(hText, (int)(m_FileItems.size()-begin));
         for (int l = 0; l < lcount; ++l) {
@@ -91,7 +91,7 @@ void ExplorerView::Refresh()
             int sizeColorF = Color::Magenta;
             int sizeColorB = Color::Black;
 
-            if (index == m_SelectionStack.top()) {
+            if (index == m_SelectionStack.back()) {
                 boldAttr = Attr::Normal;
                 pathRegColorF = sizeColorF = Color::Black;
                 pathColorB = sizeColorB = Color::White;
@@ -178,11 +178,11 @@ bool ExplorerView::InjectKey(int key)
     switch (key) {
         case 'h':
             if (m_BeginStack.size() > 1) {
-                m_BeginStack.pop();
-                m_SelectionStack.pop();
+                m_BeginStack.pop_back();
+                m_SelectionStack.pop_back();
             } else {
-                m_BeginStack.top() = 0;
-                m_SelectionStack.top() = 0;
+                m_BeginStack.back() = 0;
+                m_SelectionStack.back() = 0;
             }
 
             m_Path = FileInfo(m_Path).AbsPath();
@@ -191,21 +191,21 @@ bool ExplorerView::InjectKey(int key)
 
         case 'l':
             if (!m_FileItems.empty()) {
-                int sel = m_SelectionStack.top();
+                int sel = m_SelectionStack.back();
                 if (m_FileItems[sel].isDir) {
                     m_Path += (m_Path != "/" ? "/" : "") + m_FileItems[sel].name;
                     BuildFileItems();
 
-                    m_BeginStack.push(0);
-                    m_SelectionStack.push(0);
+                    m_BeginStack.push_back(0);
+                    m_SelectionStack.push_back(0);
                 }
             }
             break;
 
         case 'j':
             if (!m_FileItems.empty()) {
-                int& beg = m_BeginStack.top();
-                int& sel = m_SelectionStack.top();
+                int& beg = m_BeginStack.back();
+                int& sel = m_SelectionStack.back();
                 if (sel < m_FileItems.size()-1) {
                     ++sel;
                 }
@@ -218,8 +218,8 @@ bool ExplorerView::InjectKey(int key)
 
         case 'k':
             if (!m_FileItems.empty()) {
-                int& beg = m_BeginStack.top();
-                int& sel = m_SelectionStack.top();
+                int& beg = m_BeginStack.back();
+                int& sel = m_SelectionStack.back();
                 if (sel > 0) {
                     --sel;
                 }
@@ -240,6 +240,10 @@ bool ExplorerView::InjectKey(int key)
             break;
 
         case '.':
+            m_BeginStack.resize(1);
+            m_BeginStack.back() = 0;
+            m_SelectionStack.resize(1);
+            m_SelectionStack.back() = 0;
             m_HideDot = !m_HideDot;
             BuildFileItems();
             break;

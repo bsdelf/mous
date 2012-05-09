@@ -5,7 +5,7 @@
 
 #include <string>
 #include <vector>
-#include <stack>
+#include <deque>
 
 #include "scx/UniPinYin.hpp"
 class FileItemCmp;
@@ -47,8 +47,8 @@ private:
     Window d;
     std::string m_Path;
     bool m_HideDot;
-    std::stack<int> m_BeginStack;
-    std::stack<int> m_SelectionStack;
+    std::deque<int> m_BeginStack;
+    std::deque<int> m_SelectionStack;
     std::vector<FileItem> m_FileItems;
     scx::UniPinYin m_UniPinYin;
 };
