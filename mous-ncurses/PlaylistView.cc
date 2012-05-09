@@ -130,7 +130,7 @@ void PlaylistView::Refresh()
 
         xoff = x + 1 + wText;
         if (m_List.GetItemCount() > hText) {
-            double percent = (double)(m_ItemBegin) / (m_List.GetItemCount()-hText+1);
+            double percent = (double)(m_ItemSelected+1) / m_List.GetItemCount() - 0.00001f;
             yoff = y + hText*percent;
             d.AttrSet(Attr::Bold | Attr::Reverse);
             d.ColorOn(Color::Green, Color::Black);

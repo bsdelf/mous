@@ -77,6 +77,7 @@ void ExplorerView::Refresh()
     const int wPath = wText - wSize;
 
     const int begin = m_BeginStack.back();
+    const int selection = m_SelectionStack.back();
     if (!m_FileItems.empty()) {
         int lcount = std::min(hText, (int)(m_FileItems.size()-begin));
         for (int l = 0; l < lcount; ++l) {
@@ -91,7 +92,7 @@ void ExplorerView::Refresh()
             int sizeColorF = Color::Magenta;
             int sizeColorB = Color::Black;
 
-            if (index == m_SelectionStack.back()) {
+            if (index == selection) {
                 boldAttr = Attr::Normal;
                 pathRegColorF = sizeColorF = Color::Black;
                 pathColorB = sizeColorB = Color::White;
@@ -135,7 +136,7 @@ void ExplorerView::Refresh()
 
         xoff = x + 1 + wText;
         if (m_FileItems.size() > hText) {
-            double percent = (double)(begin) / (m_FileItems.size()-hText+1);
+            double percent = (double)(selection+1) / m_FileItems.size() - 0.00001f;
             yoff = y + hText*percent;
             d.AttrSet(Attr::Bold | Attr::Reverse);
             d.ColorOn(Color::Green, Color::Black);
