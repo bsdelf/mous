@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <stack>
 
 #include "scx/UniPinYin.hpp"
 class FileItemCmp;
@@ -46,8 +47,8 @@ private:
     Window d;
     std::string m_Path;
     bool m_HideDot;
-    int m_ItemBegin;
-    int m_ItemSelected;
+    std::stack<int> m_BeginStack;
+    std::stack<int> m_SelectionStack;
     std::vector<FileItem> m_FileItems;
     scx::UniPinYin m_UniPinYin;
 };

@@ -60,30 +60,29 @@ void PlaylistView::Refresh()
     if (m_Focused)
         d.OpenStyle("b");
     stringstream stream;
-    stream << "[ " << STR_TITLE << " " << m_Index
-        << " (" << m_List.GetItemCount() << ") ]";
+    stream << "[ " << STR_TITLE << " " << m_Index << " ]";
     d.CenterPrint(0, stream.str());
     if (m_Focused)
         d.CloseStyle();
 
     // content
     // { {title artist album~~00:00 }#}
+    const int w = d.w - 2;
+    const int h = d.h - 2;
+    const int x = 1;
+    const int y = 1;
+    int xoff = x;
+    int yoff = y;
+
+    const int wText = w - 2;
+    const int hText = h - 1;
+
+    const int wTime = 5 + 1;
+    const int wField = (wText - wTime) / 3;
+    const int wLastField = (wText - wTime) - wField * 2;
+
     if (!m_List.Empty()) {
-        const int w = d.w - 2;
-        const int h = d.h - 2;
-        const int x = 1;
-        const int y = 1;
-        int xoff = x;
-        int yoff = y;
-
-        const int wText = w - 2;
-        const int hText = h;
-
-        const int wTime = 5 + 1;
-        const int wField = (wText - wTime) / 3;
-        const int wLastField = (wText - wTime) - wField * 2;
-
-        int lcount = std::min(hText, m_List.GetItemCount()-m_ItemBegin);
+            int lcount = std::min(hText, m_List.GetItemCount()-m_ItemBegin);
         for (int l = 0; l < lcount; ++l) {
             int index = m_ItemBegin + l;
             MediaItem* item = m_List.GetItem(index);
@@ -101,6 +100,7 @@ void PlaylistView::Refresh()
                 fieldColorB = timeColorB = Color::White;
 
                 d.AttrSet(Attr::Normal | Attr::Reverse);
+                d.ColorOn(Color::White, Color::Black);
                 d.Print(x, yoff+l, string(w-1, ' '));
             }
 
@@ -137,8 +137,20 @@ void PlaylistView::Refresh()
             d.Print(xoff, yoff, " ");
         }
 
-        d.ResetAttrColor();
+        
     }
+
+    // status bar
+    xoff = x + 1;
+    yoff = y + hText;
+    stringstream status;
+    if (!m_List.Empty())
+        status << (m_ItemSelected+1) << "/" << m_List.GetItemCount();
+    d.AttrSet(Attr::Bold);
+    d.ColorOn(Color::White, Color::Black);
+    d.Print(xoff, yoff, status.str());
+
+    d.ResetAttrColor();
 
     d.Refresh();
 }
@@ -170,7 +182,7 @@ bool PlaylistView::InjectKey(int key)
                     ++m_ItemSelected;
                 }
                 if (m_ItemSelected > (d.h-2) / 2
-                        && m_ItemBegin < m_List.GetItemCount()-(d.h-2)) {
+                        && m_ItemBegin < m_List.GetItemCount()-(d.h-2-1)) {
                     ++m_ItemBegin;
                 }
             }
