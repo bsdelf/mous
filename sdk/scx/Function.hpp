@@ -100,22 +100,40 @@ class FunctionMem;
 
 #define SCX_FUNCTION_COPY_FUNCTION_MEM_COMMON(argts...) \
     typedef ret_t (recv_t::*fn_t)(argts);               \
+    typedef ret_t (recv_t::*const_fn_t)(argts) const;               \
     typedef FunctionBase<ret_t (argts)> FunctionBase_t; \
 public:\
-    FunctionMem(fn_t fn, recv_t* recv): \
+    FunctionMem(ret_t (recv_t::*fn)(argts), recv_t* recv): \
         m_Function(fn),                 \
+        m_ConstFunction(NULL),                 \
         m_Receiver(recv) {              \
     }                                   \
     \
-    FunctionBase_t* Clone() const {                     \
-        return new FunctionMem(m_Function, m_Receiver); \
-    }                                                   \
+    FunctionMem(ret_t (recv_t::*fn)(argts) const, recv_t* recv): \
+        m_Function(NULL),                 \
+        m_ConstFunction(fn),                 \
+        m_Receiver(recv) {              \
+    }\
+    \
+    FunctionBase_t* Clone() const {                                 \
+        if (m_Function != NULL)                                     \
+            return new FunctionMem(m_Function, m_Receiver);         \
+        else                                                        \
+            return new FunctionMem(m_ConstFunction, m_Receiver);    \
+    }                                                               \
     \
     void* GetReceiver() const { return m_Receiver; }\
     \
 private:                    \
-    fn_t m_Function;        \
+    const fn_t m_Function;        \
+    const const_fn_t m_ConstFunction;        \
     recv_t* m_Receiver
+
+#define SCX_FUNCTION_FUNCTION_MEM_DOCALL(argts...)      \
+    if (m_Function != NULL)                             \
+        return (m_Receiver->*m_Function)(argts);        \
+    else                                                \
+        return (m_Receiver->*m_ConstFunction)(argts)
 
 template<typename ret_t, typename recv_t>
 class FunctionMem<ret_t (recv_t*)>: public FunctionBase<ret_t (void)>
@@ -125,7 +143,7 @@ class FunctionMem<ret_t (recv_t*)>: public FunctionBase<ret_t (void)>
 public:
     ret_t operator()(void) const
     {
-        return (m_Receiver->*m_Function)();
+        SCX_FUNCTION_FUNCTION_MEM_DOCALL();
     }
 };
 
@@ -138,7 +156,7 @@ class FunctionMem<ret_t (recv_t*, arg_t)>: public FunctionBase<ret_t (arg_t)>
 public:
     ret_t operator()(arg_t arg) const
     {
-        return (m_Receiver->*m_Function)(arg);
+        SCX_FUNCTION_FUNCTION_MEM_DOCALL(arg);
     }
 };
 
@@ -153,7 +171,7 @@ class FunctionMem<ret_t (recv_t*, arg1_t, arg2_t)>:
 public:
     ret_t operator()(arg1_t arg1, arg2_t arg2) const
     {
-        return (m_Receiver->*m_Function)(arg1, arg2);
+        SCX_FUNCTION_FUNCTION_MEM_DOCALL(arg1, arg2);
     }
 };
 
@@ -169,7 +187,7 @@ class FunctionMem<ret_t (recv_t*, arg1_t, arg2_t, arg3_t)>:
 public:
     ret_t operator()(arg1_t arg1, arg2_t arg2, arg3_t arg3) const
     {
-        return (m_Receiver->*m_Function)(arg1, arg2, arg3);
+        SCX_FUNCTION_FUNCTION_MEM_DOCALL(arg1, arg2, arg3);
     }
 };
 
@@ -186,7 +204,7 @@ class FunctionMem<ret_t (recv_t*, arg1_t, arg2_t, arg3_t, arg4_t)>:
 public:
     ret_t operator()(arg1_t arg1, arg2_t arg2, arg3_t arg3, arg4_t arg4) const
     {
-        return (m_Receiver->*m_Function)(arg1, arg2, arg3, arg4);
+        SCX_FUNCTION_FUNCTION_MEM_DOCALL(arg1, arg2, arg3, arg4);
     }
 };
 
@@ -204,10 +222,11 @@ class FunctionMem<ret_t (recv_t*, arg1_t, arg2_t, arg3_t, arg4_t, arg5_t)>:
 public:
     ret_t operator()(arg1_t arg1, arg2_t arg2, arg3_t arg3, arg4_t arg4, arg5_t arg5) const
     {
-        return (m_Receiver->*m_Function)(arg1, arg2, arg3, arg4, arg5);
+        SCX_FUNCTION_FUNCTION_MEM_DOCALL(arg1, arg2, arg3, arg4, arg5);
     }
 };
 
+#undef SCX_FUNCTION_FUNCTION_MEM_DOCALL
 #undef SCX_FUNCTION_COPY_FUNCTION_MEM_COMMON
 
 /* Function ptr class */
@@ -233,7 +252,7 @@ public:\
     }                           \
     \
 private:\
-    fn_t m_Function
+    const fn_t m_Function
  
 template<typename ret_t,
 typename arg_t>
@@ -334,9 +353,9 @@ class Function;
 
 #define SCX_FUNCTION_COPY_FUNCTION_COMMON_VOID              \
 public:\
-    template<typename fn_t, typename recv_t>                    \
-    Function(fn_t fn, recv_t recv) {                            \
-        m_PtrFn = new FunctionMem<ret_t (recv_t)>(fn, recv);    \
+    template<class recv_t>                    \
+    Function(ret_t (recv_t::*fn)(), recv_t* recv) {                            \
+        m_PtrFn = new FunctionMem<ret_t (recv_t*)>(fn, recv);    \
         m_FnType = FunctionType::Member;                        \
     }                                                           \
     \
@@ -424,7 +443,7 @@ public:\
     }                                   \
     \
 private:\
-    FunctionBase_t* m_PtrFn;    \
+    const FunctionBase_t* m_PtrFn;    \
     EmFunctionType m_FnType
         
 template<typename ret_t, typename arg_t>
