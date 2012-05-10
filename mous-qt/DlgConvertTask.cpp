@@ -49,7 +49,7 @@ void DlgConvertTask::SlotUpdateProgress()
         FrmProgressBar* bar = (FrmProgressBar*)ui->listAllTask->itemWidget(item);
         IConvTask* task = item->data(Qt::UserRole).value<IConvTask*>();
 
-        bar->SetProgress(task->GetProgress()*100);
+        bar->SetProgress(task->Progress()*100);
 
         if (task->IsFinished()) {
             disconnect(bar, 0, this, 0);

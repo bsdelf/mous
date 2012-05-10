@@ -22,7 +22,7 @@ public:
     bool IsShown() const;
 
 public:
-    int GetMinHeight() const;
+    int MinHeight() const;
 
 private:
     Window d;

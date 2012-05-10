@@ -133,7 +133,7 @@ int MainUi::Exec()
     OnResize();
 
     for (bool quit = false; !quit; quit = false) {
-        int key = d->bgWindow.GetInput();
+        int key = d->bgWindow.Input();
         if (HandleTopKey(key, quit)) {
             if (quit)
                 break;
@@ -267,8 +267,8 @@ void MainUi::OnResize()
 /* update the layout of top layer */
 void MainUi::UpdateTopLayout()
 {
-    const int w = d->bgWindow.GetWidth();
-    const int h = d->bgWindow.GetHeight();
+    const int w = d->bgWindow.Width();
+    const int h = d->bgWindow.Height();
 
     d->layerStack.top().ShowViews(true);
 
@@ -284,7 +284,7 @@ void MainUi::UpdateTopLayout()
         case View::MaskPlaylist | View::MaskStatus:
         {
             int x = 0, y = 0;
-            int hStatus = d->statusView.GetMinHeight();
+            int hStatus = d->statusView.MinHeight();
             int hPlaylist = h - hStatus;
 
             PlaylistView& playlist = d->playlistView[d->iPlaylist];
@@ -301,7 +301,7 @@ void MainUi::UpdateTopLayout()
         {
             int wExplorer = w/2;
             int wPlaylist = w - wExplorer;
-            int hStatus = d->statusView.GetMinHeight();
+            int hStatus = d->statusView.MinHeight();
             int hExplorer = h - hStatus;
             int x = 0, y = 0;
 

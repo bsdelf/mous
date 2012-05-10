@@ -55,15 +55,15 @@ struct MousData
         typedef vector<const IPluginAgent*> PluginAgentArray;
 
         PluginAgentArray decoders;
-        mgr->GetPlugins(decoders, PluginType::Decoder);
+        mgr->Plugins(decoders, PluginType::Decoder);
         //PluginAgentArray encoders;
-        //mgr->GetPlugins(encoders, PluginType::Encoder);
+        //mgr->Plugins(encoders, PluginType::Encoder);
         PluginAgentArray renderers;
-        mgr->GetPlugins(renderers, PluginType::Renderer);
+        mgr->Plugins(renderers, PluginType::Renderer);
         PluginAgentArray mediaPacks;
-        mgr->GetPlugins(mediaPacks, PluginType::MediaPack);
+        mgr->Plugins(mediaPacks, PluginType::MediaPack);
         PluginAgentArray tagParsers;
-        mgr->GetPlugins(tagParsers, PluginType::TagParser);
+        mgr->Plugins(tagParsers, PluginType::TagParser);
 
         loader->RegisterMediaPackPlugin(mediaPacks);
         loader->RegisterTagParserPlugin(tagParsers);

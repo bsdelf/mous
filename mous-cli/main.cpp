@@ -30,7 +30,7 @@ void OnFinished()
         if (gPlaylist->SeqCurrent(item, 1)) {
             gPlaylist->SeqMoveNext();
             gPlaylist->SeqCurrent(item);
-            if (gPlayer->GetStatus() != PlayerStatus::Closed)
+            if (gPlayer->Status() != PlayerStatus::Closed)
                 gPlayer->Close();
             gPlayer->Open(item->url);
             if (item->hasRange)
@@ -49,8 +49,8 @@ void OnPlaying()
         if (gPlayer == NULL || gStop)
             break;
         gMutexForSwitch.Lock();
-        uint64_t ms = gPlayer->GetOffsetMs();
-        cout << gPlayer->GetBitRate() << " kbps " <<
+        uint64_t ms = gPlayer->OffsetMs();
+        cout << gPlayer->BitRate() << " kbps " <<
             ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
         gMutexForSwitch.Unlock();
         usleep(200*1000);
@@ -121,10 +121,10 @@ int main(int argc, char** argv)
 
     // Dump all plugin path.
     vector<string> pathList;
-    mgr->GetPluginPath(pathList);
+    mgr->PluginPath(pathList);
     for (size_t i = 0; i < pathList.size(); ++i) {
         cout << ">> " << pathList[i] << endl;
-        const PluginInfo* info = mgr->GetPluginInfo(pathList[i]);
+        const PluginInfo* info = mgr->QueryPluginInfo(pathList[i]);
         cout << ">>>> " << info->author << endl;
         cout << ">>>> " << info->name << endl;
         cout << ">>>> " << info->desc << endl;
@@ -134,28 +134,28 @@ int main(int argc, char** argv)
 
     // Get all plugin agents.
     vector<const IPluginAgent*> decoderAgentList;
-    mgr->GetPlugins(decoderAgentList, PluginType::Decoder);
+    mgr->Plugins(decoderAgentList, PluginType::Decoder);
     cout << ">> Decoder count:" << decoderAgentList.size() << endl;
 
     vector<const IPluginAgent*> encoderAgentList;
-    mgr->GetPlugins(encoderAgentList, PluginType::Encoder);
+    mgr->Plugins(encoderAgentList, PluginType::Encoder);
     cout << ">> Encoder count:" << encoderAgentList.size() << endl;
 
     vector<const IPluginAgent*> rendererAgentList;
-    mgr->GetPlugins(rendererAgentList, PluginType::Renderer);
+    mgr->Plugins(rendererAgentList, PluginType::Renderer);
     cout << ">> Renderer count:" << rendererAgentList.size() << endl;
 
     vector<const IPluginAgent*> packAgentList;
-    mgr->GetPlugins(packAgentList, PluginType::MediaPack);
+    mgr->Plugins(packAgentList, PluginType::MediaPack);
     cout << ">> MediaPack count:" << packAgentList.size() << endl;
 
     vector<const IPluginAgent*> tagAgentList;
-    mgr->GetPlugins(tagAgentList, PluginType::TagParser);
+    mgr->Plugins(tagAgentList, PluginType::TagParser);
     cout << ">> TagParser count:" << tagAgentList.size() << endl;
     cout << endl;
 
     vector<const IPluginAgent*> pelAgentList;
-    mgr->GetPlugins(pelAgentList, PluginType::EventWatcher);
+    mgr->Plugins(pelAgentList, PluginType::EventWatcher);
     cout << ">> EventWatcher count:" << pelAgentList.size() << endl;
 
     // Check plugins enough.
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
         factory->RegisterDecoderPlugin(encoderAgentList);
         factory->RegisterEncoderPlugin(decoderAgentList);
 
-        vector<string> encoders = factory->GetEncoderNames();
+        vector<string> encoders = factory->EncoderNames();
         if (encoders.empty()) {
             cout << "No encoders!" << endl;
             IConvTaskFactory::Free(factory);
@@ -209,7 +209,7 @@ int main(int argc, char** argv)
         task->Run("output.wav");
 
         while (!task->IsFinished()) {
-            double percent =  task->GetProgress();
+            double percent =  task->Progress();
             if (percent < 0) {
                 cout << "failed!" << endl;
                 break;
@@ -237,11 +237,11 @@ int main(int argc, char** argv)
     {
         vector<PluginOption> list;
         cout << ">> Player decoder plugin options:" << endl;
-        player->GetDecoderPluginOption(list);
+        player->DecoderPluginOption(list);
         PrintPluginOption(list);
         cout << ">> Player renderer plugin options:" << endl;
         PluginOption opt;
-        player->GetRendererPluginOption(opt);
+        player->RendererPluginOption(opt);
         list.resize(1);
         list[0] = opt;
         PrintPluginOption(list);

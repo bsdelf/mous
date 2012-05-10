@@ -136,13 +136,13 @@ void FrmTagEditor::UpdateTag()
         valList << val;
     }
 
-    valList[0]->setText(QString::fromUtf8(m_CurrentParser->GetAlbum().c_str()));
-    valList[1]->setText(QString::fromUtf8(m_CurrentParser->GetTitle().c_str()));
-    valList[2]->setText(QString::fromUtf8(m_CurrentParser->GetArtist().c_str()));
-    valList[3]->setText(QString::fromUtf8(m_CurrentParser->GetGenre().c_str()));
-    valList[4]->setText(QString::number(m_CurrentParser->GetYear()));
-    valList[5]->setText(QString::number(m_CurrentParser->GetTrack()));
-    valList[6]->setText(QString::fromUtf8(m_CurrentParser->GetComment().c_str()));
+    valList[0]->setText(QString::fromUtf8(m_CurrentParser->Album().c_str()));
+    valList[1]->setText(QString::fromUtf8(m_CurrentParser->Title().c_str()));
+    valList[2]->setText(QString::fromUtf8(m_CurrentParser->Artist().c_str()));
+    valList[3]->setText(QString::fromUtf8(m_CurrentParser->Genre().c_str()));
+    valList[4]->setText(QString::number(m_CurrentParser->Year()));
+    valList[5]->setText(QString::number(m_CurrentParser->Track()));
+    valList[6]->setText(QString::fromUtf8(m_CurrentParser->Comment().c_str()));
 }
 
 void FrmTagEditor::UpdateCoverArt()

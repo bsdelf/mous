@@ -40,7 +40,7 @@ private:
     void HandlePlayer(char*, int);
     void HandlePlaylist(char*, int);
 
-    char* GetPayloadBuffer(char, int);
+    char* PayloadBuffer(char, int);
     void SendOut();
 
 private:

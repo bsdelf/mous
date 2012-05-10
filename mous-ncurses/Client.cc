@@ -53,7 +53,7 @@ void Client::StopService()
     char op = Op::App::StopService;
     int payloadSize = (BufObj(NULL) << op).Offset();
 
-    char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
+    char* buf = PayloadBuffer(Op::Group::App, payloadSize);
     BufObj(buf) << op;
 
     SendOut();
@@ -64,7 +64,7 @@ void Client::PlayerPlay(const string& path)
     char op = Op::App::LoadPlay;
     int payloadSize = (BufObj(NULL) << op << path).Offset();
 
-    char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
+    char* buf = PayloadBuffer(Op::Group::App, payloadSize);
     BufObj(buf) << op << path;
 
     SendOut();
@@ -102,7 +102,7 @@ void Client::ThRecvLoop(const string& ip, int port)
         }
     }
 
-    vector<char> headerBuf(Header::GetSize());
+    vector<char> headerBuf(Header::Size());
     vector<char> payloadBuf;
     Header header(Op::Group::None, -1);
     char* buf;
@@ -169,17 +169,17 @@ void Client::HandlePlaylist(char* buf, int size)
         return;
 }
 
-char* Client::GetPayloadBuffer(char group, int payloadSize)
+char* Client::PayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
-    int size = header.GetTotalSize();
+    int size = header.TotalSize();
     if ((int)m_SendOutBuf.size() > SENDOUTBUF_MAX_SIZE && size < SENDOUTBUF_MAX_SIZE)
         vector<char>(SENDOUTBUF_MAX_SIZE).swap(m_SendOutBuf);
     m_SendOutBuf.resize(size);
 
     char* buf = &m_SendOutBuf[0];
     header.Write(buf);
-    return buf + Header::GetSize();
+    return buf + Header::Size();
 }
 
 void Client::SendOut()

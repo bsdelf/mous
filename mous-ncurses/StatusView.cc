@@ -65,7 +65,7 @@ bool StatusView::IsShown() const
     return d.shown;
 }
 
-int StatusView::GetMinHeight() const
+int StatusView::MinHeight() const
 {
     return 3+2;
 }

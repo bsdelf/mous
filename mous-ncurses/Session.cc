@@ -41,7 +41,7 @@ void Session::Stop()
 
 void Session::ThRecvLoop()
 {
-    vector<char> headerBuf(Header::GetSize());
+    vector<char> headerBuf(Header::Size());
     vector<char> payloadBuf;
     Header header(Op::Group::None, -1);
     char* buf;

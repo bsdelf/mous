@@ -47,14 +47,14 @@ struct Header
     {
     }
 
-    static int GetSize()
+    static int Size()
     {
         return 4 + sizeof(char) + sizeof(int32_t);
     }
 
-    int GetTotalSize() const
+    int TotalSize() const
     {
-        return GetSize() + payloadSize;
+        return Size() + payloadSize;
     }
 
     bool Read(char* buf)

@@ -32,7 +32,7 @@ MainWindow::~MainWindow()
 
     m_Player->SigFinished()->DisconnectReceiver(this);
 
-    if (m_Player->GetStatus() == PlayerStatus::Playing) {
+    if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
     }
     if (m_TimerUpdateUi != NULL) {
@@ -56,12 +56,12 @@ void MainWindow::InitMousCore()
 
     m_PluginManager->LoadPluginDir("./plugins");
     vector<string> pathList;
-    m_PluginManager->GetPluginPath(pathList);
+    m_PluginManager->PluginPath(pathList);
 
     vector<const IPluginAgent*> packAgentList;
     vector<const IPluginAgent*> tagAgentList;
-    m_PluginManager->GetPlugins(packAgentList, PluginType::MediaPack);
-    m_PluginManager->GetPlugins(tagAgentList, PluginType::TagParser);
+    m_PluginManager->Plugins(packAgentList, PluginType::MediaPack);
+    m_PluginManager->Plugins(tagAgentList, PluginType::TagParser);
 
     m_MediaLoader->RegisterMediaPackPlugin(packAgentList);
     m_MediaLoader->RegisterTagParserPlugin(tagAgentList);
@@ -69,9 +69,9 @@ void MainWindow::InitMousCore()
     vector<const IPluginAgent*> decoderAgentList;
     vector<const IPluginAgent*> encoderAgentList;
     vector<const IPluginAgent*> rendererAgentList;
-    m_PluginManager->GetPlugins(decoderAgentList, PluginType::Decoder);
-    m_PluginManager->GetPlugins(encoderAgentList, PluginType::Encoder);
-    m_PluginManager->GetPlugins(rendererAgentList, PluginType::Renderer);
+    m_PluginManager->Plugins(decoderAgentList, PluginType::Decoder);
+    m_PluginManager->Plugins(encoderAgentList, PluginType::Encoder);
+    m_PluginManager->Plugins(rendererAgentList, PluginType::Renderer);
 
     m_Player->RegisterRendererPlugin(rendererAgentList[0]);
     m_Player->RegisterDecoderPlugin(decoderAgentList);
@@ -115,7 +115,7 @@ void MainWindow::InitMyUi()
     m_IconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
 
     // Volume
-    m_FrmToolBar.GetSliderVolume()->setValue(m_Player->GetVolume());
+    m_FrmToolBar.GetSliderVolume()->setValue(m_Player->Volume());
 
     // PlayList View
     m_TabBarPlaylist = new MidClickTabBar(this);
@@ -186,9 +186,9 @@ void MainWindow::SlotUiPlayerStopped()
 void MainWindow::SlotUpdateUi()
 {
     //==== Update statusbar.
-    int total = m_Player->GetRangeDuration();
-    int ms = m_Player->GetOffsetMs();
-    int kbps = m_Player->GetBitRate();
+    int total = m_Player->RangeDuration();
+    int ms = m_Player->OffsetMs();
+    int kbps = m_Player->BitRate();
 
     const QString& status = QString("%1 kbps | %2:%3/%4:%5").arg(kbps).
             arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0')).
@@ -205,9 +205,9 @@ void MainWindow::SlotUpdateUi()
 
 void MainWindow::SlotBtnPlay()
 {
-    qDebug() << m_Player->GetStatus();
+    qDebug() << m_Player->Status();
 
-    switch (m_Player->GetStatus()) {
+    switch (m_Player->Status()) {
     case PlayerStatus::Closed:
         if (m_UsedMediaItem != NULL) {
             m_Player->Open(m_UsedMediaItem->url);
@@ -240,7 +240,7 @@ void MainWindow::SlotBtnPlay()
 
 void MainWindow::SlotBtnStop()
 {
-    qDebug() << m_Player->GetStatus();
+    qDebug() << m_Player->Status();
 
     m_Player->Pause();
     m_TimerUpdateUi->stop();
@@ -300,10 +300,10 @@ void MainWindow::SlotWidgetPlayListDoubleClick()
 
 void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
 {
-    if (m_Player->GetStatus() == PlayerStatus::Playing) {
+    if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
     }
-    if (m_Player->GetStatus() != PlayerStatus::Closed) {
+    if (m_Player->Status() != PlayerStatus::Closed) {
         m_Player->Close();
         m_TimerUpdateUi->stop();
     }
@@ -328,7 +328,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
 void MainWindow::SlotConvertMediaItem(const MediaItem *item)
 {
     //==== show encoders
-    vector<string> encoderNames = m_ConvFactory->GetEncoderNames();
+    vector<string> encoderNames = m_ConvFactory->EncoderNames();
     if (encoderNames.empty())
         return;
     QStringList list;
@@ -353,10 +353,10 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
 
     //==== show options
     vector<const BaseOption*> opts;
-    newTask->GetEncoderOptions(opts);
+    newTask->EncoderOptions(opts);
 
     QString fileName =
-            QString::fromUtf8((item->tag.artist + " - " + item->tag.title + "." + newTask->GetEncoderFileSuffix()).c_str());
+            QString::fromUtf8((item->tag.artist + " - " + item->tag.title + "." + newTask->EncoderFileSuffix()).c_str());
     DlgConvertOption dlgOption(this);
     dlgOption.SetDir(QDir::homePath());
     dlgOption.SetFileName(fileName);

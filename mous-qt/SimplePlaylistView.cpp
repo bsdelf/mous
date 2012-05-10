@@ -170,8 +170,8 @@ SimplePlaylistView::~SimplePlaylistView()
             delete item;
     }
 
-    for (int i = 0; i < m_Playlist.GetItemCount(); ++i) {
-        delete m_Playlist.GetItem(i);
+    for (int i = 0; i < m_Playlist.Count(); ++i) {
+        delete m_Playlist[i];
     }
     m_Playlist.Clear();
 
@@ -206,7 +206,7 @@ const MediaItem* SimplePlaylistView::GetPreviousItem() const
 
 size_t SimplePlaylistView::GetItemCount() const
 {
-    return m_Playlist.GetItemCount();
+    return m_Playlist.Count();
 }
 
 void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
@@ -278,7 +278,7 @@ void SimplePlaylistView::SlotConvert()
     QModelIndex index(selectedIndexes()[0]);
     qDebug() << index.row();
 
-    MediaItem* item = m_Playlist.GetItem(index.row());;
+    MediaItem* item = m_Playlist[index.row()];
 
     emit SigConvertMediaItem(item);
 }
@@ -341,7 +341,7 @@ void SimplePlaylistView::SlotMediaRowGot(MediaRow* mediaRow)
 
     m_DlgLoadingMedia.SetFileName(fileName);
 
-    m_Playlist.AppendItem(mediaRow->item);
+    m_Playlist.Append(mediaRow->item);
     m_StModel.appendRow(mediaRow->row);
 }
 
