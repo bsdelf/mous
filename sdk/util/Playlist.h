@@ -30,7 +30,7 @@ class Playlist
 {
 public:
     Playlist():
-        m_PlaylistMode(PlaylistMode::Normal),
+        m_Mode(PlaylistMode::Normal),
         m_SeqNormalIndex(-1),
         m_SeqRepeatIndex(-1),
         m_SeqShuffleIndex(-1)
@@ -44,12 +44,12 @@ public:
 
     void SetMode(EmPlaylistMode mode)
     {
-        m_PlaylistMode = mode;
+        m_Mode = mode;
     }
 
     EmPlaylistMode Mode() const
     {
-        return m_PlaylistMode;
+        return m_Mode;
     }
 
     bool SeqCurrent(item_t& item, int off = 0) const
@@ -58,7 +58,7 @@ public:
             return false;
 
         int idx = -1;
-        switch (m_PlaylistMode) {
+        switch (m_Mode) {
             case PlaylistMode::Normal:
                 idx = m_SeqNormalIndex + off;
                 break;
@@ -93,7 +93,7 @@ public:
         if (m_ItemQue.empty() || index < 0 || index >= (int)m_ItemQue.size())
             return false;
 
-        switch (m_PlaylistMode) {
+        switch (m_Mode) {
             case PlaylistMode::Normal:
                 m_SeqNormalIndex = index;
                 break;
@@ -114,7 +114,7 @@ public:
     void SeqMoveNext(int step = 1) const
     {
         int* idx = NULL;
-        switch (m_PlaylistMode) {
+        switch (m_Mode) {
             case PlaylistMode::Normal:
                 m_SeqNormalIndex += step;
                 idx = &m_SeqNormalIndex;
@@ -142,42 +142,42 @@ public:
         assert(idx != NULL && *idx >= 0 && *idx < (int)m_ItemQue.size());
     }
 
-    void Assign(std::deque<item_t>& items)
+    void Assign(const std::deque<item_t>& items)
     {
         m_ItemQue.assign(items.begin(), items.end());
         AdjustSeqIndexes();
         AdjustShuffleRange(true);
     }
 
-    void Insert(int index, item_t& item)
+    void Insert(int index, const item_t& item)
     {
         m_ItemQue.insert(m_ItemQue.begin()+index, item);
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void Insert(int index, std::deque<item_t>& items)
+    void Insert(int index, const std::deque<item_t>& items)
     {
         m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void Append(item_t& item)
+    void Append(const item_t& item)
     {
         m_ItemQue.push_back(item);
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void Append(std::deque<item_t>& items)
+    void Append(const std::deque<item_t>& items)
     {
         m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    bool Remove(item_t& item)
+    bool Remove(const item_t& item)
     {
         for (size_t i = 0; i < m_ItemQue.size(); ++i) {
             if (item == m_ItemQue[i]) {
@@ -248,6 +248,47 @@ public:
         reverse(m_ItemQue.begin(), m_ItemQue.end());
     }
 
+    template<class buf_t>
+    void operator<<(buf_t& buf)
+    {
+        int mode;
+        buf >> mode;
+        m_Mode = (EmPlaylistMode)mode;
+
+        int count;
+        buf >> count;
+        m_ItemQue.resize(count);
+        for (int i = 0; i < count; ++i) {
+            m_ItemQue[i] << buf;
+        }
+
+        buf >> m_SeqNormalIndex >> m_SeqRepeatIndex >> m_SeqShuffleIndex;
+
+        buf >> count;
+        m_SeqShuffleQue.resize(count);
+        for (int i = 0; i < count; ++i) {
+            buf >> m_SeqShuffleQue[i];
+        }
+    }
+
+    template<class buf_t>
+    void operator>>(buf_t& buf) const
+    {
+        buf << (int)m_Mode;
+
+        buf << (int)m_ItemQue.size();
+        for (int i = 0; i < (int)m_ItemQue.size(); ++i) {
+            m_ItemQue[i] >> buf;
+        }
+
+        buf << m_SeqNormalIndex << m_SeqRepeatIndex << m_SeqShuffleIndex;
+
+        buf << (int)m_SeqShuffleQue.size();
+        for (int i = 0; i < (int)m_SeqShuffleQue.size(); ++i) {
+            buf << m_SeqShuffleQue[i];
+        }
+    }
+
 private:
     void AdjustSeqIndexes()
     {
@@ -299,7 +340,7 @@ private:
     }
 
 private:
-    EmPlaylistMode m_PlaylistMode;
+    EmPlaylistMode m_Mode;
 
     std::deque<item_t> m_ItemQue;
     typedef typename std::deque<item_t>::iterator ItemQueIter;
