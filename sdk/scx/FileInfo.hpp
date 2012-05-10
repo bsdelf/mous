@@ -80,7 +80,7 @@ public:
         return m_Type;
     }
 
-    long Size() const
+    off_t Size() const
     {
         return m_Exists ? m_Stat.st_size : -1;
     }
