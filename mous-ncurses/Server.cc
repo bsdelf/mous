@@ -54,19 +54,19 @@ int Server::Exec()
     if (!m_Socket.Listen())
         return 1;
 
-    int maxfd = std::max(m_Socket.GetFd(), m_PipeFd[0]) + 1;
+    int maxfd = std::max(m_Socket.Fd(), m_PipeFd[0]) + 1;
     struct fd_set rset;
     FD_ZERO(&rset);
 
     TcpSocket clientSocket;
     for (bool stopService = false; !stopService; ) {
-        FD_SET(m_Socket.GetFd(), &rset);
+        FD_SET(m_Socket.Fd(), &rset);
         FD_SET(m_PipeFd[0], &rset);
         if (select(maxfd, &rset, NULL, NULL, NULL) <= 0)
             break;
 
         // open session
-        if (FD_ISSET(m_Socket.GetFd(), &rset)) {
+        if (FD_ISSET(m_Socket.Fd(), &rset)) {
             if (!m_Socket.Accept(clientSocket))
                 break;
             OpenSession(clientSocket);

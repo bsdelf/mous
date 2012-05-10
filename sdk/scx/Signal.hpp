@@ -65,7 +65,7 @@ public:                                                 \
     void DisconnectReceiver(recv_t* recv) const         \
     {                                                   \
         for (int i = m_Slots.size()-1; i >= 0; --i) {   \
-            if ((m_Slots[i]->GetReceiver()) == recv) {  \
+            if ((m_Slots[i]->Receiver()) == recv) {  \
                 delete m_Slots[i];                      \
                 m_Slots.erase(m_Slots.begin() + i);     \
             }                                           \

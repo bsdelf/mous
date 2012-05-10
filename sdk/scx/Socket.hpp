@@ -72,14 +72,14 @@ public:
         m_Addr.sin_port = htons(port);
     }
 
-    std::string GetIp() const
+    std::string Ip() const
     {
         char buf[INET6_ADDRSTRLEN];
         const char* p = inet_ntop(AF_INET, &m_Addr.sin_addr, buf, sizeof(buf));
         return p != NULL ? p : "";
     }
 
-    int GetPort() const
+    int Port() const
     {
         return ntohs(m_Addr.sin_port);
     }
@@ -128,17 +128,17 @@ public:\
         }                   \
     }                       \
 \
-    int GetFd() const\
+    int Fd() const\
     {                   \
         return m_Fd;    \
     }                   \
 \
-    InetAddr& GetAddr()\
+    InetAddr& Addr()\
     {                       \
         return m_InetAddr;  \
     }                       \
 \
-    const InetAddr& GetAddr() const\
+    const InetAddr& Addr() const\
     {                       \
         return m_InetAddr;  \
     }                       \
@@ -217,7 +217,7 @@ public:
     bool Accept(TcpSocket& clientSocket) const
     {
         clientSocket.Close();
-        InetAddr& clientAddr = clientSocket.GetAddr();
+        InetAddr& clientAddr = clientSocket.Addr();
         int connFd = accept(m_Fd, (struct sockaddr*)&clientAddr.m_Addr, &clientAddr.m_AddrLen);
         clientSocket.m_Fd = connFd;
         return connFd != -1;

@@ -26,7 +26,7 @@ public:
     virtual ~FunctionBase() { };
     virtual FunctionBase* Clone() const = 0;
     virtual ret_t operator()(void) const = 0;
-    virtual void* GetReceiver() const = 0;
+    virtual void* Receiver() const = 0;
 };
 
 template<typename ret_t,
@@ -37,7 +37,7 @@ public:
     virtual ~FunctionBase() { };
     virtual FunctionBase* Clone() const = 0;
     virtual ret_t operator()(arg_t) const = 0;
-    virtual void* GetReceiver() const = 0;
+    virtual void* Receiver() const = 0;
 };
 
 template<typename ret_t,
@@ -49,7 +49,7 @@ public:
     virtual ~FunctionBase() { };
     virtual FunctionBase* Clone() const = 0;
     virtual ret_t operator()(arg1_t, arg2_t) const = 0;
-    virtual void* GetReceiver() const = 0;
+    virtual void* Receiver() const = 0;
 };
 
 template<typename ret_t,
@@ -62,7 +62,7 @@ public:
     virtual ~FunctionBase() { };
     virtual FunctionBase* Clone() const = 0;
     virtual ret_t operator()(arg1_t, arg2_t, arg3_t) const = 0;
-    virtual void* GetReceiver() const = 0;
+    virtual void* Receiver() const = 0;
 };
 
 template<typename ret_t,
@@ -76,7 +76,7 @@ public:
     virtual ~FunctionBase() { };
     virtual FunctionBase* Clone() const = 0;
     virtual ret_t operator()(arg1_t, arg2_t, arg3_t, arg4_t) const = 0;
-    virtual void* GetReceiver() const = 0;
+    virtual void* Receiver() const = 0;
 };
 
 template<typename ret_t,
@@ -91,7 +91,7 @@ public:
     virtual ~FunctionBase() { };
     virtual FunctionBase* Clone() const = 0;
     virtual ret_t operator()(arg1_t, arg2_t, arg3_t, arg4_t, arg5_t) const = 0;
-    virtual void* GetReceiver() const = 0;
+    virtual void* Receiver() const = 0;
 };
 
 /* Function mem class */
@@ -122,7 +122,7 @@ public:\
             return new FunctionMem(m_ConstFunction, m_Receiver);    \
     }                                                               \
     \
-    void* GetReceiver() const { return m_Receiver; }\
+    void* Receiver() const { return m_Receiver; }\
     \
 private:                    \
     const fn_t m_Function;        \
@@ -246,10 +246,10 @@ public:\
         return new FunctionPtr(m_Function); \
     }                                       \
     \
-    void* GetReceiver() const   \
-    {                           \
-        return NULL;            \
-    }                           \
+    void* Receiver() const  \
+    {                       \
+        return NULL;        \
+    }                       \
     \
 private:\
     const fn_t m_Function
@@ -353,9 +353,9 @@ class Function;
 
 #define SCX_FUNCTION_COPY_FUNCTION_COMMON_VOID              \
 public:\
-    template<class recv_t>                    \
-    Function(ret_t (recv_t::*fn)(), recv_t* recv) {                            \
-        m_PtrFn = new FunctionMem<ret_t (recv_t*)>(fn, recv);    \
+    template<typename fn_t, class recv_t>                       \
+    Function(fn_t fn, recv_t* recv) {                           \
+        m_PtrFn = new FunctionMem<ret_t (recv_t*)>(fn, recv);   \
         m_FnType = FunctionType::Member;                        \
     }                                                           \
     \
@@ -364,12 +364,12 @@ public:\
         m_FnType = FunctionType::Pointer;               \
     }                                                   \
     \
-    template<typename fn_t, typename recv_t>                    \
-    void Bind(fn_t fn, recv_t recv) {                           \
-        if (m_PtrFn != NULL) delete m_PtrFn;                    \
-        m_PtrFn = new FunctionMem<ret_t (recv_t)>(fn, recv);    \
-        m_FnType = FunctionType::Member;                        \
-    }                                                           \
+    template<typename fn_t, class recv_t>                    \
+    void Bind(fn_t fn, recv_t* recv) {                       \
+        if (m_PtrFn != NULL) delete m_PtrFn;                 \
+        m_PtrFn = new FunctionMem<ret_t (recv_t*)>(fn, recv);\
+        m_FnType = FunctionType::Member;                     \
+    }                                                        \
     \
     void Bind(ret_t (*fn)(void)) {                      \
         if (m_PtrFn != NULL) delete m_PtrFn;            \
@@ -381,21 +381,21 @@ public:\
 
 #define SCX_FUNCTION_COPY_FUNCTION_COMMON_NVOID(argts...)   \
 public:\
-    template<typename fn_t, typename recv_t>                            \
-    Function(fn_t fn, recv_t recv) {                                    \
-        m_PtrFn = new FunctionMem<ret_t (recv_t, argts)>(fn, recv);     \
-        m_FnType = FunctionType::Member;                                \
-    }                                                                   \
+    template<typename fn_t, class recv_t>                            \
+    Function(fn_t fn, recv_t* recv) {                                \
+        m_PtrFn = new FunctionMem<ret_t (recv_t*, argts)>(fn, recv); \
+        m_FnType = FunctionType::Member;                             \
+    }                                                                \
     \
     Function(ret_t (*fn)(argts)) {                      \
         m_PtrFn = new FunctionPtr<ret_t (argts)>(fn);   \
         m_FnType = FunctionType::Pointer;               \
     }                                                   \
     \
-    template<typename fn_t, typename recv_t>                        \
-    void Bind(fn_t fn, recv_t recv) {                               \
+    template<typename fn_t, class recv_t>                           \
+    void Bind(fn_t fn, recv_t* recv) {                              \
         if (m_PtrFn != NULL) delete m_PtrFn;                        \
-        m_PtrFn = new FunctionMem<ret_t (recv_t, argts)>(fn, recv); \
+        m_PtrFn = new FunctionMem<ret_t (recv_t*, argts)>(fn, recv);\
         m_FnType = FunctionType::Member;                            \
     }                                                               \
     \
@@ -434,13 +434,13 @@ public:\
         return *this;                               \
     }                                               \
     \
-    EmFunctionType GetType() const {    \
-        return m_FnType;                \
-    }                                   \
+    EmFunctionType Type() const {   \
+        return m_FnType;            \
+    }                               \
     \
-    void* GetReceiver() const {         \
-        return m_PtrFn->GetReceiver();  \
-    }                                   \
+    void* Receiver() const {         \
+        return m_PtrFn->Receiver();  \
+    }                                \
     \
 private:\
     const FunctionBase_t* m_PtrFn;    \
