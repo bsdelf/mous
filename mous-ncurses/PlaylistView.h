@@ -44,6 +44,7 @@ private:
     int m_ItemBegin;
     int m_ItemSelected;
     Playlist<MediaItem*> m_List;
+    std::string m_Title;
 };
 
 #endif

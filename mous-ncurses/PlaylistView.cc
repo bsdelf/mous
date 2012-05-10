@@ -3,7 +3,6 @@
 #include <algorithm>
 using namespace std;
 
-#include <scx/Conv.hpp>
 #include <scx/CharsetHelper.hpp>
 using namespace scx;
 
@@ -13,7 +12,8 @@ PlaylistView::PlaylistView():
     m_Focused(false),
     m_Index(-1),
     m_ItemBegin(0),
-    m_ItemSelected(0)
+    m_ItemSelected(0),
+    m_Title(STR_TITLE)
 {
     for (int i = 0; i < 100; ++i) {
         MediaItem* item = new MediaItem;
@@ -51,9 +51,7 @@ void PlaylistView::Refresh()
     // title
     if (m_Focused)
         d.OpenStyle("b");
-    stringstream stream;
-    stream << "[ " << STR_TITLE << " " << m_Index << " ]";
-    d.CenterPrint(0, stream.str());
+    d.CenterPrint(0, m_Title);
     if (m_Focused)
         d.CloseStyle();
 
@@ -246,6 +244,10 @@ bool PlaylistView::HasFocus() const
 void PlaylistView::SetIndex(int index)
 {
     m_Index = index;
+
+    stringstream str;
+    str << "[ " << STR_TITLE << " " << index << " ]";
+    m_Title = str.str();
 }
 
 int PlaylistView::GetIndex() const
