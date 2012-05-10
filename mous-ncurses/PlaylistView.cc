@@ -30,14 +30,14 @@ PlaylistView::PlaylistView():
         stream << "album" << i;
         item->tag.album = stream.str();
 
-        m_List.AppendItem(item);
+        m_List.Append(item);
     }
 }
 
 PlaylistView::~PlaylistView()
 {
-    for (int i = 0; i < m_List.GetItemCount(); ++i)
-        delete m_List.GetItem(i);
+    for (int i = 0; i < m_List.Count(); ++i)
+        delete m_List[i];
     m_List.Clear();
 }
 
@@ -74,10 +74,10 @@ void PlaylistView::Refresh()
     const int wLastField = (wText - wTime) - wField * 2;
 
     if (!m_List.Empty()) {
-            int lcount = std::min(hText, m_List.GetItemCount()-m_ItemBegin);
+            int lcount = std::min(hText, m_List.Count()-m_ItemBegin);
         for (int l = 0; l < lcount; ++l) {
             int index = m_ItemBegin + l;
-            MediaItem* item = m_List.GetItem(index);
+            MediaItem* item = m_List[index];
 
             int fieldAttr = Attr::Bold;
             int fieldColorF = Color::Blue;
@@ -121,8 +121,8 @@ void PlaylistView::Refresh()
         }
 
         xoff = x + 1 + wText;
-        if (m_List.GetItemCount() > hText) {
-            double percent = (double)(m_ItemSelected+1) / m_List.GetItemCount() - 0.00001f;
+        if (m_List.Count() > hText) {
+            double percent = (double)(m_ItemSelected+1) / m_List.Count() - 0.00001f;
             yoff = y + hText*percent;
             d.AttrSet(Attr::Bold | Attr::Reverse);
             d.ColorOn(Color::Green, Color::Black);
@@ -137,7 +137,7 @@ void PlaylistView::Refresh()
     yoff = y + hText;
     stringstream status;
     if (!m_List.Empty())
-        status << (m_ItemSelected+1) << "/" << m_List.GetItemCount();
+        status << (m_ItemSelected+1) << "/" << m_List.Count();
     d.AttrSet(Attr::Bold);
     d.ColorOn(Color::White, Color::Black);
     d.Print(xoff, yoff, status.str());
@@ -170,11 +170,11 @@ bool PlaylistView::InjectKey(int key)
 
         case 'j':
             if (!m_List.Empty()) {
-                if (m_ItemSelected < m_List.GetItemCount()-1) {
+                if (m_ItemSelected < m_List.Count()-1) {
                     ++m_ItemSelected;
                 }
                 if (m_ItemSelected > (d.h-2) / 2
-                        && m_ItemBegin < m_List.GetItemCount()-(d.h-2-1)) {
+                        && m_ItemBegin < m_List.Count()-(d.h-2-1)) {
                     ++m_ItemBegin;
                 }
             }

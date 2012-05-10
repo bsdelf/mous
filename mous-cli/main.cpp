@@ -173,7 +173,7 @@ int main(int argc, char** argv)
     deque<MediaItem*> mediaList;
     for (int i = 1; i < argc; ++i) {
         loader->LoadMedia(argv[i], mediaList);
-        playlist.AppendItem(mediaList);
+        playlist.Append(mediaList);
     }
     playlist.SetMode(PlaylistMode::Repeat);
 
@@ -203,7 +203,7 @@ int main(int argc, char** argv)
             return 0;
         }
 
-        MediaItem* item = playlist.GetItem(11);
+        MediaItem* item = playlist[11];
         cout << item->url << endl;
         IConvTask* task = factory->CreateTask(item, encoders[index-1]);
         task->Run("output.wav");

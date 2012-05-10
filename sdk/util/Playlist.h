@@ -22,6 +22,9 @@ enum e {
 }
 typedef PlaylistMode::e EmPlaylistMode;
 
+/*
+ * NOTE: Playlist<int> won't be compiled!
+ */
 template <typename item_t>
 class Playlist
 {
@@ -44,7 +47,7 @@ public:
         m_PlaylistMode = mode;
     }
 
-    EmPlaylistMode GetMode() const
+    EmPlaylistMode Mode() const
     {
         return m_PlaylistMode;
     }
@@ -139,49 +142,60 @@ public:
         assert(idx != NULL && *idx >= 0 && *idx < (int)m_ItemQue.size());
     }
 
-    void AssignItem(std::deque<item_t>& items)
+    void Assign(std::deque<item_t>& items)
     {
         m_ItemQue.assign(items.begin(), items.end());
         AdjustSeqIndexes();
         AdjustShuffleRange(true);
     }
 
-    void InsertItem(int index, item_t item)
+    void Insert(int index, item_t& item)
     {
         m_ItemQue.insert(m_ItemQue.begin()+index, item);
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void InsertItem(int index, std::deque<item_t>& items)
+    void Insert(int index, std::deque<item_t>& items)
     {
         m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void AppendItem(item_t item)
+    void Append(item_t& item)
     {
         m_ItemQue.push_back(item);
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void AppendItem(std::deque<item_t>& items)
+    void Append(std::deque<item_t>& items)
     {
         m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void RemoveItem(int index)
+    bool Remove(item_t& item)
+    {
+        for (size_t i = 0; i < m_ItemQue.size(); ++i) {
+            if (item == m_ItemQue[i]) {
+                m_ItemQue.erase(m_ItemQue.begin() + i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void Remove(int index)
     {
         m_ItemQue.erase(m_ItemQue.begin() + index);
         AdjustSeqIndexes();
         AdjustShuffleRange();
     }
 
-    void RemoveItem(const std::vector<int>& indexes)
+    void Remove(const std::vector<int>& indexes)
     {
         for (int i = indexes.size()-1; i >= 0; --i) {
             m_ItemQue.erase(m_ItemQue.begin() + indexes[i]);
@@ -197,12 +211,27 @@ public:
         AdjustSeqIndexes();
     }
 
-    item_t GetItem(int index)
+    item_t& At(int index)
+    {
+        return m_ItemQue.at(index);
+    }
+
+    const item_t& At(int index) const
+    {
+        return m_ItemQue.at(index);
+    }
+
+    item_t& operator[](int index)
     {
         return m_ItemQue[index];
     }
 
-    int GetItemCount() const
+    const item_t& operator[](int index) const
+    {
+        return m_ItemQue[index];
+    }
+
+    int Count() const
     {
         int size = m_ItemQue.size();
         return size;
