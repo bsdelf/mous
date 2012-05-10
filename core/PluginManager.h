@@ -25,13 +25,9 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadAll();
 
-    void Plugins(std::vector<const IPluginAgent*>& list, EmPluginType) const;
-    void PluginPath(std::vector<std::string>& list) const;
+    void DumpPluginAgent(std::vector<const IPluginAgent*>& list, EmPluginType) const;
+    void DumpPluginPath(std::vector<std::string>& list) const;
     const PluginInfo* QueryPluginInfo(const std::string& path) const;
-
-private:
-    static std::vector<std::string>* gFtwFiles;
-    static int OnFtw(const char* file, const struct stat* s, int);
 
 private:
     std::map<std::string, IPluginAgent*> m_PluginMap;

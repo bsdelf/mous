@@ -1,9 +1,11 @@
 #include "PluginManager.h"
-#include <ftw.h>
-#include <sys/stat.h>
 #include <core/IPluginAgent.h>
 using namespace std;
 using namespace mous;
+
+#include "scx/Dir.hpp"
+#include "scx/FileInfo.hpp"
+using namespace scx;
 
 IPluginManager* IPluginManager::Create()
 {
@@ -28,13 +30,15 @@ PluginManager::~PluginManager()
 
 size_t PluginManager::LoadPluginDir(const string& dir)
 {
-    vector<string> files;
-    gFtwFiles = &files;
-    ftw(dir.c_str(), &OnFtw, 1);
-    gFtwFiles = NULL;
+    vector<string> files = Dir::ListDir(dir);
 
     for (size_t i = 0; i < files.size(); ++i) {
-        LoadPlugin(files[i]);
+        if (files[i].substr(0, 3) == "lib") {
+            string full = dir + "/" + files[i];
+            FileInfo info(full);
+            if (info.Type() == FileType::Regular && info.Suffix() == "so")
+                LoadPlugin(full);
+        }
     }
 
     return m_PluginMap.size();
@@ -75,7 +79,7 @@ void PluginManager::UnloadAll()
     m_PluginMap.clear();
 }
 
-void PluginManager::Plugins(vector<const IPluginAgent*>& list, EmPluginType type) const
+void PluginManager::DumpPluginAgent(vector<const IPluginAgent*>& list, EmPluginType type) const
 {
     list.clear();
     for (PluginMapConstIter iter = m_PluginMap.begin();
@@ -87,7 +91,7 @@ void PluginManager::Plugins(vector<const IPluginAgent*>& list, EmPluginType type
     }
 }
 
-void PluginManager::PluginPath(vector<string>& list) const
+void PluginManager::DumpPluginPath(vector<string>& list) const
 {
     list.clear();
     list.reserve(m_PluginMap.size());
@@ -102,13 +106,4 @@ const PluginInfo* PluginManager::QueryPluginInfo(const std::string& path) const
     PluginMapConstIter iter = m_PluginMap.find(path);
     return (iter != m_PluginMap.end()) ?
         iter->second->Info() : NULL;
-}
-
-vector<string>* PluginManager::gFtwFiles = NULL;
-
-int PluginManager::OnFtw(const char* file, const struct stat* s, int type)
-{
-    if (type == FTW_F && !(s->st_mode & S_IFDIR) && file != NULL)
-        gFtwFiles->push_back(file);
-    return 0;
 }

@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 
     // Dump all plugin path.
     vector<string> pathList;
-    mgr->PluginPath(pathList);
+    mgr->DumpPluginPath(pathList);
     for (size_t i = 0; i < pathList.size(); ++i) {
         cout << ">> " << pathList[i] << endl;
         const PluginInfo* info = mgr->QueryPluginInfo(pathList[i]);
@@ -134,28 +134,28 @@ int main(int argc, char** argv)
 
     // Get all plugin agents.
     vector<const IPluginAgent*> decoderAgentList;
-    mgr->Plugins(decoderAgentList, PluginType::Decoder);
+    mgr->DumpPluginAgent(decoderAgentList, PluginType::Decoder);
     cout << ">> Decoder count:" << decoderAgentList.size() << endl;
 
     vector<const IPluginAgent*> encoderAgentList;
-    mgr->Plugins(encoderAgentList, PluginType::Encoder);
+    mgr->DumpPluginAgent(encoderAgentList, PluginType::Encoder);
     cout << ">> Encoder count:" << encoderAgentList.size() << endl;
 
     vector<const IPluginAgent*> rendererAgentList;
-    mgr->Plugins(rendererAgentList, PluginType::Renderer);
+    mgr->DumpPluginAgent(rendererAgentList, PluginType::Renderer);
     cout << ">> Renderer count:" << rendererAgentList.size() << endl;
 
     vector<const IPluginAgent*> packAgentList;
-    mgr->Plugins(packAgentList, PluginType::MediaPack);
+    mgr->DumpPluginAgent(packAgentList, PluginType::MediaPack);
     cout << ">> MediaPack count:" << packAgentList.size() << endl;
 
     vector<const IPluginAgent*> tagAgentList;
-    mgr->Plugins(tagAgentList, PluginType::TagParser);
+    mgr->DumpPluginAgent(tagAgentList, PluginType::TagParser);
     cout << ">> TagParser count:" << tagAgentList.size() << endl;
     cout << endl;
 
     vector<const IPluginAgent*> pelAgentList;
-    mgr->Plugins(pelAgentList, PluginType::EventWatcher);
+    mgr->DumpPluginAgent(pelAgentList, PluginType::EventWatcher);
     cout << ">> EventWatcher count:" << pelAgentList.size() << endl;
 
     // Check plugins enough.

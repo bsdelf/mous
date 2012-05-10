@@ -56,12 +56,12 @@ void MainWindow::InitMousCore()
 
     m_PluginManager->LoadPluginDir("./plugins");
     vector<string> pathList;
-    m_PluginManager->PluginPath(pathList);
+    m_PluginManager->DumpPluginPath(pathList);
 
     vector<const IPluginAgent*> packAgentList;
     vector<const IPluginAgent*> tagAgentList;
-    m_PluginManager->Plugins(packAgentList, PluginType::MediaPack);
-    m_PluginManager->Plugins(tagAgentList, PluginType::TagParser);
+    m_PluginManager->DumpPluginAgent(packAgentList, PluginType::MediaPack);
+    m_PluginManager->DumpPluginAgent(tagAgentList, PluginType::TagParser);
 
     m_MediaLoader->RegisterMediaPackPlugin(packAgentList);
     m_MediaLoader->RegisterTagParserPlugin(tagAgentList);
@@ -69,9 +69,9 @@ void MainWindow::InitMousCore()
     vector<const IPluginAgent*> decoderAgentList;
     vector<const IPluginAgent*> encoderAgentList;
     vector<const IPluginAgent*> rendererAgentList;
-    m_PluginManager->Plugins(decoderAgentList, PluginType::Decoder);
-    m_PluginManager->Plugins(encoderAgentList, PluginType::Encoder);
-    m_PluginManager->Plugins(rendererAgentList, PluginType::Renderer);
+    m_PluginManager->DumpPluginAgent(decoderAgentList, PluginType::Decoder);
+    m_PluginManager->DumpPluginAgent(encoderAgentList, PluginType::Encoder);
+    m_PluginManager->DumpPluginAgent(rendererAgentList, PluginType::Renderer);
 
     m_Player->RegisterRendererPlugin(rendererAgentList[0]);
     m_Player->RegisterDecoderPlugin(decoderAgentList);
