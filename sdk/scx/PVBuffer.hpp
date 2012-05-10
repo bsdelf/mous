@@ -102,7 +102,7 @@ public:
     /**
      * This method can be used for initialize buffer.
      */
-    item_t* RawItem(size_t i)
+    item_t* RawItemAt(size_t i)
     {
         return m_BufferQueue[i];
     }

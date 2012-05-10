@@ -224,7 +224,7 @@ EmErrorCode Player::Open(const string& path)
 
     uint32_t maxBytesPerUnit = m_Decoder->MaxBytesPerUnit();
     for (size_t i = 0; i < m_UnitBuffers.BufferCount(); ++i) {
-        UnitBuffer* buf = m_UnitBuffers.RawItem(i);
+        UnitBuffer* buf = m_UnitBuffers.RawItemAt(i);
         buf->used = 0;
         if (buf->max < maxBytesPerUnit) {
             if (buf->data != NULL) {
