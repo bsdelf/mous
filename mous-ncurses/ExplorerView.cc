@@ -119,9 +119,9 @@ void ExplorerView::Refresh()
             xoff += wPath;
 
             const char* hint = SIZE_HINT;
-            int size = item.size;
+            off_t size = item.size;
             for (int i = 0; i < 3; ++i, ++hint) {
-                int s = size / 1024;
+                off_t s = size / 1024;
                 if (s <= 0)
                     break;
                 size = s;

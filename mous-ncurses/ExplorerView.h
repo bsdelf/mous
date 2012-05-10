@@ -38,7 +38,7 @@ private:
     {
         std::string name;
         bool isDir;
-        long size;
+        off_t size;
         mutable bool cacheOk;
         mutable std::string nameCache;
         mutable std::string sizeCache;
