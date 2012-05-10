@@ -91,7 +91,7 @@ EmErrorCode AlsaRenderer::Write(const char* buf, uint32_t len)
     return ErrorCode::Ok;
 }
 
-int AlsaRenderer::GetVolumeLevel() const
+int AlsaRenderer::VolumeLevel() const
 {
     return 0;
 }
@@ -100,7 +100,7 @@ void AlsaRenderer::SetVolumeLevel(int level)
 {
 }
 
-bool AlsaRenderer::GetOptions(vector<const BaseOption*>& list) const
+bool AlsaRenderer::Options(vector<const BaseOption*>& list) const
 {
     return false;
 }

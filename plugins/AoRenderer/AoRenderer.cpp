@@ -65,7 +65,7 @@ EmErrorCode AoRenderer::Write(const char* buf, uint32_t len)
     return ret == 0 ? ErrorCode::Ok : ErrorCode::RendererFailedToWrite;
 }
 
-int AoRenderer::GetVolumeLevel() const
+int AoRenderer::VolumeLevel() const
 {
     return 0;
 }
@@ -74,7 +74,7 @@ void AoRenderer::SetVolumeLevel(int level)
 {
 }
 
-bool AoRenderer::GetOptions(std::vector<const BaseOption*>& list) const
+bool AoRenderer::Options(std::vector<const BaseOption*>& list) const
 {
     list.clear();
     return false;

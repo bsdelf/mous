@@ -14,20 +14,20 @@ class ITagParser
 public:
     virtual ~ITagParser() { }
 
-    virtual std::vector<std::string> GetFileSuffix() const = 0;
+    virtual std::vector<std::string> FileSuffix() const = 0;
     
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
 
     // tag related calls
     virtual bool HasTag() const = 0;
-    virtual std::string GetTitle() const = 0; 
-    virtual std::string GetArtist() const = 0;
-    virtual std::string GetAlbum() const = 0;
-    virtual std::string GetComment() const = 0;
-    virtual std::string GetGenre() const = 0;
-    virtual int32_t GetYear() const = 0;
-    virtual int32_t GetTrack() const = 0;
+    virtual std::string Title() const = 0; 
+    virtual std::string Artist() const = 0;
+    virtual std::string Album() const = 0;
+    virtual std::string Comment() const = 0;
+    virtual std::string Genre() const = 0;
+    virtual int32_t Year() const = 0;
+    virtual int32_t Track() const = 0;
 
     // tag edit calls
     virtual bool CanEditTag() const = 0;
@@ -46,11 +46,11 @@ public:
 
     // property related calls
     virtual bool HasProperties() const { return false; }
-    virtual int32_t GetDuration() const { return -1; }
-    virtual int32_t GetBitRate() const { return -1; }
+    virtual int32_t Duration() const { return -1; }
+    virtual int32_t BitRate() const { return -1; }
 
     // reimplement this to provide options
-    virtual bool GetOptions(std::vector<const BaseOption*>& list) const
+    virtual bool Options(std::vector<const BaseOption*>& list) const
     {
         list.clear();
         return false; 

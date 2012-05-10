@@ -26,7 +26,7 @@ public:
     virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents);
     virtual void UnregisterAll();
 
-    virtual vector<string> GetEncoderNames() const;
+    virtual vector<string> EncoderNames() const;
     virtual IConvTask* CreateTask(const MediaItem* item, const std::string& encoder) const;
 
 private:

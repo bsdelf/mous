@@ -33,19 +33,19 @@ ConvTask::~ConvTask()
     m_EncAgent->FreeObject(m_Encoder);
 }
 
-bool ConvTask::GetDecoderOptions(std::vector<const BaseOption*>& list) const
+bool ConvTask::DecoderOptions(std::vector<const BaseOption*>& list) const
 {
-    return m_Decoder != NULL ? m_Decoder->GetOptions(list) : false;
+    return m_Decoder != NULL ? m_Decoder->Options(list) : false;
 }
 
-bool ConvTask::GetEncoderOptions(std::vector<const BaseOption*>& list) const
+bool ConvTask::EncoderOptions(std::vector<const BaseOption*>& list) const
 {
-    return m_Encoder != NULL ? m_Encoder->GetOptions(list) : false;
+    return m_Encoder != NULL ? m_Encoder->Options(list) : false;
 }
 
-const char* ConvTask::GetEncoderFileSuffix() const
+const char* ConvTask::EncoderFileSuffix() const
 {
-    return m_Encoder != NULL ? m_Encoder->GetFileSuffix() : NULL;
+    return m_Encoder != NULL ? m_Encoder->FileSuffix() : NULL;
 }
 
 void ConvTask::Run(const string& output)
@@ -62,7 +62,7 @@ void ConvTask::Cancel()
     m_WorkThread.Join();
 }
 
-double ConvTask::GetProgress() const
+double ConvTask::Progress() const
 {
     return m_Progress;
 }
@@ -84,9 +84,9 @@ void ConvTask::DoConvert(const string& output)
         return;
     }
 
-    m_Encoder->SetChannels(m_Decoder->GetChannels());
-    m_Encoder->SetSampleRate(m_Decoder->GetSampleRate());
-    m_Encoder->SetBitsPerSample(m_Decoder->GetBitsPerSample());
+    m_Encoder->SetChannels(m_Decoder->Channels());
+    m_Encoder->SetSampleRate(m_Decoder->SampleRate());
+    m_Encoder->SetBitsPerSample(m_Decoder->BitsPerSample());
     m_Encoder->SetMediaTag(&m_Item.tag);
 
     err = m_Encoder->OpenOutput(output);
@@ -97,22 +97,22 @@ void ConvTask::DoConvert(const string& output)
         return;
     }
 
-    char* unitBuffer = new char[m_Decoder->GetMaxBytesPerUnit()];
+    char* unitBuffer = new char[m_Decoder->MaxBytesPerUnit()];
     uint32_t unitBufferUsed = 0;
     uint32_t unitCount = 0;
 
-    double unitPerMs = (double)m_Decoder->GetUnitCount() / m_Decoder->GetDuration();
-    uint32_t unitOff = 0, unitBeg = 0, unitEnd = m_Decoder->GetUnitCount();
+    double unitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
+    uint32_t unitOff = 0, unitBeg = 0, unitEnd = m_Decoder->UnitCount();
 
     if (m_Item.hasRange) {
         unitBeg = m_Item.msBeg * unitPerMs;
         unitEnd = (m_Item.msEnd != (uint64_t)-1 ? m_Item.msEnd : unitEnd) * unitPerMs;
 
-        if (unitBeg > m_Decoder->GetUnitCount())
-            unitBeg = m_Decoder->GetUnitCount();
+        if (unitBeg > m_Decoder->UnitCount())
+            unitBeg = m_Decoder->UnitCount();
 
-        if (unitEnd > m_Decoder->GetUnitCount())
-            unitEnd = m_Decoder->GetUnitCount();
+        if (unitEnd > m_Decoder->UnitCount())
+            unitEnd = m_Decoder->UnitCount();
     }
 
     unitOff = unitBeg;

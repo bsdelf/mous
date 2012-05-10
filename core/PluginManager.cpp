@@ -75,19 +75,19 @@ void PluginManager::UnloadAll()
     m_PluginMap.clear();
 }
 
-void PluginManager::GetPlugins(vector<const IPluginAgent*>& list, EmPluginType type) const
+void PluginManager::Plugins(vector<const IPluginAgent*>& list, EmPluginType type) const
 {
     list.clear();
     for (PluginMapConstIter iter = m_PluginMap.begin();
             iter != m_PluginMap.end(); ++iter) {
         IPluginAgent* pAgent = iter->second;
-        if (pAgent->GetType() == type) {
+        if (pAgent->Type() == type) {
             list.push_back(pAgent);
         }
     }
 }
 
-void PluginManager::GetPluginPath(vector<string>& list) const
+void PluginManager::PluginPath(vector<string>& list) const
 {
     list.clear();
     list.reserve(m_PluginMap.size());
@@ -97,11 +97,11 @@ void PluginManager::GetPluginPath(vector<string>& list) const
     }
 }
 
-const PluginInfo* PluginManager::GetPluginInfo(const std::string& path) const
+const PluginInfo* PluginManager::QueryPluginInfo(const std::string& path) const
 {
     PluginMapConstIter iter = m_PluginMap.find(path);
     return (iter != m_PluginMap.end()) ?
-        iter->second->GetInfo() : NULL;
+        iter->second->Info() : NULL;
 }
 
 vector<string>* PluginManager::gFtwFiles = NULL;

@@ -23,19 +23,19 @@ public:
     TagLibParser();
     virtual ~TagLibParser();
 
-    virtual vector<string> GetFileSuffix() const;
+    virtual vector<string> FileSuffix() const;
     
     virtual EmErrorCode Open(const string& path);
     virtual void Close();
 
     virtual bool HasTag() const;
-    virtual string GetTitle() const;
-    virtual string GetArtist() const;
-    virtual string GetAlbum() const;
-    virtual string GetComment() const;
-    virtual string GetGenre() const;
-    virtual int32_t GetYear() const;
-    virtual int32_t GetTrack() const;
+    virtual string Title() const;
+    virtual string Artist() const;
+    virtual string Album() const;
+    virtual string Comment() const;
+    virtual string Genre() const;
+    virtual int32_t Year() const;
+    virtual int32_t Track() const;
 
     virtual bool CanEditTag() const;
     virtual bool SaveTag();
@@ -51,8 +51,8 @@ public:
     virtual bool StoreCoverArt(const char* buf, size_t len);
 
     virtual bool HasProperties() const;
-    virtual int32_t GetDuration() const;
-    virtual int32_t GetBitRate() const;
+    virtual int32_t Duration() const;
+    virtual int32_t BitRate() const;
 
 private:
     typedef void (*FnDumpCover)(const string& path, char*& buf, size_t& len);

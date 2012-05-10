@@ -29,7 +29,7 @@ public:
     virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
-    virtual std::vector<std::string> GetEncoderNames() const = 0;
+    virtual std::vector<std::string> EncoderNames() const = 0;
     virtual IConvTask* CreateTask(const MediaItem* item, const std::string& encoder) const = 0;
 };
 

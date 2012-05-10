@@ -25,9 +25,9 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadAll();
 
-    void GetPlugins(std::vector<const IPluginAgent*>& list, EmPluginType) const;
-    void GetPluginPath(std::vector<std::string>& list) const;
-    const PluginInfo* GetPluginInfo(const std::string& path) const;
+    void Plugins(std::vector<const IPluginAgent*>& list, EmPluginType) const;
+    void PluginPath(std::vector<std::string>& list) const;
+    const PluginInfo* QueryPluginInfo(const std::string& path) const;
 
 private:
     static std::vector<std::string>* gFtwFiles;

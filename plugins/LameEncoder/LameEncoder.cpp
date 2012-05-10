@@ -32,7 +32,7 @@ LameEncoder::~LameEncoder()
     CloseOutput();
 }
 
-const char* LameEncoder::GetFileSuffix() const
+const char* LameEncoder::FileSuffix() const
 {
     return "mp3";
 }
@@ -151,7 +151,7 @@ void LameEncoder::SetMediaTag(const MediaTag* tag)
     m_MediaTag = tag;
 }
 
-bool LameEncoder::GetOptions(std::vector<const BaseOption*>& list) const 
+bool LameEncoder::Options(std::vector<const BaseOption*>& list) const 
 {
     list.clear();
     list.resize(3);

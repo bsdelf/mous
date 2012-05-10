@@ -76,12 +76,12 @@ void PluginAgent::Close()
     }
 }
 
-EmPluginType PluginAgent::GetType() const
+EmPluginType PluginAgent::Type() const
 {
     return m_Type;
 }
 
-const PluginInfo* PluginAgent::GetInfo() const
+const PluginInfo* PluginAgent::Info() const
 {
     return (m_FnGetInfo != NULL) ? m_FnGetInfo() : NULL;
 }

@@ -17,7 +17,7 @@ CuePack::~CuePack()
 
 }
 
-vector<string> CuePack::GetFileSuffix() const
+vector<string> CuePack::FileSuffix() const
 {
     vector<string> list;
     list.clear();

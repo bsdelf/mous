@@ -19,7 +19,7 @@ WavDecoder::~WavDecoder()
     Close();
 }
 
-vector<string> WavDecoder::GetFileSuffix() const
+vector<string> WavDecoder::FileSuffix() const
 {
     vector<string> list;
     list.push_back("wav");
@@ -93,47 +93,47 @@ EmErrorCode WavDecoder::SetUnitIndex(uint64_t index)
     return ErrorCode::Ok;
 }
 
-uint32_t WavDecoder::GetMaxBytesPerUnit() const
+uint32_t WavDecoder::MaxBytesPerUnit() const
 {
     return m_BlockLength;
 }
 
-uint64_t WavDecoder::GetUnitIndex() const
+uint64_t WavDecoder::UnitIndex() const
 {
     return m_BlockIndex;
 }
 
-uint64_t WavDecoder::GetUnitCount() const
+uint64_t WavDecoder::UnitCount() const
 {
     return m_TotalBlocks;
 }
 
-EmAudioMode WavDecoder::GetAudioMode() const
+EmAudioMode WavDecoder::AudioMode() const
 {
     return m_WavHeader.channels == 1 ? AudioMode::Mono : AudioMode::Stereo;
 }
 
-int32_t WavDecoder::GetChannels() const
+int32_t WavDecoder::Channels() const
 {
     return m_WavHeader.channels;
 }
 
-int32_t WavDecoder::GetBitsPerSample() const
+int32_t WavDecoder::BitsPerSample() const
 {
     return m_WavHeader.bitsPerSample;
 }
 
-int32_t WavDecoder::GetSampleRate() const
+int32_t WavDecoder::SampleRate() const
 {
     return m_WavHeader.sampleRate;
 }
 
-int32_t WavDecoder::GetBitRate() const
+int32_t WavDecoder::BitRate() const
 {
     return m_WavHeader.avgBytesPerSec/1024;
 }
 
-uint64_t WavDecoder::GetDuration() const
+uint64_t WavDecoder::Duration() const
 {
     return m_Duration;
 }

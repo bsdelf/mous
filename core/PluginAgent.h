@@ -19,8 +19,8 @@ public:
     EmErrorCode Open(const std::string& path);
     void Close();
 
-    EmPluginType GetType() const;
-    const PluginInfo* GetInfo() const;
+    EmPluginType Type() const;
+    const PluginInfo* Info() const;
     void* CreateObject() const;
     void FreeObject(void* inf) const;
 

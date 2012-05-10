@@ -27,10 +27,10 @@ public:
     virtual EmErrorCode Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample);
     virtual EmErrorCode Write(const char* buf, uint32_t len);
 
-    virtual int GetVolumeLevel() const;
+    virtual int VolumeLevel() const;
     virtual void SetVolumeLevel(int level);
 
-    virtual bool GetOptions(std::vector<const BaseOption*>& list) const;
+    virtual bool Options(std::vector<const BaseOption*>& list) const;
 
 private:
     bool SetupHwParams();

@@ -27,7 +27,7 @@ ConvTaskFactory::~ConvTaskFactory()
 
 void ConvTaskFactory::RegisterDecoderPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent->GetType() == PluginType::Decoder) {
+    if (pAgent->Type() == PluginType::Decoder) {
         AddDecAgent(pAgent);
     }
 }
@@ -41,7 +41,7 @@ void ConvTaskFactory::RegisterDecoderPlugin(std::vector<const IPluginAgent*>& ag
 
 void ConvTaskFactory::RegisterEncoderPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent->GetType() == PluginType::Encoder) {
+    if (pAgent->Type() == PluginType::Encoder) {
         AddEncAgent(pAgent);
     }
 }
@@ -55,7 +55,7 @@ void ConvTaskFactory::RegisterEncoderPlugin(std::vector<const IPluginAgent*>& ag
 
 void ConvTaskFactory::UnregisterPlugin(const IPluginAgent* pAgent)
 {
-    switch (pAgent->GetType()) {
+    switch (pAgent->Type()) {
         case PluginType::Decoder:
             RemoveDecAgent(pAgent);
             break;
@@ -89,7 +89,7 @@ void ConvTaskFactory::UnregisterAll()
     m_EncAgentMap.clear();
 }
 
-vector<string> ConvTaskFactory::GetEncoderNames() const
+vector<string> ConvTaskFactory::EncoderNames() const
 {
     vector<string> list;
     list.reserve(m_EncAgentMap.size());
@@ -130,7 +130,7 @@ IConvTask* ConvTaskFactory::CreateTask(const MediaItem* item, const std::string&
 void ConvTaskFactory::AddDecAgent(const IPluginAgent* pAgent)
 {
     IDecoder* dec = (IDecoder*)pAgent->CreateObject();
-    vector<string> suffix = dec->GetFileSuffix();
+    vector<string> suffix = dec->FileSuffix();
     pAgent->FreeObject(dec);
 
     for (size_t i = 0; i < suffix.size(); ++i) {
@@ -150,7 +150,7 @@ void ConvTaskFactory::AddDecAgent(const IPluginAgent* pAgent)
 void ConvTaskFactory::RemoveDecAgent(const IPluginAgent* pAgent)
 {
     IDecoder* dec = (IDecoder*)pAgent->CreateObject();
-    vector<string> suffix = dec->GetFileSuffix();
+    vector<string> suffix = dec->FileSuffix();
     pAgent->FreeObject(dec);
 
     for (size_t i = 0; i < suffix.size(); ++i) {
@@ -173,12 +173,12 @@ void ConvTaskFactory::RemoveDecAgent(const IPluginAgent* pAgent)
 
 void ConvTaskFactory::AddEncAgent(const IPluginAgent* pAgent)
 {
-    m_EncAgentMap.insert(EncAgentMapPair(pAgent->GetInfo()->name, pAgent));
+    m_EncAgentMap.insert(EncAgentMapPair(pAgent->Info()->name, pAgent));
 }
 
 void ConvTaskFactory::RemoveEncAgent(const IPluginAgent* pAgent)
 {
-    EncAgentMapIter iter = m_EncAgentMap.find(pAgent->GetInfo()->name);
+    EncAgentMapIter iter = m_EncAgentMap.find(pAgent->Info()->name);
     if (iter != m_EncAgentMap.end())
         m_EncAgentMap.erase(iter);
 }

@@ -18,14 +18,14 @@ public:
     explicit ConvTask(const MediaItem*, const IPluginAgent*, const IPluginAgent*);
     virtual ~ConvTask();
 
-    virtual bool GetDecoderOptions(std::vector<const BaseOption*>& list) const;
-    virtual bool GetEncoderOptions(std::vector<const BaseOption*>& list) const;
-    virtual const char* GetEncoderFileSuffix() const;
+    virtual bool DecoderOptions(std::vector<const BaseOption*>& list) const;
+    virtual bool EncoderOptions(std::vector<const BaseOption*>& list) const;
+    virtual const char* EncoderFileSuffix() const;
 
     virtual void Run(const string& output);
     virtual void Cancel();
 
-    virtual double GetProgress() const;
+    virtual double Progress() const;
     virtual bool IsFinished() const;
 
 private:

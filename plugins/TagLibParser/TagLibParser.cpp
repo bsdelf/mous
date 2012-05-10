@@ -27,7 +27,7 @@ TagLibParser::~TagLibParser()
     Close();
 }
 
-vector<string> TagLibParser::GetFileSuffix() const
+vector<string> TagLibParser::FileSuffix() const
 {
     vector<string> list;
     list.clear();
@@ -85,7 +85,7 @@ bool TagLibParser::HasTag() const
     return (m_pTag != NULL) ? !m_pTag->isEmpty() : false;
 }
 
-string TagLibParser::GetTitle() const
+string TagLibParser::Title() const
 {
     if (m_pTag != NULL) {
         //return m_pTag->title().to8Bit();
@@ -95,7 +95,7 @@ string TagLibParser::GetTitle() const
     }
 }
 
-string TagLibParser::GetArtist() const
+string TagLibParser::Artist() const
 {
     if (m_pTag != NULL) {
         //return m_pTag->artist().to8Bit();
@@ -105,7 +105,7 @@ string TagLibParser::GetArtist() const
     }
 }
 
-string TagLibParser::GetAlbum() const
+string TagLibParser::Album() const
 {
     if (m_pTag != NULL) {
         //return m_pTag->album().to8Bit();
@@ -115,7 +115,7 @@ string TagLibParser::GetAlbum() const
     }
 }
 
-string TagLibParser::GetComment() const
+string TagLibParser::Comment() const
 {
     if (m_pTag != NULL) {
         //return m_pTag->comment().to8Bit();
@@ -125,7 +125,7 @@ string TagLibParser::GetComment() const
     }
 }
 
-string TagLibParser::GetGenre() const
+string TagLibParser::Genre() const
 {
     if (m_pTag != NULL) {
         //return m_pTag->genre().to8Bit();
@@ -135,7 +135,7 @@ string TagLibParser::GetGenre() const
     }
 }
 
-int32_t TagLibParser::GetYear() const
+int32_t TagLibParser::Year() const
 {
     if (m_pTag != NULL) {
         return m_pTag->year();
@@ -144,7 +144,7 @@ int32_t TagLibParser::GetYear() const
     }
 }
 
-int32_t TagLibParser::GetTrack() const
+int32_t TagLibParser::Track() const
 {
     if (m_pTag != NULL) {
         return m_pTag->track();
@@ -158,7 +158,7 @@ bool TagLibParser::HasProperties() const
     return (m_pProp != NULL) ? true : false;
 }
 
-int32_t TagLibParser::GetDuration() const
+int32_t TagLibParser::Duration() const
 {
     if (m_pProp != NULL) {
         return m_pProp->length()*1000;
@@ -167,7 +167,7 @@ int32_t TagLibParser::GetDuration() const
     }
 }
 
-int32_t TagLibParser::GetBitRate() const
+int32_t TagLibParser::BitRate() const
 {
     if (m_pProp != NULL) {
         return m_pProp->bitrate();

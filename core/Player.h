@@ -29,7 +29,7 @@ public:
     ~Player();
 
 public:
-    EmPlayerStatus GetStatus() const;
+    EmPlayerStatus Status() const;
 
     void RegisterDecoderPlugin(const IPluginAgent* pAgent);
     void RegisterDecoderPlugin(vector<const IPluginAgent*>& agents);
@@ -40,7 +40,7 @@ public:
     void UnregisterPlugin(vector<const IPluginAgent*>& agents);
     void UnregisterAll();
 
-    int GetVolume() const;
+    int Volume() const;
     void SetVolume(int level);
 
     EmErrorCode Open(const std::string& path);
@@ -53,18 +53,18 @@ public:
     void SeekTime(uint64_t msPos);
     void SeekPercent(double percent);
 
-    int32_t GetBitRate() const;
-    int32_t GetSamleRate() const;
-    uint64_t GetDuration() const;
-    uint64_t GetRangeBegin() const;
-    uint64_t GetRangeEnd() const;
-    uint64_t GetRangeDuration() const;
-    uint64_t GetOffsetMs() const;
-    uint64_t GetCurrentMs() const;
-    EmAudioMode GetAudioMode() const;
+    int32_t BitRate() const;
+    int32_t SamleRate() const;
+    uint64_t Duration() const;
+    uint64_t RangeBegin() const;
+    uint64_t RangeEnd() const;
+    uint64_t RangeDuration() const;
+    uint64_t OffsetMs() const;
+    uint64_t CurrentMs() const;
+    EmAudioMode AudioMode() const;
 
-    bool GetDecoderPluginOption(std::vector<PluginOption>& list) const;
-    bool GetRendererPluginOption(PluginOption& option) const;
+    bool DecoderPluginOption(std::vector<PluginOption>& list) const;
+    bool RendererPluginOption(PluginOption& option) const;
 
 public:
     const scx::Signal<void (void)>* SigFinished() const;

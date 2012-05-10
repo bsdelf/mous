@@ -21,11 +21,11 @@ public:
     virtual EmErrorCode Write(const char* buf, uint32_t len) = 0;
 
     // 0(muted) to 100(max)
-    virtual int GetVolumeLevel() const = 0;
+    virtual int VolumeLevel() const = 0;
     virtual void SetVolumeLevel(int level) = 0;
 
     // reimplement this to provide options
-    virtual bool GetOptions(std::vector<const BaseOption*>& list) const { return false; };
+    virtual bool Options(std::vector<const BaseOption*>& list) const { return false; };
 };
 
 }

@@ -19,8 +19,8 @@ public:
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
 
-    virtual EmPluginType GetType() const = 0;
-    virtual const PluginInfo* GetInfo() const = 0;
+    virtual EmPluginType Type() const = 0;
+    virtual const PluginInfo* Info() const = 0;
     virtual void* CreateObject() const = 0;
     virtual void FreeObject(void* inf) const = 0;
 };

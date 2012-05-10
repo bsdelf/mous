@@ -32,13 +32,13 @@ struct WavHeader
 
 #pragma pack(pop)
 
-class WavEncoder
+class WavEncoder: public IEncoder
 {
 public:
     WavEncoder();
     virtual ~WavEncoder();
 
-    virtual const char* GetFileSuffix() const;
+    virtual const char* FileSuffix() const;
 
     virtual EmErrorCode OpenOutput(const std::string& path);
     virtual void CloseOutput();
@@ -49,9 +49,6 @@ public:
     virtual void SetChannels(int32_t channels);
     virtual void SetSampleRate(int32_t sampleRate);
     virtual void SetBitsPerSample(int32_t bitsPerSample);
-
-    // reimplement this to provide options
-    virtual bool GetOptions(std::vector<const BaseOption*>& list) const { return false; };
 
 private:
     static void InitWavHeader(WavHeader* header);

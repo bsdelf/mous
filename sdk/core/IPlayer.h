@@ -38,7 +38,7 @@ public:
 public:
     virtual ~IPlayer() { }
 
-    virtual EmPlayerStatus GetStatus() const = 0;
+    virtual EmPlayerStatus Status() const = 0;
 
     virtual void RegisterDecoderPlugin(const IPluginAgent* pAgent) = 0;
     virtual void RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents) = 0;
@@ -49,7 +49,7 @@ public:
     virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
-    virtual int GetVolume() const = 0;
+    virtual int Volume() const = 0;
     virtual void SetVolume(int level) = 0;
 
     virtual EmErrorCode Open(const std::string& path) = 0;
@@ -62,19 +62,19 @@ public:
     virtual void SeekTime(uint64_t msPos) = 0;
     virtual void SeekPercent(double percent) = 0;
 
-    virtual int32_t GetBitRate() const = 0;
-    virtual int32_t GetSamleRate() const = 0;
-    virtual uint64_t GetDuration() const = 0;
-    virtual uint64_t GetRangeBegin() const = 0;
-    virtual uint64_t GetRangeEnd() const = 0;
-    virtual uint64_t GetRangeDuration() const = 0;
-    virtual uint64_t GetOffsetMs() const = 0;
-    virtual uint64_t GetCurrentMs() const = 0;
-    virtual EmAudioMode GetAudioMode() const = 0;
+    virtual int32_t BitRate() const = 0;
+    virtual int32_t SamleRate() const = 0;
+    virtual uint64_t Duration() const = 0;
+    virtual uint64_t RangeBegin() const = 0;
+    virtual uint64_t RangeEnd() const = 0;
+    virtual uint64_t RangeDuration() const = 0;
+    virtual uint64_t OffsetMs() const = 0;
+    virtual uint64_t CurrentMs() const = 0;
+    virtual EmAudioMode AudioMode() const = 0;
 
     // reimplement this to provide options
-    virtual bool GetDecoderPluginOption(std::vector<PluginOption>& list) const = 0;
-    virtual bool GetRendererPluginOption(PluginOption& option) const = 0;
+    virtual bool DecoderPluginOption(std::vector<PluginOption>& list) const = 0;
+    virtual bool RendererPluginOption(PluginOption& option) const = 0;
 
 public:
     virtual const scx::Signal<void (void)>* SigFinished() const = 0;

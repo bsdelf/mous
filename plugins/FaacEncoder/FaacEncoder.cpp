@@ -57,7 +57,7 @@ FaacEncoder::~FaacEncoder()
     CloseOutput();
 }
 
-const char* FaacEncoder::GetFileSuffix() const
+const char* FaacEncoder::FileSuffix() const
 {
     return "m4a";
 }
@@ -250,7 +250,7 @@ void FaacEncoder::SetMediaTag(const MediaTag* tag)
     m_MediaTag = tag;
 }
 
-bool FaacEncoder::GetOptions(std::vector<const BaseOption*>& list) const
+bool FaacEncoder::Options(std::vector<const BaseOption*>& list) const
 {
     list.resize(5);
     list[0] = &m_OptQuality;

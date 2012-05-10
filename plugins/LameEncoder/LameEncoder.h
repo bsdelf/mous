@@ -13,7 +13,7 @@ public:
     LameEncoder();
     virtual ~LameEncoder();
 
-    virtual const char* GetFileSuffix() const;
+    virtual const char* FileSuffix() const;
 
     virtual EmErrorCode OpenOutput(const std::string& path);
     virtual void CloseOutput();
@@ -27,7 +27,7 @@ public:
 
     virtual void SetMediaTag(const MediaTag* tag);
 
-    virtual bool GetOptions(std::vector<const BaseOption*>& list) const;
+    virtual bool Options(std::vector<const BaseOption*>& list) const;
 
 private:
     RangedIntOption m_Quality;

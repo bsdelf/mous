@@ -113,7 +113,7 @@ EmErrorCode OssRenderer::Write(const char* buf, uint32_t len)
 #define SNDCTL_DSP_SETPLAYVOL MIXER_WRITE(SOUND_MIXER_VOLUME)
 #endif
 
-int OssRenderer::GetVolumeLevel() const
+int OssRenderer::VolumeLevel() const
 {
     int level = 0;
     ioctl(m_Fd, SNDCTL_DSP_GETPLAYVOL, &level);
@@ -127,7 +127,7 @@ void OssRenderer::SetVolumeLevel(int level)
     ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
 }
 
-bool OssRenderer::GetOptions(std::vector<const BaseOption*>& list) const
+bool OssRenderer::Options(std::vector<const BaseOption*>& list) const
 {
     list.resize(1);
     list[0] = &m_OptDevicePath;

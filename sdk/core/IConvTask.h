@@ -20,15 +20,15 @@ public:
 public:
     virtual ~IConvTask() { }
 
-    virtual bool GetDecoderOptions(std::vector<const BaseOption*>& list) const = 0;
-    virtual bool GetEncoderOptions(std::vector<const BaseOption*>& list) const = 0;
-    virtual const char* GetEncoderFileSuffix() const = 0;
+    virtual bool DecoderOptions(std::vector<const BaseOption*>& list) const = 0;
+    virtual bool EncoderOptions(std::vector<const BaseOption*>& list) const = 0;
+    virtual const char* EncoderFileSuffix() const = 0;
 
     virtual void Run(const std::string& output) = 0;
     virtual void Cancel() = 0;
 
     // percent [0, 1], failed < 0
-    virtual double GetProgress() const = 0;
+    virtual double Progress() const = 0;
     virtual bool IsFinished() const = 0;
 };
 

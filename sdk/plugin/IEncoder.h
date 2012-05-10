@@ -16,7 +16,7 @@ class IEncoder
 public:
     virtual ~IEncoder() { }
 
-    virtual const char* GetFileSuffix() const = 0;
+    virtual const char* FileSuffix() const = 0;
 
     virtual EmErrorCode OpenOutput(const std::string& path) = 0;
     virtual void CloseOutput() = 0;
@@ -37,7 +37,7 @@ public:
     }
 
     // reimplement this to provide options
-    virtual bool GetOptions(std::vector<const BaseOption*>& list) const 
+    virtual bool Options(std::vector<const BaseOption*>& list) const 
     { 
         list.clear(); 
         return false; 

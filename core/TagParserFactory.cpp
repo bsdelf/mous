@@ -25,7 +25,7 @@ void TagParserFactory::RegisterTagParserPlugin(const IPluginAgent* pAgent)
 {
     ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
     if (parser != NULL) {
-        const vector<string>& key = parser->GetFileSuffix();
+        const vector<string>& key = parser->FileSuffix();
         pAgent->FreeObject(parser);
         for (size_t i = 0; i < key.size(); ++i) {
             AgentMapIter iter = m_AgentMap.find(key[i]);
@@ -47,7 +47,7 @@ void TagParserFactory::UnregisterPlugin(const IPluginAgent* pAgent)
 {
     ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
     if (parser != NULL) {
-        const vector<string>& key = parser->GetFileSuffix();
+        const vector<string>& key = parser->FileSuffix();
         pAgent->FreeObject(parser);
         for (size_t i = 0; i < key.size(); ++i) {
             AgentMapIter iter = m_AgentMap.find(key[i]);

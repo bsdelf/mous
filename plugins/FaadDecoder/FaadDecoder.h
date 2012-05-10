@@ -16,7 +16,7 @@ public:
     FaadDecoder();
     virtual ~FaadDecoder();
 
-    virtual vector<string> GetFileSuffix() const;
+    virtual vector<string> FileSuffix() const;
 
     virtual EmErrorCode Open(const string& url);
     virtual void Close();
@@ -25,16 +25,16 @@ public:
 
     virtual EmErrorCode DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount);
     virtual EmErrorCode SetUnitIndex(uint64_t index);
-    virtual uint32_t GetMaxBytesPerUnit() const;
-    virtual uint64_t GetUnitIndex() const;
-    virtual uint64_t GetUnitCount() const;
+    virtual uint32_t MaxBytesPerUnit() const;
+    virtual uint64_t UnitIndex() const;
+    virtual uint64_t UnitCount() const;
 
-    virtual EmAudioMode GetAudioMode() const;
-    virtual int32_t GetChannels() const;
-    virtual int32_t GetBitsPerSample() const;
-    virtual int32_t GetSampleRate() const;
-    virtual int32_t GetBitRate() const;
-    virtual uint64_t GetDuration() const;
+    virtual EmAudioMode AudioMode() const;
+    virtual int32_t Channels() const;
+    virtual int32_t BitsPerSample() const;
+    virtual int32_t SampleRate() const;
+    virtual int32_t BitRate() const;
+    virtual uint64_t Duration() const;
 
 private:
     EmErrorCode OpenMp4(const string& url);
