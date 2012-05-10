@@ -27,7 +27,7 @@ public:
         off = 0;
     }
 
-    void* GetBuffer()
+    void* Buffer()
     {
         return (void*)buf;
     }
@@ -37,7 +37,7 @@ public:
         off = 0;
     }
 
-    uint32_t GetOffset() const
+    uint32_t Offset() const
     {
         return off;
     }

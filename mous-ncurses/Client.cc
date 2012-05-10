@@ -51,7 +51,7 @@ void Client::SetConnectRetryInterval(int ms)
 void Client::StopService()
 {
     char op = Op::App::StopService;
-    int payloadSize = (BufObj(NULL) << op).GetOffset();
+    int payloadSize = (BufObj(NULL) << op).Offset();
 
     char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
     BufObj(buf) << op;
@@ -62,7 +62,7 @@ void Client::StopService()
 void Client::PlayerPlay(const string& path)
 {
     char op = Op::App::LoadPlay;
-    int payloadSize = (BufObj(NULL) << op << path).GetOffset();
+    int payloadSize = (BufObj(NULL) << op << path).Offset();
 
     char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
     BufObj(buf) << op << path;

@@ -40,7 +40,7 @@ ExplorerView::ExplorerView():
     m_BeginStack.push_back(0);
     m_SelectionStack.push_back(0);
 
-    m_Path = Env::GetEnv(Env::Home);
+    m_Path = Env::Env(Env::Home);
     BuildFileItems();
 }
 
@@ -249,10 +249,22 @@ bool ExplorerView::InjectKey(int key)
             break;
 
         case 'a':
-            break;
+            if (!m_FileItems.empty()) {
+                int sel = m_SelectionStack.back();
+                if (!m_FileItems[sel].isDir)
+                    SigUserOpen(m_Path + '/' + m_FileItems[sel].name);
+            }
+            return true;
 
         case '\n':
-            break;
+            if (!m_FileItems.empty()) {
+                int sel = m_SelectionStack.back();
+                if (!m_FileItems[sel].isDir)
+                    SigTmpOpen(m_Path + '/' + m_FileItems[sel].name);
+                else
+                    InjectKey('l');
+            }
+            return true;
 
         case '/':
             break;

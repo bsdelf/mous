@@ -42,7 +42,7 @@ public:
         m_Value -= n;
     }
 
-    int GetValue() const
+    int Value() const
     {
         MutexLocker mlocker(const_cast<Mutex*>(&m_Mutex));
         return m_Value;

@@ -6,7 +6,6 @@
 #include <iostream>
 #include <set>
 #include <stack>
-#include <string>
 using namespace std;
 
 #include <scx/Conv.hpp>
@@ -104,6 +103,9 @@ struct PrivateMainUi
         layer.focused.push(&playlist);
         layerStack.push(layer);
 
+        explorerView.SigTmpOpen.Connect(&MainUi::SlotTmpOpen, parent);
+        explorerView.SigUserOpen.Connect(&MainUi::SlotUserOpen, parent);
+
         for (int i = 0; i < PLAYLIST_COUNT; ++i) {
             playlistView[i].SetIndex(i);
             playlistView[i].SigSwitchPlaylist.Connect(&MainUi::SlotSwitchPlaylist, parent);
@@ -156,6 +158,14 @@ void MainUi::SlotSwitchPlaylist(bool toNext)
     int n = d->iPlaylist + (toNext ? 1 : -1);
     n = std::min(std::max(n, 0), PLAYLIST_COUNT-1);
     SwitchPlaylist(n);
+}
+
+void MainUi::SlotTmpOpen(const string& path)
+{
+}
+
+void MainUi::SlotUserOpen(const string& path)
+{
 }
 
 bool MainUi::StartClient()

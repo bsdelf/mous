@@ -38,7 +38,7 @@ public:
         return pthread_detach(m_thread_id);
     }
 
-    pthread_t GetId() const
+    pthread_t Id() const
     {
         return m_thread_id;
     }

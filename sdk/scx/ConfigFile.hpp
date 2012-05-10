@@ -158,7 +158,7 @@ public:
         }
     }
 
-    std::vector<std::string> GetKeys() const
+    std::vector<std::string> Keys() const
     {
         std::vector<std::string> list;
         list.reserve(m_Lines.size());

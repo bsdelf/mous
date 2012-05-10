@@ -18,7 +18,7 @@ const char* const Term = "TERM";
 const char* const Shell = "SHELL";
 const char* const TmpDir = "TMPDIR";
 
-static inline std::string GetEnv(const std::string& name)
+static inline std::string Env(const std::string& name)
 {
     char* p = getenv(name.c_str());
     return p != NULL ? std::string(p) : "";

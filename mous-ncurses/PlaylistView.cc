@@ -15,6 +15,7 @@ PlaylistView::PlaylistView():
     m_ItemSelected(0),
     m_Title(STR_TITLE)
 {
+    /*
     for (int i = 0; i < 100; ++i) {
         MediaItem* item = new MediaItem;
 
@@ -32,6 +33,7 @@ PlaylistView::PlaylistView():
 
         m_List.Append(item);
     }
+    */
 }
 
 PlaylistView::~PlaylistView()
@@ -241,6 +243,11 @@ bool PlaylistView::HasFocus() const
     return m_Focused;
 }
 
+int PlaylistView::Index() const
+{
+    return m_Index;
+}
+
 void PlaylistView::SetIndex(int index)
 {
     m_Index = index;
@@ -248,9 +255,4 @@ void PlaylistView::SetIndex(int index)
     stringstream str;
     str << "[ " << STR_TITLE << " " << index << " ]";
     m_Title = str.str();
-}
-
-int PlaylistView::GetIndex() const
-{
-    return m_Index;
 }

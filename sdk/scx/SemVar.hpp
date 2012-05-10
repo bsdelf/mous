@@ -46,7 +46,7 @@ public:
     }
     */
 
-    int GetValue() const
+    int Value() const
     {
         int sval = 0;
         sem_getvalue(&m_Sem, &sval);

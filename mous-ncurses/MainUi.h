@@ -1,6 +1,8 @@
 #ifndef MAINUI_H
 #define MAINUI_H
 
+#include <string>
+
 struct PrivateMainUi;
 
 class MainUi
@@ -15,6 +17,8 @@ public:
 
 private:
     void SlotSwitchPlaylist(bool);
+    void SlotTmpOpen(const std::string& path);
+    void SlotUserOpen(const std::string& path);
 
 private:
     bool StartClient();

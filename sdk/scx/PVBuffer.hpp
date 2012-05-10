@@ -84,25 +84,25 @@ public:
         //m_FreeListMutex.Unlock();
     }
 
-    size_t GetBufferCount() const
+    size_t BufferCount() const
     {
         return m_BufferQueue.size();
     }
 
-    size_t GetFreeCount() const
+    size_t FreeCount() const
     {
-        return m_FreeListSemVar.GetValue();
+        return m_FreeListSemVar.Value();
     }
 
-    size_t GetDataCount() const
+    size_t DataCount() const
     {
-        return m_DataListSemVar.GetValue();
+        return m_DataListSemVar.Value();
     }
 
     /**
      * This method can be used for initialize buffer.
      */
-    item_t* GetRawItem(size_t i)
+    item_t* RawItem(size_t i)
     {
         return m_BufferQueue[i];
     }

@@ -7,6 +7,7 @@
 #include <vector>
 #include <deque>
 
+#include "scx/Signal.hpp"
 #include "scx/UniPinYin.hpp"
 class FileItemCmp;
 
@@ -30,6 +31,10 @@ public:
     void SetFocus(bool focus);
     bool HasFocus() const;
 
+public:
+    scx::Signal<void (const std::string&)> SigTmpOpen;
+    scx::Signal<void (const std::string&)> SigUserOpen;
+
 private:
     void BuildFileItems();
 
@@ -45,8 +50,8 @@ private:
     };
 
 private:
-    bool m_Focused;
     Window d;
+    bool m_Focused;
     std::string m_Path;
     std::string m_PathCache;
     bool m_HideDot;

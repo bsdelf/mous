@@ -1,9 +1,6 @@
 #ifndef PLAYLISTVIEW_H
 #define PLAYLISTVIEW_H
 
-#include <ncurses.h>
-#include <panel.h>
-
 #include <scx/Signal.hpp>
 using namespace scx;
 
@@ -32,19 +29,20 @@ public:
     bool HasFocus() const;
 
 public:
+    int Index() const;
     void SetIndex(int i);
-    int GetIndex() const;
 
+public:
     Signal<void (bool)> SigSwitchPlaylist;
 
 private:
+    Window d;
     bool m_Focused;
     int m_Index;
-    Window d;
     int m_ItemBegin;
     int m_ItemSelected;
-    Playlist<MediaItem*> m_List;
     std::string m_Title;
+    Playlist<MediaItem*> m_List;
 };
 
 #endif
