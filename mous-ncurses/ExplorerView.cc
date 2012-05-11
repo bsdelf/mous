@@ -3,11 +3,11 @@
 #include <algorithm>
 using namespace std;
 
-#include "scx/Conv.hpp"
-#include "scx/CharsetHelper.hpp"
-#include "scx/Env.hpp"
-#include "scx/FileInfo.hpp"
-#include "scx/Dir.hpp"
+#include <scx/Conv.hpp>
+#include <scx/CharsetHelper.hpp>
+#include <scx/Env.hpp>
+#include <scx/FileInfo.hpp>
+#include <scx/Dir.hpp>
 using namespace scx;
 
 const string STR_TITLE = "[ Explorer ]";

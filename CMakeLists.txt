@@ -59,8 +59,8 @@ include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
 include_directories(SYSTEM /opt/local/include)
 link_directories(/opt/local/lib)
-include_directories(AFTER sdk)
-include_directories(AFTER contrib)
+include_directories(BEFORE sdk)
+include_directories(BEFORE contrib)
 
 #==== build output dir ====#
 set(OUTPUT_DIR ${MOUS_SOURCE_DIR}/build)
