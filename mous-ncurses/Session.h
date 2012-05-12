@@ -6,6 +6,10 @@
 #include <scx/Mutex.hpp>
 using namespace scx;
 
+#include <vector>
+#include <fstream>
+using namespace std;
+
 struct MousData;
 
 class Session
@@ -26,12 +30,18 @@ private:
     void HandlePlayer(char*, int);
     void HandlePlaylist(char*, int);
 
+    char* GetPayloadBuffer(char, int);
+    void SendOut();
+
 private:
     Thread m_RecvThread;
     TcpSocket m_Socket;
     MousData* m_Data;
     int m_NotifyFd;
     bool m_GotReqStopService;
+    vector<char> m_SendOutBuf;
+
+    fstream log;
 };
 
 #endif

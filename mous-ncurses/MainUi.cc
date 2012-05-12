@@ -6,7 +6,6 @@
 #include <iostream>
 #include <set>
 #include <stack>
-using namespace std;
 
 #include <scx/Conv.hpp>
 #include <scx/ConfigFile.hpp>
@@ -104,13 +103,15 @@ struct PrivateMainUi
         layerStack.push(layer);
 
         explorerView.SigTmpOpen.Connect(&MainUi::SlotTmpOpen, parent);
-        explorerView.SigUserOpen.Connect(&MainUi::SlotUserOpen, parent);
+        explorerView.SigUserOpen.Connect(&MainUi::SlotReqUserOpen, parent);
 
         for (int i = 0; i < PLAYLIST_COUNT; ++i) {
             playlistView[i].SetIndex(i);
             playlistView[i].SigSwitchPlaylist.Connect(&MainUi::SlotSwitchPlaylist, parent);
         }
         playlist.SetFocus(true);
+
+        client.PlaylistHandler().SigAppend().Connect(&MainUi::SlotRetUserOpen, parent);
     }
 };
 
@@ -164,8 +165,14 @@ void MainUi::SlotTmpOpen(const string& path)
 {
 }
 
-void MainUi::SlotUserOpen(const string& path)
+void MainUi::SlotReqUserOpen(const string& path)
 {
+    d->client.PlaylistHandler().Append(d->iPlaylist, path);
+}
+
+void MainUi::SlotRetUserOpen(int i, const deque<MediaItem*>& list)
+{
+    d->playlistView[i].Append(list);
 }
 
 bool MainUi::StartClient()
@@ -248,6 +255,7 @@ bool MainUi::HandleTopKey(int key, bool& quit)
 
         case 'X':
             quit = true;
+            d->client.StopService();
             break;
 
         default:

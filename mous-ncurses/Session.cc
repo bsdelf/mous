@@ -3,6 +3,7 @@
 #include <vector>
 using namespace std;
 
+#include <scx/Mutex.hpp>
 #include <scx/BufObj.hpp>
 using namespace scx;
 
@@ -11,16 +12,27 @@ using namespace scx;
 using namespace Protocol;
 
 const int PAYLOAD_MAX_SIZE = 1024;
+const int SENDOUTBUF_MAX_SIZE  = 1024*4;
+
+#define SEND_PACKET(group, stream)  \
+{\
+    int payloadSize = (BufObj(NULL) stream).Offset();   \
+    char* buf = GetPayloadBuffer(group, payloadSize);   \
+    BufObj(buf) stream;                                 \
+}\
+    SendOut()
 
 Session::Session():
     m_Data(NULL),
     m_GotReqStopService(false)
 {
+    log.open("mous.log", ios::out);
 }
 
 Session::~Session()
 {
     m_Socket.Close();
+    log.close();
 }
 
 bool Session::Run(const TcpSocket& socket, MousData* data, int notifyFd)
@@ -45,7 +57,7 @@ void Session::ThRecvLoop()
     vector<char> payloadBuf;
     Header header(Op::Group::None, -1);
     char* buf;
-    int size;
+    int len;
 
     while (!m_GotReqStopService) {
         if (!m_Socket.RecvN(&headerBuf[0], headerBuf.size()))
@@ -59,21 +71,21 @@ void Session::ThRecvLoop()
             vector<char>(header.payloadSize).swap(payloadBuf);
 
         buf = &payloadBuf[0];
-        size = header.payloadSize;
-        if (!m_Socket.RecvN(buf, size))
+        len = header.payloadSize;
+        if (!m_Socket.RecvN(buf, len))
             break;
 
         switch (header.group) {
             case Op::Group::App:
-                HandleApp(buf, size);
+                HandleApp(buf, len);
                 break;
 
             case Op::Group::Player:
-                HandlePlayer(buf, size);
+                HandlePlayer(buf, len);
                 break;
 
             case Op::Group::Playlist:
-                HandlePlaylist(buf, size);
+                HandlePlaylist(buf, len);
                 break;
         }
     }
@@ -85,7 +97,7 @@ void Session::ThRecvLoop()
     }
 }
 
-void Session::HandleApp(char* buf, int size)
+void Session::HandleApp(char* buf, int len)
 {
     char op;
     BufObj(buf) >> op;
@@ -102,10 +114,104 @@ void Session::HandleApp(char* buf, int size)
     }
 }
 
-void Session::HandlePlayer(char* buf, int size)
+void Session::HandlePlayer(char* _buf, int len)
 {
+    if (len < 1)
+        return;
+
+    BufObj buf(_buf);
+
+    char op;
+    buf >> op;
+
+    switch (op) {
+        case Op::Player::Play:
+            break;
+
+        case Op::Player::Pause:
+            break;
+
+        case Op::Player::Resume:
+            break;
+
+        case Op::Player::Status:
+            break;
+
+        default:
+            break;
+    }
 }
 
-void Session::HandlePlaylist(char* buf, int size)
+void Session::HandlePlaylist(char* _buf, int len)
 {
+    if (len < 1)
+        return;
+
+    BufObj buf(_buf);
+
+    char op;
+    buf >> op;
+    log << "len:" << len << endl;
+    log << "op:" << (int)op << endl;
+
+    switch (op) {
+        case Op::Playlist::Append:
+        {
+            char index;
+            string path;
+            buf >> index >> path;
+            if (index < 0 || index >= m_Data->playlists.size())
+                return;
+
+            log << "index:" << (int)index << endl;
+            log << "path:" << path << endl;
+
+            MutexLocker locker(&m_Data->mutex);
+            deque<MediaItem*> list;
+            if (m_Data->loader->LoadMedia(path, list) != ErrorCode::Ok)
+                return;
+            if (list.empty())
+                return;
+
+            m_Data->playlists[index].Append(list);
+
+            // assume less than 65535
+            buf.SetBuffer(NULL);
+            buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
+            for (size_t i = 0; i < list.size(); ++i) {
+                *list[i] >> buf;
+            }
+
+            buf.SetBuffer(GetPayloadBuffer(Op::Group::Playlist, buf.Offset()));
+            buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
+            for (size_t i = 0; i < list.size(); ++i) {
+                *list[i] >> buf;
+            }
+
+            SendOut();
+        }
+            break;
+
+        default:
+            break;
+    }
+}
+
+char* Session::GetPayloadBuffer(char group, int payloadSize)
+{
+    Header header(group, payloadSize);
+    int totalSize = header.TotalSize();
+    if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_SIZE || totalSize > SENDOUTBUF_MAX_SIZE)
+        m_SendOutBuf.resize(totalSize);
+    else
+        vector<char>(totalSize).swap(m_SendOutBuf);
+
+    char* buf = &m_SendOutBuf[0];
+    header.Write(buf);
+    return buf + Header::Size();
+}
+
+void Session::SendOut()
+{
+    m_Socket.SendN(&m_SendOutBuf[0], m_SendOutBuf.size());
 }

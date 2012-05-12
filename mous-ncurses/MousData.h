@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 using namespace std;
 
 #include <scx/Mutex.hpp>
@@ -26,17 +25,15 @@ struct MousData
     IMediaLoader* loader;
     IPlayer* player;
 
-    typedef Playlist<MediaItem> playlist_t;
-    typedef map<string, playlist_t*>::iterator PlaylistMapIter;
-    typedef map<string, playlist_t*>::const_iterator PlaylistMapConstIter;
-    typedef pair<string, playlist_t*> PlaylistMapPair;
-    map<string, playlist_t*> playlistMap;
+    typedef Playlist<MediaItem*> playlist_t;
+    vector<playlist_t> playlists;
 
     MousData()
     {
         mgr = IPluginManager::Create();
         loader = IMediaLoader::Create();
         player = IPlayer::Create();
+        playlists.resize(6);
     }
 
     ~MousData()
@@ -45,7 +42,7 @@ struct MousData
         IMediaLoader::Free(loader);
         IPlayer::Free(player);
 
-        ClearPlaylist();
+        ClearPlaylists();
     }
 
     void Init()
@@ -79,14 +76,12 @@ struct MousData
         mgr->UnloadAll();
     }
 
-    void ClearPlaylist()
+    void ClearPlaylists()
     {
-        PlaylistMapIter iter = playlistMap.begin();
-        PlaylistMapIter end = playlistMap.end();
-        for (; iter != end; ++iter) {
-            delete iter->second;
+        for (size_t i = 0; i < playlists.size(); ++i) {
+            for (int n = 0; i < playlists[i].Count(); ++n)
+                delete playlists[i][n];
         }
-        playlistMap.clear();
     }
 };
 

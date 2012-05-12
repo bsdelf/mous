@@ -85,8 +85,6 @@ enum e
 
     // req:op(char)
     StopService,
-    // req:op(char) path(str); ret:op(char)
-    LoadPlay,
 
     Top
 };
@@ -104,10 +102,10 @@ enum e
     Stop,
     Pause,
     Resume,
-    // req:op(char); ret:op(char) ms(uint64_t)
-    TotalMs,
-    // req:op(char); ret:op(char) ms(uint64_t)
-    CurrentMs,
+
+    // req:op(char)
+    // ret:op(char) ms(uint64_t) duration(uint64_t) bitRate(int32_t) sampleRate(int32_t) audioMode(char)
+    Status,
 
     Top
 };
@@ -115,20 +113,30 @@ enum e
 typedef Player::e EmPlayer;
 
 //==== Playlist ====
-// op(char) 
 namespace Playlist {
 enum e
 {
     None = 0,
 
-    Open,
-    Close,
-    New,
-    Delete,
-    Rename,
-    Add,
-    Remove,
+    // req:op(char) playlist(char) path(string)
+    // ret:op(char) playlist(char) count(int32_t) item(MediaItem)..*
+    Append,
+
+    // req:op(char) playlist(char) oldPos(int32_t) newPos(int32_t)
+    // ret:NONE
     Move,
+
+    // req:op(char) playlist(char) pos(int32_t)
+    // ret:NONE
+    Remove,
+
+    // req:op(char) playlist(char)
+    // ret:NONE
+    Clear,
+
+    // req:op(char)
+    // ret:op(char) playlist(char) count(int32_t) item(MediaItem)..*
+    Sync,
 
     Top
 };

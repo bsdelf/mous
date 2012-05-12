@@ -1,11 +1,13 @@
 #ifndef PLAYLISTVIEW_H
 #define PLAYLISTVIEW_H
 
+#include <deque>
+using namespace std;
+
 #include <scx/Signal.hpp>
 using namespace scx;
 
 #include <util/MediaItem.h>
-#include <util/Playlist.h>
 using namespace mous;
 
 #include "IView.h"
@@ -32,6 +34,8 @@ public:
     int Index() const;
     void SetIndex(int i);
 
+    void Append(const deque<MediaItem*>&);
+
 public:
     Signal<void (bool)> SigSwitchPlaylist;
 
@@ -42,7 +46,7 @@ private:
     int m_ItemBegin;
     int m_ItemSelected;
     std::string m_Title;
-    Playlist<MediaItem*> m_List;
+    deque<MediaItem*> m_List;
 };
 
 #endif

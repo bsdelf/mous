@@ -2,8 +2,14 @@
 #define MAINUI_H
 
 #include <string>
+#include <deque>
+using namespace std;
 
 struct PrivateMainUi;
+
+namespace mous {
+    struct MediaItem;
+}
 
 class MainUi
 {
@@ -17,8 +23,10 @@ public:
 
 private:
     void SlotSwitchPlaylist(bool);
-    void SlotTmpOpen(const std::string& path);
-    void SlotUserOpen(const std::string& path);
+    void SlotTmpOpen(const std::string&);
+
+    void SlotReqUserOpen(const std::string&);
+    void SlotRetUserOpen(int, const deque<mous::MediaItem*>&);
 
 private:
     bool StartClient();

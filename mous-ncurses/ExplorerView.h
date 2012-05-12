@@ -9,6 +9,7 @@
 
 #include <scx/Signal.hpp>
 #include <scx/UniPinYin.hpp>
+
 class FileItemCmp;
 
 class ExplorerView: public IView

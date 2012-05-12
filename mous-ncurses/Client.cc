@@ -16,6 +16,11 @@ Client::Client():
     m_ConnectMaxRetry(25),
     m_ConnectRetryInterval(200)
 {
+    m_PlayerHandler.fnGetPayloadBuffer.Bind(&Client::GetPayloadBuffer, this);
+    m_PlayerHandler.fnSendOut.Bind(&Client::SendOut, this);
+
+    m_PlaylistHandler.fnGetPayloadBuffer.Bind(&Client::GetPayloadBuffer, this);
+    m_PlaylistHandler.fnSendOut.Bind(&Client::SendOut, this);
 }
 
 Client::~Client()
@@ -53,37 +58,20 @@ void Client::StopService()
     char op = Op::App::StopService;
     int payloadSize = (BufObj(NULL) << op).Offset();
 
-    char* buf = PayloadBuffer(Op::Group::App, payloadSize);
+    char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
     BufObj(buf) << op;
 
     SendOut();
 }
 
-void Client::PlayerPlay(const string& path)
+ClientPlayerHandler& Client::PlayerHandler()
 {
-    char op = Op::App::LoadPlay;
-    int payloadSize = (BufObj(NULL) << op << path).Offset();
-
-    char* buf = PayloadBuffer(Op::Group::App, payloadSize);
-    BufObj(buf) << op << path;
-
-    SendOut();
+    return m_PlayerHandler;
 }
 
-void Client::PlayerStop()
+ClientPlaylistHandler& Client::PlaylistHandler()
 {
-}
-
-void Client::PlayerPause()
-{
-}
-
-void Client::PlayerResume()
-{
-}
-
-void Client::PlayerSeek(uint64_t ms)
-{
+    return m_PlaylistHandler;
 }
 
 void Client::ThRecvLoop(const string& ip, int port)
@@ -126,11 +114,11 @@ void Client::ThRecvLoop(const string& ip, int port)
 
         switch (header.group) {
             case Op::Group::Player:
-                HandlePlayer(buf, size);
+                m_PlayerHandler.Handle(buf, size);
                 break;
 
             case Op::Group::Playlist:
-                HandlePlaylist(buf, size);
+                m_PlaylistHandler.Handle(buf, size);
                 break;
 
             default:
@@ -139,43 +127,14 @@ void Client::ThRecvLoop(const string& ip, int port)
     }
 }
 
-void Client::HandlePlayer(char* buf, int size)
-{
-    using namespace Protocol;
-
-    if (size < (int)sizeof(char))
-        return;
-
-    char op = Op::Player::None;
-    BufObj bufObj(buf);
-    bufObj >> op;
-    switch (op) {
-        case Op::Player::TotalMs:
-            SigPlayerTotalMs(bufObj.Fetch<uint64_t>());
-            break;
-
-        case Op::Player::CurrentMs:
-            SigPlayerCurrentMs(bufObj.Fetch<uint64_t>());
-            break;
-
-        default:
-            break;
-    }
-}
-
-void Client::HandlePlaylist(char* buf, int size)
-{
-    if (size < (int)sizeof(char))
-        return;
-}
-
-char* Client::PayloadBuffer(char group, int payloadSize)
+char* Client::GetPayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
-    int size = header.TotalSize();
-    if ((int)m_SendOutBuf.size() > SENDOUTBUF_MAX_SIZE && size < SENDOUTBUF_MAX_SIZE)
-        vector<char>(SENDOUTBUF_MAX_SIZE).swap(m_SendOutBuf);
-    m_SendOutBuf.resize(size);
+    int totalSize = header.TotalSize();
+    if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_SIZE || totalSize > SENDOUTBUF_MAX_SIZE)
+        m_SendOutBuf.resize(totalSize);
+    else
+        vector<char>(totalSize).swap(m_SendOutBuf);
 
     char* buf = &m_SendOutBuf[0];
     header.Write(buf);

@@ -1,7 +1,6 @@
 #include "PlaylistView.h"
 #include <sstream>
 #include <algorithm>
-using namespace std;
 
 #include <scx/CharsetHelper.hpp>
 using namespace scx;
@@ -38,9 +37,6 @@ PlaylistView::PlaylistView():
 
 PlaylistView::~PlaylistView()
 {
-    for (int i = 0; i < m_List.Count(); ++i)
-        delete m_List[i];
-    m_List.Clear();
 }
 
 void PlaylistView::Refresh()
@@ -73,14 +69,14 @@ void PlaylistView::Refresh()
     const int wField = (wText - wTime) / 3;
     const int wLastField = (wText - wTime) - wField * 2;
 
-    if (!m_List.Empty()) {
-            int lcount = std::min(hText, m_List.Count()-m_ItemBegin);
+    if (!m_List.empty()) {
+            int lcount = std::min(hText, (int)m_List.size()-m_ItemBegin);
         for (int l = 0; l < lcount; ++l) {
             int index = m_ItemBegin + l;
-            MediaItem* item = m_List[index];
+            MediaItem& item = *m_List[index];
 
             int fieldAttr = Attr::Bold;
-            int fieldColorF = Color::Blue;
+            int fieldColorF = Color::Green;
             int fieldColorB = Color::Black;
             int timeAttr = Attr::Bold;
             int timeColorF = Color::Magenta;
@@ -100,44 +96,55 @@ void PlaylistView::Refresh()
             d.AttrSet(fieldAttr);
             d.ColorOn(fieldColorF, fieldColorB);
 
-            const string& field1 = MBStrWidth(item->tag.title) <= wField-1 ?
-                item->tag.title : MBWidthStr(item->tag.title, wField-1-3) + "...";
+            const string& field1 = MBStrWidth(item.tag.title) <= wField-1 ?
+                item.tag.title : MBWidthStr(item.tag.title, wField-1-3) + "...";
             d.Print(xoff, yoff+l, field1);
             xoff += wField;
 
-            const string& field2 = MBStrWidth(item->tag.artist) <= wField-1 ?
-                item->tag.artist : MBWidthStr(item->tag.artist, wField-1-3) + "...";
+            const string& field2 = MBStrWidth(item.tag.artist) <= wField-1 ?
+                item.tag.artist : MBWidthStr(item.tag.artist, wField-1-3) + "...";
             d.Print(xoff, yoff+l, field2);
             xoff += wField;
 
-            const string& field3 = MBStrWidth(item->tag.album) <= wLastField-1 ?
-                item->tag.album : MBWidthStr(item->tag.album, wLastField-1-3) + "...";
+            const string& field3 = MBStrWidth(item.tag.album) <= wLastField-1 ?
+                item.tag.album : MBWidthStr(item.tag.album, wLastField-1-3) + "...";
             d.Print(xoff, yoff+l, field3);
             xoff += wLastField;
 
+            // I suppose duration < 59min
+            string duration;
+            {
+                if (item.hasRange && item.msEnd == -1)
+                    item.msEnd = item.duration;
+
+                int total = (item.hasRange ? item.msEnd - item.msBeg : item.duration) / 1000;
+                int min = total / 60;
+                int sec = total % 60;
+                char buf[6];
+                snprintf(buf, sizeof(buf), "%.2d:%.2d", min, sec);
+                duration.assign(buf, 5);
+            }
             d.ColorOn(timeColorF, timeColorB);
-            d.Print(xoff, yoff+l, string("00:00"));
+            d.Print(xoff, yoff+l, duration);
             xoff += wTime;
         }
 
         xoff = x + 1 + wText;
-        if (m_List.Count() > hText) {
-            double percent = (double)(m_ItemSelected+1) / m_List.Count() - 0.00001f;
+        if ((int)m_List.size() > hText) {
+            double percent = (double)(m_ItemSelected+1) / m_List.size() - 0.00001f;
             yoff = y + hText*percent;
             d.AttrSet(Attr::Bold | Attr::Reverse);
             d.ColorOn(Color::Green, Color::Black);
             d.Print(xoff, yoff, " ");
         }
-
-        
     }
 
     // status bar
     xoff = x + 1;
     yoff = y + hText;
     stringstream status;
-    if (!m_List.Empty())
-        status << (m_ItemSelected+1) << "/" << m_List.Count();
+    if (!m_List.empty())
+        status << (m_ItemSelected+1) << "/" << m_List.size();
     d.AttrSet(Attr::Bold);
     d.ColorOn(Color::White, Color::Black);
     d.Print(xoff, yoff, status.str());
@@ -169,19 +176,19 @@ bool PlaylistView::InjectKey(int key)
             return true;
 
         case 'j':
-            if (!m_List.Empty()) {
-                if (m_ItemSelected < m_List.Count()-1) {
+            if (!m_List.empty()) {
+                if (m_ItemSelected < (int)m_List.size()-1) {
                     ++m_ItemSelected;
                 }
                 if (m_ItemSelected > (d.h-2) / 2
-                        && m_ItemBegin < m_List.Count()-(d.h-2-1)) {
+                        && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
                     ++m_ItemBegin;
                 }
             }
             break;
 
         case 'k':
-            if (!m_List.Empty()) {
+            if (!m_List.empty()) {
                 if (m_ItemSelected > 0) {
                     --m_ItemSelected;
                 }
@@ -255,4 +262,10 @@ void PlaylistView::SetIndex(int index)
     stringstream str;
     str << "[ " << STR_TITLE << " " << index << " ]";
     m_Title = str.str();
+}
+
+void PlaylistView::Append(const deque<MediaItem*>& list)
+{
+    m_List.insert(m_List.end(), list.begin(), list.end());
+    Refresh();
 }
