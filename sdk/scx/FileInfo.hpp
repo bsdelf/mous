@@ -24,7 +24,7 @@ namespace FileType {
         Other
     };
 
-    const char* Name[] = {
+    static const char* Name[] = {
         "None",
         "Regular",
         "Directory",

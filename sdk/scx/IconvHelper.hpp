@@ -33,8 +33,8 @@ bool ConvFromTo(const std::string& from, const std::string& wanted,
         outstart = workBuf;
         outlen = workLen;
     } else {
-        outstart = new char[originalLen+4];
-        outlen = originalLen+4;
+        outstart = new char[originalLen*3+4];
+        outlen = originalLen*3+4;
     }
     outbuf = outstart;
     outleft = outlen;
