@@ -31,6 +31,10 @@ bool InitConfig()
     config[Config::ServerPort] = "21027";
     config.AppendComment("");
 
+    config.AppendComment("# if tag is not utf8, use the following encoding");
+    config[Config::IfNotUtf8] = "GBK";
+    config.AppendComment("");
+
     if (config.Save(Config::ConfigPath)) {
         cout << "Seems it's the first time you run me. >_<" << endl;
         cout << "Config file: " << Config::ConfigPath << endl;

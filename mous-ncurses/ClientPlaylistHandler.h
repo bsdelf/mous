@@ -62,7 +62,7 @@ public:
     }
 
 public:
-    const Signal<void (int, const deque<MediaItem*>&)>& SigAppend() const
+    const Signal<void (int, deque<MediaItem*>&)>& SigAppend() const
     {
         return m_SigAppend;
     }
@@ -106,7 +106,7 @@ private:
     Function<char* (char, int)> fnGetPayloadBuffer;
     Function<void (void)> fnSendOut;
 
-    Signal<void (int, const deque<MediaItem*>&)> m_SigAppend;
+    Signal<void (int, deque<MediaItem*>&)> m_SigAppend;
 };
 
 #endif

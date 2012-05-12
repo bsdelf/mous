@@ -12,7 +12,6 @@
 using namespace std;
 
 #include <scx/Conv.hpp>
-#include <scx/ConfigFile.hpp>
 
 Server::Server()
 {
@@ -35,12 +34,11 @@ int Server::Exec()
     string serverIp;
     int serverPort = -1;
     {
-        ConfigFile conf;
-        if (!conf.Load(Config::ConfigPath))
+        if (!m_Config.Load(Config::ConfigPath))
             return 1;
 
-        serverIp = conf[Config::ServerIp];
-        serverPort = StrToNum<int>(conf[Config::ServerPort]);
+        serverIp = m_Config[Config::ServerIp];
+        serverPort = StrToNum<int>(m_Config[Config::ServerPort]);
     }
 
     SocketOpt opt;
@@ -120,7 +118,7 @@ void Server::StopService()
 
 void Server::OpenSession(TcpSocket& clientSocket)
 {
-    Session* session = new Session();
+    Session* session = new Session(m_Config);
     m_SessionSet.insert(session);
     session->Run(clientSocket, m_Data, m_PipeFd[1]);
 

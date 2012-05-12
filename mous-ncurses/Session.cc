@@ -3,10 +3,11 @@
 #include <vector>
 using namespace std;
 
-#include <scx/Mutex.hpp>
-#include <scx/BufObj.hpp>
+#include <scx/CharsetHelper.hpp>
+#include <scx/IconvHelper.hpp>
 using namespace scx;
 
+#include "Config.h"
 #include "MousData.h"
 #include "Protocol.h"
 using namespace Protocol;
@@ -22,7 +23,8 @@ const int SENDOUTBUF_MAX_SIZE  = 1024*4;
 }\
     SendOut()
 
-Session::Session():
+Session::Session(const ConfigFile& config):
+    m_Config(config),
     m_Data(NULL),
     m_GotReqStopService(false)
 {
@@ -156,45 +158,55 @@ void Session::HandlePlaylist(char* _buf, int len)
 
     switch (op) {
         case Op::Playlist::Append:
-        {
-            char index;
-            string path;
-            buf >> index >> path;
-            if (index < 0 || index >= m_Data->playlists.size())
-                return;
-
-            log << "index:" << (int)index << endl;
-            log << "path:" << path << endl;
-
-            MutexLocker locker(&m_Data->mutex);
-            deque<MediaItem*> list;
-            if (m_Data->loader->LoadMedia(path, list) != ErrorCode::Ok)
-                return;
-            if (list.empty())
-                return;
-
-            m_Data->playlists[index].Append(list);
-
-            // assume less than 65535
-            buf.SetBuffer(NULL);
-            buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
-            for (size_t i = 0; i < list.size(); ++i) {
-                *list[i] >> buf;
-            }
-
-            buf.SetBuffer(GetPayloadBuffer(Op::Group::Playlist, buf.Offset()));
-            buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
-            for (size_t i = 0; i < list.size(); ++i) {
-                *list[i] >> buf;
-            }
-
-            SendOut();
-        }
+            DoPlaylistAppend(buf);
             break;
 
         default:
             break;
     }
+}
+
+void Session::DoPlaylistAppend(BufObj& buf)
+{
+    char index;
+    string path;
+    buf >> index >> path;
+    if (index < 0 || index >= m_Data->playlists.size())
+        return;
+
+    log << "index:" << (int)index << endl;
+    log << "path:" << path << endl;
+
+    MutexLocker locker(&m_Data->mutex);
+    deque<MediaItem*> list;
+    if (m_Data->loader->LoadMedia(path, list) != ErrorCode::Ok)
+        return;
+    if (list.empty())
+        return;
+
+    for (size_t i = 0; i < list.size(); ++i) {
+        MediaTag& tag = list[i]->tag;
+        TryConvertToUtf8(tag.title);
+        TryConvertToUtf8(tag.artist);
+        TryConvertToUtf8(tag.album);
+    }
+
+    m_Data->playlists[index].Append(list);
+
+    // assume less than 65535
+    buf.SetBuffer(NULL);
+    buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
+    for (size_t i = 0; i < list.size(); ++i) {
+        *list[i] >> buf;
+    }
+
+    buf.SetBuffer(GetPayloadBuffer(Op::Group::Playlist, buf.Offset()));
+    buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
+    for (size_t i = 0; i < list.size(); ++i) {
+        *list[i] >> buf;
+    }
+
+    SendOut();
 }
 
 char* Session::GetPayloadBuffer(char group, int payloadSize)
@@ -214,4 +226,17 @@ char* Session::GetPayloadBuffer(char group, int payloadSize)
 void Session::SendOut()
 {
     m_Socket.SendN(&m_SendOutBuf[0], m_SendOutBuf.size());
+}
+
+void Session::TryConvertToUtf8(string& str) const
+{
+    using namespace CharsetHelper;
+    using namespace IconvHelper;
+
+    const char* c = str.c_str();
+    const size_t n = str.size();
+    const char* bad = "?????";
+    if (!IsUtf8(c) && !ConvFromTo(m_Config[Config::IfNotUtf8], "UTF-8", c, n, str)) {
+        str = bad;
+    }
 }

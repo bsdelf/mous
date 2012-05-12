@@ -26,7 +26,7 @@ private:
     void SlotTmpOpen(const std::string&);
 
     void SlotReqUserOpen(const std::string&);
-    void SlotRetUserOpen(int, const deque<mous::MediaItem*>&);
+    void SlotRetUserOpen(int, deque<mous::MediaItem*>&);
 
 private:
     bool StartClient();

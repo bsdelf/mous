@@ -170,7 +170,7 @@ void MainUi::SlotReqUserOpen(const string& path)
     d->client.PlaylistHandler().Append(d->iPlaylist, path);
 }
 
-void MainUi::SlotRetUserOpen(int i, const deque<MediaItem*>& list)
+void MainUi::SlotRetUserOpen(int i, deque<MediaItem*>& list)
 {
     d->playlistView[i].Append(list);
 }

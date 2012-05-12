@@ -6,6 +6,7 @@ using namespace std;
 
 #include <scx/Socket.hpp>
 #include <scx/Thread.hpp>
+#include <scx/ConfigFile.hpp>
 using namespace scx;
 
 struct MousData;
@@ -25,6 +26,7 @@ private:
     void CloseSession(Session*);
 
 private:
+    ConfigFile m_Config;
     MousData* m_Data;
     TcpSocket m_Socket;
     int m_PipeFd[2];

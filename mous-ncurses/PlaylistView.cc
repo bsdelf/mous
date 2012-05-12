@@ -1,4 +1,6 @@
 #include "PlaylistView.h"
+
+#include <stdio.h>
 #include <sstream>
 #include <algorithm>
 
@@ -14,25 +16,6 @@ PlaylistView::PlaylistView():
     m_ItemSelected(0),
     m_Title(STR_TITLE)
 {
-    /*
-    for (int i = 0; i < 100; ++i) {
-        MediaItem* item = new MediaItem;
-
-        stringstream stream;
-        stream << "title标题标题标题标题标题标题标题标题标题" << i;
-        item->tag.title = stream.str();
-
-        stream.str("artist");
-        stream << "artist" << i;
-        item->tag.artist = stream.str();
-
-        stream.str("album");
-        stream << "album" << i;
-        item->tag.album = stream.str();
-
-        m_List.Append(item);
-    }
-    */
 }
 
 PlaylistView::~PlaylistView()
@@ -264,7 +247,7 @@ void PlaylistView::SetIndex(int index)
     m_Title = str.str();
 }
 
-void PlaylistView::Append(const deque<MediaItem*>& list)
+void PlaylistView::Append(deque<MediaItem*>& list)
 {
     m_List.insert(m_List.end(), list.begin(), list.end());
     Refresh();

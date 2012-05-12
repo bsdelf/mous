@@ -34,7 +34,7 @@ public:
     int Index() const;
     void SetIndex(int i);
 
-    void Append(const deque<MediaItem*>&);
+    void Append(deque<MediaItem*>&);
 
 public:
     Signal<void (bool)> SigSwitchPlaylist;
