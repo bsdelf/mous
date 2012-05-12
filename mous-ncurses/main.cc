@@ -8,6 +8,7 @@
 using namespace std;
 
 #include <scx/ConfigFile.hpp>
+#include <scx/FileInfo.hpp>
 using namespace scx;
 
 #include "Config.h"
@@ -18,10 +19,7 @@ const char* const PID_FILE = "/home/shen/project/mous/build/server.pid";
 
 bool InitConfig()
 {
-    return true;
-
     ConfigFile config;
-    //config.Load("Config::ConfigPath");
 
     config.AppendComment("# server ip");
     config[Config::ServerIp] = "127.0.0.1";
@@ -83,7 +81,7 @@ void ClearPid()
 
 int main(int argc, char** argv)
 {
-    if (!InitConfig())
+    if (!FileInfo(Config::ConfigPath).Exists() && !InitConfig())
         return -1;
 
     pid_t pid = FetchPid();
