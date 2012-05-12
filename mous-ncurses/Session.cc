@@ -23,6 +23,12 @@ const int SENDOUTBUF_MAX_SIZE  = 1024*4;
 }\
     SendOut()
 
+#define SEND_PACKET_PLAYER(stream) \
+    SEND_PACKET(Protocol::Op::Group::Player, stream)
+
+#define SEND_PACKET_PLAYLIST(stream) \
+    SEND_PACKET(Protocol::Op::Group::Playlist, stream)
+
 Session::Session(const ConfigFile& config):
     m_Config(config),
     m_Data(NULL),
@@ -161,6 +167,10 @@ void Session::HandlePlaylist(char* _buf, int len)
             DoPlaylistAppend(buf);
             break;
 
+        case Op::Playlist::Remove:
+            DoPlaylistRemove(buf);
+            break;
+
         default:
             break;
     }
@@ -207,6 +217,21 @@ void Session::DoPlaylistAppend(BufObj& buf)
     }
 
     SendOut();
+}
+
+void Session::DoPlaylistRemove(BufObj& buf)
+{
+    char index;
+    int32_t pos;
+    buf >> index >> pos;
+    if (index < 0 || index >= m_Data->playlists.size())
+        return;
+    if (pos < 0 || pos >= m_Data->playlists[index].Count())
+        return;
+
+    m_Data->playlists[index].Remove(pos);
+
+    SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Remove << index << pos);
 }
 
 char* Session::GetPayloadBuffer(char group, int payloadSize)

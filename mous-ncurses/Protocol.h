@@ -83,7 +83,7 @@ enum e
 {
     None = 0,
 
-    // req:op(char)
+    // Q:op(char)
     StopService,
 
     Top
@@ -103,8 +103,8 @@ enum e
     Pause,
     Resume,
 
-    // req:op(char)
-    // ret:op(char) ms(uint64_t) duration(uint64_t) bitRate(int32_t) sampleRate(int32_t) audioMode(char)
+    // Q:op(char)
+    // A:op(char) ms(uint64_t) duration(uint64_t) bitRate(int32_t) sampleRate(int32_t) audioMode(char)
     Status,
 
     Top
@@ -118,25 +118,25 @@ enum e
 {
     None = 0,
 
-    // req:op(char) playlist(char) path(string)
-    // ret:op(char) playlist(char) count(int32_t) item(MediaItem)..*
+    // Q:op(char) playlist(char) path(string)
+    // A:op(char) playlist(char) count(int32_t) item(MediaItem)..*
     Append,
 
-    // req:op(char) playlist(char) oldPos(int32_t) newPos(int32_t)
-    // ret:NONE
-    Move,
-
-    // req:op(char) playlist(char) pos(int32_t)
-    // ret:NONE
+    // Q:op(char) playlist(char) pos(int32_t)
+    // A:op(char) playlist(char) pos(int32_t)
     Remove,
 
-    // req:op(char) playlist(char)
-    // ret:NONE
+    // Q:op(char) playlist(char)
+    // A:op(char) playlist(char)
     Clear,
 
-    // req:op(char)
-    // ret:op(char) playlist(char) count(int32_t) item(MediaItem)..*
+    // Q:op(char)
+    // A:foreach playlist reply "Append"
     Sync,
+
+    // Q:op(char) playlist(char) oldPos(int32_t) newPos(int32_t)
+    // A:NONE
+    Move,
 
     Top
 };

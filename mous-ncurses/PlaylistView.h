@@ -11,6 +11,7 @@ using namespace scx;
 using namespace mous;
 
 #include "IView.h"
+#include "ClientPlaylistHandler.h"
 
 class PlaylistView: public IView
 {
@@ -34,7 +35,13 @@ public:
     int Index() const;
     void SetIndex(int i);
 
-    void Append(deque<MediaItem*>&);
+    void SetPlaylistHandle(ClientPlaylistHandler* handler);
+
+private:
+    void Remove(int);
+
+    void SlotAppend(int, deque<MediaItem*>&);
+    void SlotRemove(int, int);
 
 public:
     Signal<void (bool)> SigSwitchPlaylist;
@@ -47,6 +54,8 @@ private:
     int m_ItemSelected;
     std::string m_Title;
     deque<MediaItem*> m_List;
+
+    ClientPlaylistHandler* m_PlaylistHandler;
 };
 
 #endif

@@ -14,7 +14,8 @@ PlaylistView::PlaylistView():
     m_Index(-1),
     m_ItemBegin(0),
     m_ItemSelected(0),
-    m_Title(STR_TITLE)
+    m_Title(STR_TITLE),
+    m_PlaylistHandler(NULL)
 {
 }
 
@@ -149,6 +150,8 @@ void PlaylistView::Resize(int w, int h)
 
 bool PlaylistView::InjectKey(int key)
 {
+    const bool empty = m_List.empty();
+
     switch (key) {
         case 'h':
             SigSwitchPlaylist(false);
@@ -159,7 +162,7 @@ bool PlaylistView::InjectKey(int key)
             return true;
 
         case 'j':
-            if (!m_List.empty()) {
+            if (!empty) {
                 if (m_ItemSelected < (int)m_List.size()-1) {
                     ++m_ItemSelected;
                 }
@@ -171,7 +174,7 @@ bool PlaylistView::InjectKey(int key)
             break;
 
         case 'k':
-            if (!m_List.empty()) {
+            if (!empty) {
                 if (m_ItemSelected > 0) {
                     --m_ItemSelected;
                 }
@@ -183,6 +186,9 @@ bool PlaylistView::InjectKey(int key)
             break;
 
         case 'd':
+            if (!empty) {
+                Remove(m_ItemSelected);
+            }
             break;
 
         case 'c':
@@ -247,8 +253,49 @@ void PlaylistView::SetIndex(int index)
     m_Title = str.str();
 }
 
-void PlaylistView::Append(deque<MediaItem*>& list)
+void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
 {
+    if (m_PlaylistHandler != NULL) {
+        m_PlaylistHandler->SigAppend().DisconnectReceiver(this);
+        m_PlaylistHandler->SigRemove().DisconnectReceiver(this);
+    }
+
+    if (handler != NULL) {
+        handler->SigAppend().Connect(&PlaylistView::SlotAppend, this);
+        handler->SigRemove().Connect(&PlaylistView::SlotRemove, this);
+    }
+
+    m_PlaylistHandler = handler;
+}
+
+void PlaylistView::Remove(int pos)
+{
+    if (m_PlaylistHandler != NULL)
+        m_PlaylistHandler->Remove(m_Index, pos);
+}
+
+void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
+{
+    if (i != m_Index)
+        return;
+
     m_List.insert(m_List.end(), list.begin(), list.end());
+
     Refresh();
+}
+
+void PlaylistView::SlotRemove(int i, int pos)
+{
+    if (i != m_Index)
+        return;
+
+    if (pos >= 0 && pos < m_List.size()) {
+        delete m_List[pos];
+        m_List.erase(m_List.begin()+pos);
+
+        if (!m_List.empty() && m_ItemSelected >= m_List.size()-1)
+            m_ItemSelected = m_List.size() - 1;
+
+        Refresh();
+    }
 }

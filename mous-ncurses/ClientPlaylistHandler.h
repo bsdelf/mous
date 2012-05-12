@@ -14,6 +14,15 @@ using namespace mous;
 
 #include "Protocol.h"
 
+#define SEND_PACKET(stream)  \
+{\
+    int payloadSize = (BufObj(NULL) stream).Offset();       \
+    char* buf = fnGetPayloadBuffer(                         \
+            Protocol::Op::Group::Playlist, payloadSize);    \
+    BufObj(buf) stream;                                     \
+}\
+    fnSendOut()
+
 class ClientPlaylistHandler
 {
     friend class Client;
@@ -56,6 +65,15 @@ public:
             }
                 break;
 
+            case Op::Playlist::Remove:
+            {
+                char playlist;
+                int32_t pos;
+                bufObj >> playlist >> pos;
+                m_SigRemove(playlist, pos);
+            }
+                break;
+
             default:
                 break;
         }
@@ -67,27 +85,21 @@ public:
         return m_SigAppend;
     }
 
-#define SEND_PACKET(group, stream)  \
-{\
-    int payloadSize = (BufObj(NULL) stream).Offset();   \
-    char* buf = fnGetPayloadBuffer(group, payloadSize); \
-    BufObj(buf) stream;                                 \
-}\
-    fnSendOut()
+    const Signal<void (int, int)>& SigRemove() const
+    {
+        return m_SigRemove;
+    }
 
     void Append(int playlist, const string& path)
     {
         using namespace Protocol::Op;
-        SEND_PACKET(Group::Playlist, 
-                << (char)Playlist::Append << (char)playlist << path);
+        SEND_PACKET(<< (char)Playlist::Append << (char)playlist << path);
     }
 
-    void MoveItem(int playlist, int oldPos, int newPos)
+    void Remove(int playlist, int pos)
     {
-    }
-
-    void RemoveItem(int playlist, int pos)
-    {
+        using namespace Protocol::Op;
+        SEND_PACKET(<< (char)Playlist::Remove << (char)playlist << (int32_t)pos);
     }
 
     void Clear(int playlist)
@@ -95,9 +107,13 @@ public:
         using namespace Protocol;
     }
 
-    void SyncAll()
+    void Sync()
     {
         using namespace Protocol;
+    }
+
+    void MoveItem(int playlist, int oldPos, int newPos)
+    {
     }
 
 #undef SEND_PACKET
@@ -107,6 +123,7 @@ private:
     Function<void (void)> fnSendOut;
 
     Signal<void (int, deque<MediaItem*>&)> m_SigAppend;
+    Signal<void (int, int)> m_SigRemove;
 };
 
 #endif

@@ -107,11 +107,10 @@ struct PrivateMainUi
 
         for (int i = 0; i < PLAYLIST_COUNT; ++i) {
             playlistView[i].SetIndex(i);
+            playlistView[i].SetPlaylistHandle(&client.PlaylistHandler());
             playlistView[i].SigSwitchPlaylist.Connect(&MainUi::SlotSwitchPlaylist, parent);
         }
         playlist.SetFocus(true);
-
-        client.PlaylistHandler().SigAppend().Connect(&MainUi::SlotRetUserOpen, parent);
     }
 };
 
@@ -168,11 +167,6 @@ void MainUi::SlotTmpOpen(const string& path)
 void MainUi::SlotReqUserOpen(const string& path)
 {
     d->client.PlaylistHandler().Append(d->iPlaylist, path);
-}
-
-void MainUi::SlotRetUserOpen(int i, deque<MediaItem*>& list)
-{
-    d->playlistView[i].Append(list);
 }
 
 bool MainUi::StartClient()

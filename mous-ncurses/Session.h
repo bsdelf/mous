@@ -34,6 +34,7 @@ private:
     void HandlePlaylist(char*, int);
 
     void DoPlaylistAppend(BufObj&);
+    void DoPlaylistRemove(BufObj&);
 
     char* GetPayloadBuffer(char, int);
     void SendOut();

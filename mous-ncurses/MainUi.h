@@ -24,9 +24,7 @@ public:
 private:
     void SlotSwitchPlaylist(bool);
     void SlotTmpOpen(const std::string&);
-
     void SlotReqUserOpen(const std::string&);
-    void SlotRetUserOpen(int, deque<mous::MediaItem*>&);
 
 private:
     bool StartClient();
