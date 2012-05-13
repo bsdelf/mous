@@ -9,11 +9,15 @@
 using namespace scx;
 
 #include <vector>
-#include <fstream>
+#include <deque>
 #include <string>
 using namespace std;
 
 struct MousData;
+
+namespace mous {
+    struct MediaItem;
+}
 
 class Session
 {
@@ -42,6 +46,7 @@ private:
     void SendOut();
 
     void TryConvertToUtf8(string& str) const;
+    void SendMediaItemsByChunk(char, const deque<mous::MediaItem*>&);
 
 private:
     const ConfigFile m_Config;
@@ -53,8 +58,6 @@ private:
     vector<char> m_SendOutBuf;
 
     string m_IfNotUtf8;
-
-    fstream log;
 };
 
 #endif

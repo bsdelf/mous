@@ -93,6 +93,9 @@ struct PrivateMainUi
         parent(p),
         iPlaylist(1)
     {
+        client.SigTryConnect().Connect(&MainUi::SlotTryConnect, parent);
+        client.SigConnected().Connect(&MainUi::SlotConnected, parent);
+
         PlaylistView& playlist = playlistView[iPlaylist];
 
         LayerInfo layer;
@@ -152,6 +155,15 @@ int MainUi::Exec()
     return 0;
 }
 
+void MainUi::SlotTryConnect()
+{
+}
+
+void MainUi::SlotConnected()
+{
+    for (int i = 0; i < PLAYLIST_COUNT; ++i)
+        d->client.PlaylistHandler().Sync(i);
+}
 
 void MainUi::SlotSwitchPlaylist(bool toNext)
 {

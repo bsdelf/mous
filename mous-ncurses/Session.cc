@@ -14,6 +14,7 @@ using namespace Protocol;
 
 const int PAYLOADBUF_MAX_KEEP = 1024;
 const int SENDOUTBUF_MAX_KEEP = 1024*4;
+const int MEDIAITEMS_IN_CHUNK = 20;
 
 #define SEND_PACKET(group, stream)  \
 {\
@@ -34,13 +35,11 @@ Session::Session(const ConfigFile& config):
     m_Data(NULL),
     m_GotReqStopService(false)
 {
-    log.open("mous.log", ios::out);
 }
 
 Session::~Session()
 {
     m_Socket.Close();
-    log.close();
 }
 
 bool Session::Run(const TcpSocket& socket, MousData* data, int notifyFd)
@@ -159,8 +158,6 @@ void Session::HandlePlaylist(char* _buf, int len)
 
     char op;
     buf >> op;
-    log << "len:" << len << endl;
-    log << "op:" << (int)op << endl;
 
     switch (op) {
         case Op::Playlist::Append:
@@ -195,9 +192,6 @@ void Session::PlaylistAppend(BufObj& buf)
     if (index < 0 || index >= m_Data->playlists.size())
         return;
 
-    log << "index:" << (int)index << endl;
-    log << "path:" << path << endl;
-
     deque<MediaItem*> list;
     if (m_Data->loader->LoadMedia(path, list) != ErrorCode::Ok)
         return;
@@ -213,20 +207,7 @@ void Session::PlaylistAppend(BufObj& buf)
 
     m_Data->playlists[index].Append(list);
 
-    // assume less than 65535
-    buf.SetBuffer(NULL);
-    buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
-    for (size_t i = 0; i < list.size(); ++i) {
-        *list[i] >> buf;
-    }
-
-    buf.SetBuffer(GetPayloadBuffer(Op::Group::Playlist, buf.Offset()));
-    buf << (char)Op::Playlist::Append << index << (int32_t) list.size();
-    for (size_t i = 0; i < list.size(); ++i) {
-        *list[i] >> buf;
-    }
-
-    SendOut();
+    SendMediaItemsByChunk(index, list);
 }
 
 void Session::PlaylistRemove(BufObj& buf)
@@ -266,7 +247,15 @@ void Session::PlaylistClear(BufObj& buf)
 
 void Session::PlaylistSync(BufObj& buf)
 {
+    char index;
+    buf >> index;
+
     MutexLocker locker(&m_Data->mutex);
+
+    if (index >= 0 && index < m_Data->playlists.size()) {
+        deque<MediaItem*>& list = m_Data->playlists[index].Items();
+        SendMediaItemsByChunk(index, list);
+    }
 }
 
 char* Session::GetPayloadBuffer(char group, int payloadSize)
@@ -298,5 +287,28 @@ void Session::TryConvertToUtf8(string& str) const
     const char* bad = "?????";
     if (!IsUtf8(c) && !ConvFromTo(m_Config[Config::IfNotUtf8], "UTF-8", c, n, str)) {
         str = bad;
+    }
+}
+
+void Session::SendMediaItemsByChunk(char index, const deque<MediaItem*>& list)
+{
+    // assume less than 65535
+    for (int off = 0, count = 0; off < list.size(); off += count) {
+        count = std::min((int)list.size() - off, MEDIAITEMS_IN_CHUNK);
+
+        BufObj buf(NULL);
+        buf << (char)Op::Playlist::Append << index << (int32_t)count;
+        for (int i = 0; i < count; ++i) {
+            *list[off+i] >> buf;
+        }
+
+        buf.SetBuffer(GetPayloadBuffer(Op::Group::Playlist, buf.Offset()));
+        buf << (char)Op::Playlist::Append << index << (int32_t)count;
+        for (int i = 0; i < count; ++i) {
+            *list[off+i] >> buf;
+        }
+
+        SendOut();
+        cout << count << endl;
     }
 }

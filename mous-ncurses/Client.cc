@@ -74,9 +74,21 @@ ClientPlaylistHandler& Client::PlaylistHandler()
     return m_PlaylistHandler;
 }
 
+const Signal<void ()>& Client::SigTryConnect() const
+{
+    return m_SigTryConnect;
+}
+
+const Signal<void ()>& Client::SigConnected() const
+{
+    return m_SigConnected;
+}
+
 void Client::ThRecvLoop(const string& ip, int port)
 {
     for (int retryCount = 0; ; ++retryCount) {
+        m_SigTryConnect();
+
         if (m_Socket.Connect(InetAddr(ip, port))) {
             break;
         }
@@ -89,6 +101,8 @@ void Client::ThRecvLoop(const string& ip, int port)
             return;
         }
     }
+
+    m_SigConnected();
 
     vector<char> headerBuf(Header::Size());
     vector<char> payloadBuf;
@@ -131,6 +145,9 @@ char* Client::GetPayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
     int totalSize = header.TotalSize();
+
+    m_SendOutBufMutex.Lock();
+
     if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_KEEP || totalSize > SENDOUTBUF_MAX_KEEP)
         m_SendOutBuf.resize(totalSize);
     else
@@ -144,4 +161,6 @@ char* Client::GetPayloadBuffer(char group, int payloadSize)
 void Client::SendOut()
 {
     m_Socket.SendN(&m_SendOutBuf[0], m_SendOutBuf.size());
+
+    m_SendOutBufMutex.Unlock();
 }

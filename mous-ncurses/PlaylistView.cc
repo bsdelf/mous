@@ -350,7 +350,8 @@ void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 
     m_List.insert(m_List.end(), list.begin(), list.end());
 
-    Refresh();
+    if (d.shown)
+        Refresh();
 }
 
 void PlaylistView::SlotRemove(int i, int pos)
@@ -365,7 +366,8 @@ void PlaylistView::SlotRemove(int i, int pos)
         if (!m_List.empty() && m_ItemSelected >= m_List.size()-1)
             m_ItemSelected = m_List.size() - 1;
 
-        Refresh();
+        if (d.shown)
+            Refresh();
     }
 
     m_WaitReply = false;
@@ -383,7 +385,8 @@ void PlaylistView::SlotClear(int i)
 
     m_ItemSelected = m_ItemBegin = 0;
 
-    Refresh();
+    if (d.shown)
+        Refresh();
 
     m_WaitReply = false;
 }

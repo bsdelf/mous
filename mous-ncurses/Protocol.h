@@ -130,8 +130,8 @@ enum e
     // A:op(char) playlist(char)
     Clear,
 
-    // Q:op(char)
-    // A:foreach playlist reply "Append"
+    // Q:op(char) playlist(char)
+    // A:{op(char) playlist(char) count(int32_t) item(MediaItem)..*}..*
     Sync,
 
     // Q:op(char) playlist1(char) pos1(int32_t) playlist2(char) pos2(int32_t)

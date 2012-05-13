@@ -119,9 +119,10 @@ public:
         SEND_PACKET(<< (char)Playlist::Clear << (char)playlist);
     }
 
-    void Sync()
+    void Sync(int playlist)
     {
-        using namespace Protocol;
+        using namespace Protocol::Op;
+        SEND_PACKET(<< (char)Playlist::Sync << (char)playlist);
     }
 
     void MoveItem(int playlist, int oldPos, int newPos)

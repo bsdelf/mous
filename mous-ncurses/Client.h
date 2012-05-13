@@ -5,6 +5,7 @@
 #include <string>
 using namespace std;
 
+#include <scx/Mutex.hpp>
 #include <scx/Function.hpp>
 #include <scx/Signal.hpp>
 #include <scx/Socket.hpp>
@@ -33,9 +34,8 @@ public:
     ClientPlayerHandler& PlayerHandler();
     ClientPlaylistHandler& PlaylistHandler();
 
-public:
-    Signal<void (uint64_t)> SigPlayerTotalMs;
-    Signal<void (uint64_t)> SigPlayerCurrentMs;
+    const Signal<void ()>& SigTryConnect() const;
+    const Signal<void ()>& SigConnected() const;
 
 private:
     void ThRecvLoop(const string&, int);
@@ -51,10 +51,14 @@ private:
     bool m_ConnectStopRetry;
 
     TcpSocket m_Socket;
+    Mutex m_SendOutBufMutex;
     vector<char> m_SendOutBuf;
 
     ClientPlayerHandler m_PlayerHandler;
     ClientPlaylistHandler m_PlaylistHandler;
+
+    Signal<void ()> m_SigTryConnect;
+    Signal<void ()> m_SigConnected;
 };
 
 #endif

@@ -22,6 +22,8 @@ public:
     int Exec();
 
 private:
+    void SlotTryConnect();
+    void SlotConnected();
     void SlotSwitchPlaylist(bool);
     void SlotTmpOpen(const std::string&);
     void SlotReqUserOpen(const std::string&);
