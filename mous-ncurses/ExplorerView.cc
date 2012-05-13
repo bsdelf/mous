@@ -195,45 +195,27 @@ bool ExplorerView::InjectKey(int key)
     switch (key) {
         case KEY_LEFT:
         case 'h':
-            if (m_BeginStack.size() > 1) {
-                m_BeginStack.pop_back();
-                m_SelectionStack.pop_back();
-            } else {
-                m_BeginStack.back() = 0;
-                m_SelectionStack.back() = 0;
-            }
-
-            m_Path = FileInfo(m_Path).AbsPath();
-            m_PathCache.clear();
-            BuildFileItems();
+            CdUp();
             break;
 
         case KEY_RIGHT:
         case 'l':
             if (!m_FileItems.empty()) {
-                int sel = m_SelectionStack.back();
-                if (m_FileItems[sel].isDir) {
-                    m_Path += (m_Path != "/" ? "/" : "") + m_FileItems[sel].name;
-                    m_PathCache.clear();
-                    BuildFileItems();
-
-                    m_BeginStack.push_back(0);
-                    m_SelectionStack.push_back(0);
-                }
+                CdIn();
             }
             break;
 
         case KEY_DOWN:
         case 'j':
             if (!m_FileItems.empty()) {
-                KeyDown();
+                ScrollDown();
             }
             break;
 
         case KEY_UP:
         case 'k':
             if (!m_FileItems.empty()) {
-                KeyUp();
+                ScrollUp();
             }
             break;
 
@@ -241,7 +223,7 @@ bool ExplorerView::InjectKey(int key)
             if (!m_FileItems.empty()) {
                 int line= (d.h - 3) / 2;
                 for (int i = 0; i < line; ++i)
-                    KeyDown();
+                    ScrollDown();
             }
             break;
 
@@ -249,7 +231,7 @@ bool ExplorerView::InjectKey(int key)
             if (!m_FileItems.empty()) {
                 int line= (d.h - 3) / 2;
                 for (int i = 0; i < line; ++i)
-                    KeyUp();
+                    ScrollUp();
             }
             break;
 
@@ -278,12 +260,14 @@ bool ExplorerView::InjectKey(int key)
         case '\n':
             if (!m_FileItems.empty()) {
                 int sel = m_SelectionStack.back();
-                if (!m_FileItems[sel].isDir)
+                if (!m_FileItems[sel].isDir) {
                     SigTmpOpen(m_Path + '/' + m_FileItems[sel].name);
-                else
-                    InjectKey('l');
+                    return true;
+                } else {
+                    CdIn();
+                }
             }
-            return true;
+            break;
 
         case '/':
             if (!m_FileItems.empty()) {
@@ -350,7 +334,35 @@ void ExplorerView::BuildFileItems()
     std::sort(m_FileItems.begin(), m_FileItems.end(), FileItemCmp(m_UniPinYin));
 }
 
-void ExplorerView::KeyDown()
+void ExplorerView::CdUp()
+{
+    if (m_BeginStack.size() > 1) {
+        m_BeginStack.pop_back();
+        m_SelectionStack.pop_back();
+    } else {
+        m_BeginStack.back() = 0;
+        m_SelectionStack.back() = 0;
+    }
+
+    m_Path = FileInfo(m_Path).AbsPath();
+    m_PathCache.clear();
+    BuildFileItems();
+}
+
+void ExplorerView::CdIn()
+{
+    int sel = m_SelectionStack.back();
+    if (m_FileItems[sel].isDir) {
+        m_Path += (m_Path != "/" ? "/" : "") + m_FileItems[sel].name;
+        m_PathCache.clear();
+        BuildFileItems();
+
+        m_BeginStack.push_back(0);
+        m_SelectionStack.push_back(0);
+    }
+}
+
+void ExplorerView::ScrollDown()
 {
     int& beg = m_BeginStack.back();
     int& sel = m_SelectionStack.back();
@@ -363,7 +375,7 @@ void ExplorerView::KeyDown()
     }
 }
 
-void ExplorerView::KeyUp()
+void ExplorerView::ScrollUp()
 {
     int& beg = m_BeginStack.back();
     int& sel = m_SelectionStack.back();
