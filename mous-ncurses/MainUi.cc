@@ -196,7 +196,6 @@ void MainUi::BeginNcurses()
     start_color();
     cbreak();
     noecho();
-    keypad(stdscr, TRUE);
     refresh();
 }
 
