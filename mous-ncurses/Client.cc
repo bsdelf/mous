@@ -9,8 +9,8 @@
 #include "Protocol.h"
 using namespace Protocol;
 
-const int PAYLOADBUF_MAX_SIZE  = 1024;
-const int SENDOUTBUF_MAX_SIZE = 256;
+const int PAYLOADBUF_MAX_KEEP = 1024;
+const int SENDOUTBUF_MAX_KEEP = 256;
 
 Client::Client():
     m_ConnectMaxRetry(25),
@@ -102,7 +102,7 @@ void Client::ThRecvLoop(const string& ip, int port)
         if (!header.Read(&headerBuf[0]))
             continue;
 
-        if ((int)payloadBuf.size() <= PAYLOADBUF_MAX_SIZE || header.payloadSize > PAYLOADBUF_MAX_SIZE)
+        if ((int)payloadBuf.size() <= PAYLOADBUF_MAX_KEEP || header.payloadSize > PAYLOADBUF_MAX_KEEP)
             payloadBuf.resize(header.payloadSize);
         else
             vector<char>(header.payloadSize).swap(payloadBuf);
@@ -131,7 +131,7 @@ char* Client::GetPayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
     int totalSize = header.TotalSize();
-    if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_SIZE || totalSize > SENDOUTBUF_MAX_SIZE)
+    if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_KEEP || totalSize > SENDOUTBUF_MAX_KEEP)
         m_SendOutBuf.resize(totalSize);
     else
         vector<char>(totalSize).swap(m_SendOutBuf);

@@ -12,8 +12,8 @@ using namespace scx;
 #include "Protocol.h"
 using namespace Protocol;
 
-const int PAYLOAD_MAX_SIZE = 1024;
-const int SENDOUTBUF_MAX_SIZE  = 1024*4;
+const int PAYLOADBUF_MAX_KEEP = 1024;
+const int SENDOUTBUF_MAX_KEEP = 1024*4;
 
 #define SEND_PACKET(group, stream)  \
 {\
@@ -73,7 +73,7 @@ void Session::ThRecvLoop()
         if (!header.Read(&headerBuf[0]))
             break;
 
-        if ((int)payloadBuf.size() <= PAYLOAD_MAX_SIZE || header.payloadSize > PAYLOAD_MAX_SIZE)
+        if ((int)payloadBuf.size() <= PAYLOADBUF_MAX_KEEP || header.payloadSize > PAYLOADBUF_MAX_KEEP)
             payloadBuf.resize(header.payloadSize);
         else
             vector<char>(header.payloadSize).swap(payloadBuf);
@@ -244,7 +244,7 @@ char* Session::GetPayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
     int totalSize = header.TotalSize();
-    if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_SIZE || totalSize > SENDOUTBUF_MAX_SIZE)
+    if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_KEEP || totalSize > SENDOUTBUF_MAX_KEEP)
         m_SendOutBuf.resize(totalSize);
     else
         vector<char>(totalSize).swap(m_SendOutBuf);
