@@ -44,9 +44,11 @@ private:
 
 private:
     void Remove(int);
+    void Clear();
 
     void SlotAppend(int, deque<MediaItem*>&);
     void SlotRemove(int, int);
+    void SlotClear(int);
 
 public:
     Signal<void (bool)> SigSwitchPlaylist;

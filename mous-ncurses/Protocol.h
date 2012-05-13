@@ -134,8 +134,8 @@ enum e
     // A:foreach playlist reply "Append"
     Sync,
 
-    // Q:op(char) playlist(char) oldPos(int32_t) newPos(int32_t)
-    // A:NONE
+    // Q:op(char) playlist1(char) pos1(int32_t) playlist2(char) pos2(int32_t)
+    // A:op(char) playlist1(char) pos2(int32_t) playlist2(char) pos2(int32_t)
     Move,
 
     Top

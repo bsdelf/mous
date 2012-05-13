@@ -171,6 +171,14 @@ void Session::HandlePlaylist(char* _buf, int len)
             PlaylistRemove(buf);
             break;
 
+        case Op::Playlist::Clear:
+            PlaylistClear(buf);
+            break;
+
+        case Op::Playlist::Sync:
+            PlaylistSync(buf);
+            break;
+
         default:
             break;
     }
@@ -229,15 +237,36 @@ void Session::PlaylistRemove(BufObj& buf)
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index < 0 || index >= m_Data->playlists.size())
-        return;
-
-    if (pos >= 0 && pos < m_Data->playlists[index].Count()) {
-        delete m_Data->playlists[index][pos];
-        m_Data->playlists[index].Remove(pos);
+    if (index >= 0 && index < m_Data->playlists.size()) {
+        if (pos >= 0 && pos < m_Data->playlists[index].Count()) {
+            delete m_Data->playlists[index][pos];
+            m_Data->playlists[index].Remove(pos);
+        }
     }
 
     SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Remove << index << pos);
+}
+
+void Session::PlaylistClear(BufObj& buf)
+{
+    char index;
+    buf >> index;
+
+    MutexLocker locker(&m_Data->mutex);
+
+    if (index >= 0 && index < m_Data->playlists.size()) {
+        for (int i = 0; i < m_Data->playlists[index].Count(); ++i) {
+            delete m_Data->playlists[index][i];
+        }
+        m_Data->playlists[index].Clear();
+    }
+
+    SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Clear << index);
+}
+
+void Session::PlaylistSync(BufObj& buf)
+{
+    MutexLocker locker(&m_Data->mutex);
 }
 
 char* Session::GetPayloadBuffer(char group, int payloadSize)

@@ -230,6 +230,9 @@ bool PlaylistView::InjectKey(int key)
             break;
 
         case 'C':
+            if (!empty) {
+                Clear();
+            }
             break;
 
         case '\n':
@@ -284,11 +287,13 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
     if (m_PlaylistHandler != NULL) {
         m_PlaylistHandler->SigAppend().DisconnectReceiver(this);
         m_PlaylistHandler->SigRemove().DisconnectReceiver(this);
+        m_PlaylistHandler->SigClear().DisconnectReceiver(this);
     }
 
     if (handler != NULL) {
         handler->SigAppend().Connect(&PlaylistView::SlotAppend, this);
         handler->SigRemove().Connect(&PlaylistView::SlotRemove, this);
+        handler->SigClear().Connect(&PlaylistView::SlotClear, this);
     }
 
     m_PlaylistHandler = handler;
@@ -327,6 +332,17 @@ void PlaylistView::Remove(int pos)
     }
 }
 
+void PlaylistView::Clear()
+{
+    if (m_WaitReply)
+        return;
+
+    if (m_PlaylistHandler != NULL) {
+        m_WaitReply = true;
+        m_PlaylistHandler->Clear(m_Index);
+    }
+}
+
 void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 {
     if (i != m_Index)
@@ -351,6 +367,23 @@ void PlaylistView::SlotRemove(int i, int pos)
 
         Refresh();
     }
+
+    m_WaitReply = false;
+}
+
+void PlaylistView::SlotClear(int i)
+{
+    if (i != m_Index)
+        return;
+
+    for (size_t i = 0; i < m_List.size(); ++i) {
+        delete m_List[i];
+    }
+    m_List.clear();
+
+    m_ItemSelected = m_ItemBegin = 0;
+
+    Refresh();
 
     m_WaitReply = false;
 }

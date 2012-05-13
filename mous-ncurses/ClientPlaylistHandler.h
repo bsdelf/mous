@@ -74,6 +74,12 @@ public:
             }
                 break;
 
+            case Op::Playlist::Clear:
+            {
+                m_SigClear(bufObj.Fetch<char>());
+            }
+                break;
+
             default:
                 break;
         }
@@ -90,6 +96,11 @@ public:
         return m_SigRemove;
     }
 
+    const Signal<void (int)>& SigClear() const
+    {
+        return m_SigClear;
+    }
+
     void Append(int playlist, const string& path)
     {
         using namespace Protocol::Op;
@@ -104,7 +115,8 @@ public:
 
     void Clear(int playlist)
     {
-        using namespace Protocol;
+        using namespace Protocol::Op;
+        SEND_PACKET(<< (char)Playlist::Clear << (char)playlist);
     }
 
     void Sync()
@@ -124,6 +136,7 @@ private:
 
     Signal<void (int, deque<MediaItem*>&)> m_SigAppend;
     Signal<void (int, int)> m_SigRemove;
+    Signal<void (int)> m_SigClear;
 };
 
 #endif

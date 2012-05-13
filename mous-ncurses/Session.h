@@ -35,6 +35,8 @@ private:
 
     void PlaylistAppend(BufObj&);
     void PlaylistRemove(BufObj&);
+    void PlaylistClear(BufObj&);
+    void PlaylistSync(BufObj&);
 
     char* GetPayloadBuffer(char, int);
     void SendOut();
