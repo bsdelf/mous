@@ -245,7 +245,7 @@ bool ExplorerView::InjectKey(int key)
         case KEY_END:
             if (!m_FileItems.empty()) {
                 m_SelectionStack.back() = m_FileItems.size() - 1;
-                m_BeginStack.back() = m_FileItems.size() - (d.h - 3);
+                m_BeginStack.back() = std::max((int)m_FileItems.size() - (d.h - 3), 0);
             }
             break;
 
