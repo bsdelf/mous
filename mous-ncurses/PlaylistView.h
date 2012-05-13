@@ -39,6 +39,10 @@ public:
     void SetPlaylistHandle(ClientPlaylistHandler* handler);
 
 private:
+    void ScrollUp();
+    void ScrollDown();
+
+private:
     void Remove(int);
 
     void SlotAppend(int, deque<MediaItem*>&);

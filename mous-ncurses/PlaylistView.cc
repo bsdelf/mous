@@ -155,35 +155,59 @@ bool PlaylistView::InjectKey(int key)
     const bool empty = m_List.empty();
 
     switch (key) {
+        case KEY_LEFT:
         case 'h':
             SigSwitchPlaylist(false);
             return true;
 
+        case KEY_RIGHT:
         case 'l':
             SigSwitchPlaylist(true);
             return true;
 
+        case KEY_DOWN:
         case 'j':
             if (!empty) {
-                if (m_ItemSelected < (int)m_List.size()-1) {
-                    ++m_ItemSelected;
-                }
-                if (m_ItemSelected > (d.h-2) / 2
-                        && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
-                    ++m_ItemBegin;
+                ScrollDown();
+            }
+            break;
+
+        case KEY_UP:
+        case 'k':
+            if (!empty) {
+                ScrollUp();
+            }
+            break;
+
+        case KEY_NPAGE:
+            if (!empty) {
+                int line = (d.h - 3) / 2;
+                for (int i = 0; i < line; ++i) {
+                    ScrollDown();
                 }
             }
             break;
 
-        case 'k':
+        case KEY_PPAGE:
             if (!empty) {
-                if (m_ItemSelected > 0) {
-                    --m_ItemSelected;
+                int line = (d.h - 3) / 2;
+                for (int i = 0; i < line; ++i) {
+                    ScrollUp();
                 }
-                if (m_ItemSelected < m_ItemBegin + (d.h-2) / 2
-                        && m_ItemBegin > 0) {
-                    --m_ItemBegin;
-                }
+            }
+            break;
+
+        case KEY_HOME:
+            if (!empty) {
+                m_ItemBegin = 0;
+                m_ItemSelected = 0;
+            }
+            break;
+
+        case KEY_END:
+            if (!empty) {
+                m_ItemSelected = m_List.size() - 1;
+                m_ItemBegin = std::max((int)m_List.size() - (d.h - 3), 0);
             }
             break;
 
@@ -268,6 +292,28 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
     }
 
     m_PlaylistHandler = handler;
+}
+
+void PlaylistView::ScrollUp()
+{
+    if (m_ItemSelected > 0) {
+        --m_ItemSelected;
+    }
+    if (m_ItemSelected < m_ItemBegin + (d.h-2) / 2
+            && m_ItemBegin > 0) {
+        --m_ItemBegin;
+    }
+}
+
+void PlaylistView::ScrollDown()
+{
+    if (m_ItemSelected < (int)m_List.size()-1) {
+        ++m_ItemSelected;
+    }
+    if (m_ItemSelected > (d.h-2) / 2
+            && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
+        ++m_ItemBegin;
+    }
 }
 
 void PlaylistView::Remove(int pos)
