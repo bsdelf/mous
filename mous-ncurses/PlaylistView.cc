@@ -15,6 +15,7 @@ PlaylistView::PlaylistView():
     m_ItemBegin(0),
     m_ItemSelected(0),
     m_Title(STR_TITLE),
+    m_WaitReply(false),
     m_PlaylistHandler(NULL)
 {
 }
@@ -146,6 +147,7 @@ void PlaylistView::MoveTo(int x, int y)
 void PlaylistView::Resize(int w, int h)
 {
     d.Resize(w, h);
+    d.EnableKeypad(true);
 }
 
 bool PlaylistView::InjectKey(int key)
@@ -189,7 +191,7 @@ bool PlaylistView::InjectKey(int key)
             if (!empty) {
                 Remove(m_ItemSelected);
             }
-            break;
+            return true;
 
         case 'c':
             break;
@@ -270,8 +272,13 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
 
 void PlaylistView::Remove(int pos)
 {
-    if (m_PlaylistHandler != NULL)
+    if (m_WaitReply)
+        return;
+
+    if (m_PlaylistHandler != NULL) {
+        m_WaitReply = true;
         m_PlaylistHandler->Remove(m_Index, pos);
+    }
 }
 
 void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
@@ -298,4 +305,6 @@ void PlaylistView::SlotRemove(int i, int pos)
 
         Refresh();
     }
+
+    m_WaitReply = false;
 }

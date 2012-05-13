@@ -5,6 +5,7 @@
 using namespace std;
 
 #include <scx/Signal.hpp>
+#include <scx/Mutex.hpp>
 using namespace scx;
 
 #include <util/MediaItem.h>
@@ -54,6 +55,7 @@ private:
     int m_ItemSelected;
     std::string m_Title;
     deque<MediaItem*> m_List;
+    bool m_WaitReply;
 
     ClientPlaylistHandler* m_PlaylistHandler;
 };

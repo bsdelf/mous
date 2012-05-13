@@ -164,11 +164,11 @@ void Session::HandlePlaylist(char* _buf, int len)
 
     switch (op) {
         case Op::Playlist::Append:
-            DoPlaylistAppend(buf);
+            PlaylistAppend(buf);
             break;
 
         case Op::Playlist::Remove:
-            DoPlaylistRemove(buf);
+            PlaylistRemove(buf);
             break;
 
         default:
@@ -176,18 +176,20 @@ void Session::HandlePlaylist(char* _buf, int len)
     }
 }
 
-void Session::DoPlaylistAppend(BufObj& buf)
+void Session::PlaylistAppend(BufObj& buf)
 {
     char index;
     string path;
     buf >> index >> path;
+
+    MutexLocker locker(&m_Data->mutex);
+
     if (index < 0 || index >= m_Data->playlists.size())
         return;
 
     log << "index:" << (int)index << endl;
     log << "path:" << path << endl;
 
-    MutexLocker locker(&m_Data->mutex);
     deque<MediaItem*> list;
     if (m_Data->loader->LoadMedia(path, list) != ErrorCode::Ok)
         return;
@@ -219,17 +221,21 @@ void Session::DoPlaylistAppend(BufObj& buf)
     SendOut();
 }
 
-void Session::DoPlaylistRemove(BufObj& buf)
+void Session::PlaylistRemove(BufObj& buf)
 {
     char index;
     int32_t pos;
     buf >> index >> pos;
+
+    MutexLocker locker(&m_Data->mutex);
+
     if (index < 0 || index >= m_Data->playlists.size())
         return;
-    if (pos < 0 || pos >= m_Data->playlists[index].Count())
-        return;
 
-    m_Data->playlists[index].Remove(pos);
+    if (pos >= 0 && pos < m_Data->playlists[index].Count()) {
+        delete m_Data->playlists[index][pos];
+        m_Data->playlists[index].Remove(pos);
+    }
 
     SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Remove << index << pos);
 }

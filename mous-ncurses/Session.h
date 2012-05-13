@@ -33,8 +33,8 @@ private:
     void HandlePlayer(char*, int);
     void HandlePlaylist(char*, int);
 
-    void DoPlaylistAppend(BufObj&);
-    void DoPlaylistRemove(BufObj&);
+    void PlaylistAppend(BufObj&);
+    void PlaylistRemove(BufObj&);
 
     char* GetPayloadBuffer(char, int);
     void SendOut();
