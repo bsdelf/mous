@@ -93,6 +93,7 @@ void HelpView::MoveTo(int x, int y)
 void HelpView::Resize(int w, int h)
 {
     d.Resize(w, h);
+    d.EnableKeypad(true);
 }
 
 bool HelpView::InjectKey(int key)

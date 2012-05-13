@@ -20,6 +20,7 @@ public:
     {
         Cleanup();
         m_Wnd = newwin(LINES, COLS, 0, 0);
+        keypad(m_Wnd, TRUE);
         wrefresh(m_Wnd);
     }
 
