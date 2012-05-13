@@ -231,6 +231,16 @@ public:
         return m_ItemQue[index];
     }
 
+    std::deque<item_t>& Items()
+    {
+        return m_ItemQue;
+    }
+
+    const std::deque<item_t>& Items() const
+    {
+        return m_ItemQue;
+    }
+
     int Count() const
     {
         int size = m_ItemQue.size();
