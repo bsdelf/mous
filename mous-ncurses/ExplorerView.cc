@@ -187,11 +187,13 @@ void ExplorerView::Resize(int w, int h)
     }
 
     d.Resize(w, h);
+    d.EnableKeypad(true);
 }
 
 bool ExplorerView::InjectKey(int key)
 {
     switch (key) {
+        case KEY_LEFT:
         case 'h':
             if (m_BeginStack.size() > 1) {
                 m_BeginStack.pop_back();
@@ -206,6 +208,7 @@ bool ExplorerView::InjectKey(int key)
             BuildFileItems();
             break;
 
+        case KEY_RIGHT:
         case 'l':
             if (!m_FileItems.empty()) {
                 int sel = m_SelectionStack.back();
@@ -220,31 +223,47 @@ bool ExplorerView::InjectKey(int key)
             }
             break;
 
+        case KEY_DOWN:
         case 'j':
             if (!m_FileItems.empty()) {
-                int& beg = m_BeginStack.back();
-                int& sel = m_SelectionStack.back();
-                if (sel < m_FileItems.size()-1) {
-                    ++sel;
-                }
-                if (sel > (d.h-2) / 2
-                        && beg < m_FileItems.size()-(d.h-2-1)) {
-                    ++beg;
-                }
+                KeyDown();
             }
             break;
 
+        case KEY_UP:
         case 'k':
             if (!m_FileItems.empty()) {
-                int& beg = m_BeginStack.back();
-                int& sel = m_SelectionStack.back();
-                if (sel > 0) {
-                    --sel;
-                }
-                if (sel < beg + (d.h-2) / 2
-                        && beg > 0) {
-                    --beg;
-                }
+                KeyUp();
+            }
+            break;
+
+        case KEY_NPAGE:
+            if (!m_FileItems.empty()) {
+                int line= (d.h - 3) / 2;
+                for (int i = 0; i < line; ++i)
+                    KeyDown();
+            }
+            break;
+
+        case KEY_PPAGE:
+            if (!m_FileItems.empty()) {
+                int line= (d.h - 3) / 2;
+                for (int i = 0; i < line; ++i)
+                    KeyUp();
+            }
+            break;
+
+        case KEY_HOME:
+            if (!m_FileItems.empty()) {
+                m_BeginStack.back() = 0;
+                m_SelectionStack.back() = 0;
+            }
+            break;
+
+        case KEY_END:
+            if (!m_FileItems.empty()) {
+                m_SelectionStack.back() = m_FileItems.size() - 1;
+                m_BeginStack.back() = m_FileItems.size() - (d.h - 3);
             }
             break;
 
@@ -267,6 +286,8 @@ bool ExplorerView::InjectKey(int key)
             return true;
 
         case '/':
+            if (!m_FileItems.empty()) {
+            }
             break;
 
         case '.':
@@ -327,4 +348,30 @@ void ExplorerView::BuildFileItems()
     }
 
     std::sort(m_FileItems.begin(), m_FileItems.end(), FileItemCmp(m_UniPinYin));
+}
+
+void ExplorerView::KeyDown()
+{
+    int& beg = m_BeginStack.back();
+    int& sel = m_SelectionStack.back();
+    if (sel < m_FileItems.size()-1) {
+        ++sel;
+    }
+    if (sel > (d.h-2) / 2
+            && beg < m_FileItems.size()-(d.h-2-1)) {
+        ++beg;
+    }
+}
+
+void ExplorerView::KeyUp()
+{
+    int& beg = m_BeginStack.back();
+    int& sel = m_SelectionStack.back();
+    if (sel > 0) {
+        --sel;
+    }
+    if (sel < beg + (d.h-2) / 2
+            && beg > 0) {
+        --beg;
+    }
 }

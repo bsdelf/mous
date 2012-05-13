@@ -38,6 +38,8 @@ public:
 
 private:
     void BuildFileItems();
+    void KeyUp();
+    void KeyDown();
 
 private:
     struct FileItem
