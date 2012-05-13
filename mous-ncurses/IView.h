@@ -83,6 +83,11 @@ struct Window
         }
     }
 
+    void EnableKeypad(bool enable)
+    {
+        keypad(win, enable ? TRUE : FALSE);
+    }
+
     void Refresh()
     {
         if (win != NULL)
