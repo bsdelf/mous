@@ -21,7 +21,6 @@ namespace Protocol {
 //==== Header ====
 const char* const STR_MAGIC = "MOUS";
 
-namespace Op {
 namespace Group {
 enum e 
 {
@@ -35,7 +34,6 @@ enum e
 };
 }
 typedef Group::e EmGroup;
-}
 
 struct Header
 {
@@ -61,9 +59,9 @@ struct Header
     {
         if (std::memcmp(STR_MAGIC, buf, 4) == 0) {
             BufObj(buf+4) >> group >> payloadSize;
-            return IsVaildEm(Op::Group, group);
+            return IsVaildEm(Group, group);
         } else {
-            group = Op::Group::None;
+            group = Group::None;
             payloadSize = -1;
             return false;
         }
@@ -97,14 +95,18 @@ enum e
 {
     None = 0,
 
-    Play,   
-    Seek,
-    Stop,
+    // Q:op(char)
     Pause,
-    Resume,
+
+    // Q:op(char) msOff(int32_t)
+    Seek,
+
+    // Q:op(char) percent(char)
+    Volume,
 
     // Q:op(char)
-    // A:op(char) ms(uint64_t) duration(uint64_t) bitRate(int32_t) sampleRate(int32_t) audioMode(char)
+    // A:op(char) status(char) 
+    //   [ms(uint64_t) duration(uint64_t) bitRate(int32_t) sampleRate(int32_t) audioMode(char)]
     Status,
 
     Top
@@ -117,6 +119,9 @@ namespace Playlist {
 enum e
 {
     None = 0,
+
+    // Q:op(char) playlist(char) pos(int32_t)
+    Play,   
 
     // Q:op(char) playlist(char) path(string)
     // A:op(char) playlist(char) count(int32_t) item(MediaItem)..*

@@ -7,6 +7,15 @@ using namespace scx;
 
 #include "Protocol.h"
 
+#define SEND_PACKET(stream)  \
+{\
+    int payloadSize = (BufObj(NULL) stream).Offset();   \
+    char* buf = fnGetPayloadBuffer(                     \
+            Protocol::Op::Group::Player, payloadSize);  \
+    BufObj(buf) stream;                                 \
+}\
+    fnSendOut()
+
 class ClientPlayerHandler
 {
     friend class Client;
@@ -65,6 +74,14 @@ public:
     {
     }
 
+    void VolumeUp()
+    {
+    }
+
+    void VolumeDown()
+    {
+    }
+
 private:
     Function<char* (char, int)> fnGetPayloadBuffer;
     Function<void (void)> fnSendOut;
@@ -72,4 +89,5 @@ private:
     Signal<void ()> m_SigStatusChanged;
 };
 
+#undef SEND_PACKET
 #endif

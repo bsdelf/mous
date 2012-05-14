@@ -25,10 +25,10 @@ const int MEDIAITEMS_IN_CHUNK = 20;
     SendOut()
 
 #define SEND_PACKET_PLAYER(stream) \
-    SEND_PACKET(Protocol::Op::Group::Player, stream)
+    SEND_PACKET(Protocol::Group::Player, stream)
 
 #define SEND_PACKET_PLAYLIST(stream) \
-    SEND_PACKET(Protocol::Op::Group::Playlist, stream)
+    SEND_PACKET(Protocol::Group::Playlist, stream)
 
 Session::Session(const ConfigFile& config):
     m_Config(config),
@@ -62,7 +62,7 @@ void Session::ThRecvLoop()
 {
     vector<char> headerBuf(Header::Size());
     vector<char> payloadBuf;
-    Header header(Op::Group::None, -1);
+    Header header(Group::None, -1);
     char* buf;
     int len;
 
@@ -83,15 +83,15 @@ void Session::ThRecvLoop()
             break;
 
         switch (header.group) {
-            case Op::Group::App:
+            case Group::App:
                 HandleApp(buf, len);
                 break;
 
-            case Op::Group::Player:
+            case Group::Player:
                 HandlePlayer(buf, len);
                 break;
 
-            case Op::Group::Playlist:
+            case Group::Playlist:
                 HandlePlaylist(buf, len);
                 break;
         }
@@ -132,13 +132,7 @@ void Session::HandlePlayer(char* _buf, int len)
     buf >> op;
 
     switch (op) {
-        case Op::Player::Play:
-            break;
-
         case Op::Player::Pause:
-            break;
-
-        case Op::Player::Resume:
             break;
 
         case Op::Player::Status:
@@ -160,6 +154,9 @@ void Session::HandlePlaylist(char* _buf, int len)
     buf >> op;
 
     switch (op) {
+        case Op::Playlist::Play:
+            break;
+
         case Op::Playlist::Append:
             PlaylistAppend(buf);
             break;
@@ -302,7 +299,7 @@ void Session::SendMediaItemsByChunk(char index, const deque<MediaItem*>& list)
             *list[off+i] >> buf;
         }
 
-        buf.SetBuffer(GetPayloadBuffer(Op::Group::Playlist, buf.Offset()));
+        buf.SetBuffer(GetPayloadBuffer(Group::Playlist, buf.Offset()));
         buf << (char)Op::Playlist::Append << index << (int32_t)count;
         for (int i = 0; i < count; ++i) {
             *list[off+i] >> buf;

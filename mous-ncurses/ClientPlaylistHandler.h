@@ -16,10 +16,10 @@ using namespace mous;
 
 #define SEND_PACKET(stream)  \
 {\
-    int payloadSize = (BufObj(NULL) stream).Offset();       \
-    char* buf = fnGetPayloadBuffer(                         \
-            Protocol::Op::Group::Playlist, payloadSize);    \
-    BufObj(buf) stream;                                     \
+    int payloadSize = (BufObj(NULL) stream).Offset();   \
+    char* buf = fnGetPayloadBuffer(                     \
+            Protocol::Group::Playlist, payloadSize);    \
+    BufObj(buf) stream;                                 \
 }\
     fnSendOut()
 
@@ -129,8 +129,6 @@ public:
     {
     }
 
-#undef SEND_PACKET
-    
 private:
     Function<char* (char, int)> fnGetPayloadBuffer;
     Function<void (void)> fnSendOut;
@@ -140,4 +138,6 @@ private:
     Signal<void (int)> m_SigClear;
 };
 
+#undef SEND_PACKET
+    
 #endif

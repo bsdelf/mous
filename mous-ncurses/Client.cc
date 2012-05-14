@@ -58,7 +58,7 @@ void Client::StopService()
     char op = Op::App::StopService;
     int payloadSize = (BufObj(NULL) << op).Offset();
 
-    char* buf = GetPayloadBuffer(Op::Group::App, payloadSize);
+    char* buf = GetPayloadBuffer(Group::App, payloadSize);
     BufObj(buf) << op;
 
     SendOut();
@@ -106,7 +106,7 @@ void Client::ThRecvLoop(const string& ip, int port)
 
     vector<char> headerBuf(Header::Size());
     vector<char> payloadBuf;
-    Header header(Op::Group::None, -1);
+    Header header(Group::None, -1);
     char* buf;
     int size;
 
@@ -127,11 +127,11 @@ void Client::ThRecvLoop(const string& ip, int port)
             break;
 
         switch (header.group) {
-            case Op::Group::Player:
+            case Group::Player:
                 m_PlayerHandler.Handle(buf, size);
                 break;
 
-            case Op::Group::Playlist:
+            case Group::Playlist:
                 m_PlaylistHandler.Handle(buf, size);
                 break;
 
