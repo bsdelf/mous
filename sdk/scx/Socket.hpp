@@ -1,6 +1,7 @@
 #ifndef SCX_SOCKET_HPP
 #define SCX_SOCKET_HPP
 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -10,6 +11,11 @@
 #include <string>
 #include <iostream>
 using namespace std;
+
+#ifndef SO_REUSEPORT
+#define SCX_SOCKET_SO_REUSEPORT
+#define SO_REUSEPORT SO_REUSEADDR
+#endif
 
 namespace scx {
 
@@ -275,5 +281,10 @@ class UnixSocket
 }
 
 #undef SCX_COPY_SOCKETCOMMON
+
+#ifdef SCX_SOCKET_SO_REUSEPORT
+#undef SO_REUSEPORT
+#undef SCX_SOCKET_SO_REUSEPORT
+#endif
 
 #endif
