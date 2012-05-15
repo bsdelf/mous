@@ -2,6 +2,7 @@
 #define SCX_ENV_HPP
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <string>
 
