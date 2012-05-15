@@ -225,13 +225,14 @@ endif()
 
 if(WithHeadFiles)
     file(GLOB HEAD_FILES "${MOUS_SOURCE_DIR}/sdk/*")
-    install(DIRECTORY ${HEAD_FILES} 
-        DESTINATION include/mous)
+    install(DIRECTORY ${HEAD_FILES} DESTINATION include/mous)
 endif()
 
 file(GLOB PLUGINS_LIBS "${PROJECT_BINARY_DIR}/plugins/*.so")
-install(FILES ${PLUGINS_LIBS} 
-    DESTINATION lib/mous)
+install(FILES ${PLUGINS_LIBS} DESTINATION lib/mous)
+
+file(GLOB RESOURCE_FILES "${MOUS_SOURCE_DIR}/resource/*")
+install(DIRECTORY ${RESOURCE_FILES} DESTINATION share/mous)
 
 # messages
 message("CMake:		" ${CMAKE_VERSION})
