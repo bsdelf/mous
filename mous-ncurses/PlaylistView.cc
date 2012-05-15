@@ -99,7 +99,7 @@ void PlaylistView::Refresh()
             // I suppose duration < 59min
             string duration;
             {
-                if (item.hasRange && item.msEnd == -1)
+                if (item.hasRange && item.msEnd == (size_t)-1)
                     item.msEnd = item.duration;
 
                 int total = (item.hasRange ? item.msEnd - item.msBeg : item.duration) / 1000;
@@ -359,11 +359,11 @@ void PlaylistView::SlotRemove(int i, int pos)
     if (i != m_Index)
         return;
 
-    if (pos >= 0 && pos < m_List.size()) {
+    if (pos >= 0 && (size_t)pos < m_List.size()) {
         delete m_List[pos];
         m_List.erase(m_List.begin()+pos);
 
-        if (!m_List.empty() && m_ItemSelected >= m_List.size()-1)
+        if (!m_List.empty() && m_ItemSelected >= (int)m_List.size()-1)
             m_ItemSelected = m_List.size() - 1;
 
         if (d.shown)

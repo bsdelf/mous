@@ -5,6 +5,7 @@
 #include <panel.h>
 
 #include "IView.h"
+#include "ClientPlayerHandler.h"
 
 class StatusView: public IView
 {
@@ -24,8 +25,16 @@ public:
 public:
     int MinHeight() const;
 
+    void SetPlayerHandler(ClientPlayerHandler* handler);
+
 private:
     Window d;
+    int m_CurrentMs;
+    int m_Duration;
+    int m_BitRate;
+    int m_SamepleRate;
+    
+    ClientPlayerHandler* m_PlayerHandler;
 };
 
 #endif

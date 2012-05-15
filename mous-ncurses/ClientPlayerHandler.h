@@ -41,7 +41,7 @@ public:
         BufObj bufObj(buf);
         bufObj >> op;
         switch (op) {
-            case Op::Player::Status:
+            case Op::Player::ItemProgress:
                 break;
 
             default:

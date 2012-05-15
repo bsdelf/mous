@@ -96,6 +96,8 @@ struct PrivateMainUi
         client.SigTryConnect().Connect(&MainUi::SlotTryConnect, parent);
         client.SigConnected().Connect(&MainUi::SlotConnected, parent);
 
+        statusView.SetPlayerHandler(&client.PlayerHandler());
+
         PlaylistView& playlist = playlistView[iPlaylist];
 
         LayerInfo layer;

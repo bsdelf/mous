@@ -254,7 +254,7 @@ private:
     // NOTE: very limited usage
     std::string ParseStyle(const std::string& str)
     {
-        int off = 0;
+        size_t off = 0;
         while (off+1 < str.size()) {
             if (str[off] != '^')
                 break;

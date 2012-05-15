@@ -53,7 +53,7 @@ int Server::Exec()
         return 1;
 
     int maxfd = std::max(m_Socket.Fd(), m_PipeFd[0]) + 1;
-    struct fd_set rset;
+    fd_set rset;
     FD_ZERO(&rset);
 
     TcpSocket clientSocket;

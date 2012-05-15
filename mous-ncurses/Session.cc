@@ -135,7 +135,7 @@ void Session::HandlePlayer(char* _buf, int len)
         case Op::Player::Pause:
             break;
 
-        case Op::Player::Status:
+        case Op::Player::ItemProgress:
             break;
 
         default:

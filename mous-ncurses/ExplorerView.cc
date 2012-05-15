@@ -142,7 +142,7 @@ void ExplorerView::Refresh()
         }
 
         xoff = x + 1 + wText;
-        if (m_FileItems.size() > hText) {
+        if (m_FileItems.size() > (size_t)hText) {
             double percent = (double)(selection+1) / m_FileItems.size() - 0.00001f;
             yoff = y + hText*percent;
             d.AttrSet(Attr::Bold | Attr::Reverse);
@@ -366,11 +366,11 @@ void ExplorerView::ScrollDown()
 {
     int& beg = m_BeginStack.back();
     int& sel = m_SelectionStack.back();
-    if (sel < m_FileItems.size()-1) {
+    if (sel < (int)m_FileItems.size()-1) {
         ++sel;
     }
     if (sel > (d.h-2) / 2
-            && beg < m_FileItems.size()-(d.h-2-1)) {
+            && beg < (int)m_FileItems.size()-(d.h-2-1)) {
         ++beg;
     }
 }

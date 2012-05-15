@@ -11,7 +11,8 @@ StatusView::~StatusView()
 void StatusView::Refresh()
 {
     d.Clear();
-    d.CenterPrint(0, "Status");
+    //d.CenterPrint(0, "Status");
+    //d.Print(0, 0, "hello");
     d.Refresh();
 }
 
@@ -68,4 +69,9 @@ bool StatusView::IsShown() const
 int StatusView::MinHeight() const
 {
     return 3+2;
+}
+
+void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
+{
+    m_PlayerHandler = handler;
 }

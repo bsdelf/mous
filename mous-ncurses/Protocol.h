@@ -81,7 +81,7 @@ enum e
 {
     None = 0,
 
-    // Q:op(char)
+    // C:op(char)
     StopService,
 
     Top
@@ -95,19 +95,25 @@ enum e
 {
     None = 0,
 
-    // Q:op(char)
+    // C:op(char)
+    // S:op(char) paused(char 0/1)
     Pause,
 
-    // Q:op(char) msOff(int32_t)
+    // unimplemented yet
     Seek,
 
-    // Q:op(char) percent(char)
+    // C:op(char) percent(char)
     Volume,
 
-    // Q:op(char)
-    // A:op(char) status(char) 
-    //   [ms(uint64_t) duration(uint64_t) bitRate(int32_t) sampleRate(int32_t) audioMode(char)]
-    Status,
+    // S:op(char) item(MediaItem) sampleRate(int32_t) duration(uint64_t)
+    ItemStart,
+
+    // S:op(char)
+    ItemFinished,
+
+    // C:op(char)
+    // S:op(char) running(char) [ms(uint64_t) bitRate(int32_t)]
+    ItemProgress,
 
     Top
 };
@@ -120,27 +126,27 @@ enum e
 {
     None = 0,
 
-    // Q:op(char) playlist(char) pos(int32_t)
+    // C:op(char) playlist(char) pos(int32_t)
     Play,   
 
-    // Q:op(char) playlist(char) path(string)
-    // A:op(char) playlist(char) count(int32_t) item(MediaItem)..*
+    // C:op(char) playlist(char) path(string)
+    // S:op(char) playlist(char) count(int32_t) item(MediaItem)..*
     Append,
 
-    // Q:op(char) playlist(char) pos(int32_t)
-    // A:op(char) playlist(char) pos(int32_t)
+    // C:op(char) playlist(char) pos(int32_t)
+    // S:op(char) playlist(char) pos(int32_t)
     Remove,
 
-    // Q:op(char) playlist(char)
-    // A:op(char) playlist(char)
+    // C:op(char) playlist(char)
+    // S:op(char) playlist(char)
     Clear,
 
-    // Q:op(char) playlist(char)
-    // A:{op(char) playlist(char) count(int32_t) item(MediaItem)..*}..*
+    // C:op(char) playlist(char)
+    // S:{op(char) playlist(char) count(int32_t) item(MediaItem)..*}..*
     Sync,
 
-    // Q:op(char) playlist1(char) pos1(int32_t) playlist2(char) pos2(int32_t)
-    // A:op(char) playlist1(char) pos2(int32_t) playlist2(char) pos2(int32_t)
+    // C:op(char) playlist1(char) pos1(int32_t) playlist2(char) pos2(int32_t)
+    // S:op(char) playlist1(char) pos2(int32_t) playlist2(char) pos2(int32_t)
     Move,
 
     Top
