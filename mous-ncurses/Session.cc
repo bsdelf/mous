@@ -12,9 +12,9 @@ using namespace scx;
 #include "Protocol.h"
 using namespace Protocol;
 
-const int PAYLOADBUF_MAX_KEEP = 1024;
-const int SENDOUTBUF_MAX_KEEP = 1024*4;
-const int MEDIAITEMS_IN_CHUNK = 20;
+const size_t PAYLOADBUF_MAX_KEEP = 1024;
+const size_t SENDOUTBUF_MAX_KEEP = 1024*4;
+const size_t MEDIAITEMS_IN_CHUNK = 20;
 
 #define SEND_PACKET(group, stream)  \
 {\
@@ -71,8 +71,10 @@ void Session::ThRecvLoop()
             break;
         if (!header.Read(&headerBuf[0]))
             break;
+        if (header.payloadSize <= 0)
+            continue;
 
-        if ((int)payloadBuf.size() <= PAYLOADBUF_MAX_KEEP || header.payloadSize > PAYLOADBUF_MAX_KEEP)
+        if (payloadBuf.size() <= PAYLOADBUF_MAX_KEEP || (size_t)header.payloadSize > PAYLOADBUF_MAX_KEEP)
             payloadBuf.resize(header.payloadSize);
         else
             vector<char>(header.payloadSize).swap(payloadBuf);
@@ -258,8 +260,9 @@ void Session::PlaylistSync(BufObj& buf)
 char* Session::GetPayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
-    int totalSize = header.TotalSize();
-    if ((int)m_SendOutBuf.size() <= SENDOUTBUF_MAX_KEEP || totalSize > SENDOUTBUF_MAX_KEEP)
+    size_t totalSize = header.TotalSize();
+
+    if (m_SendOutBuf.size() <= SENDOUTBUF_MAX_KEEP || totalSize > SENDOUTBUF_MAX_KEEP)
         m_SendOutBuf.resize(totalSize);
     else
         vector<char>(totalSize).swap(m_SendOutBuf);
@@ -290,18 +293,18 @@ void Session::TryConvertToUtf8(string& str) const
 void Session::SendMediaItemsByChunk(char index, const deque<MediaItem*>& list)
 {
     // assume less than 65535
-    for (int off = 0, count = 0; off < list.size(); off += count) {
-        count = std::min((int)list.size() - off, MEDIAITEMS_IN_CHUNK);
+    for (size_t off = 0, count = 0; off < list.size(); off += count) {
+        count = std::min(list.size() - off, MEDIAITEMS_IN_CHUNK);
 
         BufObj buf(NULL);
         buf << (char)Op::Playlist::Append << index << (int32_t)count;
-        for (int i = 0; i < count; ++i) {
+        for (size_t i = 0; i < count; ++i) {
             *list[off+i] >> buf;
         }
 
         buf.SetBuffer(GetPayloadBuffer(Group::Playlist, buf.Offset()));
         buf << (char)Op::Playlist::Append << index << (int32_t)count;
-        for (int i = 0; i < count; ++i) {
+        for (size_t i = 0; i < count; ++i) {
             *list[off+i] >> buf;
         }
 
