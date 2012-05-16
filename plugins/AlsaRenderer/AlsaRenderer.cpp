@@ -47,15 +47,15 @@ EmErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t&
     if (ok)
         SetupSwParams();
 
-    if (channels != m_Channels.val) {
+    if ((unsigned int)channels != m_Channels.val) {
         channels = m_Channels.val;
         ok = false;
     }
-    if (sampleRate != m_Channels.val) {
+    if ((unsigned int)sampleRate != m_Channels.val) {
         sampleRate = m_Channels.val;
         ok = false;
     }
-    if (bitsPerSample != m_BitsPerSample) {
+    if ((unsigned int)bitsPerSample != m_BitsPerSample) {
         bitsPerSample = m_BitsPerSample;
         ok = false;
     }
