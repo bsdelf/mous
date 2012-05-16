@@ -10,7 +10,7 @@ class DlgConvertOption;
 }
 
 namespace mous {
-class BaseOption;
+struct BaseOption;
 }
 
 class DlgConvertOption : public QDialog
