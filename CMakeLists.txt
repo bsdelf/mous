@@ -12,8 +12,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 #==== Library path ====#
 include_directories(SYSTEM /usr/local/include)
-link_directories(/usr/local/lib)
 include_directories(SYSTEM /opt/local/include)
+link_directories(/usr/local/lib)
 link_directories(/opt/local/lib)
 include_directories(BEFORE sdk)
 include_directories(BEFORE contrib)
@@ -111,6 +111,24 @@ if(WithFrontendNcurses)
     else()
         target_link_libraries(mous-ncurses MousCore -pthread -lncursesw -liconv)
     endif()
+endif()
+
+# mous-qt
+if(WithFrontendQt)
+    find_package(Qt4 REQUIRED QtCore QtGui)
+    include(${QT_USE_FILE})
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    file(GLOB EXE_MOUS_QT_HEADS mous-qt/*.h mous-qt/*.hpp)
+    file(GLOB EXE_MOUS_QT_SOURCES mous-qt/*.cpp)
+    file(GLOB EXE_MOUS_QT_UI mous-qt/*.ui)
+    file(GLOB EXE_MOUS_QT_QRC mous-qt/*.qrc)
+    QT4_WRAP_CPP(EXE_MOUS_QT_WCPP ${EXE_MOUS_QT_HEADS})
+    QT4_WRAP_UI(EXE_MOUS_QT_WUI ${EXE_MOUS_QT_UI})
+    QT4_ADD_RESOURCES(EXE_MOUS_QT_WRES ${EXE_MOUS_QT_QRC})
+    add_executable(qmous ${EXE_MOUS_QT_SOURCES}
+        ${EXE_MOUS_QT_WCPP} ${EXE_MOUS_QT_WUI} ${EXE_MOUS_QT_WRES})
+    add_dependencies(qmous MousCore)
+    target_link_libraries(qmous MousCore -liconv ${QT_LIBRARIES})
 endif()
 
 # OSS plugin
@@ -211,16 +229,16 @@ endif()
 
 #==== Install Targets ====#
 install(TARGETS MousCore
-        RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib)
 
 if(WithFrontendNcurses)
     install(TARGETS mous-ncurses
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib)
+        RUNTIME DESTINATION bin)
 endif()
 
 if(WithFrontendQt)
+    install(TARGETS qmous
+        RUNTIME DESTINATION bin)
 endif()
 
 if(WithHeadFiles)
@@ -234,7 +252,7 @@ install(FILES ${PLUGINS_LIBS} DESTINATION lib/mous)
 file(GLOB RESOURCE_FILES "${MOUS_SOURCE_DIR}/resource/*")
 install(DIRECTORY ${RESOURCE_FILES} DESTINATION share/mous)
 
-# messages
+#==== Messages ====#
 message("CMake:		" ${CMAKE_VERSION})
 message("OS Name:	" ${CMAKE_SYSTEM_NAME})
 message("OS Version:	" ${CMAKE_SYSTEM_VERSION})
