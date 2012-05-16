@@ -79,7 +79,7 @@ struct MousData
     void ClearPlaylists()
     {
         for (size_t i = 0; i < playlists.size(); ++i) {
-            for (int n = 0; i < playlists[i].Count(); ++n)
+            for (int n = 0; n < playlists[i].Count(); ++n)
                 delete playlists[i][n];
         }
     }
