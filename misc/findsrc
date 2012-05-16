@@ -1,0 +1,5 @@
+#!/bin/sh
+find \
+    ./sdk/util/ ./sdk/core/ ./sdk/plugin/ ./plugins/ ./core/ ./frontend/cli/ ./frontend/qt/ ./frontend/ncurses/ \
+    -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.cc" \
+    | xargs wc | sort -k 4

@@ -1,0 +1,5 @@
+#!/bin/sh
+find \
+    ./sdk/util/ ./sdk/core/ ./sdk/plugin/ ./plugins/ ./core/ ./frontend/ncurses ./frontend/cli/ \
+    -name "*.[hc]" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.cc"
+
