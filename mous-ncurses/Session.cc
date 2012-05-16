@@ -186,7 +186,7 @@ void Session::PlaylistAppend(BufObj& buf)
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index < 0 || index >= m_Data->playlists.size())
+    if (index < 0 || (size_t)index >= m_Data->playlists.size())
         return;
 
     deque<MediaItem*> list;
@@ -215,7 +215,7 @@ void Session::PlaylistRemove(BufObj& buf)
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index >= 0 && index < m_Data->playlists.size()) {
+    if (index >= 0 && (size_t)index < m_Data->playlists.size()) {
         if (pos >= 0 && pos < m_Data->playlists[index].Count()) {
             delete m_Data->playlists[index][pos];
             m_Data->playlists[index].Remove(pos);
@@ -232,7 +232,7 @@ void Session::PlaylistClear(BufObj& buf)
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index >= 0 && index < m_Data->playlists.size()) {
+    if (index >= 0 && (size_t)index < m_Data->playlists.size()) {
         for (int i = 0; i < m_Data->playlists[index].Count(); ++i) {
             delete m_Data->playlists[index][i];
         }
@@ -249,7 +249,7 @@ void Session::PlaylistSync(BufObj& buf)
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index >= 0 && index < m_Data->playlists.size()) {
+    if (index >= 0 && (size_t)index < m_Data->playlists.size()) {
         deque<MediaItem*>& list = m_Data->playlists[index].Items();
         SendMediaItemsByChunk(index, list);
     }
