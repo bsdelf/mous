@@ -57,7 +57,7 @@ public:
         for (size_t pos = 0; ; ++pos) {
             pos = path.find('/', pos);
             string parent = path.substr(0, pos != string::npos ? pos+1 : path.size());
-            printf("%s\n", parent.c_str());
+            //printf("%s\n", parent.c_str());
 
             FileInfo info(parent);
             if (info.Exists()) {
