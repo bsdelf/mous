@@ -36,6 +36,9 @@ if(UseCompileClang)
     set(CMAKE_CXX_COMPILER "clang++")
 endif()
 
+set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Install path prefix")
+add_definitions(-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+
 #==== Frontend ====#
 option(WithFrontendQt "Build Qt frontend" off)
 option(WithFrontendNcurses "Build ncurses frontend" off)

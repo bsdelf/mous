@@ -11,12 +11,12 @@
 #include <iostream>
 using namespace std;
 
-#include <scx/Conv.hpp>
-
 Server::Server()
 {
     m_Data = new MousData;
     pipe(m_PipeFd);
+
+    log.open("mous.log", ios::out);
 }
 
 Server::~Server()
@@ -25,21 +25,23 @@ Server::~Server()
     close(m_PipeFd[0]);
     close(m_PipeFd[1]);
     m_Socket.Close();
+
+    log.close();
 }
 
 int Server::Exec()
 {
-    m_Data->Init();
+    if (!m_Data->Init())
+        return 1;
 
-    string serverIp;
-    int serverPort = -1;
-    {
-        if (!m_Config.Load(Config::ConfigPath))
-            return 1;
+    const Config* config = GlobalConfig::Instance();
+    log << config << endl;
+    if (config == NULL)
+        return 2;
 
-        serverIp = m_Config[Config::ServerIp];
-        serverPort = StrToNum<int>(m_Config[Config::ServerPort]);
-    }
+    log << config->pluginDir << endl;
+    log << config->serverIp << endl;
+    log << config->serverPort << endl;
 
     SocketOpt opt;
     opt.reuseAddr = true;
@@ -47,7 +49,7 @@ int Server::Exec()
     opt.keepAlive = true;
     m_Socket.SetOption(opt);
 
-    if (!m_Socket.Bind(serverIp, serverPort))
+    if (!m_Socket.Bind(config->serverIp, config->serverPort))
         return 1;
     if (!m_Socket.Listen())
         return 1;
@@ -118,7 +120,7 @@ void Server::StopService()
 
 void Server::OpenSession(TcpSocket& clientSocket)
 {
-    Session* session = new Session(m_Config);
+    Session* session = new Session();
     m_SessionSet.insert(session);
     session->Run(clientSocket, m_Data, m_PipeFd[1]);
 

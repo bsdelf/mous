@@ -23,7 +23,7 @@ public:
     Client();
     ~Client();
 
-    bool Run(const string& ip, int port);
+    bool Run();
     void Stop();
 
     void SetConnectMaxRetry(int max);

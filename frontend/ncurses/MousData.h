@@ -45,9 +45,14 @@ struct MousData
         ClearPlaylists();
     }
 
-    void Init()
+    bool Init()
     {
-        mgr->LoadPluginDir(Config::PluginDir);
+        const Config* config = GlobalConfig::Instance();
+        if (config == NULL)
+            return false;
+
+        if (!mgr->LoadPluginDir(config->pluginDir))
+            return false;
 
         typedef vector<const IPluginAgent*> PluginAgentArray;
 
@@ -67,6 +72,8 @@ struct MousData
 
         player->RegisterRendererPlugin(renderers[0]);
         player->RegisterDecoderPlugin(decoders);
+
+        return true;
     }
 
     void Cleanup()

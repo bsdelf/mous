@@ -8,13 +8,11 @@
 #include <stack>
 
 #include <scx/Conv.hpp>
-#include <scx/ConfigFile.hpp>
 using namespace scx;
 
 #include <util/MediaItem.h>
 using namespace mous;
 
-#include "Config.h"
 #include "Client.h"
 #include "BgWindow.h"
 #include "IView.h"
@@ -185,17 +183,7 @@ void MainUi::SlotReqUserOpen(const string& path)
 
 bool MainUi::StartClient()
 {
-    string serverIp;
-    int serverPort = -1;
-
-    ConfigFile conf;
-    if (!conf.Load(Config::ConfigPath))
-        return false;
-
-    serverIp = conf[Config::ServerIp];
-    serverPort = StrToNum<int>(conf[Config::ServerPort]);
-
-    return d->client.Run(serverIp, serverPort);
+    return d->client.Run();
 }
 
 void MainUi::StopClient()

@@ -1,17 +1,30 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-namespace Config {
+#include <string>
+#include <scx/Singleton.hpp>
 
-const char* const PluginDir = "/home/shen/project/mous/build/plugins";
+struct Config
+{
+    bool Init();
 
-const char* const ConfigPath = "/home/shen/project/mous/build/ncurses.config";
+    // environment
+    std::string pluginDir;
+    std::string resourceDir;
+    std::string pinyinFile;
+    std::string configFile;
+    std::string pidFile;
 
-const char* const ServerIp = "ServerIp";
-const char* const ServerPort = "ServerPort";
+    // config content
+    std::string serverIp;
+    int serverPort;
+    std::string ifNotUtf8;
 
-const char* const IfNotUtf8 = "IfNotUtf8";
+private:
+    bool SaveDefault();
+    bool LoadContent();
+};
 
-}
+typedef scx::Singleton<Config> GlobalConfig;
 
 #endif

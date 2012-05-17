@@ -30,8 +30,7 @@ const size_t MEDIAITEMS_IN_CHUNK = 20;
 #define SEND_PACKET_PLAYLIST(stream) \
     SEND_PACKET(Protocol::Group::Playlist, stream)
 
-Session::Session(const ConfigFile& config):
-    m_Config(config),
+Session::Session():
     m_Data(NULL),
     m_GotReqStopService(false)
 {
@@ -285,7 +284,8 @@ void Session::TryConvertToUtf8(string& str) const
     const char* c = str.c_str();
     const size_t n = str.size();
     const char* bad = "?????";
-    if (!IsUtf8(c) && !ConvFromTo(m_Config[Config::IfNotUtf8], "UTF-8", c, n, str)) {
+    const Config* config = GlobalConfig::Instance();
+    if (!IsUtf8(c) && (config == NULL || !ConvFromTo(config->ifNotUtf8, "UTF-8", c, n, str))) {
         str = bad;
     }
 }

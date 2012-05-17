@@ -5,7 +5,6 @@
 #include <scx/Socket.hpp>
 #include <scx/Mutex.hpp>
 #include <scx/BufObj.hpp>
-#include <scx/ConfigFile.hpp>
 using namespace scx;
 
 #include <vector>
@@ -25,7 +24,7 @@ public:
     typedef unsigned long ptr_t;
 
 public:
-    Session(const ConfigFile& config);
+    Session();
     ~Session();
 
     bool Run(const TcpSocket& socket, MousData* data, int notifyFd);
@@ -49,7 +48,6 @@ private:
     void SendMediaItemsByChunk(char, const deque<mous::MediaItem*>&);
 
 private:
-    const ConfigFile m_Config;
     Thread m_RecvThread;
     TcpSocket m_Socket;
     MousData* m_Data;

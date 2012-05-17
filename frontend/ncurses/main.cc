@@ -7,82 +7,48 @@
 #include <fstream>
 using namespace std;
 
-#include <scx/ConfigFile.hpp>
-#include <scx/FileInfo.hpp>
-using namespace scx;
-
 #include "Config.h"
 #include "Server.h"
 #include "MainUi.h"
 
-const char* const PID_FILE = "/home/shen/project/mous/build/server.pid";
-
-bool InitConfig()
-{
-    ConfigFile config;
-
-    config.AppendComment("# server ip");
-    config[Config::ServerIp] = "127.0.0.1";
-    config.AppendComment("");
-
-    config.AppendComment("# server port");
-    config[Config::ServerPort] = "21027";
-    config.AppendComment("");
-
-    config.AppendComment("# if tag is not utf8, use the following encoding");
-    config[Config::IfNotUtf8] = "GBK";
-    config.AppendComment("");
-
-    if (config.Save(Config::ConfigPath)) {
-        cout << "Seems it's the first time you run me. >_<" << endl;
-        cout << "Config file: " << Config::ConfigPath << endl;
-
-        for (int i = 5; i > 0; --i) {
-            cout << "." << i << flush;
-            usleep(500*1000);
-        }
-        cout << endl;
-
-        cout << "Enjoy it! ;-)" << endl;
-        sleep(1);
-
-        return true;
-    } else {
-        cerr << "InitConfig(): Failed to write config" << endl;
-        return false;
-    }
-}
-
 pid_t FetchPid()
 {
     pid_t pid = 0;
-    fstream stream;
-    stream.open(PID_FILE, ios::in);
-    if (stream.is_open()) {
-        stream >> pid;
+    const Config* config = GlobalConfig::Instance();
+    if (config != NULL) {
+        fstream stream;
+        stream.open(config->pidFile.c_str(), ios::in);
+        if (stream.is_open()) {
+            stream >> pid;
+        }
+        stream.close();
     }
-    stream.close();
     return pid;
 }
 
 void StorePid()
 {
-    fstream stream;
-    stream.open(PID_FILE, ios::out);
-    stream << getpid();
-    stream.close();
-    cout << getpid() << endl;
+    const Config* config = GlobalConfig::Instance();
+    if (config != NULL) {
+        fstream stream;
+        stream.open(config->pidFile.c_str(), ios::out);
+        stream << getpid();
+        stream.close();
+    }
 }
 
 void ClearPid()
 {
-    unlink(PID_FILE);
+    const Config* config = GlobalConfig::Instance();
+    if (config != NULL) {
+        unlink(config->pidFile.c_str());
+    }
 }
 
 int main(int argc, char** argv)
 {
-    if (!FileInfo(Config::ConfigPath).Exists() && !InitConfig())
-        return -1;
+    if (!GlobalConfig::Instance()->Init())
+        return 1;
 
     pid_t pid = FetchPid();
     if (pid == 0 || (kill(pid, 0) != 0 && errno == ESRCH))
