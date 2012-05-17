@@ -3,7 +3,7 @@ Started     Name            Description
 O           libMousCore     mous core/sdk
 O           mous-cli        Only for test
 O           mous-qt         Qt based frontend
-X           mous-ncurses    ncurses based frontend
+O           mous-ncurses    ncurses based frontend
 X           mous-gtk        Gtk+ based frontend??
 
 2.Features
@@ -24,7 +24,7 @@ Even NONE of them are built, mous will still be able to launch,
 but of course it will be useless!
 
 Supported   Dependence          Reason
-X           NONE                ALSA Renderer
+O           NONE                ALSA Renderer
 O           NONE                OSS Renderer
 
 O           NONE                WAV Decoder
