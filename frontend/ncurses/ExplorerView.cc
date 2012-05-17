@@ -10,6 +10,8 @@ using namespace std;
 #include <scx/Dir.hpp>
 using namespace scx;
 
+#include "Config.h"
+
 const string STR_TITLE = "[ Explorer ]";
 
 const char* const SIZE_HINT = "BKMG";
@@ -35,7 +37,9 @@ ExplorerView::ExplorerView():
     m_Focused(false),
     m_HideDot(true)
 {
-    m_UniPinYin.LoadMap("unipy.map");
+    const Config* config = GlobalConfig::Instance();
+    if (config != NULL)
+        m_UniPinYin.LoadMap(config->pyMapFile);
 
     m_BeginStack.push_back(0);
     m_SelectionStack.push_back(0);

@@ -10,13 +10,18 @@ using namespace std;
 #include <scx/ConfigFile.hpp>
 using namespace scx;
 
-namespace Def {
+namespace Path {
+    const char* const ConfigRoot = "/.config/mous/";
     const char* const PluginRoot = "/lib/mous/";
     const char* const ResourceRoot = "/share/mous/";
-    const char* const ConfigRoot = "/.config/mous/";
+    const char* const ResourcePinYin = "/pinyin/";
+
+    const char* const PyMapFile = "unipy.map";
     const char* const ConfigFile = "ncurses.config";
     const char* const PidFile = "server.pid";
+}
 
+namespace Field {
     const char* const ServerIp = "ServerIp";
     const char* const ServerPort = "ServerPort";
 
@@ -26,21 +31,22 @@ namespace Def {
 bool Config::Init()
 {
     // prepare installed dir
-    FileInfo pluginDirInfo(string(CMAKE_INSTALL_PREFIX) + Def::PluginRoot);
+    FileInfo pluginDirInfo(string(CMAKE_INSTALL_PREFIX) + Path::PluginRoot);
     if (!pluginDirInfo.Exists() || pluginDirInfo.Type() != FileType::Directory)
         return false;
     pluginDir = pluginDirInfo.AbsFilePath();
 
-    FileInfo resDirInfo(string(CMAKE_INSTALL_PREFIX) + Def::ResourceRoot);
+    FileInfo resDirInfo(string(CMAKE_INSTALL_PREFIX) + Path::ResourceRoot);
     if (!resDirInfo.Exists() || resDirInfo.Type() != FileType::Directory)
         return false;
     resourceDir = resDirInfo.AbsFilePath();
 
     // prepare root dir
-    string configRootDir = Env::Env(Env::Home) + Def::ConfigRoot;
+    string configRootDir = Env::Env(Env::Home) + Path::ConfigRoot;
 
-    configFile = configRootDir + Def::ConfigFile;
-    pidFile = configRootDir + Def::PidFile;
+    pyMapFile = resourceDir + Path::ResourcePinYin + Path::PyMapFile;
+    configFile = configRootDir + Path::ConfigFile;
+    pidFile = configRootDir + Path::PidFile;
 
     FileInfo configRootDirInfo(configRootDir);
     if (configRootDirInfo.Exists()) {
@@ -62,15 +68,15 @@ bool Config::SaveDefault()
     ConfigFile config;
 
     config.AppendComment("# server ip");
-    config[Def::ServerIp] = "127.0.0.1";
+    config[Field::ServerIp] = "127.0.0.1";
     config.AppendComment("");
 
     config.AppendComment("# server port");
-    config[Def::ServerPort] = "21027";
+    config[Field::ServerPort] = "21027";
     config.AppendComment("");
 
     config.AppendComment("# if tag is not utf8, use the following encoding");
-    config[Def::IfNotUtf8] = "GBK";
+    config[Field::IfNotUtf8] = "GBK";
     config.AppendComment("");
 
     if (config.Save(configFile)) {
@@ -89,9 +95,9 @@ bool Config::LoadContent()
     if (!config.Load(configFile, '#'))
         return false;
 
-    serverIp = config[Def::ServerIp];
-    serverPort = StrToNum<int>(config[Def::ServerPort]);
-    ifNotUtf8 = config[Def::IfNotUtf8];
+    serverIp = config[Field::ServerIp];
+    serverPort = StrToNum<int>(config[Field::ServerPort]);
+    ifNotUtf8 = config[Field::IfNotUtf8];
 
     return true;
 }
