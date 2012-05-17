@@ -74,18 +74,8 @@ bool Config::SaveDefault()
     config.AppendComment("");
 
     if (config.Save(configFile)) {
-        cout << "Seems it's the first time you run me. >_<" << endl;
-        cout << "Config file: " << configFile << endl;
-
-        for (int i = 5; i > 0; --i) {
-            cout << "." << i << flush;
-            usleep(500*1000);
-        }
-        cout << endl;
-
-        cout << "Enjoy it! ;-)" << endl;
+        cout << "New config file was generated: " << configFile << endl;
         sleep(1);
-
         return true;
     } else {
         cerr << "InitConfig(): Failed to write config" << endl;
@@ -102,14 +92,6 @@ bool Config::LoadContent()
     serverIp = config[Def::ServerIp];
     serverPort = StrToNum<int>(config[Def::ServerPort]);
     ifNotUtf8 = config[Def::IfNotUtf8];
-
-    cout << pluginDir << endl;
-    cout << resourceDir << endl;
-    cout << configFile << endl;
-    cout << pidFile << endl;
-    cout << serverIp << endl;
-    cout << serverPort << endl;
-    cout << ifNotUtf8 << endl;
 
     return true;
 }
