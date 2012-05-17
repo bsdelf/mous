@@ -156,6 +156,7 @@ void Session::HandlePlaylist(char* _buf, int len)
 
     switch (op) {
         case Op::Playlist::Play:
+            PlaylistPlay(buf);
             break;
 
         case Op::Playlist::Append:
@@ -177,6 +178,32 @@ void Session::HandlePlaylist(char* _buf, int len)
         default:
             break;
     }
+}
+
+void Session::PlaylistPlay(BufObj& buf)
+{
+    char index;
+    int32_t pos;
+    buf >> index >> pos;
+
+    MutexLocker locker(&m_Data->mutex);
+
+    if (index < 0 || (size_t)index >= m_Data->playlists.size())
+        return;
+
+    if (pos < 0 || pos >= m_Data->playlists[index].Count())
+        return;
+
+    IPlayer* player = m_Data->player;
+    MediaItem* item = m_Data->playlists[index][pos];
+
+    if (player->Status() != PlayerStatus::Closed)
+        player->Close();
+    player->Open(item->url);
+    if (item->hasRange)
+        player->Play(item->msBeg, item->msEnd);
+    else
+        player->Play();
 }
 
 void Session::PlaylistAppend(BufObj& buf)

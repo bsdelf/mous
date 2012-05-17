@@ -127,6 +127,7 @@ enum e
     None = 0,
 
     // C:op(char) playlist(char) pos(int32_t)
+    // S:op(char) playlist(char) ok(char 0/1)
     Play,   
 
     // C:op(char) playlist(char) path(string)

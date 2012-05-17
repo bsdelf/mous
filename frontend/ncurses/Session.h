@@ -36,6 +36,7 @@ private:
     void HandlePlayer(char*, int);
     void HandlePlaylist(char*, int);
 
+    void PlaylistPlay(BufObj&);
     void PlaylistAppend(BufObj&);
     void PlaylistRemove(BufObj&);
     void PlaylistClear(BufObj&);

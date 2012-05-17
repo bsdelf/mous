@@ -43,9 +43,11 @@ private:
     void ScrollDown();
 
 private:
+    void Play(int);
     void Remove(int);
     void Clear();
 
+    void SlotPlay(int, bool);
     void SlotAppend(int, deque<MediaItem*>&);
     void SlotRemove(int, int);
     void SlotClear(int);

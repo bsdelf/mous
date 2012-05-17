@@ -236,7 +236,10 @@ bool PlaylistView::InjectKey(int key)
             break;
 
         case '\n':
-            break;
+            if (!empty) {
+                Play(m_ItemSelected);
+            }
+            return true;
 
         case '/':
             break;
@@ -291,6 +294,7 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
     }
 
     if (handler != NULL) {
+        handler->SigPlay().Connect(&PlaylistView::SlotPlay, this);
         handler->SigAppend().Connect(&PlaylistView::SlotAppend, this);
         handler->SigRemove().Connect(&PlaylistView::SlotRemove, this);
         handler->SigClear().Connect(&PlaylistView::SlotClear, this);
@@ -321,6 +325,15 @@ void PlaylistView::ScrollDown()
     }
 }
 
+void PlaylistView::Play(int pos)
+{
+    if (m_WaitReply)
+        return;
+
+    if (m_PlaylistHandler != NULL)
+        m_PlaylistHandler->Play(m_Index, pos);
+}
+
 void PlaylistView::Remove(int pos)
 {
     if (m_WaitReply)
@@ -341,6 +354,12 @@ void PlaylistView::Clear()
         m_WaitReply = true;
         m_PlaylistHandler->Clear(m_Index);
     }
+}
+
+void PlaylistView::SlotPlay(int i, bool ok)
+{
+    if (i != m_Index)
+        return;
 }
 
 void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
