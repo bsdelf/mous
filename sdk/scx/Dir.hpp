@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <stack>
 #include "FileInfo.hpp"
 
 namespace scx {
@@ -16,92 +17,67 @@ namespace scx {
 class Dir
 {
 public:
-    Dir()
-    {
-    }
-
-    ~Dir()
-    {
-    }
-
-    explicit Dir(const std::string& path):
-        m_Path(path)
-    {
-        Refresh();
-    }
-
-    bool ChDir(const std::string& path)
+    static bool ChDir(const std::string& path)
     {
         FileInfo file(path);
-        if (file.Exists() && file.Type() == FileType::Directory) {
-            if (chdir(path.c_str()) == 0) {
-                m_Path = path;
-                return true;
-            }
-        } 
-        Refresh();
-        return false;
+        if (file.Exists() && file.Type() == FileType::Directory)
+            return chdir(path.c_str()) == 0;
+        else
+            return false;
     }
 
-    bool ChDirUp()
+    static bool ChDirUp()
     {
         return ChDir("..");
     }
 
-    size_t EntryCount() const
+    static bool Rename(const std::string& oldName, const std::string& newName)
     {
-        return m_Files.size();
+        return rename(oldName.c_str(), newName.c_str()) == 0;
     }
 
-    std::vector<std::string> Entries() const
+    static bool Remove(const std::string& path)
     {
-        return m_Files;
+        return remove(path.c_str()) == 0;
     }
 
-    std::string Path() const
+    static bool MakeDir(const std::string& path, mode_t mode)
     {
-        return m_Path;
+        using namespace std;
+
+        {
+            FileInfo info(path);
+            if (info.Exists())
+                return info.Type() == FileType::Directory;
+        }
+
+        if (mode & 0700)
+            mode |= S_IRWXU;
+
+        for (size_t pos = 0; ; ++pos) {
+            pos = path.find('/', pos);
+            string parent = path.substr(0, pos != string::npos ? pos+1 : path.size());
+            printf("%s\n", parent.c_str());
+
+            FileInfo info(parent);
+            if (info.Exists()) {
+                if (info.Type() != FileType::Directory)
+                    return false;
+            } else {
+                if (mkdir(parent.c_str(), mode) != 0) {
+                    perror(string("MakeDir() " + parent + " failed!").c_str());
+                    return false;
+                }
+            }
+
+            if (pos == string::npos)
+                break;
+        }
+
+        return true;
     }
 
-    bool MkDir(const std::string& path, int mode) const
-    {
-        return mkdir(path.c_str(), mode) == 0;
-    }
-
-    bool IsRoot()
-    {
-        return m_Path == "/";
-    }
-
-    bool Exists()
-    {
-        return FileInfo(m_Path).Exists();
-    }
-
-    bool Rename(const std::string& newName)
-    {
-        bool ret = rename(m_Path.c_str(), newName.c_str());
-        if (ret)
-            m_Path = newName;
-        return ret;
-    }
-
-    bool Remove()
-    {
-        bool ret = remove(m_Path.c_str()) == 0;
-        if (ret)
-            m_Files.clear();
-        return ret;
-    }
-
-    std::vector<std::string> Refresh()
-    {
-        m_Files = ListDir(m_Path);
-        return m_Files;
-    }
-
-public:
-    static inline std::vector<std::string> ListDir(const std::string& path)
+    static std::vector<std::string> ListDir(const std::string& path)
     {
         std::vector<std::string> list;
         DIR* dir = opendir(path.c_str());
@@ -111,10 +87,6 @@ public:
         closedir(dir);
         return list;
     }
-
-private:
-    std::string m_Path;
-    std::vector<std::string> m_Files;
 };
 
 }

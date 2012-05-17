@@ -9,10 +9,10 @@ template<typename T>
 class Singleton
 {
 public:
-    static T& Instance()
+    static T* Instance()
     {
         pthread_once(&control, &Singleton::Init);
-        return *sInstance;
+        return sInstance;
     }
 
     static void Cleanup()
