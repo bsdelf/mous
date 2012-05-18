@@ -201,6 +201,7 @@ bool PlaylistView::InjectKey(int key)
             if (!empty) {
                 m_ItemBegin = 0;
                 m_ItemSelected = 0;
+                ReqSelect();
             }
             break;
 
@@ -208,12 +209,13 @@ bool PlaylistView::InjectKey(int key)
             if (!empty) {
                 m_ItemSelected = m_List.size() - 1;
                 m_ItemBegin = std::max((int)m_List.size() - (d.h - 3), 0);
+                ReqSelect();
             }
             break;
 
         case 'd':
             if (!empty) {
-                Remove(m_ItemSelected);
+                ReqRemove(m_ItemSelected);
             }
             return true;
 
@@ -231,13 +233,13 @@ bool PlaylistView::InjectKey(int key)
 
         case 'C':
             if (!empty) {
-                Clear();
+                ReqClear();
             }
             break;
 
         case '\n':
             if (!empty) {
-                Play(m_ItemSelected);
+                ReqPlay(m_ItemSelected);
             }
             return true;
 
@@ -288,12 +290,15 @@ void PlaylistView::SetIndex(int index)
 void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
 {
     if (m_PlaylistHandler != NULL) {
+        m_PlaylistHandler->SigSelect().DisconnectReceiver(this);
+        m_PlaylistHandler->SigPlay().DisconnectReceiver(this);
         m_PlaylistHandler->SigAppend().DisconnectReceiver(this);
         m_PlaylistHandler->SigRemove().DisconnectReceiver(this);
         m_PlaylistHandler->SigClear().DisconnectReceiver(this);
     }
 
     if (handler != NULL) {
+        handler->SigSelect().Connect(&PlaylistView::SlotSelect, this);
         handler->SigPlay().Connect(&PlaylistView::SlotPlay, this);
         handler->SigAppend().Connect(&PlaylistView::SlotAppend, this);
         handler->SigRemove().Connect(&PlaylistView::SlotRemove, this);
@@ -308,10 +313,12 @@ void PlaylistView::ScrollUp()
     if (m_ItemSelected > 0) {
         --m_ItemSelected;
     }
-    if (m_ItemSelected < m_ItemBegin + (d.h-2) / 2
+    if (m_ItemSelected < m_ItemBegin + (d.h-2) / 2 
             && m_ItemBegin > 0) {
         --m_ItemBegin;
     }
+
+    ReqSelect();
 }
 
 void PlaylistView::ScrollDown()
@@ -323,18 +330,26 @@ void PlaylistView::ScrollDown()
             && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
         ++m_ItemBegin;
     }
+
+    ReqSelect();
 }
 
-void PlaylistView::Play(int pos)
+void PlaylistView::ReqSelect()
+{
+    if (m_PlaylistHandler != NULL) {
+        m_PlaylistHandler->Select(m_Index, m_ItemSelected);
+    }
+}
+
+void PlaylistView::ReqPlay(int pos)
 {
     if (m_WaitReply)
         return;
-
     if (m_PlaylistHandler != NULL)
         m_PlaylistHandler->Play(m_Index, pos);
 }
 
-void PlaylistView::Remove(int pos)
+void PlaylistView::ReqRemove(int pos)
 {
     if (m_WaitReply)
         return;
@@ -345,7 +360,7 @@ void PlaylistView::Remove(int pos)
     }
 }
 
-void PlaylistView::Clear()
+void PlaylistView::ReqClear()
 {
     if (m_WaitReply)
         return;
@@ -354,6 +369,17 @@ void PlaylistView::Clear()
         m_WaitReply = true;
         m_PlaylistHandler->Clear(m_Index);
     }
+}
+
+void PlaylistView::SlotSelect(int i, int pos)
+{
+    if (i != m_Index)
+        return;
+
+    m_ItemSelected = pos;
+
+    if (d.shown)
+        Refresh();
 }
 
 void PlaylistView::SlotPlay(int i, bool ok)
@@ -390,6 +416,8 @@ void PlaylistView::SlotRemove(int i, int pos)
     }
 
     m_WaitReply = false;
+
+    ReqSelect();
 }
 
 void PlaylistView::SlotClear(int i)
@@ -408,4 +436,7 @@ void PlaylistView::SlotClear(int i)
         Refresh();
 
     m_WaitReply = false;
+
+    ReqSelect();
 }
+

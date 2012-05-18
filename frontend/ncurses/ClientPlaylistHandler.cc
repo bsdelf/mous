@@ -32,6 +32,21 @@ void ClientPlaylistHandler::Handle(char* buf, int len)
     BufObj bufObj(buf);
     bufObj >> op;
     switch (op) {
+        case Op::Playlist::Switch:
+        {
+            m_SigSwitch(bufObj.Fetch<char>());
+        }
+            break;
+
+        case Op::Playlist::Select:
+        {
+            char playlist;
+            int32_t pos;
+            bufObj >> playlist >> pos;
+            m_SigSelect(playlist, pos);
+        }
+            break;
+
         case Op::Playlist::Play:
         {
             char playlist;
@@ -76,6 +91,16 @@ void ClientPlaylistHandler::Handle(char* buf, int len)
         default:
             break;
     }
+}
+
+void ClientPlaylistHandler::Switch(int playlist)
+{
+    SEND_PACKET(<< (char)Op::Playlist::Switch << (char)playlist);
+}
+
+void ClientPlaylistHandler::Select(int playlist, int pos)
+{
+    SEND_PACKET(<< (char)Op::Playlist::Select << (char)playlist << (int32_t)pos);
 }
 
 void ClientPlaylistHandler::Play(int playlist, int pos)

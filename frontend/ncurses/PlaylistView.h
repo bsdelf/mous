@@ -43,10 +43,12 @@ private:
     void ScrollDown();
 
 private:
-    void Play(int);
-    void Remove(int);
-    void Clear();
+    void ReqSelect();
+    void ReqPlay(int);
+    void ReqRemove(int);
+    void ReqClear();
 
+    void SlotSelect(int, int);
     void SlotPlay(int, bool);
     void SlotAppend(int, deque<MediaItem*>&);
     void SlotRemove(int, int);

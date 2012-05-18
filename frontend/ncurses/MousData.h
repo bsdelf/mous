@@ -28,12 +28,21 @@ struct MousData
     typedef Playlist<MediaItem*> playlist_t;
     vector<playlist_t> playlists;
 
-    MousData()
+    int currentPlaylist;
+    vector<int> selectedItem;
+
+    MousData():
+        currentPlaylist(1),
+        selectedItem(6, 0)
     {
         mgr = IPluginManager::Create();
         loader = IMediaLoader::Create();
         player = IPlayer::Create();
+
         playlists.resize(6);
+
+        //currentPlaylist = 0;
+        //selectedItem = vector<int>(6, 0);
     }
 
     ~MousData()

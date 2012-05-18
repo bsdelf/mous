@@ -93,6 +93,7 @@ struct PrivateMainUi
     {
         client.SigTryConnect().Connect(&MainUi::SlotTryConnect, parent);
         client.SigConnected().Connect(&MainUi::SlotConnected, parent);
+        client.PlaylistHandler().SigSwitch().Connect(&MainUi::SwitchPlaylist, parent);
 
         statusView.SetPlayerHandler(&client.PlayerHandler());
 
@@ -129,23 +130,22 @@ MainUi::~MainUi()
 
 int MainUi::Exec()
 {
-    if (!StartClient())
-        return 1;
     BeginNcurses();
-
     OnResize();
 
-    for (bool quit = false; !quit; quit = false) {
-        int key = d->bgWindow.Input();
-        if (HandleTopKey(key, quit)) {
-            if (quit)
-                break;
-            else
+    if (StartClient()) {
+        for (bool quit = false; !quit; quit = false) {
+            int key = d->bgWindow.Input();
+            if (HandleTopKey(key, quit)) {
+                if (quit)
+                    break;
+                else
+                    continue;
+            } else if (d->statusView.InjectKey(key)) {
                 continue;
-        } else if (d->statusView.InjectKey(key)) {
-            continue;
-        } else  {
-            d->layerStack.top().focused.top()->InjectKey(key);
+            } else  {
+                d->layerStack.top().focused.top()->InjectKey(key);
+            }
         }
     }
 
@@ -409,5 +409,9 @@ void MainUi::SwitchPlaylist(int n)
     }
 
     UpdateTopLayout();
+
+    // tell server
+    ClientPlaylistHandler& handle = d->client.PlaylistHandler();
+    handle.Switch(n);
 }
 

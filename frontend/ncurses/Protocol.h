@@ -126,6 +126,14 @@ enum e
 {
     None = 0,
 
+    // C:op(char) playlist(char)
+    // S:op(char) playlist(char)
+    Switch,
+
+    // C:op(char) playlist(char) item(int32_t)
+    // S:op(char) playlist(char) item(int32_t)
+    Select,
+
     // C:op(char) playlist(char) pos(int32_t)
     // S:op(char) playlist(char) ok(char 0/1)
     Play,   
@@ -143,7 +151,7 @@ enum e
     Clear,
 
     // C:op(char) playlist(char)
-    // S:{op(char) playlist(char) count(int32_t) item(MediaItem)..*}..*
+    // S:{Append..*}
     Sync,
 
     // C:op(char) playlist1(char) pos1(int32_t) playlist2(char) pos2(int32_t)
