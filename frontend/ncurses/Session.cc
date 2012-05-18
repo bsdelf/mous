@@ -211,7 +211,8 @@ void Session::PlaylistSelect(BufObj& buf)
     if (index < 0 || (size_t)index >= m_Data->selectedItem.size())
         return;
 
-    if (pos < 0 || pos >= m_Data->playlists[index].Count())
+    if ((pos < 0 || pos >= m_Data->playlists[index].Count())
+            && !m_Data->playlists[index].Empty())
         return;
 
     m_Data->selectedItem[index] = pos;

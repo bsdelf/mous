@@ -235,7 +235,7 @@ bool PlaylistView::InjectKey(int key)
             if (!empty) {
                 ReqClear();
             }
-            break;
+            return true;
 
         case '\n':
             if (!empty) {
