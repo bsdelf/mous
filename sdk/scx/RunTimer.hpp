@@ -87,7 +87,7 @@ public:
 		mBegin.tv_sec = mts.tv_sec;
 		mBegin.tv_nsec = mts.tv_nsec;
 #else
-		clock_gettime(CLOCK_MONOTONIC_PRECISE, &mBegin);
+		clock_gettime(CLOCK_MONOTONIC, &mBegin);
 #endif
     }
 
@@ -102,7 +102,7 @@ public:
 		mEnd.tv_sec = mts.tv_sec;
 		mEnd.tv_nsec = mts.tv_nsec;
 #else
-		clock_gettime(CLOCK_MONOTONIC_PRECISE, &mEnd);
+		clock_gettime(CLOCK_MONOTONIC, &mEnd);
 #endif
     }
 

@@ -2,14 +2,13 @@
 #define SCX_PVBUFFER_HPP
 
 #include <deque>
+
 #include "Mutex.hpp"
+
 #ifndef __MACH__
 #include "SemVar.hpp"
 #else
-#include "FakeSemVar.hpp"
-namespace scx {
-typedef FakeSemVar SemVar;
-}
+#include "SoftSemVar.hpp"
 #endif
 
 namespace scx {
@@ -17,6 +16,13 @@ namespace scx {
 template <typename item_t>
 class PVBuffer
 {
+
+#ifndef __MACH__
+    typedef SemVar Semaphore;
+#else
+    typedef SoftSemVar Semaphore;
+#endif
+
 public:
     PVBuffer():
         m_FreeListSemVar(0),
@@ -177,11 +183,11 @@ private:
 
     std::deque<item_t*> m_FreeQueue;
     Mutex m_FreeListMutex;
-    SemVar m_FreeListSemVar;
+    Semaphore m_FreeListSemVar;
 
     std::deque<item_t*> m_DataQueue;
     Mutex m_DataListMutex;
-    SemVar m_DataListSemVar;
+    Semaphore m_DataListSemVar;
 };
 
 }

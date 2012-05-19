@@ -1,20 +1,20 @@
-#ifndef SCX_FAKESEMVAR_HPP
-#define SCX_FAKESEMVAR_HPP
+#ifndef SCX_SOFTSEMVAR_HPP
+#define SCX_SOFTSEMVAR_HPP
 
 #include "Mutex.hpp"
 #include "CondVar.hpp"
 
 namespace scx {
 
-class FakeSemVar
+class SoftSemVar
 {
 public:
-    explicit FakeSemVar(int value = 0):
+    explicit SoftSemVar(int value = 0):
         m_Value(value)
     {
     }
 
-    ~FakeSemVar()
+    ~SoftSemVar()
     {
     }
 
