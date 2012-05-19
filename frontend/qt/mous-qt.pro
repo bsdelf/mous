@@ -9,7 +9,7 @@ QT       += core gui
 TARGET = mous-qt
 TEMPLATE = app
 
-INCLUDEPATH += ../sdk
+INCLUDEPATH += ../../sdk
 LIBS += -liconv -L./ -Wl,-rpath,./ -lMousCore
 
 macx {
