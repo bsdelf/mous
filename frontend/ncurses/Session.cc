@@ -24,10 +24,10 @@ const size_t MEDIAITEMS_IN_CHUNK = 20;
 }\
     SendOut()
 
-#define SEND_PACKET_PLAYER(stream) \
+#define SEND_PLAYER_PACKET(stream) \
     SEND_PACKET(Protocol::Group::Player, stream)
 
-#define SEND_PACKET_PLAYLIST(stream) \
+#define SEND_PLAYLIST_PACKET(stream) \
     SEND_PACKET(Protocol::Group::Playlist, stream)
 
 Session::Session():
@@ -134,13 +134,43 @@ void Session::HandlePlayer(char* _buf, int len)
 
     switch (op) {
         case Op::Player::Pause:
+            PlayerPause(buf);
             break;
 
         case Op::Player::ItemProgress:
+            PlayerItemProgress(buf);
             break;
 
         default:
             break;
+    }
+}
+
+void Session::PlayerPause(BufObj&)
+{
+    MutexLocker locker(&m_Data->mutex);
+    
+    m_Data->PausePlayer();
+}
+
+void Session::PlayerItemProgress(BufObj&)
+{
+    char running = 0;
+    uint64_t ms = 0;
+    int32_t bitRate = 0;
+
+    MutexLocker locker(&m_Data->mutex);
+    if (m_Data->player->Status() == PlayerStatus::Playing) {
+        running = 1;
+        ms = m_Data->player->OffsetMs();
+        bitRate = m_Data->player->BitRate();
+    }
+    locker.Unlock();
+
+    if (running) {
+        SEND_PLAYER_PACKET(<< Op::Player::ItemProgress << running << ms << bitRate);
+    } else {
+        SEND_PLAYER_PACKET(<< Op::Player::ItemProgress << running);
     }
 }
 
@@ -190,69 +220,60 @@ void Session::HandlePlaylist(char* _buf, int len)
 
 void Session::PlaylistSwitch(BufObj& buf)
 {
-    char index;
-    buf >> index;
+    char iList;
+    buf >> iList;
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index < 0 || (size_t)index >= m_Data->playlists.size())
+    if (iList < 0 || (size_t)iList >= m_Data->playlists.size())
         return;
 
-    m_Data->currentPlaylist = index;
+    m_Data->selectedPlaylist = iList;
 }
 
 void Session::PlaylistSelect(BufObj& buf)
 {
-    char index;
-    int32_t pos;
+    char iList;
+    int32_t iItem;
 
-    buf >> index >> pos;
+    buf >> iList >> iItem;
 
-    if (index < 0 || (size_t)index >= m_Data->selectedItem.size())
+    if (iList < 0 || (size_t)iList >= m_Data->selectedItem.size())
         return;
 
-    if ((pos < 0 || pos >= m_Data->playlists[index].Count())
-            && !m_Data->playlists[index].Empty())
+    if ((iItem < 0 || iItem >= m_Data->playlists[iList].Count())
+            && !m_Data->playlists[iList].Empty())
         return;
 
-    m_Data->selectedItem[index] = pos;
+    m_Data->selectedItem[iList] = iItem;
 }
 
 void Session::PlaylistPlay(BufObj& buf)
 {
-    char index;
-    int32_t pos;
-    buf >> index >> pos;
+    char iList;
+    int32_t iItem;
+    buf >> iList >> iItem;
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index < 0 || (size_t)index >= m_Data->playlists.size())
+    if (iList < 0 || (size_t)iList >= m_Data->playlists.size())
         return;
 
-    if (pos < 0 || pos >= m_Data->playlists[index].Count())
+    if (iItem < 0 || iItem >= m_Data->playlists[iList].Count())
         return;
 
-    IPlayer* player = m_Data->player;
-    MediaItem* item = m_Data->playlists[index][pos];
-
-    if (player->Status() != PlayerStatus::Closed)
-        player->Close();
-    player->Open(item->url);
-    if (item->hasRange)
-        player->Play(item->msBeg, item->msEnd);
-    else
-        player->Play();
+    m_Data->PlayAt(iList, iItem);
 }
 
 void Session::PlaylistAppend(BufObj& buf)
 {
-    char index;
+    char iList;
     string path;
-    buf >> index >> path;
+    buf >> iList >> path;
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index < 0 || (size_t)index >= m_Data->playlists.size())
+    if (iList < 0 || (size_t)iList >= m_Data->playlists.size())
         return;
 
     deque<MediaItem*> list;
@@ -268,66 +289,66 @@ void Session::PlaylistAppend(BufObj& buf)
         TryConvertToUtf8(tag.album);
     }
 
-    m_Data->playlists[index].Append(list);
+    m_Data->playlists[iList].Append(list);
 
-    SendMediaItemsByChunk(index, list);
+    SendMediaItemsByChunk(iList, list);
 }
 
 void Session::PlaylistRemove(BufObj& buf)
 {
-    char index;
-    int32_t pos;
-    buf >> index >> pos;
+    char iList;
+    int32_t iItem;
+    buf >> iList >> iItem;
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index >= 0 && (size_t)index < m_Data->playlists.size()) {
-        if (pos >= 0 && pos < m_Data->playlists[index].Count()) {
-            delete m_Data->playlists[index][pos];
-            m_Data->playlists[index].Remove(pos);
+    if (iList >= 0 && (size_t)iList < m_Data->playlists.size()) {
+        if (iItem >= 0 && iItem < m_Data->playlists[iList].Count()) {
+            delete m_Data->playlists[iList][iItem];
+            m_Data->playlists[iList].Remove(iItem);
         }
     }
 
-    SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Remove << index << pos);
+    SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Remove << iList << iItem);
 }
 
 void Session::PlaylistClear(BufObj& buf)
 {
-    char index;
-    buf >> index;
+    char iList;
+    buf >> iList;
 
     MutexLocker locker(&m_Data->mutex);
 
-    if (index >= 0 && (size_t)index < m_Data->playlists.size()) {
-        for (int i = 0; i < m_Data->playlists[index].Count(); ++i) {
-            delete m_Data->playlists[index][i];
+    if (iList >= 0 && (size_t)iList < m_Data->playlists.size()) {
+        for (int i = 0; i < m_Data->playlists[iList].Count(); ++i) {
+            delete m_Data->playlists[iList][i];
         }
-        m_Data->playlists[index].Clear();
+        m_Data->playlists[iList].Clear();
     }
 
-    SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Clear << index);
+    SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Clear << iList);
 }
 
 void Session::PlaylistSync(BufObj& buf)
 {
-    char index;
-    buf >> index;
+    char iList;
+    buf >> iList;
 
     MutexLocker locker(&m_Data->mutex);
 
     // send playlist
-    if (index >= 0 && (size_t)index < m_Data->playlists.size()) {
-        deque<MediaItem*>& list = m_Data->playlists[index].Items();
-        SendMediaItemsByChunk(index, list);
+    if (iList >= 0 && (size_t)iList < m_Data->playlists.size()) {
+        deque<MediaItem*>& list = m_Data->playlists[iList].Items();
+        SendMediaItemsByChunk(iList, list);
     }
 
     // recover previous status
-    if ((int)index == m_Data->currentPlaylist) {
-        SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Switch
-                << (char)m_Data->currentPlaylist);
+    if ((int)iList == m_Data->selectedPlaylist) {
+        SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Switch
+                << (char)m_Data->selectedPlaylist);
     }
     for (size_t i = 0; i < m_Data->selectedItem.size(); ++i) {
-        SEND_PACKET_PLAYLIST(<< (char)Op::Playlist::Select
+        SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Select
                 << (char)i << (int32_t)m_Data->selectedItem[i]);
     }
 }

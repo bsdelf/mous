@@ -96,24 +96,40 @@ enum e
     None = 0,
 
     // C:op(char)
-    // S:op(char) paused(char 0/1)
     Pause,
 
     // unimplemented yet
     Seek,
 
-    // C:op(char) percent(char)
-    Volume,
+    // C:op(char)
+    // S:op(char) percent(char [0, 100])
+    GetVolume,
+
+    // C:op(char) percent(char [0, 100])
+    SetVolume,
+
+    // C:op(char) running(char 0/1)
+    // S:[ItemInfo] [ItemProgress] op(char) running(char 0/1)
+    ItemSync,
 
     // S:op(char) item(MediaItem) sampleRate(int32_t) duration(uint64_t)
-    ItemStart,
+    ItemInfo,
 
-    // S:op(char)
-    ItemFinished,
-
-    // C:op(char)
-    // S:op(char) running(char) [ms(uint64_t) bitRate(int32_t)]
+    // S:op(char) ms(uint64_t) bitRate(int32_t)
     ItemProgress,
+
+    // For instance:
+    // C(running=0) |ItemSync|  >>  S(running=1)
+    // C wait
+    // C(running=0=>1)          <<  S(running=1) |ItemInfo|ItemProgress|ItemSync|
+    // C(running=1) |ItemSync|  >>  S(running=1)
+    // C wait
+    // C(running=1)             <<  S(running=1) |ItemProgress|ItemSync|
+    // C(running=1) |ItemSync|  >>  S(running=0)
+    // C wait
+    // C(running=1=>0)          <<  S(running=0)
+    //
+    // Client should wait for Server's ItemSync before sending *next* ItemSync.
 
     Top
 };
