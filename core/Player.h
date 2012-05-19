@@ -11,7 +11,7 @@
 #ifndef __MACH__
 #include <scx/SemVar.hpp>
 #else
-#include <scx/FakeSemVar.hpp>
+#include <scx/SoftSemVar.hpp>
 #endif
 
 using namespace std;
@@ -24,6 +24,13 @@ class IRenderer;
 
 class Player: public IPlayer
 {
+
+#ifndef __MACH__
+    typedef scx::SemVar Semaphore;
+#else
+    typedef scx::SoftSemVar Semaphore;
+#endif
+
 public:
     Player();
     ~Player();
@@ -123,12 +130,6 @@ private:
     };
 
 private:
-#ifndef __MACH__
-    typedef scx::SemVar Semaphore;
-#else
-    typedef scx::FakeSemVar Semaphore;
-#endif
-
     EmPlayerStatus m_Status;
 
     bool m_StopDecoder;
