@@ -15,7 +15,7 @@ class ClientPlaylistHandler
 {
     friend class Client;
 
-public:
+private:
     ClientPlaylistHandler();
     ~ClientPlaylistHandler();
 
