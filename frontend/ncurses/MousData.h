@@ -41,6 +41,8 @@ struct MousData
     void ClosePlayer();
     void PausePlayer();
 
+    const MediaItem* ItemInPlaying() const;
+
 private:
     void SlotFinished();
 

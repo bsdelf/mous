@@ -109,8 +109,8 @@ enum e
     SetVolume,
 
     // C:op(char) running(char 0/1)
-    // S:[ItemInfo] [ItemProgress] op(char) running(char 0/1)
-    ItemSync,
+    // S:op(char) running(char 0/1)
+    Sync,
 
     // S:op(char) item(MediaItem) sampleRate(int32_t) duration(uint64_t)
     ItemInfo,
@@ -119,15 +119,15 @@ enum e
     ItemProgress,
 
     // For instance:
-    // C(running=0) |ItemSync|  >>  S(running=1)
+    // C(running=0) |Sync|  >>  S(running=1)
     // C wait
-    // C(running=0=>1)          <<  S(running=1) |ItemInfo|ItemProgress|ItemSync|
-    // C(running=1) |ItemSync|  >>  S(running=1)
+    // C(running=0=>1)      <<  S(running=1) |ItemInfo|ItemProgress|Sync|
+    // C(running=1) |Sync|  >>  S(running=1)
     // C wait
-    // C(running=1)             <<  S(running=1) |ItemProgress|ItemSync|
-    // C(running=1) |ItemSync|  >>  S(running=0)
+    // C(running=1)         <<  S(running=1) |ItemProgress|Sync|
+    // C(running=1) |Sync|  >>  S(running=0)
     // C wait
-    // C(running=1=>0)          <<  S(running=0)
+    // C(running=1=>0)      <<  S(running=0) |Sync|
     //
     // Client should wait for Server's ItemSync before sending *next* ItemSync.
 

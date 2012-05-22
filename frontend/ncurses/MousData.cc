@@ -136,3 +136,11 @@ void MousData::PlayItem(const MediaItem* item)
     else
         player->Play();
 }
+
+const MediaItem* MousData::ItemInPlaying() const
+{
+    MediaItem* item = NULL;
+    const playlist_t& list = playlists[usedPlaylist];
+    list.SeqCurrent(item, 0);
+    return item;
+}

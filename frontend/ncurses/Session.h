@@ -37,7 +37,7 @@ private:
     void HandlePlaylist(char*, int);
 
     void PlayerPause(BufObj&);
-    void PlayerItemProgress(BufObj&);
+    void PlayerSync(BufObj&);
 
     void PlaylistSwitch(BufObj&);
     void PlaylistSelect(BufObj&);
@@ -52,6 +52,7 @@ private:
 
     void TryConvertToUtf8(string& str) const;
     void SendMediaItemsByChunk(char, const deque<mous::MediaItem*>&);
+    void SendMediaItemInfo(const mous::MediaItem*);
 
 private:
     Thread m_RecvThread;

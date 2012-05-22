@@ -30,6 +30,9 @@ const size_t MEDIAITEMS_IN_CHUNK = 20;
 #define SEND_PLAYLIST_PACKET(stream) \
     SEND_PACKET(Protocol::Group::Playlist, stream)
 
+#define BINARY_MASK(a, b) \
+    ( ((a)<<1) | (b) )
+
 Session::Session():
     m_Data(NULL),
     m_GotReqStopService(false)
@@ -137,8 +140,8 @@ void Session::HandlePlayer(char* _buf, int len)
             PlayerPause(buf);
             break;
 
-        case Op::Player::ItemProgress:
-            PlayerItemProgress(buf);
+        case Op::Player::Sync:
+            PlayerSync(buf);
             break;
 
         default:
@@ -153,25 +156,39 @@ void Session::PlayerPause(BufObj&)
     m_Data->PausePlayer();
 }
 
-void Session::PlayerItemProgress(BufObj&)
+void Session::PlayerSync(BufObj& buf)
 {
-    char running = 0;
-    uint64_t ms = 0;
-    int32_t bitRate = 0;
+    int running = buf.Fetch<char>();
 
     MutexLocker locker(&m_Data->mutex);
-    if (m_Data->player->Status() == PlayerStatus::Playing) {
-        running = 1;
-        ms = m_Data->player->OffsetMs();
-        bitRate = m_Data->player->BitRate();
-    }
-    locker.Unlock();
 
-    if (running) {
-        SEND_PLAYER_PACKET(<< Op::Player::ItemProgress << running << ms << bitRate);
-    } else {
-        SEND_PLAYER_PACKET(<< Op::Player::ItemProgress << running);
+    EmPlayerStatus status = m_Data->player->Status();
+    int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
+
+    int mask = BINARY_MASK(running, nowRunning);
+    switch (mask) {
+        case BINARY_MASK(0, 1):
+        {
+            const MediaItem* item = m_Data->ItemInPlaying();
+            SendMediaItemInfo(item);
+        }
+        case BINARY_MASK(1, 1):
+        {
+            uint64_t ms = m_Data->player->OffsetMs();
+            int32_t bitRate = m_Data->player->BitRate();
+            SEND_PLAYER_PACKET(<< (char)Op::Player::ItemProgress << ms << bitRate);
+        }
+            break;
+
+        case BINARY_MASK(1, 0):
+        case BINARY_MASK(0, 0):
+            break;
+
+        default:
+            break;
     }
+
+    SEND_PLAYER_PACKET(<< (char)Op::Player::Sync << (char)nowRunning);
 }
 
 void Session::HandlePlaylist(char* _buf, int len)
@@ -263,6 +280,9 @@ void Session::PlaylistPlay(BufObj& buf)
         return;
 
     m_Data->PlayAt(iList, iItem);
+
+    const MediaItem* item = m_Data->ItemInPlaying();
+    SendMediaItemInfo(item);
 }
 
 void Session::PlaylistAppend(BufObj& buf)
@@ -408,4 +428,26 @@ void Session::SendMediaItemsByChunk(char index, const deque<MediaItem*>& list)
         SendOut();
         cout << count << endl;
     }
+}
+
+void Session::SendMediaItemInfo(const MediaItem* item)
+{
+    if (item == NULL)
+        return;
+
+    char op = Op::Player::ItemInfo;
+    int32_t sampleRate = m_Data->player->SamleRate();
+    uint64_t duration = m_Data->player->Duration();
+
+    BufObj buf(NULL);
+    buf << op;
+    *item >> buf;
+    buf << sampleRate << duration;
+
+    buf.SetBuffer(GetPayloadBuffer(Group::Player, buf.Offset()));
+    buf << op;
+    *item >> buf;
+    buf << sampleRate << duration;
+
+    SendOut();
 }

@@ -10,6 +10,7 @@ using namespace scx;
 const string STR_TITLE = "Playlist";
 
 PlaylistView::PlaylistView():
+    m_NeedRefresh(0),
     m_Focused(false),
     m_Index(-1),
     m_ItemBegin(0),
@@ -137,6 +138,16 @@ void PlaylistView::Refresh()
     d.ResetAttrColor();
 
     d.Refresh();
+
+    MutexLocker locker(&m_NeedRefreshMutex);
+    if (m_NeedRefresh > 0)
+        --m_NeedRefresh;
+}
+
+bool PlaylistView::NeedRefresh() const
+{
+    MutexLocker locker(&m_NeedRefreshMutex);
+    return m_NeedRefresh != 0;
 }
 
 void PlaylistView::MoveTo(int x, int y)
@@ -250,6 +261,7 @@ bool PlaylistView::InjectKey(int key)
             return false;
     }
     Refresh();
+
     return true;
 }
 
@@ -378,8 +390,10 @@ void PlaylistView::SlotSelect(int i, int pos)
 
     m_ItemSelected = pos;
 
-    if (d.shown)
-        Refresh();
+    if (d.shown) {
+        MutexLocker locker(&m_NeedRefreshMutex);
+        ++m_NeedRefresh;
+    }
 }
 
 void PlaylistView::SlotPlay(int i, bool ok)
@@ -395,8 +409,10 @@ void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 
     m_List.insert(m_List.end(), list.begin(), list.end());
 
-    if (d.shown)
-        Refresh();
+    if (d.shown) {
+        MutexLocker locker(&m_NeedRefreshMutex);
+        ++m_NeedRefresh;
+    }
 }
 
 void PlaylistView::SlotRemove(int i, int pos)
@@ -411,8 +427,10 @@ void PlaylistView::SlotRemove(int i, int pos)
         if (!m_List.empty() && m_ItemSelected >= (int)m_List.size()-1)
             m_ItemSelected = m_List.size() - 1;
 
-        if (d.shown)
-            Refresh();
+        if (d.shown) {
+            MutexLocker locker(&m_NeedRefreshMutex);
+            ++m_NeedRefresh;
+        }
     }
 
     m_WaitReply = false;
@@ -432,8 +450,10 @@ void PlaylistView::SlotClear(int i)
 
     m_ItemSelected = m_ItemBegin = 0;
 
-    if (d.shown)
-        Refresh();
+    if (d.shown) {
+        MutexLocker locker(&m_NeedRefreshMutex);
+        ++m_NeedRefresh;
+    }
 
     m_WaitReply = false;
 

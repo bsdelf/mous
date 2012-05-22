@@ -5,6 +5,8 @@
 
 #include <string>
 
+#include <scx/Function.hpp>
+
 class IView
 {
 public:
@@ -13,6 +15,7 @@ public:
     virtual void MoveTo(int x, int y) = 0;
     virtual void Resize(int w, int h) = 0;
     virtual void Refresh() = 0;
+    virtual bool NeedRefresh() const { return false; }
 
     virtual bool InjectKey(int key) = 0;
 
@@ -85,13 +88,28 @@ struct Window
 
     void EnableKeypad(bool enable)
     {
-        keypad(win, enable ? TRUE : FALSE);
+        if (win != NULL)
+            keypad(win, enable ? TRUE : FALSE);
     }
 
     void Refresh()
     {
         if (win != NULL)
             wrefresh(win);
+    }
+
+    void EnableEcho(bool enable)
+    {
+        if (enable)
+            echo();
+        else
+            noecho();
+    }
+
+    int Input(int x, int y, bool showCursor = true)
+    {
+        curs_set(showCursor ? 1 : 0);
+        return mvwgetch(win, y, x);
     }
 
     void Print(int x, int y, const std::string& _str, bool styled = false)
@@ -122,9 +140,11 @@ struct Window
 
     void Clear()
     {
-        werase(win);
-        if (boxed)
-            box(win, 0, 0);
+        if (win != NULL) {
+            werase(win);
+            if (boxed)
+                box(win, 0, 0);
+        }
     }
 
     void MoveTo(int _x, int _y)
@@ -166,42 +186,51 @@ struct Window
 
     void AttrOn(int attrs)
     {
-        wattron(win, attrs);
+        if (win != NULL)
+            wattron(win, attrs);
     }
 
     void AttrSet(int attrs)
     {
-        wattrset(win, attrs);
+        if (win != NULL)
+            wattrset(win, attrs);
     }
 
     void AttrOff(int attrs)
     {
-        wattroff(win, attrs);
+        if (win != NULL)
+            wattroff(win, attrs);
     }
 
     void ResetAttrColor()
     {
-        init_pair(0, ncurses::Color::White, ncurses::Color::Black);
-        wattrset(win, ncurses::Attr::Normal | COLOR_PAIR(0));
+        if (win != NULL) {
+            init_pair(0, ncurses::Color::White, ncurses::Color::Black);
+            wattrset(win, ncurses::Attr::Normal | COLOR_PAIR(0));
+        }
     }
 
     short ColorOn(int f, int b)
     {
         short colorId = f*8 + b + 1;
-        init_pair(colorId, f, b);
-        wattron(win, COLOR_PAIR(colorId));
+        if (win != NULL) {
+            init_pair(colorId, f, b);
+            wattron(win, COLOR_PAIR(colorId));
+        }
         return colorId;
     }
 
     void ColorOff(short colorId)
     {
-        wattroff(win, COLOR_PAIR(colorId));
-        wattroff(win, COLOR_PAIR(0));
+        if (win != NULL) {
+            wattroff(win, COLOR_PAIR(colorId));
+            wattroff(win, COLOR_PAIR(0));
+        }
     }
 
     int OpenStyle(const std::string& style)
     {
-        if (style.empty())
+        if (win == NULL || style.empty())
             return 0;
 
         int n = 1;
@@ -241,6 +270,21 @@ struct Window
     void CloseStyle()
     {
         ResetAttrColor();
+    }
+
+public:
+    void SafelyDo(const scx::Function<void (void)>& fn)
+    {
+        use_window(win, &WindowCallback, const_cast<void*>(static_cast<const void*>(&fn)));
+    }
+
+private:
+    static int WindowCallback(WINDOW* _w, void* p)
+    {
+        using namespace scx;
+        Function<void (void)>* fn = static_cast<Function<void (void)>*>(p);
+        (*fn)();
+        return 0;
     }
 
 private:

@@ -53,12 +53,13 @@ struct LayerInfo
     typedef set<IView*> ShownSet;
     typedef set<IView*>::iterator ShownSetIter;
 
-    void RefreshViews()
+    void RefreshViews(bool forced)
     {
         ShownSetIter iter = views.begin();
         ShownSetIter end = views.end();
         for (; iter != end; ++iter) {
-            (*iter)->Refresh();
+            if (forced || (*iter)->NeedRefresh())
+                (*iter)->Refresh();
         }
     }
 
@@ -136,7 +137,8 @@ int MainUi::Exec()
     if (StartClient()) {
         for (bool quit = false; !quit; quit = false) {
             int key = d->bgWindow.Input();
-            if (HandleTopKey(key, quit)) {
+
+            if (key != ERR && HandleTopKey(key, quit)) {
                 if (quit)
                     break;
                 else
@@ -146,6 +148,8 @@ int MainUi::Exec()
             } else  {
                 d->layerStack.top().focused.top()->InjectKey(key);
             }
+
+            d->layerStack.top().RefreshViews(false);
         }
     }
 
@@ -161,6 +165,8 @@ void MainUi::SlotTryConnect()
 
 void MainUi::SlotConnected()
 {
+    d->client.PlayerHandler().StartSync();
+
     for (int i = 0; i < PLAYLIST_COUNT; ++i)
         d->client.PlaylistHandler().Sync(i);
 }
@@ -199,6 +205,7 @@ void MainUi::BeginNcurses()
     cbreak();
     noecho();
     refresh();
+    halfdelay(1);
 }
 
 void MainUi::EndNcurses()
@@ -251,6 +258,9 @@ bool MainUi::HandleTopKey(int key, bool& quit)
         case 'X':
             quit = true;
             d->client.StopService();
+            break;
+
+        case ERR:
             break;
 
         default:
@@ -326,7 +336,7 @@ void MainUi::UpdateTopLayout()
             break;
     }
 
-    d->layerStack.top().RefreshViews();
+    d->layerStack.top().RefreshViews(true);
 }
 
 /* on same layer */
@@ -387,7 +397,11 @@ void MainUi::SwitchFocus()
         (IView*)(d->playlistView+d->iPlaylist) : 
         (IView*)&d->explorerView;
     layer.focused.top()->SetFocus(true);
-    layer.RefreshViews();
+
+    // NOTE: avoid refresh status view 
+    //layer.RefreshViews();
+    d->explorerView.Refresh();
+    d->playlistView[d->iPlaylist].Refresh();
 }
 
 void MainUi::SwitchPlaylist(int n)

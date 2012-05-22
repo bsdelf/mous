@@ -7,12 +7,13 @@ using namespace Protocol;
 {\
     int payloadSize = (BufObj(NULL) stream).Offset();   \
     char* buf = fnGetPayloadBuffer(                     \
-            Protocol::Op::Group::Player, payloadSize);  \
+            Protocol::Group::Player, payloadSize);      \
     BufObj(buf) stream;                                 \
 }\
     fnSendOut()
 
-ClientPlayerHandler::ClientPlayerHandler()
+ClientPlayerHandler::ClientPlayerHandler():
+    m_WaitSyncReply(false)
 {
 }
 
@@ -32,7 +33,28 @@ void ClientPlayerHandler::Handle(char* buf, int len)
     BufObj bufObj(buf);
     bufObj >> op;
     switch (op) {
+        case Op::Player::Sync:
+        {
+            MutexLocker locker(&m_MutexWaitSyncReply);
+
+            m_WaitSyncReply = false;
+            locker.Unlock();
+
+            m_Status.playing = bufObj.Fetch<char>() == 1 ? true : false;
+        }
+            break;
+
+        case Op::Player::ItemInfo:
+        {
+            m_Status.item << bufObj;
+            bufObj >> m_Status.sampleRate >> m_Status.duration;
+        }
+            break;
+
         case Op::Player::ItemProgress:
+        {
+            bufObj >> m_Status.pos >> m_Status.bitRate;
+        }
             break;
 
         default:
@@ -40,16 +62,21 @@ void ClientPlayerHandler::Handle(char* buf, int len)
     }
 }
 
-void ClientPlayerHandler::Play()
+void ClientPlayerHandler::StartSync()
 {
+    m_Status.playing = false;
+    m_SyncSchedule.Start();
+    m_SyncSchedule.Schedule(&ClientPlayerHandler::OnSyncTask, this, 200);
+}
+
+void ClientPlayerHandler::StopSync()
+{
+    m_SyncSchedule.Stop(true);
 }
 
 void ClientPlayerHandler::Pause()
 {
-}
-
-void ClientPlayerHandler::Stop()
-{
+    SEND_PACKET(<< (char)Op::Player::Pause);
 }
 
 void ClientPlayerHandler::Next()
@@ -68,4 +95,17 @@ void ClientPlayerHandler::VolumeDown()
 {
 }
 
-#undef SEND_PACKET
+void ClientPlayerHandler::OnSyncTask()
+{
+    MutexLocker locker(&m_MutexWaitSyncReply);
+
+    if (m_WaitSyncReply)
+        return;
+    m_WaitSyncReply = true;
+
+    locker.Unlock();
+
+    m_SigStatus(m_Status);
+
+    SEND_PACKET(<< (char)Op::Player::Sync << (char)(m_Status.playing ? 1 : 0));
+}

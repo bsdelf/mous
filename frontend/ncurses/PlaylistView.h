@@ -21,6 +21,8 @@ public:
     ~PlaylistView();
 
     void Refresh();
+    bool NeedRefresh() const;
+
     void MoveTo(int x, int y);
     void Resize(int w, int h);
 
@@ -59,6 +61,10 @@ public:
 
 private:
     Window d;
+
+    int m_NeedRefresh;
+    mutable Mutex m_NeedRefreshMutex;
+
     bool m_Focused;
     int m_Index;
     int m_ItemBegin;

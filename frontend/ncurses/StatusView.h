@@ -1,8 +1,11 @@
 #ifndef STATUSVIEW_H
 #define STATUSVIEW_H
 
-#include <ncurses.h>
-#include <panel.h>
+#include <util/MediaItem.h>
+using namespace mous;
+
+#include <scx/Mutex.hpp>
+using namespace scx;
 
 #include "IView.h"
 #include "ClientPlayerHandler.h"
@@ -14,6 +17,8 @@ public:
     ~StatusView();
 
     void Refresh();
+    bool NeedRefresh() const;
+
     void MoveTo(int x, int y);
     void Resize(int w, int h);
 
@@ -28,13 +33,17 @@ public:
     void SetPlayerHandler(ClientPlayerHandler* handler);
 
 private:
+    void SlotStatus(const ClientPlayerHandler::PlayerStatus& status);
+    void DoRefresh();
+
+private:
     Window d;
-    int m_CurrentMs;
-    int m_Duration;
-    int m_BitRate;
-    int m_SamepleRate;
-    
+    int m_NeedRefresh;
+    mutable Mutex m_NeedRefreshMutex;
+
     ClientPlayerHandler* m_PlayerHandler;
+    mutable Mutex m_PlayerStatusMutex;
+    ClientPlayerHandler::PlayerStatus m_PlayerStatus;
 };
 
 #endif
