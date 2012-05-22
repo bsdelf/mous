@@ -437,7 +437,7 @@ void Session::SendMediaItemInfo(const MediaItem* item)
 
     char op = Op::Player::ItemInfo;
     int32_t sampleRate = m_Data->player->SamleRate();
-    uint64_t duration = m_Data->player->Duration();
+    uint64_t duration = m_Data->player->RangeDuration();
 
     BufObj buf(NULL);
     buf << op;

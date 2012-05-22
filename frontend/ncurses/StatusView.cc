@@ -5,6 +5,18 @@ using namespace std;
 
 #include <scx/CharsetHelper.hpp>
 #include <scx/Conv.hpp>
+#include <scx/FileInfo.hpp>
+
+inline static string FormatTime(int ms)
+{
+    if (ms <= 0)
+        return "00:00";
+
+    char buf[6];
+    int sec = ms / 1000;
+    snprintf(buf, sizeof(buf), "%.2d:%.2d", (int)(sec/60), (int)(sec%60));
+    return string(buf, 5);
+}
 
 StatusView::StatusView():
     m_NeedRefresh(0),
@@ -34,10 +46,11 @@ void StatusView::Refresh()
     const int wCurrentItem = w - (wVolLabel + wVolSlider + 1) - 1;
 
     MutexLocker playerStatuslocker(&m_PlayerStatusMutex);
+    const MediaItem& item = m_PlayerStatus.item;
     const MediaTag& tag = m_PlayerStatus.item.tag;
 
-    // { title - artist~~~~~~-|=======|+}
-    string currentItem = tag.title + " - " + tag.artist;
+    // { title - artist (file)~~~~~~-|=======|+}
+    string currentItem = tag.title + " - " + tag.artist + " (" + FileInfo(item.url).BaseName() + ")";
     currentItem = MBStrWidth(currentItem) <= wCurrentItem ?
         currentItem : MBWidthStr(currentItem, wCurrentItem-3) + "...";
     d.AttrSet(Attr::Bold);
@@ -59,6 +72,67 @@ void StatusView::Refresh()
     d.ColorOn(Color::Yellow, Color::Black);
     d.Print(xoff, yoff,  "|+");
     xoff += 2;
+
+    // { 00:00/00:00 bitRate bps sampleRate Hz }
+    xoff = x;
+    yoff += 1;
+    {
+        string sp = "/";
+        string ms = FormatTime(m_PlayerStatus.pos);
+        string dur = FormatTime(m_PlayerStatus.duration);
+        string bps = NumToStr(m_PlayerStatus.bitRate);
+        string rate = NumToStr(m_PlayerStatus.sampleRate);
+
+        d.AttrSet(Attr::Bold);
+        d.ColorOn(Color::Magenta, Color::Black);
+        d.Print(xoff, yoff, ms);
+        xoff += ms.size();
+
+        d.AttrSet(Attr::Normal);
+        d.ColorOn(Color::White, Color::Black);
+        d.Print(xoff, yoff, sp);
+        xoff += sp.size();
+
+        d.AttrSet(Attr::Bold);
+        d.ColorOn(Color::Magenta, Color::Black);
+        d.Print(xoff, yoff, dur);
+        xoff += dur.size();
+        xoff += 4;
+
+        d.AttrSet(Attr::Bold);
+        d.ColorOn(Color::Magenta, Color::Black);
+        d.Print(xoff, yoff, bps);
+        xoff += bps.size();
+        xoff += 1;
+
+        d.AttrSet(Attr::Normal);
+        d.ColorOn(Color::White, Color::Black);
+        d.Print(xoff, yoff, "bps");
+        xoff += 3 + 4;
+
+        d.AttrSet(Attr::Bold);
+        d.ColorOn(Color::Magenta, Color::Black);
+        d.Print(xoff, yoff, rate);
+        xoff += rate.size();
+        xoff += 1;
+
+        d.AttrSet(Attr::Normal);
+        d.ColorOn(Color::White, Color::Black);
+        d.Print(xoff, yoff, "Hz");
+        xoff += 2 + 4;
+    }
+
+    // { =====~~~~~~~~ }
+    xoff = x;
+    yoff += 1;
+    if (m_PlayerStatus.duration != 0) {
+        int wSlider = (w - 1) * m_PlayerStatus.pos / m_PlayerStatus.duration;
+        string slider(wSlider, '-');
+
+        d.AttrSet(Attr::Bold);
+        d.ColorOn(Color::Yellow, Color::Black);
+        d.Print(xoff, yoff, slider+">");
+    }
 
     d.ResetAttrColor();
 
