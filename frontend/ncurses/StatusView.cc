@@ -1,5 +1,7 @@
 #include "StatusView.h"
 
+#include <stdio.h>
+
 #include <string>
 using namespace std;
 
@@ -36,7 +38,7 @@ void StatusView::Refresh()
     d.Clear();
 
     const int w = d.w - 3;
-    const int h = d.h - 2;
+    //const int h = d.h - 2;
     const int x = 2, y = 1;
 
     int xoff = x, yoff = y;
