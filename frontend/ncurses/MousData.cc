@@ -91,12 +91,16 @@ void MousData::PlayAt(int iList, int iItem)
 
 void MousData::ClosePlayer()
 {
+    MutexLocker locker(&playerMutex);
+
     if (player->Status() != PlayerStatus::Closed)
         player->Close();
 }
 
 void MousData::PausePlayer()
 {
+    MutexLocker locker(&playerMutex);
+
     switch (player->Status()) {
         case PlayerStatus::Playing:
             player->Pause();
@@ -129,6 +133,8 @@ void MousData::SlotFinished()
 void MousData::PlayItem(const MediaItem* item)
 {
     ClosePlayer();
+
+    MutexLocker locker(&playerMutex);
 
     player->Open(item->url);
     if (item->hasRange)

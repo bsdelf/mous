@@ -160,9 +160,12 @@ void Session::PlayerSync(BufObj& buf)
 {
     int running = buf.Fetch<char>();
 
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker dataLocker(&m_Data->mutex);
 
+    MutexLocker playerLocker(&m_Data->playerMutex);
     EmPlayerStatus status = m_Data->player->Status();
+    playerLocker.Unlock();
+
     int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
 
     int mask = BINARY_MASK(running, nowRunning);
@@ -174,8 +177,11 @@ void Session::PlayerSync(BufObj& buf)
         }
         case BINARY_MASK(1, 1):
         {
+            playerLocker.Relock();
             uint64_t ms = m_Data->player->OffsetMs();
             int32_t bitRate = m_Data->player->BitRate();
+            playerLocker.Unlock();
+
             SEND_PLAYER_PACKET(<< (char)Op::Player::ItemProgress << ms << bitRate);
         }
             break;
@@ -187,6 +193,8 @@ void Session::PlayerSync(BufObj& buf)
         default:
             break;
     }
+
+    dataLocker.Unlock();
 
     SEND_PLAYER_PACKET(<< (char)Op::Player::Sync << (char)nowRunning);
 }
@@ -329,6 +337,8 @@ void Session::PlaylistRemove(BufObj& buf)
         }
     }
 
+    locker.Unlock();
+
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Remove << iList << iItem);
 }
 
@@ -345,6 +355,8 @@ void Session::PlaylistClear(BufObj& buf)
         }
         m_Data->playlists[iList].Clear();
     }
+
+    locker.Unlock();
 
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Clear << iList);
 }
@@ -436,8 +448,11 @@ void Session::SendMediaItemInfo(const MediaItem* item)
         return;
 
     char op = Op::Player::ItemInfo;
+
+    MutexLocker locker(&m_Data->playerMutex);
     int32_t sampleRate = m_Data->player->SamleRate();
     uint64_t duration = m_Data->player->RangeDuration();
+    locker.Unlock();
 
     BufObj buf(NULL);
     buf << op;

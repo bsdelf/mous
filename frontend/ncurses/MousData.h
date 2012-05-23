@@ -22,6 +22,7 @@ struct MousData
     IPluginManager* mgr;
     IMediaLoader* loader;
     IPlayer* player;
+    Mutex playerMutex;
 
     typedef Playlist<MediaItem*> playlist_t;
     vector<playlist_t> playlists;
