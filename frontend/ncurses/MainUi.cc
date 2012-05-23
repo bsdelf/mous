@@ -88,9 +88,15 @@ struct PrivateMainUi
     int iPlaylist;
     stack<LayerInfo> layerStack;
 
+    Mutex needSwitchPlaylistMutex;
+    int needSwitchPlaylist;
+    int switchPlaylistTo;
+
     PrivateMainUi(MainUi* p):
         parent(p),
-        iPlaylist(1)
+        iPlaylist(1),
+        needSwitchPlaylist(0),
+        switchPlaylistTo(-1)
     {
         client.SigTryConnect().Connect(&MainUi::SlotTryConnect, parent);
         client.SigConnected().Connect(&MainUi::SlotConnected, parent);
@@ -149,7 +155,7 @@ int MainUi::Exec()
                 d->layerStack.top().focused.top()->InjectKey(key);
             }
 
-            d->layerStack.top().RefreshViews(false);
+            SyncRefresh();
         }
     }
 
@@ -175,7 +181,10 @@ void MainUi::SlotSwitchPlaylist(bool toNext)
 {
     int n = d->iPlaylist + (toNext ? 1 : -1);
     n = std::min(std::max(n, 0), PLAYLIST_COUNT-1);
-    SwitchPlaylist(n);
+
+    MutexLocker locker(&d->needSwitchPlaylistMutex);
+    d->switchPlaylistTo = n;
+    ++d->needSwitchPlaylist;
 }
 
 void MainUi::SlotTmpOpen(const string& path)
@@ -267,6 +276,23 @@ bool MainUi::HandleTopKey(int key, bool& quit)
             return false;
     }
     return true;
+}
+
+void MainUi::SyncRefresh()
+{
+    // switch playlist as needed
+    {
+        MutexLocker locker(&d->needSwitchPlaylistMutex);
+        if (d->needSwitchPlaylist > 0) {
+            SwitchPlaylist(d->switchPlaylistTo);
+            --d->needSwitchPlaylist;
+        }
+    }
+
+    // refresh top layer as needed
+    {
+        d->layerStack.top().RefreshViews(false);
+    }
 }
 
 void MainUi::OnResize()

@@ -36,6 +36,7 @@ private:
     void EndNcurses();
 
     bool HandleTopKey(int, bool&);
+    void SyncRefresh();
 
     void OnResize();
     void UpdateTopLayout();
