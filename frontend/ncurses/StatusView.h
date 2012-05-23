@@ -34,7 +34,6 @@ public:
 
 private:
     void SlotStatus(const ClientPlayerHandler::PlayerStatus& status);
-    void DoRefresh();
 
 private:
     Window d;

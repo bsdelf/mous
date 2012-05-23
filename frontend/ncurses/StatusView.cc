@@ -79,11 +79,14 @@ void StatusView::Refresh()
     xoff = x;
     yoff += 1;
     {
+        const int tab = 4;
         string sp = "/";
         string ms = FormatTime(m_PlayerStatus.pos);
         string dur = FormatTime(m_PlayerStatus.duration);
         string bps = NumToStr(m_PlayerStatus.bitRate);
+        string strBps = " Kbps";
         string rate = NumToStr(m_PlayerStatus.sampleRate);
+        string strRate = " Hz";
 
         d.AttrSet(Attr::Bold);
         d.ColorOn(Color::Magenta, Color::Black);
@@ -99,29 +102,27 @@ void StatusView::Refresh()
         d.ColorOn(Color::Magenta, Color::Black);
         d.Print(xoff, yoff, dur);
         xoff += dur.size();
-        xoff += 4;
+        xoff += tab;
 
         d.AttrSet(Attr::Bold);
         d.ColorOn(Color::Magenta, Color::Black);
         d.Print(xoff, yoff, bps);
         xoff += bps.size();
-        xoff += 1;
 
         d.AttrSet(Attr::Normal);
         d.ColorOn(Color::White, Color::Black);
-        d.Print(xoff, yoff, "bps");
-        xoff += 3 + 4;
+        d.Print(xoff, yoff, strBps);
+        xoff += strBps.size() + tab;
 
         d.AttrSet(Attr::Bold);
         d.ColorOn(Color::Magenta, Color::Black);
         d.Print(xoff, yoff, rate);
         xoff += rate.size();
-        xoff += 1;
 
         d.AttrSet(Attr::Normal);
         d.ColorOn(Color::White, Color::Black);
-        d.Print(xoff, yoff, "Hz");
-        xoff += 2 + 4;
+        d.Print(xoff, yoff, strRate);
+        xoff += strRate.size() + tab;
     }
 
     // { =====~~~~~~~~ }
@@ -231,23 +232,4 @@ void StatusView::SlotStatus(const ClientPlayerHandler::PlayerStatus& status)
         MutexLocker locker(&m_NeedRefreshMutex);
         ++m_NeedRefresh;
     }
-}
-
-void StatusView::DoRefresh()
-{
-    using namespace ncurses;
-
-    if (!d.shown || d.win == NULL)
-        return;
-
-    d.Clear();
-
-    d.ResetAttrColor();
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::Green, Color::Black);
-    d.Print(1, 2, NumToStr(m_PlayerStatus.pos/1000));
-
-    d.ResetAttrColor();
-
-    d.Refresh();
 }
