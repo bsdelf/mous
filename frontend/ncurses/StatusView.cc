@@ -14,10 +14,20 @@ inline static string FormatTime(int ms)
     if (ms <= 0)
         return "00:00";
 
-    char buf[6];
+    char buf[5+1];
     int sec = ms / 1000;
     snprintf(buf, sizeof(buf), "%.2d:%.2d", (int)(sec/60), (int)(sec%60));
     return string(buf, 5);
+}
+
+inline static string FormatBitRate(int rate)
+{
+    if (rate <= 0)
+        return string(4, ' ');
+
+    char buf[4+1];
+    snprintf(buf, sizeof(buf), "%4.d", rate);
+    return string(buf, 4);
 }
 
 StatusView::StatusView():
@@ -83,7 +93,7 @@ void StatusView::Refresh()
         string sp = "/";
         string ms = FormatTime(m_PlayerStatus.pos);
         string dur = FormatTime(m_PlayerStatus.duration);
-        string bps = NumToStr(m_PlayerStatus.bitRate);
+        string bps = FormatBitRate(m_PlayerStatus.bitRate);
         string strBps = " Kbps";
         string rate = NumToStr(m_PlayerStatus.sampleRate);
         string strRate = " Hz";
