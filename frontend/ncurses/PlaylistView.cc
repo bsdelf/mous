@@ -52,8 +52,9 @@ void PlaylistView::Refresh()
     const int hText = h - 1;
 
     const int wTime = 5 + 1;
-    const int wField = (wText - wTime) / 3;
-    const int wLastField = (wText - wTime) - wField * 2;
+    const int wField1 = (wText - wTime) * (2/5.f);
+    const int wField2 = (wText - wTime) * (1/5.f);
+    const int wField3 = (wText - wTime) - (wField1 + wField2);
 
     if (!m_List.empty()) {
             int lcount = std::min(hText, (int)m_List.size()-m_ItemBegin);
@@ -82,20 +83,20 @@ void PlaylistView::Refresh()
             d.AttrSet(fieldAttr);
             d.ColorOn(fieldColorF, fieldColorB);
 
-            const string& field1 = MBStrWidth(item.tag.title) <= wField-1 ?
-                item.tag.title : MBWidthStr(item.tag.title, wField-1-3) + "...";
+            const string& field1 = MBStrWidth(item.tag.title) <= wField1-1 ?
+                item.tag.title : MBWidthStr(item.tag.title, wField1-1-3) + "...";
             d.Print(xoff, yoff+l, field1);
-            xoff += wField;
+            xoff += wField1;
 
-            const string& field2 = MBStrWidth(item.tag.artist) <= wField-1 ?
-                item.tag.artist : MBWidthStr(item.tag.artist, wField-1-3) + "...";
+            const string& field2 = MBStrWidth(item.tag.artist) <= wField2-1 ?
+                item.tag.artist : MBWidthStr(item.tag.artist, wField2-1-3) + "...";
             d.Print(xoff, yoff+l, field2);
-            xoff += wField;
+            xoff += wField2;
 
-            const string& field3 = MBStrWidth(item.tag.album) <= wLastField-1 ?
-                item.tag.album : MBWidthStr(item.tag.album, wLastField-1-3) + "...";
+            const string& field3 = MBStrWidth(item.tag.album) <= wField3-1 ?
+                item.tag.album : MBWidthStr(item.tag.album, wField3-1-3) + "...";
             d.Print(xoff, yoff+l, field3);
-            xoff += wLastField;
+            xoff += wField3;
 
             // I suppose duration < 59min
             string duration;
