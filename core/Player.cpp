@@ -1,14 +1,19 @@
 #include "Player.h"
-#include <cassert>
+
+#include <unistd.h>
+#include <assert.h>
+
 #include <iostream>
 #include <algorithm>
+using namespace std;
+
 #include <scx/Conv.hpp>
 #include <scx/FileHelper.hpp>
+using namespace scx;
+
 #include <plugin/IDecoder.h>
 #include <plugin/IRenderer.h>
 #include <core/IPluginAgent.h>
-using namespace std;
-using namespace scx;
 using namespace mous;
 
 IPlayer* IPlayer::Create()
@@ -558,7 +563,8 @@ void Player::ThRenderer()
             assert(buf != NULL);
             assert(buf->data != NULL);
 
-            m_Renderer->Write(buf->data, buf->used);
+            if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok)
+                usleep(10*1000);
             m_UnitBuffers.RecycleData(buf);
 
             m_RendererIndex += buf->unitCount;
@@ -570,16 +576,17 @@ void Player::ThRenderer()
 
         m_SemRendererEnd.Post();
 
-        Function<void (void)> fn(&Player::ThPostSigFinished, this);
-        m_ThPostSigFinished.Run(fn);
-        m_ThPostSigFinished.Detach();
+        if (m_RendererIndex >= m_UnitEnd) {
+            m_Status = PlayerStatus::Stopped;
+            Function<void (void)> fn(&Player::ThPostSigFinished, this);
+            m_ThPostSigFinished.Join();
+            m_ThPostSigFinished.Run(fn);
+            //m_ThPostSigFinished.Detach();
+        }
     }
 }
 
 void Player::ThPostSigFinished()
 {
-    if (m_RendererIndex >= m_UnitEnd) {
-        m_Status = PlayerStatus::Stopped;
-        m_SigFinished();
-    }
+    m_SigFinished();
 }
