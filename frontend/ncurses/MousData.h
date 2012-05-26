@@ -38,16 +38,16 @@ struct MousData
     void Cleanup();
     void ClearPlaylists();
 
-    void PlayAt(int iList, int iItem);
-    void ClosePlayer();
+    bool PlayAt(int iList, int iItem);
     void PausePlayer();
 
     const MediaItem* ItemInPlaying() const;
 
 private:
-    void SlotFinished();
+    void ClosePlayer();
+    bool PlayItem(const MediaItem* item);
 
-    void PlayItem(const MediaItem* item);
+    void SlotFinished();
 };
 
 #endif

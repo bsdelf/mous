@@ -287,10 +287,13 @@ void Session::PlaylistPlay(BufObj& buf)
     if (iItem < 0 || iItem >= m_Data->playlists[iList].Count())
         return;
 
-    m_Data->PlayAt(iList, iItem);
+    bool ok = m_Data->PlayAt(iList, iItem);
+    if (ok) {
+        const MediaItem* item = m_Data->ItemInPlaying();
+        SendMediaItemInfo(item);
+    } 
 
-    const MediaItem* item = m_Data->ItemInPlaying();
-    SendMediaItemInfo(item);
+    SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Play << (char)iList << (char)(ok ? 1 : 0));
 }
 
 void Session::PlaylistAppend(BufObj& buf)

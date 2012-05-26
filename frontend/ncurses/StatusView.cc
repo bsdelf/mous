@@ -125,16 +125,17 @@ void StatusView::Refresh()
         xoff += strRate.size() + tab;
     }
 
-    // { =====~~~~~~~~ }
+    // { ---------->~~~~~~~~~~~ }
     xoff = x;
     yoff += 1;
     if (m_PlayerStatus.duration != 0) {
-        int wSlider = (w - 1) * m_PlayerStatus.pos / m_PlayerStatus.duration;
-        string slider(wSlider, '-');
+        float percent = std::min((float)m_PlayerStatus.pos / m_PlayerStatus.duration, 1.0000f);
+        int wSlider = (w - 1 - 1) * percent;
+        string slider = string(wSlider, '-') + ">";
 
         d.AttrSet(Attr::Bold);
         d.ColorOn(Color::Yellow, Color::Black);
-        d.Print(xoff, yoff, slider+">");
+        d.Print(xoff, yoff, slider);
     }
 
     d.ResetAttrColor();

@@ -77,7 +77,7 @@ void MousData::ClearPlaylists()
     }
 }
 
-void MousData::PlayAt(int iList, int iItem)
+bool MousData::PlayAt(int iList, int iItem)
 {
     usedPlaylist = iList;
     MousData::playlist_t& list = playlists[iList];
@@ -86,15 +86,7 @@ void MousData::PlayAt(int iList, int iItem)
     list.SeqJumpTo(iItem);
     list.SeqCurrent(item);
 
-    PlayItem(item);
-}
-
-void MousData::ClosePlayer()
-{
-    MutexLocker locker(&playerMutex);
-
-    if (player->Status() != PlayerStatus::Closed)
-        player->Close();
+    return PlayItem(item);
 }
 
 void MousData::PausePlayer()
@@ -115,6 +107,37 @@ void MousData::PausePlayer()
     }
 }
 
+const MediaItem* MousData::ItemInPlaying() const
+{
+    MediaItem* item = NULL;
+    const playlist_t& list = playlists[usedPlaylist];
+    list.SeqCurrent(item, 0);
+    return item;
+}
+
+bool MousData::PlayItem(const MediaItem* item)
+{
+    MutexLocker locker(&playerMutex);
+
+    ClosePlayer();
+
+    if (player->Open(item->url) != mous::ErrorCode::Ok)
+        return false;
+
+    if (item->hasRange)
+        player->Play(item->msBeg, item->msEnd);
+    else
+        player->Play();
+
+    return true;
+}
+
+void MousData::ClosePlayer()
+{
+    if (player->Status() != PlayerStatus::Closed)
+        player->Close();
+}
+
 void MousData::SlotFinished()
 {
     MutexLocker locker(&mutex);
@@ -128,25 +151,4 @@ void MousData::SlotFinished()
     if (item != NULL) {
         PlayItem(item);
     }
-}
-
-void MousData::PlayItem(const MediaItem* item)
-{
-    ClosePlayer();
-
-    MutexLocker locker(&playerMutex);
-
-    player->Open(item->url);
-    if (item->hasRange)
-        player->Play(item->msBeg, item->msEnd);
-    else
-        player->Play();
-}
-
-const MediaItem* MousData::ItemInPlaying() const
-{
-    MediaItem* item = NULL;
-    const playlist_t& list = playlists[usedPlaylist];
-    list.SeqCurrent(item, 0);
-    return item;
 }

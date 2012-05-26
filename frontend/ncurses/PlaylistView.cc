@@ -357,8 +357,11 @@ void PlaylistView::ReqPlay(int pos)
 {
     if (m_WaitReply)
         return;
-    if (m_PlaylistHandler != NULL)
+
+    if (m_PlaylistHandler != NULL) {
+        m_WaitReply = true;
         m_PlaylistHandler->Play(m_Index, pos);
+    }
 }
 
 void PlaylistView::ReqRemove(int pos)
@@ -400,6 +403,8 @@ void PlaylistView::SlotPlay(int i, bool ok)
 {
     if (i != m_Index)
         return;
+
+    m_WaitReply = false;
 }
 
 void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
