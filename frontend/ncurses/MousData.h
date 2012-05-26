@@ -5,6 +5,7 @@
 using namespace std;
 
 #include <scx/Mutex.hpp>
+#include <scx/Signal.hpp>
 using namespace scx;
 
 #include <util/MediaItem.h>
@@ -43,11 +44,18 @@ struct MousData
 
     const MediaItem* ItemInPlaying() const;
 
+    const Signal<void (const MediaItem*)>& SigPlayNextItem() const
+    {
+        return m_SigPlayNextItem;
+    }
+
 private:
     void ClosePlayer();
     bool PlayItem(const MediaItem* item);
 
     void SlotFinished();
+
+    Signal<void (const MediaItem*)> m_SigPlayNextItem;
 };
 
 #endif

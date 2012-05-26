@@ -120,9 +120,9 @@ void Server::StopService()
 
 void Server::OpenSession(TcpSocket& clientSocket)
 {
-    Session* session = new Session();
+    Session* session = new Session(m_Data);
     m_SessionSet.insert(session);
-    session->Run(clientSocket, m_Data, m_PipeFd[1]);
+    session->Run(clientSocket, m_PipeFd[1]);
 
     cout << "OpenSession()" << endl;
 }

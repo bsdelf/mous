@@ -24,10 +24,10 @@ public:
     typedef unsigned long ptr_t;
 
 public:
-    Session();
+    explicit Session(MousData* data);
     ~Session();
 
-    bool Run(const TcpSocket& socket, MousData* data, int notifyFd);
+    bool Run(const TcpSocket& socket, int notifyFd);
     void Stop();
 
 private:
@@ -46,6 +46,8 @@ private:
     void PlaylistRemove(BufObj&);
     void PlaylistClear(BufObj&);
     void PlaylistSync(BufObj&);
+
+    void SlotPlayNextItem(const mous::MediaItem*);
 
     char* GetPayloadBuffer(char, int);
     void SendOut();

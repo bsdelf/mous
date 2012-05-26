@@ -33,22 +33,27 @@ const size_t MEDIAITEMS_IN_CHUNK = 20;
 #define BINARY_MASK(a, b) \
     ( ((a)<<1) | (b) )
 
-Session::Session():
-    m_Data(NULL),
+Session::Session(MousData* data):
+    m_Data(data),
     m_GotReqStopService(false)
 {
+    MutexLocker locker(&m_Data->mutex);
+    m_Data->SigPlayNextItem().Connect(&Session::SlotPlayNextItem, this);
 }
 
 Session::~Session()
 {
     m_Socket.Close();
+
+    MutexLocker locker(&m_Data->mutex);
+    m_Data->SigPlayNextItem().DisconnectReceiver(this);
+    m_Data = NULL;
 }
 
-bool Session::Run(const TcpSocket& socket, MousData* data, int notifyFd)
+bool Session::Run(const TcpSocket& socket, int notifyFd)
 {
     m_GotReqStopService = false;
     m_Socket = socket;
-    m_Data = data;
     m_NotifyFd = notifyFd;
     Function<void ()> fn(&Session::ThRecvLoop, this);
     return m_RecvThread.Run(fn) == 0;
@@ -386,6 +391,11 @@ void Session::PlaylistSync(BufObj& buf)
         SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Select
                 << (char)i << (int32_t)m_Data->selectedItem[i]);
     }
+}
+
+void Session::SlotPlayNextItem(const mous::MediaItem* item)
+{
+    SendMediaItemInfo(item);
 }
 
 char* Session::GetPayloadBuffer(char group, int payloadSize)

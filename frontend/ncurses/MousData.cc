@@ -150,5 +150,6 @@ void MousData::SlotFinished()
     }
     if (item != NULL) {
         PlayItem(item);
+        m_SigPlayNextItem(item);
     }
 }
