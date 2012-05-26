@@ -9,7 +9,7 @@ using namespace std;
 #include <scx/Thread.hpp>
 using namespace scx;
 
-struct MousData;
+struct ServerContext;
 class Session;
 
 class Server
@@ -26,7 +26,7 @@ private:
     void CloseSession(Session*);
 
 private:
-    MousData* m_Data;
+    ServerContext* m_Data;
     TcpSocket m_Socket;
     int m_PipeFd[2];
     set<Session*> m_SessionSet;

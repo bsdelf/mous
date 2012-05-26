@@ -1,5 +1,5 @@
-#ifndef MOUSDATA_H
-#define MOUSDATA_H
+#ifndef SERVERCONTEXT_H
+#define SERVERCONTEXT_H
 
 #include <vector>
 using namespace std;
@@ -16,7 +16,7 @@ using namespace scx;
 #include <core/ITagParserFactory.h>
 using namespace mous;
 
-struct MousData
+struct ServerContext
 {
     Mutex mutex;
 
@@ -32,8 +32,8 @@ struct MousData
     int selectedPlaylist;
     vector<int> selectedItem;
 
-    MousData();
-    ~MousData();
+    ServerContext();
+    ~ServerContext();
 
     bool Init();
     void Cleanup();

@@ -8,7 +8,7 @@ using namespace std;
 using namespace scx;
 
 #include "Config.h"
-#include "MousData.h"
+#include "ServerContext.h"
 #include "Protocol.h"
 using namespace Protocol;
 
@@ -33,21 +33,21 @@ const size_t MEDIAITEMS_IN_CHUNK = 20;
 #define BINARY_MASK(a, b) \
     ( ((a)<<1) | (b) )
 
-Session::Session(MousData* data):
-    m_Data(data),
+Session::Session(ServerContext* data):
+    m_Context(data),
     m_GotReqStopService(false)
 {
-    MutexLocker locker(&m_Data->mutex);
-    m_Data->SigPlayNextItem().Connect(&Session::SlotPlayNextItem, this);
+    MutexLocker locker(&m_Context->mutex);
+    m_Context->SigPlayNextItem().Connect(&Session::SlotPlayNextItem, this);
 }
 
 Session::~Session()
 {
     m_Socket.Close();
 
-    MutexLocker locker(&m_Data->mutex);
-    m_Data->SigPlayNextItem().DisconnectReceiver(this);
-    m_Data = NULL;
+    MutexLocker locker(&m_Context->mutex);
+    m_Context->SigPlayNextItem().DisconnectReceiver(this);
+    m_Context = NULL;
 }
 
 bool Session::Run(const TcpSocket& socket, int notifyFd)
@@ -156,19 +156,19 @@ void Session::HandlePlayer(char* _buf, int len)
 
 void Session::PlayerPause(BufObj&)
 {
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker locker(&m_Context->mutex);
     
-    m_Data->PausePlayer();
+    m_Context->PausePlayer();
 }
 
 void Session::PlayerSync(BufObj& buf)
 {
     int running = buf.Fetch<char>();
 
-    MutexLocker dataLocker(&m_Data->mutex);
+    MutexLocker dataLocker(&m_Context->mutex);
 
-    MutexLocker playerLocker(&m_Data->playerMutex);
-    EmPlayerStatus status = m_Data->player->Status();
+    MutexLocker playerLocker(&m_Context->playerMutex);
+    EmPlayerStatus status = m_Context->player->Status();
     playerLocker.Unlock();
 
     int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
@@ -177,14 +177,14 @@ void Session::PlayerSync(BufObj& buf)
     switch (mask) {
         case BINARY_MASK(0, 1):
         {
-            const MediaItem* item = m_Data->ItemInPlaying();
+            const MediaItem* item = m_Context->ItemInPlaying();
             SendMediaItemInfo(item);
         }
         case BINARY_MASK(1, 1):
         {
             playerLocker.Relock();
-            uint64_t ms = m_Data->player->OffsetMs();
-            int32_t bitRate = m_Data->player->BitRate();
+            uint64_t ms = m_Context->player->OffsetMs();
+            int32_t bitRate = m_Context->player->BitRate();
             playerLocker.Unlock();
 
             SEND_PLAYER_PACKET(<< (char)Op::Player::ItemProgress << ms << bitRate);
@@ -253,12 +253,12 @@ void Session::PlaylistSwitch(BufObj& buf)
     char iList;
     buf >> iList;
 
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker locker(&m_Context->mutex);
 
-    if (iList < 0 || (size_t)iList >= m_Data->playlists.size())
+    if (iList < 0 || (size_t)iList >= m_Context->playlists.size())
         return;
 
-    m_Data->selectedPlaylist = iList;
+    m_Context->selectedPlaylist = iList;
 }
 
 void Session::PlaylistSelect(BufObj& buf)
@@ -268,14 +268,14 @@ void Session::PlaylistSelect(BufObj& buf)
 
     buf >> iList >> iItem;
 
-    if (iList < 0 || (size_t)iList >= m_Data->selectedItem.size())
+    if (iList < 0 || (size_t)iList >= m_Context->selectedItem.size())
         return;
 
-    if ((iItem < 0 || iItem >= m_Data->playlists[iList].Count())
-            && !m_Data->playlists[iList].Empty())
+    if ((iItem < 0 || iItem >= m_Context->playlists[iList].Count())
+            && !m_Context->playlists[iList].Empty())
         return;
 
-    m_Data->selectedItem[iList] = iItem;
+    m_Context->selectedItem[iList] = iItem;
 }
 
 void Session::PlaylistPlay(BufObj& buf)
@@ -284,17 +284,17 @@ void Session::PlaylistPlay(BufObj& buf)
     int32_t iItem;
     buf >> iList >> iItem;
 
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker locker(&m_Context->mutex);
 
-    if (iList < 0 || (size_t)iList >= m_Data->playlists.size())
+    if (iList < 0 || (size_t)iList >= m_Context->playlists.size())
         return;
 
-    if (iItem < 0 || iItem >= m_Data->playlists[iList].Count())
+    if (iItem < 0 || iItem >= m_Context->playlists[iList].Count())
         return;
 
-    bool ok = m_Data->PlayAt(iList, iItem);
+    bool ok = m_Context->PlayAt(iList, iItem);
     if (ok) {
-        const MediaItem* item = m_Data->ItemInPlaying();
+        const MediaItem* item = m_Context->ItemInPlaying();
         SendMediaItemInfo(item);
     } 
 
@@ -307,13 +307,13 @@ void Session::PlaylistAppend(BufObj& buf)
     string path;
     buf >> iList >> path;
 
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker locker(&m_Context->mutex);
 
-    if (iList < 0 || (size_t)iList >= m_Data->playlists.size())
+    if (iList < 0 || (size_t)iList >= m_Context->playlists.size())
         return;
 
     deque<MediaItem*> list;
-    if (m_Data->loader->LoadMedia(path, list) != ErrorCode::Ok)
+    if (m_Context->loader->LoadMedia(path, list) != ErrorCode::Ok)
         return;
     if (list.empty())
         return;
@@ -325,7 +325,7 @@ void Session::PlaylistAppend(BufObj& buf)
         TryConvertToUtf8(tag.album);
     }
 
-    m_Data->playlists[iList].Append(list);
+    m_Context->playlists[iList].Append(list);
 
     SendMediaItemsByChunk(iList, list);
 }
@@ -336,12 +336,12 @@ void Session::PlaylistRemove(BufObj& buf)
     int32_t iItem;
     buf >> iList >> iItem;
 
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker locker(&m_Context->mutex);
 
-    if (iList >= 0 && (size_t)iList < m_Data->playlists.size()) {
-        if (iItem >= 0 && iItem < m_Data->playlists[iList].Count()) {
-            delete m_Data->playlists[iList][iItem];
-            m_Data->playlists[iList].Remove(iItem);
+    if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
+        if (iItem >= 0 && iItem < m_Context->playlists[iList].Count()) {
+            delete m_Context->playlists[iList][iItem];
+            m_Context->playlists[iList].Remove(iItem);
         }
     }
 
@@ -355,13 +355,13 @@ void Session::PlaylistClear(BufObj& buf)
     char iList;
     buf >> iList;
 
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker locker(&m_Context->mutex);
 
-    if (iList >= 0 && (size_t)iList < m_Data->playlists.size()) {
-        for (int i = 0; i < m_Data->playlists[iList].Count(); ++i) {
-            delete m_Data->playlists[iList][i];
+    if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
+        for (int i = 0; i < m_Context->playlists[iList].Count(); ++i) {
+            delete m_Context->playlists[iList][i];
         }
-        m_Data->playlists[iList].Clear();
+        m_Context->playlists[iList].Clear();
     }
 
     locker.Unlock();
@@ -374,22 +374,22 @@ void Session::PlaylistSync(BufObj& buf)
     char iList;
     buf >> iList;
 
-    MutexLocker locker(&m_Data->mutex);
+    MutexLocker locker(&m_Context->mutex);
 
     // send playlist
-    if (iList >= 0 && (size_t)iList < m_Data->playlists.size()) {
-        deque<MediaItem*>& list = m_Data->playlists[iList].Items();
+    if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
+        deque<MediaItem*>& list = m_Context->playlists[iList].Items();
         SendMediaItemsByChunk(iList, list);
     }
 
     // recover previous status
-    if ((int)iList == m_Data->selectedPlaylist) {
+    if ((int)iList == m_Context->selectedPlaylist) {
         SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Switch
-                << (char)m_Data->selectedPlaylist);
+                << (char)m_Context->selectedPlaylist);
     }
-    for (size_t i = 0; i < m_Data->selectedItem.size(); ++i) {
+    for (size_t i = 0; i < m_Context->selectedItem.size(); ++i) {
         SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Select
-                << (char)i << (int32_t)m_Data->selectedItem[i]);
+                << (char)i << (int32_t)m_Context->selectedItem[i]);
     }
 }
 
@@ -462,9 +462,9 @@ void Session::SendMediaItemInfo(const MediaItem* item)
 
     char op = Op::Player::ItemInfo;
 
-    MutexLocker locker(&m_Data->playerMutex);
-    int32_t sampleRate = m_Data->player->SamleRate();
-    uint64_t duration = m_Data->player->RangeDuration();
+    MutexLocker locker(&m_Context->playerMutex);
+    int32_t sampleRate = m_Context->player->SamleRate();
+    uint64_t duration = m_Context->player->RangeDuration();
     locker.Unlock();
 
     BufObj buf(NULL);

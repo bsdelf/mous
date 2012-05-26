@@ -12,7 +12,7 @@ using namespace scx;
 #include <string>
 using namespace std;
 
-struct MousData;
+struct ServerContext;
 
 namespace mous {
     struct MediaItem;
@@ -24,7 +24,7 @@ public:
     typedef unsigned long ptr_t;
 
 public:
-    explicit Session(MousData* data);
+    explicit Session(ServerContext* data);
     ~Session();
 
     bool Run(const TcpSocket& socket, int notifyFd);
@@ -57,9 +57,10 @@ private:
     void SendMediaItemInfo(const mous::MediaItem*);
 
 private:
+    ServerContext* m_Context;
+
     Thread m_RecvThread;
     TcpSocket m_Socket;
-    MousData* m_Data;
     int m_NotifyFd;
     bool m_GotReqStopService;
     vector<char> m_SendOutBuf;

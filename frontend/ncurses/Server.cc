@@ -1,7 +1,7 @@
 #include "Server.h"
 #include "Config.h"
 #include "Session.h"
-#include "MousData.h"
+#include "ServerContext.h"
 
 #include <unistd.h>
 #include <sys/select.h>
@@ -13,7 +13,7 @@ using namespace std;
 
 Server::Server()
 {
-    m_Data = new MousData;
+    m_Data = new ServerContext;
     pipe(m_PipeFd);
 
     log.open("mous.log", ios::out);

@@ -1,11 +1,11 @@
-#include "MousData.h"
+#include "ServerContext.h"
 
 #include <scx/Signal.hpp>
 using namespace scx;
 
 #include "Config.h"
 
-MousData::MousData():
+ServerContext::ServerContext():
     playlists(6),
     usedPlaylist(-1),
     selectedPlaylist(1),
@@ -14,10 +14,10 @@ MousData::MousData():
     mgr = IPluginManager::Create();
     loader = IMediaLoader::Create();
     player = IPlayer::Create();
-    player->SigFinished()->Connect(&MousData::SlotFinished, this);
+    player->SigFinished()->Connect(&ServerContext::SlotFinished, this);
 }
 
-MousData::~MousData()
+ServerContext::~ServerContext()
 {
     player->SigFinished()->DisconnectReceiver(this);
 
@@ -30,7 +30,7 @@ MousData::~MousData()
     ClearPlaylists();
 }
 
-bool MousData::Init()
+bool ServerContext::Init()
 {
     const Config* config = GlobalConfig::Instance();
     if (config == NULL)
@@ -61,14 +61,14 @@ bool MousData::Init()
     return true;
 }
 
-void MousData::Cleanup()
+void ServerContext::Cleanup()
 {
     loader->UnregisterAll();
     player->UnregisterAll();
     mgr->UnloadAll();
 }
 
-void MousData::ClearPlaylists()
+void ServerContext::ClearPlaylists()
 {
     for (size_t i = 0; i < playlists.size(); ++i) {
         playlist_t& list = playlists[i];
@@ -77,10 +77,10 @@ void MousData::ClearPlaylists()
     }
 }
 
-bool MousData::PlayAt(int iList, int iItem)
+bool ServerContext::PlayAt(int iList, int iItem)
 {
     usedPlaylist = iList;
-    MousData::playlist_t& list = playlists[iList];
+    ServerContext::playlist_t& list = playlists[iList];
 
     MediaItem* item = NULL;
     list.SeqJumpTo(iItem);
@@ -89,7 +89,7 @@ bool MousData::PlayAt(int iList, int iItem)
     return PlayItem(item);
 }
 
-void MousData::PausePlayer()
+void ServerContext::PausePlayer()
 {
     MutexLocker locker(&playerMutex);
 
@@ -107,7 +107,7 @@ void MousData::PausePlayer()
     }
 }
 
-const MediaItem* MousData::ItemInPlaying() const
+const MediaItem* ServerContext::ItemInPlaying() const
 {
     MediaItem* item = NULL;
     const playlist_t& list = playlists[usedPlaylist];
@@ -115,7 +115,7 @@ const MediaItem* MousData::ItemInPlaying() const
     return item;
 }
 
-bool MousData::PlayItem(const MediaItem* item)
+bool ServerContext::PlayItem(const MediaItem* item)
 {
     MutexLocker locker(&playerMutex);
 
@@ -132,13 +132,13 @@ bool MousData::PlayItem(const MediaItem* item)
     return true;
 }
 
-void MousData::ClosePlayer()
+void ServerContext::ClosePlayer()
 {
     if (player->Status() != PlayerStatus::Closed)
         player->Close();
 }
 
-void MousData::SlotFinished()
+void ServerContext::SlotFinished()
 {
     MutexLocker locker(&mutex);
 
