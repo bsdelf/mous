@@ -34,10 +34,10 @@ inline static std::string ToString(e mode)
             return "Shuffle";
 
         case ShuffleRepeat:
-            return "ShuffleRepeat";
+            return "Shuffle Repeat";
 
         case RepeatOne:
-            return "RepeatOne";
+            return "Repeat One";
 
         default:
             return "";
