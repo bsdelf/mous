@@ -33,6 +33,14 @@ void ClientPlayerHandler::Handle(char* buf, int len)
     BufObj bufObj(buf);
     bufObj >> op;
     switch (op) {
+        case Op::Player::PlayMode:
+        {
+            string mode;
+            bufObj >> mode;
+            m_SigPlayMode(mode);
+        }
+            break;
+
         case Op::Player::Sync:
         {
             MutexLocker locker(&m_MutexWaitSyncReply);
@@ -72,6 +80,11 @@ void ClientPlayerHandler::StartSync()
 void ClientPlayerHandler::StopSync()
 {
     m_SyncSchedule.Stop(true);
+}
+
+void ClientPlayerHandler::PlayMode(bool next)
+{
+    SEND_PACKET(<< (char)Op::Player::PlayMode << (char)(next ? 1 : 0));
 }
 
 void ClientPlayerHandler::Pause()

@@ -37,15 +37,21 @@ public:
     void StopSync();
 
     // request
-    void Pause();
-
-    void Next();
-    void Previous();
-
+    //
     void VolumeUp();
     void VolumeDown();
 
-    // sync
+    void PlayMode(bool next);
+
+    void Pause();
+    void Next();
+    void Previous();
+
+    const Signal<void (const std::string&)>& SigPlayMode() const
+    {
+        return m_SigPlayMode;
+    }
+
     const Signal<void (const PlayerStatus&)>& SigStatus() const
     {
         return m_SigStatus;
@@ -58,6 +64,7 @@ private:
     Function<char* (char, int)> fnGetPayloadBuffer;
     Function<void (void)> fnSendOut;
 
+    Signal<void (const std::string&)> m_SigPlayMode;
     Signal<void (const PlayerStatus&)> m_SigStatus;
 
     PlayerStatus m_Status;

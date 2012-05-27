@@ -28,10 +28,15 @@ struct ServerContext
     typedef Playlist<MediaItem*> playlist_t;
     vector<playlist_t> playlists;
 
+    EmPlaylistMode playMode;
+
     int usedPlaylist;
     int selectedPlaylist;
     vector<int> selectedItem;
 
+    Signal<void (const MediaItem*)> sigPlayNextItem;
+
+public:
     ServerContext();
     ~ServerContext();
 
@@ -39,23 +44,20 @@ struct ServerContext
     void Cleanup();
     void ClearPlaylists();
 
-    bool PlayAt(int iList, int iItem);
-    void PausePlayer();
+    void NextPlayMode();
 
+    bool PlayAt(int iList, int iItem);
+    bool PlayNext(bool toNext);
+    void PausePlayer();
     const MediaItem* ItemInPlaying() const;
 
-    const Signal<void (const MediaItem*)>& SigPlayNextItem() const
-    {
-        return m_SigPlayNextItem;
-    }
-
 private:
+    void SetPlayMode(EmPlaylistMode mode);
+
     void ClosePlayer();
     bool PlayItem(const MediaItem* item);
 
     void SlotFinished();
-
-    Signal<void (const MediaItem*)> m_SigPlayNextItem;
 };
 
 #endif

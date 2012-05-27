@@ -37,6 +37,9 @@ private:
     void HandlePlaylist(char*, int);
 
     void PlayerPause(BufObj&);
+    void PlayerSeek(BufObj&);
+    void PlayerVolume(BufObj&);
+    void PlayerPlayMode(BufObj&);
     void PlayerSync(BufObj&);
 
     void PlaylistSwitch(BufObj&);

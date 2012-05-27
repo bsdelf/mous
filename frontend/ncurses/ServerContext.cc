@@ -15,6 +15,8 @@ ServerContext::ServerContext():
     loader = IMediaLoader::Create();
     player = IPlayer::Create();
     player->SigFinished()->Connect(&ServerContext::SlotFinished, this);
+
+    SetPlayMode(PlaylistMode::Normal);
 }
 
 ServerContext::~ServerContext()
@@ -77,6 +79,14 @@ void ServerContext::ClearPlaylists()
     }
 }
 
+void ServerContext::NextPlayMode()
+{
+    int mode = static_cast<int>(playMode) + 1;
+    if (mode >= static_cast<int>(PlaylistMode::Top))
+        mode = PlaylistMode::Normal;
+    SetPlayMode(static_cast<EmPlaylistMode>(mode));
+}
+
 bool ServerContext::PlayAt(int iList, int iItem)
 {
     usedPlaylist = iList;
@@ -132,6 +142,14 @@ bool ServerContext::PlayItem(const MediaItem* item)
     return true;
 }
 
+void ServerContext::SetPlayMode(EmPlaylistMode mode)
+{
+    playMode = mode;
+    for (size_t i = 0; i < playlists.size(); ++i) {
+        playlists[i].SetMode(playMode);
+    }
+}
+
 void ServerContext::ClosePlayer()
 {
     if (player->Status() != PlayerStatus::Closed)
@@ -150,6 +168,6 @@ void ServerContext::SlotFinished()
     }
     if (item != NULL) {
         PlayItem(item);
-        m_SigPlayNextItem(item);
+        sigPlayNextItem(item);
     }
 }

@@ -38,7 +38,7 @@ Session::Session(ServerContext* data):
     m_GotReqStopService(false)
 {
     MutexLocker locker(&m_Context->mutex);
-    m_Context->SigPlayNextItem().Connect(&Session::SlotPlayNextItem, this);
+    m_Context->sigPlayNextItem.Connect(&Session::SlotPlayNextItem, this);
 }
 
 Session::~Session()
@@ -46,7 +46,7 @@ Session::~Session()
     m_Socket.Close();
 
     MutexLocker locker(&m_Context->mutex);
-    m_Context->SigPlayNextItem().DisconnectReceiver(this);
+    m_Context->sigPlayNextItem.DisconnectReceiver(this);
     m_Context = NULL;
 }
 
@@ -145,6 +145,18 @@ void Session::HandlePlayer(char* _buf, int len)
             PlayerPause(buf);
             break;
 
+        case Op::Player::Seek:
+            PlayerSeek(buf);
+            break;
+
+        case Op::Player::Volume:
+            PlayerVolume(buf);
+            break;
+
+        case Op::Player::PlayMode:
+            PlayerPlayMode(buf);
+            break;
+
         case Op::Player::Sync:
             PlayerSync(buf);
             break;
@@ -159,6 +171,38 @@ void Session::PlayerPause(BufObj&)
     MutexLocker locker(&m_Context->mutex);
     
     m_Context->PausePlayer();
+}
+
+void Session::PlayerSeek(BufObj& buf)
+{
+    MutexLocker locker(&m_Context->mutex);
+}
+
+void Session::PlayerVolume(BufObj& buf)
+{
+}
+
+void Session::PlayerPlayMode(BufObj& buf)
+{
+    char next = buf.Fetch<char>();
+
+    MutexLocker locker(&m_Context->mutex);
+
+    switch (next) {
+        case 1:
+        {
+            m_Context->NextPlayMode();
+        }
+        case 0:
+        {
+            string mode = PlaylistMode::ToString(m_Context->playMode);
+            SEND_PLAYER_PACKET(<< (char)Op::Player::PlayMode << mode);
+        }
+            break;
+
+        default:
+            break;
+    }
 }
 
 void Session::PlayerSync(BufObj& buf)

@@ -23,7 +23,7 @@ inline static string FormatTime(int ms)
 inline static string FormatBitRate(int rate)
 {
     if (rate <= 0)
-        return string(4, ' ');
+        return "   0";
 
     char buf[4+1];
     snprintf(buf, sizeof(buf), "%4.d", rate);
@@ -31,8 +31,8 @@ inline static string FormatBitRate(int rate)
 }
 
 StatusView::StatusView():
-    m_NeedRefresh(0),
-    m_PlayerHandler(NULL)
+    m_PlayerHandler(NULL),
+    m_NeedRefresh(0)
 {
 }
 
@@ -57,7 +57,8 @@ void StatusView::Refresh()
     const int wVolSlider = 20;
     const int wCurrentItem = w - (wVolLabel + wVolSlider + 1) - 1;
 
-    MutexLocker playerStatuslocker(&m_PlayerStatusMutex);
+    MutexLocker locker(&m_RefreshMutex);
+
     const MediaItem& item = m_PlayerStatus.item;
     const MediaTag& tag = m_PlayerStatus.item.tag;
 
@@ -133,6 +134,10 @@ void StatusView::Refresh()
         d.ColorOn(Color::White, Color::Black);
         d.Print(xoff, yoff, strRate);
         xoff += strRate.size() + tab;
+
+        d.AttrSet(Attr::Bold);
+        d.ColorOn(Color::White, Color::Black);
+        d.Print(xoff, yoff, m_PlayMode);
     }
 
     // { ---------->~~~~~~~~~~~ }
@@ -152,14 +157,13 @@ void StatusView::Refresh()
 
     d.Refresh();
 
-    MutexLocker needRefreshLocker(&m_NeedRefreshMutex);
     if (m_NeedRefresh > 0)
         --m_NeedRefresh;
 }
 
 bool StatusView::NeedRefresh() const
 {
-    MutexLocker locker(&m_NeedRefreshMutex);
+    MutexLocker locker(&m_RefreshMutex);
     return m_NeedRefresh != 0;
 }
 
@@ -178,6 +182,10 @@ bool StatusView::InjectKey(int key)
     switch (key) {
         case ' ':
             m_PlayerHandler->Pause();
+            break;
+
+        case 'm':
+            m_PlayerHandler->PlayMode(true);
             break;
 
         case '>':
@@ -222,25 +230,28 @@ int StatusView::MinHeight() const
 void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
 {
     if (m_PlayerHandler != NULL) {
+        m_PlayerHandler->SigPlayMode().DisconnectReceiver(this);
         m_PlayerHandler->SigStatus().DisconnectReceiver(this);
     }
 
     if (handler != NULL) {
+        handler->SigPlayMode().Connect(&StatusView::SlotPlayMode, this);
         handler->SigStatus().Connect(&StatusView::SlotStatus, this);
     }
 
     m_PlayerHandler = handler;
 }
 
+void StatusView::SlotPlayMode(const std::string& mode)
+{
+    MutexLocker locker(&m_RefreshMutex);
+    m_PlayMode = mode;
+    ++m_NeedRefresh;
+}
+
 void StatusView::SlotStatus(const ClientPlayerHandler::PlayerStatus& status)
 {
-    {
-        MutexLocker locker(&m_PlayerStatusMutex);
-        m_PlayerStatus = status;
-    }
-
-    {
-        MutexLocker locker(&m_NeedRefreshMutex);
-        ++m_NeedRefresh;
-    }
+    MutexLocker locker(&m_RefreshMutex);
+    m_PlayerStatus = status;
+    ++m_NeedRefresh;
 }
