@@ -56,9 +56,7 @@ class Playlist
 public:
     Playlist():
         m_Mode(PlaylistMode::Normal),
-        m_SeqNormalIndex(-1),
-        m_SeqRepeatIndex(-1),
-        m_SeqShuffleIndex(-1)
+        m_SeqIndex(-1)
     {
 
     }
@@ -77,144 +75,101 @@ public:
         return m_Mode;
     }
 
-    bool SeqCurrent(item_t& item, int off = 0) const
+    // generally you do not need to call this
+    int SeqOffsetToIndex(int off) const
     {
-        if (m_ItemQue.empty())
-            return false;
+        if (m_ItemQueue.empty())
+            return -1;
 
         int idx = -1;
         switch (m_Mode) {
             case PlaylistMode::Normal:
-                idx = m_SeqNormalIndex + off;
+            case PlaylistMode::Shuffle:
+                idx = m_SeqIndex + off;
                 break;
 
             case PlaylistMode::Repeat:
             case PlaylistMode::RepeatOne:
-                idx = (m_SeqRepeatIndex + off) % m_ItemQue.size();
-                break;
-
-            case PlaylistMode::Shuffle:
-                idx = m_SeqShuffleIndex + off;
-                idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
-                    m_SeqShuffleQue[idx] : -1;
-                break;
-
             case PlaylistMode::ShuffleRepeat:
-                idx = (m_SeqShuffleIndex + off) % m_ItemQue.size();
-                idx = (idx >= 0 && idx < (int)m_SeqShuffleQue.size()) ?
-                    m_SeqShuffleQue[idx] : -1;
+                idx = (m_SeqIndex + off) % m_ItemQueue.size();
                 break;
 
             default:
-                return false;
+                break;
         }
 
-        if (idx >= 0 && idx < (int)m_ItemQue.size())
-            item = m_ItemQue[idx];
+        return (idx >= 0 && (size_t)idx < m_ItemQueue.size()) ? idx : -1;
+    }
 
-        return true;
+    bool SeqHasOffset(int off) const
+    {
+        return SeqOffsetToIndex(off) != -1;
+    }
+
+    const item_t& SeqItemAtOffset(int off, bool moveTo) const
+    {
+        return (const_cast<Playlist*>(this))->SeqItemAtOffset(off, moveTo);
+    }
+
+    item_t& SeqItemAtOffset(int off, bool moveTo)
+    {
+        int index = SeqOffsetToIndex(off);
+        assert(index >= 0 && (size_t)index < m_ItemQueue.size());
+        if (moveTo)
+            m_SeqIndex = index;
+        return m_ItemQueue[index];
     }
 
     bool SeqJumpTo(int index) const
     {
-        if (m_ItemQue.empty() || index < 0 || index >= (int)m_ItemQue.size())
+        if (index >= 0 && (size_t)index < m_ItemQueue.size()) {
+            m_SeqIndex = index;
+            return true;
+        } else {
             return false;
-
-        switch (m_Mode) {
-            case PlaylistMode::Normal:
-                m_SeqNormalIndex = index;
-                break;
-
-            case PlaylistMode::Repeat:
-            case PlaylistMode::RepeatOne:
-                m_SeqRepeatIndex = index;
-                break;
-
-            case PlaylistMode::Shuffle:
-            case PlaylistMode::ShuffleRepeat:
-                m_SeqShuffleIndex = index;
-                break;
-
-            default:
-                break;
         }
-        return true;
-    }
-
-    void SeqMoveNext(int step = 1) const
-    {
-        int* idx = NULL;
-        switch (m_Mode) {
-            case PlaylistMode::Normal:
-                m_SeqNormalIndex += step;
-                idx = &m_SeqNormalIndex;
-                break;
-
-            case PlaylistMode::Repeat:
-                m_SeqRepeatIndex = (m_SeqRepeatIndex + step) % m_ItemQue.size();
-                idx = &m_SeqRepeatIndex;
-                break;
-
-            case PlaylistMode::Shuffle:
-                m_SeqShuffleIndex += step;
-                idx = &m_SeqShuffleIndex;
-                break;
-
-            case PlaylistMode::ShuffleRepeat:
-                m_SeqShuffleIndex = (m_SeqShuffleIndex + step) % m_ItemQue.size();
-                idx = &m_SeqShuffleIndex;
-                break;
-
-            case PlaylistMode::RepeatOne:
-                idx = &m_SeqRepeatIndex;
-                break;
-                
-            default:
-                return;
-        }
-        assert(idx != NULL && *idx >= 0 && *idx < (int)m_ItemQue.size());
     }
 
     void Assign(const std::deque<item_t>& items)
     {
-        m_ItemQue.assign(items.begin(), items.end());
-        AdjustSeqIndexes();
+        m_ItemQueue.assign(items.begin(), items.end());
+        AdjustSeqPosition();
         AdjustShuffleRange(true);
     }
 
     void Insert(int index, const item_t& item)
     {
-        m_ItemQue.insert(m_ItemQue.begin()+index, item);
-        AdjustSeqIndexes();
+        m_ItemQueue.insert(m_ItemQueue.begin()+index, item);
+        AdjustSeqPosition();
         AdjustShuffleRange();
     }
 
     void Insert(int index, const std::deque<item_t>& items)
     {
-        m_ItemQue.insert(m_ItemQue.begin()+index, items.begin(), items.end());
-        AdjustSeqIndexes();
+        m_ItemQueue.insert(m_ItemQueue.begin()+index, items.begin(), items.end());
+        AdjustSeqPosition();
         AdjustShuffleRange();
     }
 
     void Append(const item_t& item)
     {
-        m_ItemQue.push_back(item);
-        AdjustSeqIndexes();
+        m_ItemQueue.push_back(item);
+        AdjustSeqPosition();
         AdjustShuffleRange();
     }
 
     void Append(const std::deque<item_t>& items)
     {
-        m_ItemQue.insert(m_ItemQue.end(), items.begin(), items.end());
-        AdjustSeqIndexes();
+        m_ItemQueue.insert(m_ItemQueue.end(), items.begin(), items.end());
+        AdjustSeqPosition();
         AdjustShuffleRange();
     }
 
     bool Remove(const item_t& item)
     {
-        for (size_t i = 0; i < m_ItemQue.size(); ++i) {
-            if (item == m_ItemQue[i]) {
-                m_ItemQue.erase(m_ItemQue.begin() + i);
+        for (size_t i = 0; i < m_ItemQueue.size(); ++i) {
+            if (item == m_ItemQueue[i]) {
+                m_ItemQueue.erase(m_ItemQueue.begin() + i);
                 return true;
             }
         }
@@ -223,72 +178,72 @@ public:
 
     void Remove(int index)
     {
-        m_ItemQue.erase(m_ItemQue.begin() + index);
-        AdjustSeqIndexes();
+        m_ItemQueue.erase(m_ItemQueue.begin() + index);
+        AdjustSeqPosition();
         AdjustShuffleRange();
     }
 
     void Remove(const std::vector<int>& indexes)
     {
         for (int i = indexes.size()-1; i >= 0; --i) {
-            m_ItemQue.erase(m_ItemQue.begin() + indexes[i]);
+            m_ItemQueue.erase(m_ItemQueue.begin() + indexes[i]);
         }
-        AdjustSeqIndexes();
+        AdjustSeqPosition();
         AdjustShuffleRange();
     }
 
     void Clear()
     {
-        m_ItemQue.clear();
-        m_SeqShuffleQue.clear();
-        AdjustSeqIndexes();
+        m_ItemQueue.clear();
+        m_SeqShuffleQuque.clear();
+        AdjustSeqPosition();
     }
 
     item_t& At(int index)
     {
-        return m_ItemQue.at(index);
+        return m_ItemQueue.at(index);
     }
 
     const item_t& At(int index) const
     {
-        return m_ItemQue.at(index);
+        return m_ItemQueue.at(index);
     }
 
     item_t& operator[](int index)
     {
-        return m_ItemQue[index];
+        return m_ItemQueue[index];
     }
 
     const item_t& operator[](int index) const
     {
-        return m_ItemQue[index];
+        return m_ItemQueue[index];
     }
 
     std::deque<item_t>& Items()
     {
-        return m_ItemQue;
+        return m_ItemQueue;
     }
 
     const std::deque<item_t>& Items() const
     {
-        return m_ItemQue;
+        return m_ItemQueue;
     }
 
     int Count() const
     {
-        int size = m_ItemQue.size();
+        int size = m_ItemQueue.size();
         return size;
     }
 
     bool Empty() const
     {
-        bool empty = m_ItemQue.empty();
+        bool empty = m_ItemQueue.empty();
         return empty;
     }
 
     void Reverse()
     {
-        reverse(m_ItemQue.begin(), m_ItemQue.end());
+        reverse(m_ItemQueue.begin(), m_ItemQueue.end());
     }
 
     template<class buf_t>
@@ -300,17 +255,17 @@ public:
 
         int count;
         buf >> count;
-        m_ItemQue.resize(count);
+        m_ItemQueue.resize(count);
         for (int i = 0; i < count; ++i) {
-            m_ItemQue[i] << buf;
+            m_ItemQueue[i] << buf;
         }
 
-        buf >> m_SeqNormalIndex >> m_SeqRepeatIndex >> m_SeqShuffleIndex;
+        buf >> m_SeqIndex;
 
         buf >> count;
-        m_SeqShuffleQue.resize(count);
+        m_SeqShuffleQuque.resize(count);
         for (int i = 0; i < count; ++i) {
-            buf >> m_SeqShuffleQue[i];
+            buf >> m_SeqShuffleQuque[i];
         }
     }
 
@@ -319,64 +274,57 @@ public:
     {
         buf << (int)m_Mode;
 
-        buf << (int)m_ItemQue.size();
-        for (int i = 0; i < (int)m_ItemQue.size(); ++i) {
-            m_ItemQue[i] >> buf;
+        buf << (int)m_ItemQueue.size();
+        for (int i = 0; i < (int)m_ItemQueue.size(); ++i) {
+            m_ItemQueue[i] >> buf;
         }
 
-        buf << m_SeqNormalIndex << m_SeqRepeatIndex << m_SeqShuffleIndex;
+        buf << m_SeqIndex;
 
-        buf << (int)m_SeqShuffleQue.size();
-        for (int i = 0; i < (int)m_SeqShuffleQue.size(); ++i) {
-            buf << m_SeqShuffleQue[i];
+        buf << (int)m_SeqShuffleQuque.size();
+        for (int i = 0; i < (int)m_SeqShuffleQuque.size(); ++i) {
+            buf << m_SeqShuffleQuque[i];
         }
     }
 
 private:
-    void AdjustSeqIndexes()
+    void AdjustSeqPosition()
     {
-        if (!m_ItemQue.empty()) {
-            if (m_SeqNormalIndex == -1)
-                m_SeqNormalIndex = 0;
-            if (m_SeqRepeatIndex == -1)
-                m_SeqRepeatIndex = 0;
-            if (m_SeqShuffleIndex == -1)
-                m_SeqShuffleIndex = 0;
-        } else {
-            m_SeqNormalIndex = -1;
-            m_SeqRepeatIndex = -1;
-            m_SeqShuffleIndex = -1;
+        if (m_ItemQueue.empty()) {
+            m_SeqIndex = -1;
+        } else if (m_SeqIndex == -1) {
+            m_SeqIndex = 0;
         }
     }
 
     void AdjustShuffleRange(bool reGenerate = false)
     {
         if (reGenerate)
-            m_SeqShuffleQue.clear();
+            m_SeqShuffleQuque.clear();
 
-        int need = m_ItemQue.size() - m_SeqShuffleQue.size();
+        int need = m_ItemQueue.size() - m_SeqShuffleQuque.size();
         if (need > 0) {
             srandom(time(NULL));
             for (int i = 0; i < need; ++i) {
-                int inspos = random() % (m_SeqShuffleQue.size()+1);
-                m_SeqShuffleQue.insert(m_SeqShuffleQue.begin()+inspos, m_SeqShuffleQue.size());
+                int inspos = random() % (m_SeqShuffleQuque.size()+1);
+                m_SeqShuffleQuque.insert(m_SeqShuffleQuque.begin()+inspos, m_SeqShuffleQuque.size());
             }
         } else if (need < 0){
-            int top = m_ItemQue.size();
-            for (int i = m_SeqShuffleQue.size()-1; i >= 0; --i) {
-                if (m_SeqShuffleQue[i] >= top)
-                    m_SeqShuffleQue.erase(m_SeqShuffleQue.begin() + i);
+            int top = m_ItemQueue.size();
+            for (int i = m_SeqShuffleQuque.size()-1; i >= 0; --i) {
+                if (m_SeqShuffleQuque[i] >= top)
+                    m_SeqShuffleQuque.erase(m_SeqShuffleQuque.begin() + i);
             }
         }
 
-        assert(m_ItemQue.size() == m_SeqShuffleQue.size());
+        assert(m_ItemQueue.size() == m_SeqShuffleQuque.size());
 
         // debug
         /*
         using namespace std;
         cout << "shuffle:";
-        for (size_t i = 0; i < m_SeqShuffleQue.size(); ++i) {
-            cout << m_SeqShuffleQue[i] << ", ";
+        for (size_t i = 0; i < m_SeqShuffleQuque.size(); ++i) {
+            cout << m_SeqShuffleQuque[i] << ", ";
         }
         cout << endl;
         */
@@ -385,13 +333,11 @@ private:
 private:
     EmPlaylistMode m_Mode;
 
-    std::deque<item_t> m_ItemQue;
-    typedef typename std::deque<item_t>::iterator ItemQueIter;
+    std::deque<item_t> m_ItemQueue;
+    typedef typename std::deque<item_t>::iterator ItemQueueIter;
 
-    mutable int m_SeqNormalIndex;
-    mutable int m_SeqRepeatIndex;
-    mutable int m_SeqShuffleIndex;
-    std::deque<int> m_SeqShuffleQue;
+    mutable int m_SeqIndex;
+    std::deque<int> m_SeqShuffleQuque;
 
 };
 
