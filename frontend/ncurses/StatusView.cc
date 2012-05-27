@@ -184,7 +184,10 @@ bool StatusView::InjectKey(int key)
     MutexLocker locker(&m_RefreshMutex);
     switch (key) {
         case ' ':
-            m_PlayerHandler->Pause();
+            if (!m_WaitReply) {
+                m_PlayerHandler->Pause();
+                m_WaitReply = true;
+            }
             break;
 
         case 'm':
@@ -195,17 +198,31 @@ bool StatusView::InjectKey(int key)
             break;
 
         case 'n':
-            m_PlayerHandler->PlayNext();
+            if (!m_WaitReply) {
+                m_PlayerHandler->PlayNext();
+                m_WaitReply = true;
+            }
             break;
 
         case 'p':
-            m_PlayerHandler->PlayPrev();
+            if (!m_WaitReply) {
+                m_PlayerHandler->PlayPrevious();
+                m_WaitReply = true;
+            }
             break;
 
         case '>':
+            if (!m_WaitReply) {
+                m_PlayerHandler->SeekForward();
+                m_WaitReply = true;
+            }
             break;
 
         case '<':
+            if (!m_WaitReply) {
+                m_PlayerHandler->SeekBackward();
+                m_WaitReply = true;
+            }
             break;
 
         case '+':
@@ -248,13 +265,19 @@ int StatusView::MinHeight() const
 void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
 {
     if (m_PlayerHandler != NULL) {
+        m_PlayerHandler->SigPause().DisconnectReceiver(this);
+        m_PlayerHandler->SigSeek().DisconnectReceiver(this);
         m_PlayerHandler->SigVolume().DisconnectReceiver(this);
+        m_PlayerHandler->SigPlayNext().DisconnectReceiver(this);
         m_PlayerHandler->SigPlayMode().DisconnectReceiver(this);
         m_PlayerHandler->SigStatus().DisconnectReceiver(this);
     }
 
     if (handler != NULL) {
+        handler->SigPause().Connect(&StatusView::SlotPause, this);
+        handler->SigSeek().Connect(&StatusView::SlotSeek, this);
         handler->SigVolume().Connect(&StatusView::SlotVolume, this);
+        handler->SigPlayNext().Connect(&StatusView::SlotPlayNext, this);
         handler->SigPlayMode().Connect(&StatusView::SlotPlayMode, this);
         handler->SigStatus().Connect(&StatusView::SlotStatus, this);
     }
@@ -262,11 +285,29 @@ void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
     m_PlayerHandler = handler;
 }
 
+void StatusView::SlotPause()
+{
+    MutexLocker locker(&m_RefreshMutex);
+    m_WaitReply = false;
+}
+
+void StatusView::SlotSeek()
+{
+    MutexLocker locker(&m_RefreshMutex);
+    m_WaitReply = false;
+}
+
 void StatusView::SlotVolume(int vol)
 {
     MutexLocker locker(&m_RefreshMutex);
     m_Volume = vol;
     ++m_NeedRefresh;
+    m_WaitReply = false;
+}
+
+void StatusView::SlotPlayNext(bool hasNext)
+{
+    MutexLocker locker(&m_RefreshMutex);
     m_WaitReply = false;
 }
 

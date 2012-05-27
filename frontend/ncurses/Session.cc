@@ -1,6 +1,7 @@
 #include "Session.h"
 
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 #include <scx/CharsetHelper.hpp>
@@ -175,11 +176,31 @@ void Session::PlayerPause(BufObj&)
     MutexLocker locker(&m_Context->mutex);
     
     m_Context->PausePlayer();
+
+    SEND_PLAYER_PACKET(<< (char)Op::Player::Pause);
 }
 
 void Session::PlayerSeek(BufObj& buf)
 {
+    char direct = buf.Fetch<char>();
+    
     MutexLocker locker(&m_Context->mutex);
+
+    switch (direct) {
+        case 1:
+        case -1:
+        {
+            int64_t delta = direct * 1000 * 3;
+            uint64_t pos = m_Context->player->CurrentMs() + delta;
+            m_Context->player->SeekTime(pos);
+
+            SEND_PLAYER_PACKET(<< (char)Op::Player::Seek);
+        }
+            break;
+
+        default:
+            break;
+    }
 }
 
 void Session::PlayerVolume(BufObj& buf)
@@ -240,7 +261,9 @@ void Session::PlayerPlayNext(BufObj& buf)
 
     MutexLocker locker(&m_Context->mutex);
 
-    m_Context->PlayNext(direct);
+    bool hasNext = m_Context->PlayNext(direct);
+
+    SEND_PLAYER_PACKET(<< (char)Op::Player::PlayNext << (char)(hasNext ? 1 : 0));
 }
 
 void Session::PlayerSync(BufObj& buf)
@@ -250,8 +273,6 @@ void Session::PlayerSync(BufObj& buf)
     MutexLocker locker(&m_Context->mutex);
 
     EmPlayerStatus status = m_Context->player->Status();
-    //playerLocker.Unlock();
-
     int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
 
     int mask = BINARY_MASK(running, nowRunning);
@@ -263,10 +284,8 @@ void Session::PlayerSync(BufObj& buf)
         }
         case BINARY_MASK(1, 1):
         {
-            //playerLocker.Relock();
             uint64_t ms = m_Context->player->OffsetMs();
             int32_t bitRate = m_Context->player->BitRate();
-            //playerLocker.Unlock();
 
             SEND_PLAYER_PACKET(<< (char)Op::Player::ItemProgress << ms << bitRate);
         }
@@ -279,8 +298,6 @@ void Session::PlayerSync(BufObj& buf)
         default:
             break;
     }
-
-    locker.Unlock();
 
     SEND_PLAYER_PACKET(<< (char)Op::Player::Sync << (char)nowRunning);
 }
@@ -543,10 +560,8 @@ void Session::SendMediaItemInfo(const MediaItem* item)
 
     char op = Op::Player::ItemInfo;
 
-    MutexLocker locker(&m_Context->mutex);
     int32_t sampleRate = m_Context->player->SamleRate();
     uint64_t duration = m_Context->player->RangeDuration();
-    locker.Unlock();
 
     BufObj buf(NULL);
     buf << op;

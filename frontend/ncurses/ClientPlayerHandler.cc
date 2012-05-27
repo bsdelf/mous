@@ -33,6 +33,18 @@ void ClientPlayerHandler::Handle(char* buf, int len)
     BufObj bufObj(buf);
     bufObj >> op;
     switch (op) {
+        case Op::Player::Pause:
+        {
+            m_SigPause();
+        }
+            break;
+
+        case Op::Player::Seek:
+        {
+            m_SigSeek();
+        }
+            break;
+
         case Op::Player::Volume:
         {
             m_SigVolume(bufObj.Fetch<char>());
@@ -44,6 +56,13 @@ void ClientPlayerHandler::Handle(char* buf, int len)
             string mode;
             bufObj >> mode;
             m_SigPlayMode(mode);
+        }
+            break;
+
+        case Op::Player::PlayNext:
+        {
+            bool hasNext = bufObj.Fetch<char>() == 1 ? true : false;
+            m_SigPlayNext(hasNext);
         }
             break;
 
@@ -118,12 +137,22 @@ void ClientPlayerHandler::Pause()
     SEND_PACKET(<< (char)Op::Player::Pause);
 }
 
+void ClientPlayerHandler::SeekForward()
+{
+    SEND_PACKET(<< (char)Op::Player::Seek << (char)1);
+}
+
+void ClientPlayerHandler::SeekBackward()
+{
+    SEND_PACKET(<< (char)Op::Player::Seek << (char)-1);
+}
+
 void ClientPlayerHandler::PlayNext()
 {
     SEND_PACKET(<< (char)Op::Player::PlayNext << (char)1);
 }
 
-void ClientPlayerHandler::PlayPrev()
+void ClientPlayerHandler::PlayPrevious()
 {
     SEND_PACKET(<< (char)Op::Player::PlayNext << (char)-1);
 }

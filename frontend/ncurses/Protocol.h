@@ -96,9 +96,11 @@ enum e
     None = 0,
 
     // C:op(char)
+    // S:op(char)
     Pause,
 
     // C:op(char) direction(char -1/1)
+    // S:op(char)
     Seek,
 
     // C:op(char) change(char 0/-1/1)
@@ -110,6 +112,7 @@ enum e
     PlayMode,
 
     // C:op(char) direction(char -1/1)
+    // S:op(char) has(char 0/1)
     PlayNext,
 
     // C:op(char) running(char 0/1)
