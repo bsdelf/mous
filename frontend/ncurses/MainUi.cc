@@ -142,8 +142,9 @@ int MainUi::Exec()
 
     if (StartClient()) {
         for (bool quit = false; !quit; quit = false) {
-            int key = d->bgWindow.Input();
+            SyncRefresh();
 
+            int key = d->bgWindow.Input();
             if (key != ERR && HandleTopKey(key, quit)) {
                 if (quit)
                     break;
@@ -154,8 +155,6 @@ int MainUi::Exec()
             } else  {
                 d->layerStack.top().focused.top()->InjectKey(key);
             }
-
-            SyncRefresh();
         }
     }
 
@@ -172,6 +171,7 @@ void MainUi::SlotTryConnect()
 void MainUi::SlotConnected()
 {
     d->client.PlayerHandler().StartSync();
+    d->client.PlayerHandler().QueryVolume();
     d->client.PlayerHandler().QueryPlayMode();
 
     for (int i = 0; i < PLAYLIST_COUNT; ++i)
