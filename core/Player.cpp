@@ -393,10 +393,6 @@ void Player::SeekTime(uint64_t msPos)
 void Player::SeekPercent(double percent)
 {
     uint64_t unit = m_UnitBeg + (m_UnitEnd - m_UnitBeg) * percent;
-    if (unit < m_UnitBeg) 
-        unit = m_UnitBeg;
-    if (unit > m_UnitEnd)
-        unit = m_UnitEnd;
 
     switch (m_Status) {
         case PlayerStatus::Playing:
@@ -423,7 +419,13 @@ void Player::DoSeekTime(uint64_t msPos)
 
 void Player::DoSeekUnit(uint64_t unit)
 {
+    if (unit < m_UnitBeg) 
+        unit = m_UnitBeg;
+    else if (unit > m_UnitEnd)
+        unit = m_UnitEnd;
+
     m_Decoder->SetUnitIndex(unit);
+
     m_DecoderIndex = unit;
     m_RendererIndex = unit;
 }
@@ -579,9 +581,8 @@ void Player::ThRenderer()
         if (m_RendererIndex >= m_UnitEnd) {
             m_Status = PlayerStatus::Stopped;
             Function<void (void)> fn(&Player::ThPostSigFinished, this);
-            m_ThPostSigFinished.Join();
             m_ThPostSigFinished.Run(fn);
-            //m_ThPostSigFinished.Detach();
+            m_ThPostSigFinished.Detach();
         }
     }
 }
