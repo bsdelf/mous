@@ -92,16 +92,27 @@ bool ServerContext::PlayAt(int iList, int iItem)
     usedPlaylist = iList;
     ServerContext::playlist_t& list = playlists[iList];
 
-    MediaItem* item = NULL;
     list.SeqJumpTo(iItem);
-    list.SeqCurrent(item);
-
+    const MediaItem* item = list.SeqItemAtOffset(0, false);
     return PlayItem(item);
+}
+
+bool ServerContext::PlayNext(char direct)
+{
+    playlist_t& list = playlists[usedPlaylist];
+    if (list.SeqHasOffset(direct)) {
+        const MediaItem* item = list.SeqItemAtOffset(direct, true);
+        PlayItem(item);
+        sigPlayNextItem(item);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void ServerContext::PausePlayer()
 {
-    MutexLocker locker(&playerMutex);
+    //MutexLocker locker(&playerMutex);
 
     switch (player->Status()) {
         case PlayerStatus::Playing:
@@ -119,15 +130,13 @@ void ServerContext::PausePlayer()
 
 const MediaItem* ServerContext::ItemInPlaying() const
 {
-    MediaItem* item = NULL;
     const playlist_t& list = playlists[usedPlaylist];
-    list.SeqCurrent(item, 0);
-    return item;
+    return list.SeqHasOffset(0) ? list.SeqItemAtOffset(0, false) : NULL;
 }
 
 bool ServerContext::PlayItem(const MediaItem* item)
 {
-    MutexLocker locker(&playerMutex);
+    //MutexLocker locker(&playerMutex);
 
     ClosePlayer();
 
@@ -161,12 +170,8 @@ void ServerContext::SlotFinished()
     MutexLocker locker(&mutex);
 
     playlist_t& list = playlists[usedPlaylist];
-    MediaItem* item = NULL;
-    if (list.SeqCurrent(item, 1)) {
-        list.SeqMoveNext();
-        list.SeqCurrent(item);
-    }
-    if (item != NULL) {
+    if (list.SeqHasOffset(1)) {
+        const MediaItem* item = list.SeqItemAtOffset(1, true);
         PlayItem(item);
         sigPlayNextItem(item);
     }

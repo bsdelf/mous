@@ -40,6 +40,7 @@ private:
     void PlayerSeek(BufObj&);
     void PlayerVolume(BufObj&);
     void PlayerPlayMode(BufObj&);
+    void PlayerPlayNext(BufObj&);
     void PlayerSync(BufObj&);
 
     void PlaylistSwitch(BufObj&);

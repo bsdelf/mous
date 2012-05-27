@@ -37,15 +37,15 @@ public:
     void StopSync();
 
     // request
-    //
     void VolumeUp();
     void VolumeDown();
 
-    void PlayMode(bool next);
+    void QueryPlayMode();
+    void NextPlayMode();
 
     void Pause();
-    void Next();
-    void Previous();
+    void PlayNext();
+    void PlayPrev();
 
     const Signal<void (const std::string&)>& SigPlayMode() const
     {

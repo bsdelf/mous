@@ -172,7 +172,7 @@ void MainUi::SlotTryConnect()
 void MainUi::SlotConnected()
 {
     d->client.PlayerHandler().StartSync();
-    d->client.PlayerHandler().PlayMode(false);
+    d->client.PlayerHandler().QueryPlayMode();
 
     for (int i = 0; i < PLAYLIST_COUNT; ++i)
         d->client.PlaylistHandler().Sync(i);

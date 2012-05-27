@@ -185,7 +185,15 @@ bool StatusView::InjectKey(int key)
             break;
 
         case 'm':
-            m_PlayerHandler->PlayMode(true);
+            m_PlayerHandler->NextPlayMode();
+            break;
+
+        case 'n':
+            m_PlayerHandler->PlayNext();
+            break;
+
+        case 'p':
+            m_PlayerHandler->PlayPrev();
             break;
 
         case '>':
@@ -194,16 +202,12 @@ bool StatusView::InjectKey(int key)
         case '<':
             break;
 
-        case 'N':
-            break;
-
-        case 'P':
-            break;
-
         case '+':
+        case '=':
             break;
 
         case '-':
+        case '_':
             break;
 
         default:

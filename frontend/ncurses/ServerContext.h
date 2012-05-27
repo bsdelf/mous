@@ -23,7 +23,6 @@ struct ServerContext
     IPluginManager* mgr;
     IMediaLoader* loader;
     IPlayer* player;
-    Mutex playerMutex;
 
     typedef Playlist<MediaItem*> playlist_t;
     vector<playlist_t> playlists;
@@ -47,7 +46,7 @@ public:
     void NextPlayMode();
 
     bool PlayAt(int iList, int iItem);
-    bool PlayNext(bool toNext);
+    bool PlayNext(char direct);
     void PausePlayer();
     const MediaItem* ItemInPlaying() const;
 

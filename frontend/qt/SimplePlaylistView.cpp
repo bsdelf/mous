@@ -186,22 +186,13 @@ void SimplePlaylistView::SetMediaLoader(const IMediaLoader* loader)
 
 const MediaItem* SimplePlaylistView::GetNextItem() const
 {
-    MediaItem* item = NULL;
-    if (m_Playlist.SeqCurrent(item, 1)) {
-        m_Playlist.SeqMoveNext();
-        m_Playlist.SeqCurrent(item);
-    }
-    return item;
+    return m_Playlist.SeqHasOffset(1) ? m_Playlist.SeqItemAtOffset(1, true) : NULL;
+
 }
 
 const MediaItem* SimplePlaylistView::GetPreviousItem() const
 {
-    MediaItem* item = NULL;
-    if (m_Playlist.SeqCurrent(item, -1)) {
-        m_Playlist.SeqMoveNext(-1);
-        m_Playlist.SeqCurrent(item);
-    }
-    return NULL;
+    return m_Playlist.SeqHasOffset(-1) ? m_Playlist.SeqItemAtOffset(-1, true) : NULL;
 }
 
 size_t SimplePlaylistView::GetItemCount() const
@@ -220,8 +211,7 @@ void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
     qDebug() << index.row();
 
     m_Playlist.SeqJumpTo(index.row());
-    MediaItem* item = NULL;
-    m_Playlist.SeqCurrent(item);
+    MediaItem* item = m_Playlist.SeqItemAtOffset(0, false);
 
     emit SigPlayMediaItem(this, item);
 }

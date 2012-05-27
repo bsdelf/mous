@@ -157,6 +157,10 @@ void Session::HandlePlayer(char* _buf, int len)
             PlayerPlayMode(buf);
             break;
 
+        case Op::Player::PlayNext:
+            PlayerPlayNext(buf);
+            break;
+
         case Op::Player::Sync:
             PlayerSync(buf);
             break;
@@ -205,15 +209,23 @@ void Session::PlayerPlayMode(BufObj& buf)
     }
 }
 
+void Session::PlayerPlayNext(BufObj& buf)
+{
+    char direct = buf.Fetch<char>();
+
+    MutexLocker locker(&m_Context->mutex);
+
+    m_Context->PlayNext(direct);
+}
+
 void Session::PlayerSync(BufObj& buf)
 {
     int running = buf.Fetch<char>();
 
-    MutexLocker dataLocker(&m_Context->mutex);
+    MutexLocker locker(&m_Context->mutex);
 
-    MutexLocker playerLocker(&m_Context->playerMutex);
     EmPlayerStatus status = m_Context->player->Status();
-    playerLocker.Unlock();
+    //playerLocker.Unlock();
 
     int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
 
@@ -226,10 +238,10 @@ void Session::PlayerSync(BufObj& buf)
         }
         case BINARY_MASK(1, 1):
         {
-            playerLocker.Relock();
+            //playerLocker.Relock();
             uint64_t ms = m_Context->player->OffsetMs();
             int32_t bitRate = m_Context->player->BitRate();
-            playerLocker.Unlock();
+            //playerLocker.Unlock();
 
             SEND_PLAYER_PACKET(<< (char)Op::Player::ItemProgress << ms << bitRate);
         }
@@ -243,7 +255,7 @@ void Session::PlayerSync(BufObj& buf)
             break;
     }
 
-    dataLocker.Unlock();
+    locker.Unlock();
 
     SEND_PLAYER_PACKET(<< (char)Op::Player::Sync << (char)nowRunning);
 }
@@ -506,7 +518,7 @@ void Session::SendMediaItemInfo(const MediaItem* item)
 
     char op = Op::Player::ItemInfo;
 
-    MutexLocker locker(&m_Context->playerMutex);
+    MutexLocker locker(&m_Context->mutex);
     int32_t sampleRate = m_Context->player->SamleRate();
     uint64_t duration = m_Context->player->RangeDuration();
     locker.Unlock();

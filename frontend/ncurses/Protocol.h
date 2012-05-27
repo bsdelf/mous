@@ -109,6 +109,9 @@ enum e
     // S:op(char) mode(string)
     PlayMode,
 
+    // C:op(char) direction(char -1/1)
+    PlayNext,
+
     // C:op(char) running(char 0/1)
     // S:op(char) running(char 0/1)
     Sync,

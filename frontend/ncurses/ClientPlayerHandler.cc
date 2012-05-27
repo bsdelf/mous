@@ -82,9 +82,22 @@ void ClientPlayerHandler::StopSync()
     m_SyncSchedule.Stop(true);
 }
 
-void ClientPlayerHandler::PlayMode(bool next)
+void ClientPlayerHandler::VolumeUp()
 {
-    SEND_PACKET(<< (char)Op::Player::PlayMode << (char)(next ? 1 : 0));
+}
+
+void ClientPlayerHandler::VolumeDown()
+{
+}
+
+void ClientPlayerHandler::QueryPlayMode()
+{
+    SEND_PACKET(<< (char)Op::Player::PlayMode << (char)0);
+}
+
+void ClientPlayerHandler::NextPlayMode()
+{
+    SEND_PACKET(<< (char)Op::Player::PlayMode << (char)1);
 }
 
 void ClientPlayerHandler::Pause()
@@ -92,20 +105,14 @@ void ClientPlayerHandler::Pause()
     SEND_PACKET(<< (char)Op::Player::Pause);
 }
 
-void ClientPlayerHandler::Next()
+void ClientPlayerHandler::PlayNext()
 {
+    SEND_PACKET(<< (char)Op::Player::PlayNext << (char)1);
 }
 
-void ClientPlayerHandler::Previous()
+void ClientPlayerHandler::PlayPrev()
 {
-}
-
-void ClientPlayerHandler::VolumeUp()
-{
-}
-
-void ClientPlayerHandler::VolumeDown()
-{
+    SEND_PACKET(<< (char)Op::Player::PlayNext << (char)-1);
 }
 
 void ClientPlayerHandler::OnSyncTask()

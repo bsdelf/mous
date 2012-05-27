@@ -26,10 +26,8 @@ void OnFinished()
 {
     gMutexForSwitch.Lock();
     if (gPlaylist != NULL && !gStop) {
-        MediaItem* item = NULL;
-        if (gPlaylist->SeqCurrent(item, 1)) {
-            gPlaylist->SeqMoveNext();
-            gPlaylist->SeqCurrent(item);
+        if (gPlaylist->SeqHasOffset(1)) {
+            MediaItem* item = gPlaylist->SeqItemAtOffset(1, true);
             if (gPlayer->Status() != PlayerStatus::Closed)
                 gPlayer->Close();
             gPlayer->Open(item->url);
@@ -251,9 +249,8 @@ int main(int argc, char** argv)
     if (playlist.Empty())
         return -1;
 
-    MediaItem* item = NULL;
-    playlist.SeqCurrent(item);
-    assert(item != NULL);
+    const MediaItem* item = playlist.SeqItemAtOffset(0, false);
+
     cout << ">>>> Tag Info" << endl;
     cout << "\ttitle:" << item->tag.title << endl;
     cout << "\tartist:" << item->tag.artist << endl;
