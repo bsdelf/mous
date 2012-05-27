@@ -17,8 +17,33 @@ enum e {
     Repeat,
     Shuffle,
     ShuffleRepeat,
-    RepeatOne
+    RepeatOne,
+    Top,
 };
+
+inline static std::string ToString(e mode)
+{
+    switch (mode) {
+        case Normal:
+            return "Normal";
+
+        case Repeat:
+            return "Repeat";
+
+        case Shuffle:
+            return "Shuffle";
+
+        case ShuffleRepeat:
+            return "ShuffleRepeat";
+
+        case RepeatOne:
+            return "RepeatOne";
+
+        default:
+            return "";
+    }
+}
+
 }
 typedef PlaylistMode::e EmPlaylistMode;
 
@@ -80,6 +105,8 @@ public:
                     m_SeqShuffleQue[idx] : -1;
                 break;
 
+            default:
+                return false;
         }
 
         if (idx >= 0 && idx < (int)m_ItemQue.size())
@@ -106,6 +133,9 @@ public:
             case PlaylistMode::Shuffle:
             case PlaylistMode::ShuffleRepeat:
                 m_SeqShuffleIndex = index;
+                break;
+
+            default:
                 break;
         }
         return true;
@@ -138,6 +168,9 @@ public:
             case PlaylistMode::RepeatOne:
                 idx = &m_SeqRepeatIndex;
                 break;
+                
+            default:
+                return;
         }
         assert(idx != NULL && *idx >= 0 && *idx < (int)m_ItemQue.size());
     }
