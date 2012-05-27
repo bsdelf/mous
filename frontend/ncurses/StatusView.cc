@@ -47,6 +47,8 @@ void StatusView::Refresh()
     using namespace ncurses;
     using namespace CharsetHelper;
 
+    MutexLocker locker(&m_RefreshMutex);
+
     d.Clear();
 
     const int w = d.w - 3;
@@ -58,8 +60,6 @@ void StatusView::Refresh()
     const int wVolLabel = 2*2;
     const int wVolSlider = 20;
     const int wCurrentItem = w - (wVolLabel + wVolSlider + 1) - 1;
-
-    MutexLocker locker(&m_RefreshMutex);
 
     const MediaItem& item = m_PlayerStatus.item;
     const MediaTag& tag = m_PlayerStatus.item.tag;

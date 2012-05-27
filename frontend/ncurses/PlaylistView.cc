@@ -30,6 +30,8 @@ void PlaylistView::Refresh()
     using namespace CharsetHelper;
     using namespace ncurses;
 
+    MutexLocker locker(&m_NeedRefreshMutex);
+
     d.Clear();
 
     // title
@@ -140,7 +142,6 @@ void PlaylistView::Refresh()
 
     d.Refresh();
 
-    MutexLocker locker(&m_NeedRefreshMutex);
     if (m_NeedRefresh > 0)
         --m_NeedRefresh;
 }
@@ -389,13 +390,14 @@ void PlaylistView::ReqClear()
 
 void PlaylistView::SlotSelect(int i, int pos)
 {
+    MutexLocker locker(&m_NeedRefreshMutex);
+
     if (i != m_Index)
         return;
 
     m_ItemSelected = pos;
 
     if (d.shown) {
-        MutexLocker locker(&m_NeedRefreshMutex);
         ++m_NeedRefresh;
     }
 }
@@ -410,19 +412,22 @@ void PlaylistView::SlotPlay(int i, bool ok)
 
 void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 {
+    MutexLocker locker(&m_NeedRefreshMutex);
+
     if (i != m_Index)
         return;
 
     m_List.insert(m_List.end(), list.begin(), list.end());
 
     if (d.shown) {
-        MutexLocker locker(&m_NeedRefreshMutex);
         ++m_NeedRefresh;
     }
 }
 
 void PlaylistView::SlotRemove(int i, int pos)
 {
+    MutexLocker locker(&m_NeedRefreshMutex);
+
     if (i != m_Index)
         return;
 
@@ -434,7 +439,6 @@ void PlaylistView::SlotRemove(int i, int pos)
             m_ItemSelected = m_List.size() - 1;
 
         if (d.shown) {
-            MutexLocker locker(&m_NeedRefreshMutex);
             ++m_NeedRefresh;
         }
     }
@@ -446,6 +450,8 @@ void PlaylistView::SlotRemove(int i, int pos)
 
 void PlaylistView::SlotClear(int i)
 {
+    MutexLocker locker(&m_NeedRefreshMutex);
+
     if (i != m_Index)
         return;
 
@@ -457,7 +463,6 @@ void PlaylistView::SlotClear(int i)
     m_ItemSelected = m_ItemBegin = 0;
 
     if (d.shown) {
-        MutexLocker locker(&m_NeedRefreshMutex);
         ++m_NeedRefresh;
     }
 

@@ -112,8 +112,6 @@ bool ServerContext::PlayNext(char direct)
 
 void ServerContext::PausePlayer()
 {
-    //MutexLocker locker(&playerMutex);
-
     switch (player->Status()) {
         case PlayerStatus::Playing:
             player->Pause();
@@ -136,8 +134,6 @@ const MediaItem* ServerContext::ItemInPlaying() const
 
 bool ServerContext::PlayItem(const MediaItem* item)
 {
-    //MutexLocker locker(&playerMutex);
-
     ClosePlayer();
 
     if (player->Open(item->url) != mous::ErrorCode::Ok)
