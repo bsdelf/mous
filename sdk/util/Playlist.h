@@ -89,9 +89,12 @@ public:
                 break;
 
             case PlaylistMode::Repeat:
-            case PlaylistMode::RepeatOne:
             case PlaylistMode::ShuffleRepeat:
                 idx = (m_SeqIndex + off) % m_ItemQueue.size();
+                break;
+
+            case PlaylistMode::RepeatOne:
+                idx = m_SeqIndex;
                 break;
 
             default:
@@ -117,6 +120,17 @@ public:
         assert(index >= 0 && (size_t)index < m_ItemQueue.size());
         if (moveTo)
             m_SeqIndex = index;
+
+        switch(m_Mode) {
+            case PlaylistMode::Shuffle:
+            case PlaylistMode::ShuffleRepeat:
+                index = m_SeqShuffleQuque[index];
+                break;
+
+            default:
+                break;
+        }
+
         return m_ItemQueue[index];
     }
 
