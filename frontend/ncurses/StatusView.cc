@@ -32,7 +32,9 @@ inline static string FormatBitRate(int rate)
 
 StatusView::StatusView():
     m_PlayerHandler(NULL),
-    m_NeedRefresh(0)
+    m_WaitReply(false),
+    m_NeedRefresh(0),
+    m_Volume(0)
 {
 }
 
@@ -76,9 +78,9 @@ void StatusView::Refresh()
     d.Print(xoff, yoff, "-|");
     xoff += 2;
 
-    d.AttrSet(Attr::Bold);
+    d.AttrSet(Attr::Normal);
     d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, string(wVolSlider/2, '='));
+    d.Print(xoff, yoff, string(wVolSlider * (m_Volume/100.f), '='));
     xoff += wVolSlider;
 
     d.AttrSet(Attr::Bold);
@@ -179,13 +181,17 @@ void StatusView::Resize(int w, int h)
 
 bool StatusView::InjectKey(int key)
 {
+    MutexLocker locker(&m_RefreshMutex);
     switch (key) {
         case ' ':
             m_PlayerHandler->Pause();
             break;
 
         case 'm':
-            m_PlayerHandler->NextPlayMode();
+            if (!m_WaitReply) {
+                m_PlayerHandler->NextPlayMode();
+                m_WaitReply = true;
+            }
             break;
 
         case 'n':
@@ -204,10 +210,18 @@ bool StatusView::InjectKey(int key)
 
         case '+':
         case '=':
+            if (!m_WaitReply) {
+                m_PlayerHandler->VolumeUp();
+                m_WaitReply = true;
+            }
             break;
 
         case '-':
         case '_':
+            if (!m_WaitReply) {
+                m_PlayerHandler->VolumeDown();
+                m_WaitReply = true;
+            }
             break;
 
         default:
@@ -234,11 +248,13 @@ int StatusView::MinHeight() const
 void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
 {
     if (m_PlayerHandler != NULL) {
+        m_PlayerHandler->SigVolume().DisconnectReceiver(this);
         m_PlayerHandler->SigPlayMode().DisconnectReceiver(this);
         m_PlayerHandler->SigStatus().DisconnectReceiver(this);
     }
 
     if (handler != NULL) {
+        handler->SigVolume().Connect(&StatusView::SlotVolume, this);
         handler->SigPlayMode().Connect(&StatusView::SlotPlayMode, this);
         handler->SigStatus().Connect(&StatusView::SlotStatus, this);
     }
@@ -246,11 +262,20 @@ void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
     m_PlayerHandler = handler;
 }
 
+void StatusView::SlotVolume(int vol)
+{
+    MutexLocker locker(&m_RefreshMutex);
+    m_Volume = vol;
+    ++m_NeedRefresh;
+    m_WaitReply = false;
+}
+
 void StatusView::SlotPlayMode(const std::string& mode)
 {
     MutexLocker locker(&m_RefreshMutex);
     m_PlayMode = mode;
     ++m_NeedRefresh;
+    m_WaitReply = false;
 }
 
 void StatusView::SlotStatus(const ClientPlayerHandler::PlayerStatus& status)

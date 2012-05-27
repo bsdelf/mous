@@ -33,16 +33,20 @@ public:
     void SetPlayerHandler(ClientPlayerHandler* handler);
 
 private:
-    void SlotPlayMode(const std::string& mode);
-    void SlotStatus(const ClientPlayerHandler::PlayerStatus& status);
+    void SlotVolume(int);
+    void SlotPlayMode(const std::string&);
+    void SlotStatus(const ClientPlayerHandler::PlayerStatus&);
 
 private:
     Window d;
 
     ClientPlayerHandler* m_PlayerHandler;
 
+    bool m_WaitReply;
+
     mutable Mutex m_RefreshMutex;
     int m_NeedRefresh;
+    int m_Volume;
     std::string m_PlayMode;
     ClientPlayerHandler::PlayerStatus m_PlayerStatus;
 };

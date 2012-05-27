@@ -37,6 +37,7 @@ public:
     void StopSync();
 
     // request
+    void QueryVolume();
     void VolumeUp();
     void VolumeDown();
 
@@ -46,6 +47,11 @@ public:
     void Pause();
     void PlayNext();
     void PlayPrev();
+
+    const Signal<void (int)>& SigVolume() const
+    {
+        return m_SigVolume;
+    }
 
     const Signal<void (const std::string&)>& SigPlayMode() const
     {
@@ -64,6 +70,7 @@ private:
     Function<char* (char, int)> fnGetPayloadBuffer;
     Function<void (void)> fnSendOut;
 
+    Signal<void (int)> m_SigVolume;
     Signal<void (const std::string&)> m_SigPlayMode;
     Signal<void (const PlayerStatus&)> m_SigStatus;
 

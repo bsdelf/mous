@@ -184,6 +184,31 @@ void Session::PlayerSeek(BufObj& buf)
 
 void Session::PlayerVolume(BufObj& buf)
 {
+    char change = buf.Fetch<char>();
+
+    MutexLocker locker(&m_Context->mutex);
+
+    switch (change) {
+        case 0:
+            break;
+
+        case 1:
+        case -1:
+        {
+            int vol = m_Context->player->Volume() + change*5;
+            if (vol > 100)
+                vol = 100;
+            else if (vol < 0)
+                vol = 0;
+            m_Context->player->SetVolume(vol);
+        }
+            break;
+
+        default:
+            return;
+    }
+
+    SEND_PLAYER_PACKET(<< (char)Op::Player::Volume << (char)m_Context->player->Volume());
 }
 
 void Session::PlayerPlayMode(BufObj& buf)

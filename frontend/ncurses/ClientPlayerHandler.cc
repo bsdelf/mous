@@ -33,6 +33,12 @@ void ClientPlayerHandler::Handle(char* buf, int len)
     BufObj bufObj(buf);
     bufObj >> op;
     switch (op) {
+        case Op::Player::Volume:
+        {
+            m_SigVolume(bufObj.Fetch<char>());
+        }
+            break;
+
         case Op::Player::PlayMode:
         {
             string mode;
@@ -82,12 +88,19 @@ void ClientPlayerHandler::StopSync()
     m_SyncSchedule.Stop(true);
 }
 
+void ClientPlayerHandler::QueryVolume()
+{
+    SEND_PACKET(<< (char)Op::Player::Volume << (char)0);
+}
+
 void ClientPlayerHandler::VolumeUp()
 {
+    SEND_PACKET(<< (char)Op::Player::Volume << (char)1);
 }
 
 void ClientPlayerHandler::VolumeDown()
 {
+    SEND_PACKET(<< (char)Op::Player::Volume << (char)-1);
 }
 
 void ClientPlayerHandler::QueryPlayMode()
