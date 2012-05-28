@@ -124,9 +124,9 @@ private:
 
         buf << list.m_SeqIndex;
 
-        buf << (int)list.m_SeqShuffleQuque.size();
-        for (size_t i = 0; i < std::min(STL_MAX, list.m_SeqShuffleQuque.size()); ++i) {
-            buf << list.m_SeqShuffleQuque[i];
+        buf << (int)list.m_SeqShuffleQueue.size();
+        for (size_t i = 0; i < std::min(STL_MAX, list.m_SeqShuffleQueue.size()); ++i) {
+            buf << list.m_SeqShuffleQueue[i];
         }
         
         return buf.Offset();
@@ -174,9 +174,9 @@ private:
         buf >> list.m_SeqIndex;
 
         buf >> count;
-        list.m_SeqShuffleQuque.resize(count);
+        list.m_SeqShuffleQueue.resize(count);
         for (int i = 0; i < count; ++i) {
-            buf >> list.m_SeqShuffleQuque[i];
+            buf >> list.m_SeqShuffleQueue[i];
         }
 
         return true;
