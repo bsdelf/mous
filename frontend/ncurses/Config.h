@@ -11,10 +11,13 @@ struct Config
     // environment
     std::string pluginDir;
     std::string resourceDir;
+    std::string configDir;
 
     std::string configFile;
     std::string pidFile;
     std::string pyMapFile;
+    std::string contextFile;
+    std::string playlistFile;
 
     // config content
     std::string serverIp;

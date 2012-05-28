@@ -19,6 +19,9 @@ namespace Path {
     const char* const PyMapFile = "unipy.map";
     const char* const ConfigFile = "ncurses.config";
     const char* const PidFile = "server.pid";
+
+    const char* const ContextFile = "ncurses.context";
+    const char* const PlaylistFile = "playlist%d.dat";
 }
 
 namespace Field {
@@ -42,18 +45,20 @@ bool Config::Init()
     resourceDir = resDirInfo.AbsFilePath();
 
     // prepare root dir
-    string configRootDir = Env::Env(Env::Home) + Path::ConfigRoot;
+    configDir = Env::Env(Env::Home) + Path::ConfigRoot;
 
     pyMapFile = resourceDir + Path::ResourcePinYin + Path::PyMapFile;
-    configFile = configRootDir + Path::ConfigFile;
-    pidFile = configRootDir + Path::PidFile;
+    configFile = configDir + Path::ConfigFile;
+    pidFile = configDir + Path::PidFile;
+    contextFile = configDir + Path::ContextFile;
+    playlistFile = configDir + Path::PlaylistFile;
 
-    FileInfo configRootDirInfo(configRootDir);
+    FileInfo configRootDirInfo(configDir);
     if (configRootDirInfo.Exists()) {
         if (configRootDirInfo.Type() != FileType::Directory)
             return false;
     } else {
-        if (!Dir::MakeDir(configRootDir, 0777))
+        if (!Dir::MakeDir(configDir, 0777))
             return false;
 
         if (!SaveDefault())

@@ -43,6 +43,9 @@ public:
     void Cleanup();
     void ClearPlaylists();
 
+    void Dump();
+    void Restore();
+
     void NextPlayMode();
 
     bool PlayAt(int iList, int iItem);

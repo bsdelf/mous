@@ -13,35 +13,28 @@ using namespace std;
 
 Server::Server()
 {
-    m_Data = new ServerContext;
+    m_Context = new ServerContext;
     pipe(m_PipeFd);
-
-    log.open("mous.log", ios::out);
 }
 
 Server::~Server()
 {
-    delete m_Data;
+    delete m_Context;
     close(m_PipeFd[0]);
     close(m_PipeFd[1]);
     m_Socket.Close();
-
-    log.close();
 }
 
 int Server::Exec()
 {
-    if (!m_Data->Init())
+    if (!m_Context->Init())
         return 1;
 
     const Config* config = GlobalConfig::Instance();
-    log << config << endl;
     if (config == NULL)
         return 2;
 
-    log << config->pluginDir << endl;
-    log << config->serverIp << endl;
-    log << config->serverPort << endl;
+    m_Context->Restore();
 
     SocketOpt opt;
     opt.reuseAddr = true;
@@ -98,7 +91,7 @@ int Server::Exec()
         }
     }
 
-    m_Data->Cleanup();
+    m_Context->Cleanup();
 
     return 0;
 }
@@ -115,12 +108,14 @@ void Server::StopService()
     }
     m_SessionSet.clear();
 
+    m_Context->Dump();
+
     cout << "StopService()" << endl;
 }
 
 void Server::OpenSession(TcpSocket& clientSocket)
 {
-    Session* session = new Session(m_Data);
+    Session* session = new Session(m_Context);
     m_SessionSet.insert(session);
     session->Run(clientSocket, m_PipeFd[1]);
 

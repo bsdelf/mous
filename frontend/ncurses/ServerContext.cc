@@ -1,9 +1,19 @@
 #include "ServerContext.h"
 
+#include <fstream>
+#include <sstream>
+using namespace std;
+
+#include <scx/BufObj.hpp>
 #include <scx/Signal.hpp>
 using namespace scx;
 
+#include <util/PlaylistSerializer.h>
+using namespace mous;
+
 #include "Config.h"
+
+const int VERSION = 1;
 
 ServerContext::ServerContext():
     playlists(6),
@@ -76,6 +86,80 @@ void ServerContext::ClearPlaylists()
         playlist_t& list = playlists[i];
         for (int n = 0; n < list.Count(); ++n)
             delete list[n];
+    }
+}
+
+void ServerContext::Dump()
+{
+    typedef PlaylistSerializer<MediaItem*> Serializer;
+
+    const Config* config = GlobalConfig::Instance();
+    if (config == NULL)
+        return;
+
+    // save context
+    BufObj buf(NULL);
+    buf << (int)VERSION;
+    buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
+    buf.PutArray(selectedItem);
+
+    vector<char> outbuf(buf.Offset());
+
+    buf.SetBuffer(&outbuf[0]);
+    buf << (int)VERSION;
+    buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
+    buf.PutArray(selectedItem);
+
+    fstream outfile;
+    outfile.open(config->contextFile.c_str(), ios::binary | ios::out);
+    outfile.write(&outbuf[0], outbuf.size());
+    outfile.close();
+    
+    // save playlists
+    vector<char> nameBuf(config->playlistFile.size() + 2);
+    for (size_t i = 0; i < playlists.size(); ++i) {
+        snprintf(&nameBuf[0], nameBuf.size(), config->playlistFile.c_str(), i);
+        Serializer::Store(playlists[i], &nameBuf[0]);
+    }
+}
+
+void ServerContext::Restore()
+{
+    typedef PlaylistSerializer<MediaItem*> Serializer;
+
+    const Config* config = GlobalConfig::Instance();
+    if (config == NULL)
+        return;
+
+    // load context
+    stringstream stream;
+    fstream infile;
+    infile.open(config->contextFile.c_str(), ios::binary | ios::in);
+    stream << infile.rdbuf();
+    infile.close();
+
+    BufObj buf(const_cast<char*>(stream.str().data()));
+
+    int version;
+    buf >> version;
+    if (version != VERSION)
+        return;
+
+    char mode;
+    int used;
+    int selected;
+    buf >> mode >> used >> selected;
+    buf.TakeArray(selectedItem);
+
+    playMode = (EmPlaylistMode)mode;
+    usedPlaylist = used;
+    selectedPlaylist = selected;
+
+    // load playlists
+    vector<char> nameBuf(config->playlistFile.size() + 2);
+    for (size_t i = 0; i < playlists.size(); ++i) {
+        snprintf(&nameBuf[0], nameBuf.size(), config->playlistFile.c_str(), i);
+        Serializer::Load(playlists[i], &nameBuf[0]);
     }
 }
 
