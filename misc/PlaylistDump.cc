@@ -1,5 +1,5 @@
-#include "util/Playlist.h"
-#include "util/MediaItem.h"
+#include <util/MediaItem.h>
+#include <util/PlaylistSerializer.h>
 using namespace mous;
 
 #include "scx/BufObj.hpp"
@@ -24,6 +24,8 @@ void PrintList(const Playlist<MediaItem>& list)
 
 int main()
 {
+    PlaylistSerializer<MediaItem> serializer;
+
     cout << "=== Write dat ===" << endl;
     {
         Playlist<MediaItem> list;
@@ -47,39 +49,17 @@ int main()
 
         PrintList(list);
 
-        BufObj buf(NULL);
-        list >> buf;
-        cout << COUNT << " items, need bytes:" << buf.GetOffset() << endl;
+        serializer.Store(list, FILE_NAME);
 
-        vector<char> realBuf(buf.GetOffset());
-        buf.ResetOffset();
-        buf.SetBuffer(&realBuf[0]);
-        list >> buf;
-
-        fstream file;
-        file.open(FILE_NAME, ios::out);
-        file << (int)realBuf.size();
-        file.write(&realBuf[0], realBuf.size());
-        file.close();
+        vector<char> outbuf;
+        serializer.Store(list, outbuf);
+        cout << COUNT << " items, write bytes:" << outbuf.size() << endl;
     }
 
     cout << "=== Read dat ===" << endl;
     {
-        vector<char> realBuf;
-        int size;
-
-        fstream file;
-        file.open(FILE_NAME, ios::in);
-        file >> size;
-        realBuf.resize(size);
-        file.read(&realBuf[0], size);
-        file.close();
-
-        cout << "bytes:" << size << endl;
-
-        BufObj buf(&realBuf[0]);
         Playlist<MediaItem> list2;
-        list2 << buf;
+        serializer.Load(list2, FILE_NAME);
         PrintList(list2);
     }
 
