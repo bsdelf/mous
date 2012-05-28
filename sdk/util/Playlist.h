@@ -260,47 +260,6 @@ public:
         reverse(m_ItemQueue.begin(), m_ItemQueue.end());
     }
 
-    template<class buf_t>
-    void operator<<(buf_t& buf)
-    {
-        int mode;
-        buf >> mode;
-        m_Mode = (EmPlaylistMode)mode;
-
-        int count;
-        buf >> count;
-        m_ItemQueue.resize(count);
-        for (int i = 0; i < count; ++i) {
-            m_ItemQueue[i] << buf;
-        }
-
-        buf >> m_SeqIndex;
-
-        buf >> count;
-        m_SeqShuffleQuque.resize(count);
-        for (int i = 0; i < count; ++i) {
-            buf >> m_SeqShuffleQuque[i];
-        }
-    }
-
-    template<class buf_t>
-    void operator>>(buf_t& buf) const
-    {
-        buf << (int)m_Mode;
-
-        buf << (int)m_ItemQueue.size();
-        for (int i = 0; i < (int)m_ItemQueue.size(); ++i) {
-            m_ItemQueue[i] >> buf;
-        }
-
-        buf << m_SeqIndex;
-
-        buf << (int)m_SeqShuffleQuque.size();
-        for (int i = 0; i < (int)m_SeqShuffleQuque.size(); ++i) {
-            buf << m_SeqShuffleQuque[i];
-        }
-    }
-
 private:
     void AdjustSeqPosition()
     {
