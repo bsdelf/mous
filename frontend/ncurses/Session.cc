@@ -476,7 +476,7 @@ void Session::PlaylistSync(BufObj& buf)
 
     // send playlist
     if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
-        deque<MediaItem*>& list = m_Context->playlists[iList].Items();
+        const deque<MediaItem*>& list = m_Context->playlists[iList].Items();
         SendMediaItemsByChunk(iList, list);
     }
 

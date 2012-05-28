@@ -47,12 +47,17 @@ inline static std::string ToString(e mode)
 }
 typedef PlaylistMode::e EmPlaylistMode;
 
+template <typename item_t>
+class PlaylistSerializer;
+
 /*
  * NOTE: Playlist<int> won't be compiled!
  */
 template <typename item_t>
 class Playlist
 {
+    friend class PlaylistSerializer<item_t>;
+
 public:
     Playlist():
         m_Mode(PlaylistMode::Normal),
@@ -233,12 +238,7 @@ public:
         return m_ItemQueue[index];
     }
 
-    std::deque<item_t>& Items()
-    {
-        return m_ItemQueue;
-    }
-
-    const std::deque<item_t>& Items() const
+    std::deque<item_t> Items() const
     {
         return m_ItemQueue;
     }
