@@ -10,6 +10,12 @@
 #include <algorithm>
 #include <iostream>
 
+#define MOUS_HAS(container, var) \
+    (container.find(var) != container.end())
+
+#define MOUS_FIND(container, var) \
+    std::find(container.begin(), container.end(), var)
+
 namespace mous {
 
 namespace PlaylistMode {
@@ -87,13 +93,9 @@ public:
             shuffleSet.insert(ShuffleRepeat);
 
             // normal <=> shuffle
-            if (normalSet.find(m_Mode) != normalSet.end()
-                    && shuffleSet.find(mode) != shuffleSet.end()) {
-                m_SeqIndex = 
-                    find(m_SeqShuffleQueue.begin(), m_SeqShuffleQueue.end(), m_SeqIndex)
-                    - m_SeqShuffleQueue.begin();
-            } else if (shuffleSet.find(m_Mode) != shuffleSet.end()
-                    && normalSet.find(mode) != normalSet.end()) {
+            if (MOUS_HAS(normalSet, m_Mode) && MOUS_HAS(shuffleSet, mode)) {
+                m_SeqIndex = MOUS_FIND(m_SeqShuffleQueue, m_SeqIndex) - m_SeqShuffleQueue.begin();
+            } else if (MOUS_HAS(shuffleSet, m_Mode) && MOUS_HAS(normalSet, mode)) {
                 m_SeqIndex = m_SeqShuffleQueue[m_SeqIndex];
             }
         }
@@ -179,9 +181,7 @@ public:
 
                 case Shuffle:
                 case ShuffleRepeat:
-                    m_SeqIndex = 
-                        find(m_SeqShuffleQueue.begin(), m_SeqShuffleQueue.end(), index)
-                        - m_SeqShuffleQueue.begin();
+                    m_SeqIndex = MOUS_FIND(m_SeqShuffleQueue, index) - m_SeqShuffleQueue.begin();
                     break;
 
                 default:
@@ -359,5 +359,8 @@ private:
 };
 
 }
+
+#undef MOUS_HAS
+#undef MOUS_FIND
 
 #endif
