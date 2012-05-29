@@ -45,9 +45,9 @@ private:
     void FormatTime(QString& str, int ms);
 
 private:
-    void SlotPlayerStopped();
+    void SlotPlayerFinished();
 private slots:
-    void SlotUiPlayerStopped();
+    void SlotUiPlayerFinished();
 
 private slots:
     void SlotUpdateUi();

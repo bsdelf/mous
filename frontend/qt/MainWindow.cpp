@@ -75,7 +75,7 @@ void MainWindow::InitMousCore()
 
     m_Player->RegisterRendererPlugin(rendererAgentList[0]);
     m_Player->RegisterDecoderPlugin(decoderAgentList);
-    m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerStopped, this);
+    m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
 
     m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
     m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
@@ -135,7 +135,7 @@ void MainWindow::InitMyUi()
     // Show default playlist
     SlotWidgetPlayListDoubleClick();
 
-    QDockWidget* dock = new QDockWidget("Metadata");
+    QDockWidget* dock = new QDockWidget(tr("Metadata"));
     dock->setWidget(&m_FrmTagEditor);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     dock->setFeatures(QDockWidget::NoDockWidgetFeatures | QDockWidget::DockWidgetMovable);
@@ -170,17 +170,18 @@ void MainWindow::FormatTime(QString& str, int ms)
 }
 
 /* MousCore slots */
-void MainWindow::SlotPlayerStopped()
+void MainWindow::SlotPlayerFinished()
 {
-    QMetaObject::invokeMethod(this, "SlotUiPlayerStopped", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, "SlotUiPlayerFinished", Qt::QueuedConnection);
 }
 
-void MainWindow::SlotUiPlayerStopped()
+void MainWindow::SlotUiPlayerFinished()
 {
     qDebug() << "Stopped!";
     if (m_UsedPlaylistView != NULL) {
         const MediaItem* item = m_UsedPlaylistView->NextItem();
-        SlotPlayMediaItem(m_UsedPlaylistView, item);
+        if (item != NULL)
+            SlotPlayMediaItem(m_UsedPlaylistView, item);
     }
 }
 
