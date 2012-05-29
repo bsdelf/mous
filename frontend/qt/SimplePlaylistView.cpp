@@ -1,14 +1,19 @@
 #include "SimplePlaylistView.h"
 #include <QtCore>
 #include <QtGui>
+
 #include <util/MediaItem.h>
 #include <core/IMediaLoader.h>
+using namespace mous;
+
 #include <scx/Thread.hpp>
 #include <scx/IconvHelper.hpp>
-#include "UiHelper.hpp"
+#include <scx/CharsetHelper.hpp>
+using namespace scx;
 using namespace std;
+
+#include "UiHelper.hpp"
 using namespace sqt;
-using namespace mous;
 
 SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
@@ -200,6 +205,29 @@ size_t SimplePlaylistView::GetItemCount() const
     return m_Playlist.Count();
 }
 
+/* Override qt methods */
+void SimplePlaylistView::dragEnterEvent(QDragEnterEvent *event)
+{
+    qDebug() << "+drag" << event->mimeData()->text();
+    event->acceptProposedAction();
+}
+
+void SimplePlaylistView::dragMoveEvent(QDragMoveEvent *event)
+{
+    qDebug() << "~drag" << event->mimeData()->text();
+}
+
+void SimplePlaylistView::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    qDebug() << "-drag";
+}
+
+void SimplePlaylistView::dropEvent(QDropEvent *event)
+{
+    qDebug() << "!drop" << event->mimeData()->text();
+    event->acceptProposedAction();
+}
+
 void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
 {
     QTreeView::mouseDoubleClickEvent(event);
@@ -366,41 +394,24 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
             QString strDuration;
             strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
 
-
             string tmp;
-
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
-                item->tag.artist = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
-                item->tag.artist = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
-                item->tag.artist = tmp;
-            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
+            if (!CharsetHelper::IsUtf8(item->tag.artist.c_str())
+                    && IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
                 item->tag.artist = tmp;
             else
-                qDebug() << "failed:" << QString::fromUtf8(item->tag.artist.c_str());
+                qDebug() << "no touch:" << QString::fromUtf8(item->tag.artist.c_str());
 
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
-                item->tag.album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
-                item->tag.album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
-                item->tag.album = tmp;
-            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
+            if (!CharsetHelper::IsUtf8(item->tag.album.c_str())
+                    && IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
                 item->tag.album = tmp;
             else
-                qDebug() << "failed:" << QString::fromUtf8(item->tag.album.c_str());
+                qDebug() << "no touch:" << QString::fromUtf8(item->tag.album.c_str());
 
-            if (scx::IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
-                item->tag.title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB18030", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
-                item->tag.title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("GB2312", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
-                item->tag.title = tmp;
-            else if (scx::IconvHelper::ConvFromTo("BIG-5", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
+            if (!CharsetHelper::IsUtf8(item->tag.title.c_str())
+                    && IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
                 item->tag.title = tmp;
             else
-                qDebug() << "failed:" << QString::fromUtf8(item->tag.title.c_str());
+                qDebug() << "no touch:" << QString::fromUtf8(item->tag.title.c_str());
 
             // Build row
             mediaRow.row << new QStandardItem(QString::fromUtf8(item->tag.artist.c_str()));
