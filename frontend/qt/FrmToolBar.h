@@ -15,12 +15,12 @@ public:
     explicit FrmToolBar(QWidget *parent = 0);
     ~FrmToolBar();
     
-    QToolButton* GetBtnPlay();
-    QToolButton* GetBtnNext();
-    QToolButton* GetBtnPrev();
+    QToolButton* BtnPlay();
+    QToolButton* BtnNext();
+    QToolButton* BtnPrev();
 
-    QSlider* GetSliderVolume();
-    QSlider* GetSliderPlaying();
+    QSlider* SliderVolume();
+    QSlider* SliderPlaying();
 
 private:
     Ui::FrmToolBar *ui;

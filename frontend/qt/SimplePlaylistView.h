@@ -24,9 +24,9 @@ public:
 
     virtual void SetMediaLoader(const mous::IMediaLoader* loader);
 
-    virtual const mous::MediaItem* GetNextItem() const;
-    virtual const mous::MediaItem* GetPreviousItem() const;
-    virtual size_t GetItemCount() const;
+    virtual const mous::MediaItem* NextItem() const;
+    virtual const mous::MediaItem* PrevItem() const;
+    virtual int ItemCount() const;
 
 signals:
     void SigPlayMediaItem(IPlaylistView *view, const mous::MediaItem* item);

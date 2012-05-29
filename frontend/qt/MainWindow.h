@@ -53,7 +53,8 @@ private slots:
     void SlotUpdateUi();
 
     void SlotBtnPlay();
-    void SlotBtnStop();
+    void SlotBtnPrev();
+    void SlotBtnNext();
 
     void SlotSliderVolumeValueChanged(int);
 

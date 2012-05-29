@@ -13,9 +13,9 @@ public:
 
     virtual void SetMediaLoader(const mous::IMediaLoader* loader) = 0;
 
-    virtual const mous::MediaItem* GetNextItem() const = 0;
-    virtual const mous::MediaItem* GetPreviousItem() const = 0;
-    virtual size_t GetItemCount() const = 0;
+    virtual const mous::MediaItem* PrevItem() const = 0;
+    virtual const mous::MediaItem* NextItem() const = 0;
+    virtual int ItemCount() const = 0;
 };
 
 #endif // IPLAYLISTVIEW_H

@@ -13,27 +13,27 @@ FrmToolBar::~FrmToolBar()
     delete ui;
 }
 
-QToolButton* FrmToolBar::GetBtnPlay()
+QToolButton* FrmToolBar::BtnPlay()
 {
     return ui->btnPlay;
 }
 
-QToolButton* FrmToolBar::GetBtnPrev()
+QToolButton* FrmToolBar::BtnPrev()
 {
     return ui->btnPrev;
 }
 
-QToolButton* FrmToolBar::GetBtnNext()
+QToolButton* FrmToolBar::BtnNext()
 {
     return ui->btnNext;
 }
 
-QSlider* FrmToolBar::GetSliderVolume()
+QSlider* FrmToolBar::SliderVolume()
 {
     return ui->sliderVolume;
 }
 
-QSlider* FrmToolBar::GetSliderPlaying()
+QSlider* FrmToolBar::SliderPlaying()
 {
     return ui->sliderPlaying;
 }

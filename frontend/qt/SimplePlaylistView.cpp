@@ -189,18 +189,18 @@ void SimplePlaylistView::SetMediaLoader(const IMediaLoader* loader)
     m_MediaLoader = loader;
 }
 
-const MediaItem* SimplePlaylistView::GetNextItem() const
+const MediaItem* SimplePlaylistView::NextItem() const
 {
     return m_Playlist.SeqHasOffset(1) ? m_Playlist.SeqItemAtOffset(1, true) : NULL;
 
 }
 
-const MediaItem* SimplePlaylistView::GetPreviousItem() const
+const MediaItem* SimplePlaylistView::PrevItem() const
 {
     return m_Playlist.SeqHasOffset(-1) ? m_Playlist.SeqItemAtOffset(-1, true) : NULL;
 }
 
-size_t SimplePlaylistView::GetItemCount() const
+int SimplePlaylistView::ItemCount() const
 {
     return m_Playlist.Count();
 }

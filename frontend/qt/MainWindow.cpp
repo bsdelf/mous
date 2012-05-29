@@ -115,7 +115,7 @@ void MainWindow::InitMyUi()
     m_IconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
 
     // Volume
-    m_FrmToolBar.GetSliderVolume()->setValue(m_Player->Volume());
+    m_FrmToolBar.SliderVolume()->setValue(m_Player->Volume());
 
     // PlayList View
     m_TabBarPlaylist = new MidClickTabBar(this);
@@ -149,13 +149,15 @@ void MainWindow::InitQtSlots()
 {
     connect(m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
 
-    connect(m_FrmToolBar.GetBtnPlay(), SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
+    connect(m_FrmToolBar.BtnPlay(), SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
+    connect(m_FrmToolBar.BtnPrev(), SIGNAL(clicked()), this, SLOT(SlotBtnPrev()));
+    connect(m_FrmToolBar.BtnNext(), SIGNAL(clicked()), this, SLOT(SlotBtnNext()));
 
-    connect(m_FrmToolBar.GetSliderVolume(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderVolumeValueChanged(int)));
+    connect(m_FrmToolBar.SliderVolume(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderVolumeValueChanged(int)));
 
-    connect(m_FrmToolBar.GetSliderPlaying(), SIGNAL(sliderPressed()), this, SLOT(SlotSliderPlayingPressed()));
-    connect(m_FrmToolBar.GetSliderPlaying(), SIGNAL(sliderReleased()), this, SLOT(SlotSliderPlayingReleased()));
-    connect(m_FrmToolBar.GetSliderPlaying(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderPlayingValueChanged(int)));
+    connect(m_FrmToolBar.SliderPlaying(), SIGNAL(sliderPressed()), this, SLOT(SlotSliderPlayingPressed()));
+    connect(m_FrmToolBar.SliderPlaying(), SIGNAL(sliderReleased()), this, SLOT(SlotSliderPlayingReleased()));
+    connect(m_FrmToolBar.SliderPlaying(), SIGNAL(valueChanged(int)), this, SLOT(SlotSliderPlayingValueChanged(int)));
 
     connect(m_TabBarPlaylist, SIGNAL(SigMidClick(int)), this, SLOT(SlotBarPlayListMidClick(int)));
     connect(m_TabWidgetPlaylist, SIGNAL(SigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
@@ -177,7 +179,7 @@ void MainWindow::SlotUiPlayerStopped()
 {
     qDebug() << "Stopped!";
     if (m_UsedPlaylistView != NULL) {
-        const MediaItem* item = m_UsedPlaylistView->GetNextItem();
+        const MediaItem* item = m_UsedPlaylistView->NextItem();
         SlotPlayMediaItem(m_UsedPlaylistView, item);
     }
 }
@@ -198,8 +200,8 @@ void MainWindow::SlotUpdateUi()
 
     //==== Update slider.
     if (!m_SliderPlayingPreempted) {
-        int percent = (double)ms / total * m_FrmToolBar.GetSliderPlaying()->maximum();
-        m_FrmToolBar.GetSliderPlaying()->setSliderPosition(percent);
+        int percent = (double)ms / total * m_FrmToolBar.SliderPlaying()->maximum();
+        m_FrmToolBar.SliderPlaying()->setSliderPosition(percent);
     }
 }
 
@@ -218,13 +220,13 @@ void MainWindow::SlotBtnPlay()
     case PlayerStatus::Playing:
         m_Player->Pause();
         m_TimerUpdateUi->stop();
-        m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPlaying);
+        m_FrmToolBar.BtnPlay()->setIcon(m_IconPlaying);
         break;
 
     case PlayerStatus::Paused:
         m_TimerUpdateUi->start(m_UpdateInterval);
         m_Player->Resume();
-        m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPaused);
+        m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
         break;
 
     case PlayerStatus::Stopped:
@@ -233,17 +235,23 @@ void MainWindow::SlotBtnPlay()
             m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
         else
             m_Player->Play();
-        m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPaused);
+        m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
         break;
     }
 }
 
-void MainWindow::SlotBtnStop()
+void MainWindow::SlotBtnPrev()
 {
-    qDebug() << m_Player->Status();
+    const mous::MediaItem* item = m_UsedPlaylistView->PrevItem();
+    if (item != NULL)
+        SlotPlayMediaItem(m_UsedPlaylistView, item);
+}
 
-    m_Player->Pause();
-    m_TimerUpdateUi->stop();
+void MainWindow::SlotBtnNext()
+{
+    const mous::MediaItem* item = m_UsedPlaylistView->NextItem();
+    if (item != NULL)
+        SlotPlayMediaItem(m_UsedPlaylistView, item);
 }
 
 void MainWindow::SlotSliderVolumeValueChanged(int val)
@@ -266,7 +274,7 @@ void MainWindow::SlotSliderPlayingValueChanged(int val)
     if (!m_SliderPlayingPreempted)
         return;
 
-    const double& percent = (double)val / m_FrmToolBar.GetSliderPlaying()->maximum();
+    const double& percent = (double)val / m_FrmToolBar.SliderPlaying()->maximum();
     m_Player->SeekPercent(percent);
 }
 
@@ -316,7 +324,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
         m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
     else
         m_Player->Play();
-    m_FrmToolBar.GetBtnPlay()->setIcon(m_IconPaused);
+    m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
 
     setWindowTitle(QString::fromUtf8(item->tag.title.c_str()));
 
