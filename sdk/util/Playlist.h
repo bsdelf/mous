@@ -76,7 +76,7 @@ public:
         using namespace std;
         using namespace PlaylistMode;
 
-        if (m_SeqIndex >= 0 && m_SeqIndex < m_ItemQueue.size())  {
+        if (m_SeqIndex >= 0 && (size_t)m_SeqIndex < m_ItemQueue.size())  {
             set<EmPlaylistMode> normalSet;
             normalSet.insert(Normal);
             normalSet.insert(Repeat);
