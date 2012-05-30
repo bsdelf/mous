@@ -17,7 +17,7 @@ signals:
     void SigDoubleClick();
 
 private:
-    void mouseDoubleClickEvent(QMouseEvent* evt);
+    void mouseDoubleClickEvent(QMouseEvent* event);
 };
 
 }
