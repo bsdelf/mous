@@ -1,15 +1,21 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+
+#include "DlgListSelect.h"
+#include "DlgConvertOption.h"
+#include "SimplePlaylistView.h"
+
 #include "MidClickTabBar.hpp"
 #include "CustomHeadTabWidget.hpp"
-#include "DlgListSelect.h"
-#include <scx/Signal.hpp>
-#include <util/MediaItem.h>
-#include "SimplePlaylistView.h"
-#include "DlgConvertOption.h"
-using namespace std;
 using namespace sqt;
+
+#include <scx/Signal.hpp>
+using namespace scx;
+
+#include <util/MediaItem.h>
 using namespace mous;
+
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -181,7 +187,7 @@ void MainWindow::SlotUiPlayerFinished()
     if (m_UsedPlaylistView != NULL) {
         const MediaItem* item = m_UsedPlaylistView->NextItem();
         if (item != NULL)
-            SlotPlayMediaItem(m_UsedPlaylistView, item);
+            SlotPlayMediaItem(m_UsedPlaylistView, *item);
     }
 }
 
@@ -245,14 +251,14 @@ void MainWindow::SlotBtnPrev()
 {
     const mous::MediaItem* item = m_UsedPlaylistView->PrevItem();
     if (item != NULL)
-        SlotPlayMediaItem(m_UsedPlaylistView, item);
+        SlotPlayMediaItem(m_UsedPlaylistView, *item);
 }
 
 void MainWindow::SlotBtnNext()
 {
     const mous::MediaItem* item = m_UsedPlaylistView->NextItem();
     if (item != NULL)
-        SlotPlayMediaItem(m_UsedPlaylistView, item);
+        SlotPlayMediaItem(m_UsedPlaylistView, *item);
 }
 
 void MainWindow::SlotSliderVolumeValueChanged(int val)
@@ -296,18 +302,18 @@ void MainWindow::SlotWidgetPlayListDoubleClick()
     SimplePlaylistView* view = new SimplePlaylistView(this);
     view->SetMediaLoader(m_MediaLoader);
 
-    connect(view, SIGNAL(SigPlayMediaItem(IPlaylistView*, const mous::MediaItem*)),
-            this, SLOT(SlotPlayMediaItem(IPlaylistView*, const mous::MediaItem*)));
-    connect(view, SIGNAL(SigConvertMediaItem(const mous::MediaItem*)),
-            this, SLOT(SlotConvertMediaItem(const mous::MediaItem*)));
-    connect(view, SIGNAL(SigConvertMediaItems(QList<const mous::MediaItem*>)),
-            this, SLOT(SlotConvertMediaItems(QList<const mous::MediaItem*>)));
+    connect(view, SIGNAL(SigPlayMediaItem(IPlaylistView*, const MediaItem&)),
+            this, SLOT(SlotPlayMediaItem(IPlaylistView*, const MediaItem&)));
+    connect(view, SIGNAL(SigConvertMediaItem(const MediaItem&)),
+            this, SLOT(SlotConvertMediaItem(const MediaItem&)));
+    connect(view, SIGNAL(SigConvertMediaItems(const QList<MediaItem>&)),
+            this, SLOT(SlotConvertMediaItems(const QList<MediaItem>&)));
 
     m_TabWidgetPlaylist->addTab(view, QString::number(m_TabWidgetPlaylist->count()));
     m_TabWidgetPlaylist->setCurrentIndex(m_TabWidgetPlaylist->count()-1);
 }
 
-void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
+void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 {
     if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
@@ -317,24 +323,24 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem *item)
         m_TimerUpdateUi->stop();
     }
 
-    m_UsedMediaItem = item;
-    m_Player->Open(m_UsedMediaItem->url);
+    m_UsedMediaItem = &item;
 
+    m_Player->Open(item.url);
     m_TimerUpdateUi->start(m_UpdateInterval);
-    if (m_UsedMediaItem->hasRange)
-        m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
+    if (item.hasRange)
+        m_Player->Play(item.msBeg, item.msEnd);
     else
         m_Player->Play();
     m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
 
-    setWindowTitle(QString::fromUtf8(item->tag.title.c_str()));
+    setWindowTitle(QString::fromUtf8(item.tag.title.c_str()));
 
     m_UsedPlaylistView = view;
 
-    m_FrmTagEditor.LoadFileTag(item->url);
+    m_FrmTagEditor.LoadFileTag(item.url);
 }
 
-void MainWindow::SlotConvertMediaItem(const MediaItem *item)
+void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 {
     //==== show encoders
     vector<string> encoderNames = m_ConvFactory->EncoderNames();
@@ -365,7 +371,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
     newTask->EncoderOptions(opts);
 
     QString fileName =
-            QString::fromUtf8((item->tag.artist + " - " + item->tag.title + "." + newTask->EncoderFileSuffix()).c_str());
+            QString::fromUtf8((item.tag.artist + " - " + item.tag.title + "." + newTask->EncoderFileSuffix()).c_str());
     DlgConvertOption dlgOption(this);
     dlgOption.SetDir(QDir::homePath());
     dlgOption.SetFileName(fileName);
@@ -383,7 +389,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem *item)
     m_DlgConvertTask.AddTask(newTask, fileName);
 }
 
-void MainWindow::SlotConvertMediaItems(QList<const MediaItem*> items)
+void MainWindow::SlotConvertMediaItems(const QList<MediaItem>& items)
 {
 
 }

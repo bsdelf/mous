@@ -3,13 +3,19 @@
 
 #include <QtCore>
 #include <QtGui>
+
 #include <core/IPluginManager.h>
 #include <core/IMediaLoader.h>
 #include <core/IPlayer.h>
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
 #include <core/ITagParserFactory.h>
+#include <util/MediaItem.h>
+using namespace mous;
+
 #include <string>
+using namespace std;
+
 #include "FrmToolBar.h"
 #include "FrmTagEditor.h"
 #include "IPlaylistView.h"
@@ -65,9 +71,9 @@ private slots:
     void SlotBarPlayListMidClick(int index);
     void SlotWidgetPlayListDoubleClick();
 
-    void SlotPlayMediaItem(IPlaylistView* view, const mous::MediaItem* item);
-    void SlotConvertMediaItem(const mous::MediaItem *item);
-    void SlotConvertMediaItems(QList<const mous::MediaItem*> items);
+    void SlotPlayMediaItem(IPlaylistView* view, const MediaItem& item);
+    void SlotConvertMediaItem(const MediaItem& item);
+    void SlotConvertMediaItems(const QList<MediaItem>& items);
 
 private:
     Ui::MainWindow *ui;

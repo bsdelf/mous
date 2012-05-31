@@ -18,9 +18,17 @@ using namespace sqt;
 const QString ITEM_MIME = "index:";
 const QString FILE_MIME = "file://";
 
+typedef PlaylistActionHistory<MediaItem> ActionHistory;
+
 SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
-    m_MediaLoader(NULL)
+    m_MediaLoader(NULL),
+    m_ShortcutCopy(qobject_cast<QWidget*>(this)),
+    m_ShortcutCut(qobject_cast<QWidget*>(this)),
+    m_ShortcutPaste(qobject_cast<QWidget*>(this)),
+    m_ShortcutDelete(qobject_cast<QWidget*>(this)),
+    m_ShortcutUndo(qobject_cast<QWidget*>(this)),
+    m_ShortcutRedo(qobject_cast<QWidget*>(this))
 {
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -34,24 +42,26 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     connect(action, SIGNAL(triggered()), this, SLOT(SlotAppend()));
     actionList << action;
 
+    actionList << new QAction(this);
+
     // Action remove
     action = new QAction(tr("Remove"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(SlotRemove()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotShortcutDelete()));
     actionList << action;
 
     // Action copy
     action = new QAction(tr("Copy"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(SlotCopy()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotShortcutCopy()));
     actionList << action;
 
     // Action cut
     action = new QAction(tr("Cut"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(SlotCut()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotShortcutCut()));
     actionList << action;
 
     // Action paste
     action = new QAction(tr("Paste"), this);
-    connect(action, SIGNAL(triggered()), this, SLOT(SlotPaste()));
+    connect(action, SIGNAL(triggered()), this, SLOT(SlotShortcutPaste()));
     actionList << action;
 
     actionList << new QAction(this);
@@ -134,24 +144,24 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    setModel(&m_StModel);
+    setModel(&m_ItemModel);
     header()->setResizeMode(QHeaderView::Stretch);
 
     // Header
     QStringList headList;
     headList << tr("Artist") << tr("Album") << tr("Title") << tr("Track") << tr("Duration");
-    m_StModel.setHorizontalHeaderLabels(headList);
-    m_StModel.setColumnCount(headList.size());
+    m_ItemModel.setHorizontalHeaderLabels(headList);
+    m_ItemModel.setColumnCount(headList.size());
 
     // Test
     /*
-    m_StModel.setRowCount(0);
-    for (int row = 0; row < m_StModel.rowCount(); ++row) {
-        for (int column = 0; column < m_StModel.columnCount(); ++column) {
+    m_ItemModel.setRowCount(0);
+    for (int row = 0; row < m_ItemModel.rowCount(); ++row) {
+        for (int column = 0; column < m_ItemModel.columnCount(); ++column) {
              QStandardItem *item = new QStandardItem(QString("row %0, column %1").arg(row).arg(column));
-             item->setEditable(false);
-             item->setSizeHint(QSize(-1, 25));
-             m_StModel.setItem(row, column, item);
+             item.setEditable(false);
+             item.setSizeHint(QSize(-1, 25));
+             m_ItemModel.setItem(row, column, item);
          }
     }
     */
@@ -159,12 +169,15 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     m_Playlist.SetMode(PlaylistMode::Repeat);
 
     // connect
-    connect(this, SIGNAL(SigReadyToLoad()), this, SLOT(SlotReadyToLoad()), Qt::BlockingQueuedConnection);
-    connect(this, SIGNAL(SigLoadFinished()), this, SLOT(SlotLoadFinished()), Qt::BlockingQueuedConnection);
-    connect(this, SIGNAL(SigMediaRowGot(MediaRow*)), this, SLOT(SlotMediaRowGot(MediaRow*)), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(SigReadyToLoad()),
+            this, SLOT(SlotReadyToLoad()), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(SigLoadFinished()),
+            this, SLOT(SlotLoadFinished()), Qt::BlockingQueuedConnection);
+    connect(this, SIGNAL(SigListRowGot(const ListRow&)),
+            this, SLOT(SlotListRowGot(const ListRow&)), Qt::BlockingQueuedConnection);
 
-    connect(&m_ScrollTimer, SIGNAL(timeout()), this, SLOT(SlotCheckForScroll));
-    //connect(&m_PickMediaItemTimer, SIGNAL(timeout()), this, SLOT(SlotPickMediaItem()));
+    //connect(&m_ScrollTimer, SIGNAL(timeout()), this, SLOT(SlotCheckForScroll));
+    SetupShortcuts();
 }
 
 SimplePlaylistView::~SimplePlaylistView()
@@ -178,18 +191,14 @@ SimplePlaylistView::~SimplePlaylistView()
         delete action;
     }
 
-    while (m_StModel.rowCount() > 0) {
-        QList<QStandardItem*> list = m_StModel.takeRow(0);
+    while (m_ItemModel.rowCount() > 0) {
+        QList<QStandardItem*> list = m_ItemModel.takeRow(0);
         foreach(QStandardItem* item, list)
             delete item;
     }
 
-    for (int i = 0; i < m_Playlist.Count(); ++i) {
-        delete m_Playlist[i];
-    }
     m_Playlist.Clear();
 
-    //m_LoadThread.jooin();
 }
 
 /* IPlayListView interfaces */
@@ -200,18 +209,35 @@ void SimplePlaylistView::SetMediaLoader(const IMediaLoader* loader)
 
 const MediaItem* SimplePlaylistView::NextItem() const
 {
-    return m_Playlist.SeqHasOffset(1) ? m_Playlist.SeqItemAtOffset(1, true) : NULL;
+    return m_Playlist.SeqHasOffset(1) ? &m_Playlist.SeqItemAtOffset(1, true) : NULL;
 
 }
 
 const MediaItem* SimplePlaylistView::PrevItem() const
 {
-    return m_Playlist.SeqHasOffset(-1) ? m_Playlist.SeqItemAtOffset(-1, true) : NULL;
+    return m_Playlist.SeqHasOffset(-1) ? &m_Playlist.SeqItemAtOffset(-1, true) : NULL;
 }
 
 int SimplePlaylistView::ItemCount() const
 {
     return m_Playlist.Count();
+}
+
+void SimplePlaylistView::SetupShortcuts()
+{
+    m_ShortcutCopy.setKey(QKeySequence::Copy);
+    m_ShortcutCut.setKey(QKeySequence::Cut);
+    m_ShortcutPaste.setKey(QKeySequence::Paste);
+    m_ShortcutDelete.setKey(QKeySequence::Delete);
+    m_ShortcutUndo.setKey(QKeySequence::Undo);
+    m_ShortcutRedo.setKey(QKeySequence::Redo);
+
+    connect(&m_ShortcutCopy, SIGNAL(activated()), this, SLOT(SlotShortcutCopy()));
+    connect(&m_ShortcutCut, SIGNAL(activated()), this, SLOT(SlotShortcutCut()));
+    connect(&m_ShortcutPaste, SIGNAL(activated()), this, SLOT(SlotShortcutPaste()));
+    connect(&m_ShortcutDelete, SIGNAL(activated()), this, SLOT(SlotShortcutDelete()));
+    connect(&m_ShortcutUndo, SIGNAL(activated()), this, SLOT(SlotShortcutUndo()));
+    connect(&m_ShortcutRedo, SIGNAL(activated()), this, SLOT(SlotShortcutRedo()));
 }
 
 /* Override qt methods */
@@ -272,7 +298,7 @@ void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
     qDebug() << index.row();
 
     m_Playlist.SeqJumpTo(index.row());
-    MediaItem* item = m_Playlist.SeqItemAtOffset(0, false);
+    const MediaItem& item = m_Playlist.SeqItemAtOffset(0, false);
 
     emit SigPlayMediaItem(this, item);
 }
@@ -357,7 +383,7 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
 /* Action menus */
 void SimplePlaylistView::SlotAppend()
 {
-    // Get media path
+    // Pick media files
     QString oldPath("~");
     if (!m_PrevMediaFilePath.isEmpty()) {
         QFileInfo info(m_PrevMediaFilePath);
@@ -369,29 +395,11 @@ void SimplePlaylistView::SlotAppend()
         return;
 
     m_PrevMediaFilePath = pathList.first();
+
+    // Async load
     scx::Function<void (const QStringList&)> fn(&SimplePlaylistView::LoadMediaItem, this);
     m_LoadMediaThread.Run(fn, pathList);
     m_LoadMediaThread.Detach();
-}
-
-void SimplePlaylistView::SlotRemove()
-{
-
-}
-
-void SimplePlaylistView::SlotCopy()
-{
-
-}
-
-void SimplePlaylistView::SlotCut()
-{
-
-}
-
-void SimplePlaylistView::SlotPaste()
-{
-
 }
 
 void SimplePlaylistView::SlotTagging()
@@ -407,7 +415,7 @@ void SimplePlaylistView::SlotConvert()
     QModelIndex index(selectedIndexes()[0]);
     qDebug() << index.row();
 
-    MediaItem* item = m_Playlist[index.row()];
+    MediaItem item = m_Playlist[index.row()];
 
     emit SigConvertMediaItem(item);
 }
@@ -438,7 +446,6 @@ void SimplePlaylistView::SlotReadyToLoad()
 
     m_DlgLoadingMedia.setWindowTitle(tr("Loading"));
     m_DlgLoadingMedia.show();
-    //m_PickMediaItemTimer.start(1);
 }
 
 
@@ -448,30 +455,113 @@ void SimplePlaylistView::SlotLoadFinished()
     m_DlgLoadingMedia.hide();
 }
 
-void SimplePlaylistView::SlotMediaRowGot(MediaRow* mediaRow)
+void SimplePlaylistView::SlotListRowGot(const ListRow& listRow)
 {
-    /*
-    if (m_TmpLoadList.isEmpty()) {
-        m_DlgLoadingMedia.SetFileName("");
-        if (m_LoadFinished) {
-            m_PickMediaItemTimer.stop();
-            m_DlgLoadingMedia.hide();
-            setUpdatesEnabled(true);
-        }
-        return;
-    }
-    m_TmpLoadMutex.lock();
-    MediaRow mediaRow = m_TmpLoadList.takeFirst();
-    m_TmpLoadMutex.unlock();
-    */
-
-    QFileInfo info(QString::fromUtf8(mediaRow->item->url.c_str()));
+    QFileInfo info(QString::fromUtf8(listRow.item.url.c_str()));
     QString fileName(info.fileName());
 
     m_DlgLoadingMedia.SetFileName(fileName);
 
-    m_Playlist.Append(mediaRow->item);
-    m_StModel.appendRow(mediaRow->row);
+    m_Playlist.Append(listRow.item);
+    m_ItemModel.appendRow(listRow.fields);
+}
+
+void SimplePlaylistView::SlotShortcutCopy()
+{
+    qDebug() << "copy";
+}
+
+void SimplePlaylistView::SlotShortcutCut()
+{
+    qDebug() << "cut";
+}
+
+void SimplePlaylistView::SlotShortcutPaste()
+{
+    qDebug() << "paste";
+}
+
+void SimplePlaylistView::SlotShortcutDelete()
+{
+    qDebug() << "delete";
+}
+
+void SimplePlaylistView::SlotShortcutUndo()
+{
+    qDebug() << "undo";
+
+    if (m_History.HasUndoAction()) {
+        ActionHistory::Action action = m_History.PopUndoAction();
+        switch (action.type) {
+        case ActionHistory::Insert:
+        {
+            // append?
+            if (action.insertPos == -1) {
+                assert(!m_Playlist.Empty() && m_ItemModel.rowCount() != 0);
+                int n = action.srcItemList.size();
+                int begin = m_Playlist.Count() - n;
+                vector<int> indexes(n);
+                for (int i = 0; i < n; ++i) {
+                    indexes[i] = begin + i;
+                }
+                m_Playlist.Remove(indexes);
+                m_ItemModel.removeRows(begin, n);
+            } else {
+
+            }
+        }
+            break;
+
+        case ActionHistory::Remove:
+        {
+
+        }
+            break;
+
+        case ActionHistory::Move:
+        {
+        }
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
+void SimplePlaylistView::SlotShortcutRedo()
+{
+    qDebug() << "redo";
+
+    if (m_History.HasRedoAction()) {
+        ActionHistory::Action action = m_History.TakeRedoAction();
+        switch (action.type) {
+        case ActionHistory::Insert:
+        {
+            // append?
+            if (action.insertPos == -1) {
+                SlotReadyToLoad();
+                for (size_t i = 0; i < action.srcItemList.size(); ++i) {
+                    ListRow listRow = BuildListRow(action.srcItemList[i].second);
+                    SlotListRowGot(listRow);
+                }
+                SlotLoadFinished();
+            } else {
+
+            }
+        }
+            break;
+
+        case ActionHistory::Remove:
+            break;
+
+        case ActionHistory::Move:
+            break;
+
+        default:
+            break;
+        }
+    }
 }
 
 void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
@@ -479,84 +569,89 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
     if (pathList.empty())
         return;
 
-    m_LoadFinished = false;
-    m_TmpLoadList.clear();
-
     emit SigReadyToLoad();
 
-    std::deque<mous::MediaItem*> mediaItemList;
+    // Prepare for history
+    ActionHistory::Action action;
+    action.type = ActionHistory::Insert;
+    action.insertPos = -1;
 
     for (int i = 0; i < pathList.size(); ++i) {
         if (pathList.at(i).isEmpty())
             continue;
 
-        // Although load ok, the item may still invaild(player won't be able to it)
-        if (m_MediaLoader->LoadMedia(pathList.at(i).toUtf8().data(), mediaItemList) != ErrorCode::Ok)
+        // Although load ok,
+        // the item may still invaild(player won't be able to play it)
+        deque<MediaItem> mediaItemList;
+        const char* filePath = pathList.at(i).toUtf8().data();
+        if (m_MediaLoader->LoadMedia(filePath, mediaItemList) != ErrorCode::Ok)
             continue;
 
         for(size_t j = 0; j < mediaItemList.size(); ++j) {
-            MediaItem* item = mediaItemList[j];
-            if (item == NULL)
-                continue;
-
-            MediaRow mediaRow;
-            mediaRow.item = item;
-
-            // Check sec duration
-            int secDuration = 0;
-            if (item->hasRange) {
-                if (item->msEnd != (uint64_t)-1)
-                    secDuration = (item->msEnd - item->msBeg)/1000;
-                else
-                    secDuration = (item->duration - item->msBeg)/1000;
-            } else {
-                secDuration = item->duration/1000;
-            }
-            QString strDuration;
-            strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
-
-            string tmp;
-            if (!CharsetHelper::IsUtf8(item->tag.artist.c_str())
-                    && IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.artist.data(), item->tag.artist.size(), tmp))
-                item->tag.artist = tmp;
-            else
-                qDebug() << "no touch:" << QString::fromUtf8(item->tag.artist.c_str());
-
-            if (!CharsetHelper::IsUtf8(item->tag.album.c_str())
-                    && IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.album.data(), item->tag.album.size(), tmp))
-                item->tag.album = tmp;
-            else
-                qDebug() << "no touch:" << QString::fromUtf8(item->tag.album.c_str());
-
-            if (!CharsetHelper::IsUtf8(item->tag.title.c_str())
-                    && IconvHelper::ConvFromTo("GBK", "UTF-8", item->tag.title.data(), item->tag.title.size(), tmp))
-                item->tag.title = tmp;
-            else
-                qDebug() << "no touch:" << QString::fromUtf8(item->tag.title.c_str());
-
-            // Build row
-            mediaRow.row << new QStandardItem(QString::fromUtf8(item->tag.artist.c_str()));
-            mediaRow.row << new QStandardItem(QString::fromUtf8(item->tag.album.c_str()));
-            mediaRow.row << new QStandardItem(QString::fromUtf8(item->tag.title.c_str()));
-            mediaRow.row << new QStandardItem(QString::number(item->tag.track));
-            mediaRow.row << new QStandardItem(strDuration);
-            for (int i = 0; i < mediaRow.row.size(); ++i) {
-                QStandardItem* item = mediaRow.row[i];
-                item->setEditable(false);
-                item->setSizeHint(QSize(-1, 22));
-            }
-
-            emit SigMediaRowGot(&mediaRow);
-            /*
-            m_TmpLoadMutex.lock();
-            m_TmpLoadList.append(mediaRow);
-            m_TmpLoadMutex.unlock();
-            */
+            MediaItem& item = mediaItemList[j];
+            ListRow listRow = BuildListRow(item);
+            action.srcItemList.push_back(std::pair<int, MediaItem>(-1, item));
+            emit SigListRowGot(listRow);
         }
     }
 
+    // Record operation
+    if (!action.srcItemList.empty())
+        m_History.PushUndoAction(action);
+
     emit SigLoadFinished();
-    m_LoadFinished = true;
+}
+
+SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) const
+{
+    ListRow listRow;
+    listRow.item = item;
+
+    // Check sec duration
+    int secDuration = 0;
+    if (item.hasRange) {
+        if (item.msEnd != (uint64_t)-1)
+            secDuration = (item.msEnd - item.msBeg)/1000;
+        else
+            secDuration = (item.duration - item.msBeg)/1000;
+    } else {
+        secDuration = item.duration/1000;
+    }
+    QString strDuration;
+    strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
+
+    string tmp;
+    if (!CharsetHelper::IsUtf8(item.tag.artist.c_str())
+            && IconvHelper::ConvFromTo("GBK", "UTF-8", item.tag.artist.data(), item.tag.artist.size(), tmp))
+        item.tag.artist = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(item.tag.artist.c_str());
+
+    if (!CharsetHelper::IsUtf8(item.tag.album.c_str())
+            && IconvHelper::ConvFromTo("GBK", "UTF-8", item.tag.album.data(), item.tag.album.size(), tmp))
+        item.tag.album = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(item.tag.album.c_str());
+
+    if (!CharsetHelper::IsUtf8(item.tag.title.c_str())
+            && IconvHelper::ConvFromTo("GBK", "UTF-8", item.tag.title.data(), item.tag.title.size(), tmp))
+        item.tag.title = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(item.tag.title.c_str());
+
+    // Build fields
+    listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.artist.c_str()));
+    listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.album.c_str()));
+    listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.title.c_str()));
+    listRow.fields << new QStandardItem(QString::number(item.tag.track));
+    listRow.fields << new QStandardItem(strDuration);
+    for (int i = 0; i < listRow.fields.size(); ++i) {
+        QStandardItem* item = listRow.fields[i];
+        item->setEditable(false);
+        item->setSizeHint(QSize(-1, 22));
+    }
+
+    return listRow;
 }
 
 void SimplePlaylistView::SlotCheckForScroll()

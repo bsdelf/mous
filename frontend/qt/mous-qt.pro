@@ -46,7 +46,8 @@ HEADERS  += MainWindow.h \
     FrmToolBar.h \
     FrmTagEditor.h \
     IPlaylistView.h \
-    SimplePlaylistView.h
+    SimplePlaylistView.h \
+    PlaylistActionHistory.h
 
 FORMS    += MainWindow.ui \
     DlgListSelect.ui \
