@@ -28,7 +28,7 @@ public:
     void UnregisterPlugin(vector<const IPluginAgent*>& agents);
     void UnregisterAll();
 
-    EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem*>& list) const;
+    EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const;
 
 private:
     void AddMediaPack(const IPluginAgent* pAgent);
@@ -36,8 +36,8 @@ private:
     void AddTagParser(const IPluginAgent* pAgent);
     void RemoveTagParser(const IPluginAgent* pAgent);
  
-    EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem*>& list) const;
-    EmErrorCode TryParseTag(std::deque<MediaItem*>& list) const;
+    EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem>& list) const;
+    EmErrorCode TryParseTag(std::deque<MediaItem>& list) const;
 
 private:
     std::map<const IPluginAgent*, void*> m_AgentMap;

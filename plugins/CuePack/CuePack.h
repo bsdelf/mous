@@ -16,12 +16,12 @@ public:
 
     virtual vector<string> FileSuffix() const;
 
-    virtual void DumpMedia(const string& path, deque<MediaItem*>& list,
+    virtual void DumpMedia(const string& path, deque<MediaItem>& list,
 	    const map<string, IMediaPack*>* pMap) const;
 
-    virtual void DumpStream(const string& stream, deque<MediaItem*>& list,
+    virtual void DumpStream(const string& stream, deque<MediaItem>& list,
 	    const map<string, IMediaPack*>* pMap) const;
 
 private:
-    void DumpCue(const string& dir, Cd* cd, deque<MediaItem*>& list) const;
+    void DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const;
 };

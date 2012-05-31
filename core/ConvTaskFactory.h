@@ -27,7 +27,7 @@ public:
     virtual void UnregisterAll();
 
     virtual vector<string> EncoderNames() const;
-    virtual IConvTask* CreateTask(const MediaItem* item, const std::string& encoder) const;
+    virtual IConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const;
 
 private:
     void AddDecAgent(const IPluginAgent* pAgent);

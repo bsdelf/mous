@@ -164,7 +164,7 @@ void MediaLoader::RemoveTagParser(const IPluginAgent* pAgent)
     }
 }
 
-EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem*>& list) const
+EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem>& list) const
 {
     list.clear();
 
@@ -174,17 +174,18 @@ EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem*>& list) 
     return ErrorCode::Ok;
 }
 
-EmErrorCode MediaLoader::TryUnpack(const string& path, deque<MediaItem*>& list) const
+EmErrorCode MediaLoader::TryUnpack(const string& path, deque<MediaItem>& list) const
 {
     // Find MediaPack.
     string suffix = ToLower(FileHelper::FileSuffix(path));
     MediaPackMapConstIter iter = m_MediaPackMap.find(suffix);
+
+    MediaItem tmpItem;
     if (iter == m_MediaPackMap.end()) {
         // General Media
-        MediaItem* item = new MediaItem;
-        item->url = path;
-        item->hasRange = false;
-        list.push_back(item);
+        tmpItem.url = path;
+        tmpItem.hasRange = false;
+        list.push_back(tmpItem);
     } else {
         // MediaPack
         IMediaPack* pack = iter->second;
@@ -194,12 +195,12 @@ EmErrorCode MediaLoader::TryUnpack(const string& path, deque<MediaItem*>& list) 
     return ErrorCode::Ok;
 }
 
-EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list) const
+EmErrorCode MediaLoader::TryParseTag(deque<MediaItem>& list) const
 {
     for (size_t i = 0; i < list.size(); ++i) {
         // Find TagParser.
-        MediaItem* item = list[i];
-        string suffix = ToLower(FileHelper::FileSuffix(item->url));
+        MediaItem& item = list[i];
+        string suffix = ToLower(FileHelper::FileSuffix(item.url));
         TagParserMapConstIter iter = m_TagParserMap.find(suffix);
         if (iter == m_TagParserMap.end()) {
             iter = m_TagParserMap.find("*");
@@ -209,29 +210,29 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem*>& list) const
 
         // Parse & Fill.
         ITagParser* parser = iter->second;
-        parser->Open(item->url);
+        parser->Open(item.url);
         if (parser->HasTag()) {
-            if (item->tag.title.empty())
-                item->tag.title = parser->Title();
-            if (item->tag.artist.empty())
-                item->tag.artist = parser->Artist();
-            if (item->tag.album.empty())
-                item->tag.album = parser->Album();
-            if (item->tag.comment.empty())
-                item->tag.comment = parser->Comment();
-            if (item->tag.genre.empty())
-                item->tag.genre = parser->Genre();
-            if (item->tag.year < 0)
-                item->tag.year = parser->Year();
-            if (item->tag.track < 0)
-                item->tag.track = parser->Track();
+            if (item.tag.title.empty())
+                item.tag.title = parser->Title();
+            if (item.tag.artist.empty())
+                item.tag.artist = parser->Artist();
+            if (item.tag.album.empty())
+                item.tag.album = parser->Album();
+            if (item.tag.comment.empty())
+                item.tag.comment = parser->Comment();
+            if (item.tag.genre.empty())
+                item.tag.genre = parser->Genre();
+            if (item.tag.year < 0)
+                item.tag.year = parser->Year();
+            if (item.tag.track < 0)
+                item.tag.track = parser->Track();
         } else {
             cout << "WARN: no tag!!" << endl;
         }
 
         if (parser->HasProperties()) {
-            if (item->duration < 0)
-                item->duration = parser->Duration();
+            if (item.duration < 0)
+                item.duration = parser->Duration();
         } else {
             cout << "FATAL: no properties!!" << endl;
         }

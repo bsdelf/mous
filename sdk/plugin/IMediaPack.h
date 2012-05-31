@@ -18,10 +18,10 @@ public:
 
     virtual std::vector<std::string> FileSuffix() const = 0;
 
-    virtual void DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
+    virtual void DumpMedia(const std::string& path, std::deque<MediaItem>& list,
         const std::map<std::string, IMediaPack*>* pMap) const = 0;
 
-    virtual void DumpStream(const std::string& stream, std::deque<MediaItem*>& list,
+    virtual void DumpStream(const std::string& stream, std::deque<MediaItem>& list,
         const std::map<std::string, IMediaPack*>* pMap) const = 0;
 
     // reimplement this to provide options

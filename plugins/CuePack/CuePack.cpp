@@ -25,7 +25,7 @@ vector<string> CuePack::FileSuffix() const
     return list;
 }
 
-void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
+void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& list,
     const std::map<std::string, IMediaPack*>* pMap) const
 {
     FILE* file = fopen(path.c_str(), "r");
@@ -37,14 +37,14 @@ void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem*>& list,
     DumpCue(dir, cd, list);
 }
 
-void CuePack::DumpStream(const std::string& stream, std::deque<MediaItem*>& list,
+void CuePack::DumpStream(const std::string& stream, std::deque<MediaItem>& list,
     const std::map<std::string, IMediaPack*>* pMap) const
 {
     Cd* cd = cue_parse_string(stream.c_str());
     DumpCue("", cd, list);
 }
 
-void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem*>& list) const
+void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const
 {
     int ntrack = cd_get_ntrack(cd);
 
@@ -84,56 +84,56 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem*>& list) const
         delete data;
     }
 
+    MediaItem tmpItem;
     for (int i = 1; i <= ntrack; ++i) {
-        MediaItem* item = new MediaItem;
-        list.push_back(item);
+        list.push_back(tmpItem);
 
         Track* track = cd_get_track(cd, i);
-        item->url = dir + track_get_filename(track);
-        item->hasRange = true;
+        tmpItem.url = dir + track_get_filename(track);
+        tmpItem.hasRange = true;
         //item->msBeg = (track_get_start(track))/75*1000;
         //item->msEnd = item->msBeg + ((uint64_t)track_get_length(track))/75*1000;
-        item->msBeg = ((track_get_start(track)
+        tmpItem.msBeg = ((track_get_start(track)
                     //+ track_get_index(track, 1)
                     - track_get_zero_pre(track)) * 1000) / 75;
-        item->msEnd = ((track_get_start(track) + track_get_length(track)
+        tmpItem.msEnd = ((track_get_start(track) + track_get_length(track)
                     //- track_get_index(track, 1)
                     + track_get_zero_pre(track)) * 1000) / 75;
-        if (item->msBeg >= item->msEnd || i == ntrack)
-            item->msEnd = -1;
+        if (tmpItem.msBeg >= tmpItem.msEnd || i == ntrack)
+            tmpItem.msEnd = -1;
 
         Cdtext* text = track_get_cdtext(track);
 
-        item->tag.album = album;
-        item->tag.year = year;
+        tmpItem.tag.album = album;
+        tmpItem.tag.year = year;
 
         data = cdtext_get(PTI_TITLE, text);
         if (data != NULL) {
-            item->tag.title = data;
+            tmpItem.tag.title = data;
             delete data;
         }
 
         data = cdtext_get(PTI_PERFORMER, text);
         if (data != NULL) {
-            item->tag.artist = data;
+            tmpItem.tag.artist = data;
             delete data;
         } else {
-            item->tag.artist = artist;
+            tmpItem.tag.artist = artist;
         }
 
         data = cdtext_get(PTI_GENRE, text);
         if (data != NULL) {
-            item->tag.genre = data;
+            tmpItem.tag.genre = data;
             delete data;
         } else {
-            item->tag.genre = genre;
+            tmpItem.tag.genre = genre;
         }
 
-        item->tag.track = i;
+        tmpItem.tag.track = i;
 
         //cdtext_delete(text);
 
-        cout << i << '\t' << item->url << endl;
-        cout << "range:" << item->msBeg << "-" << item->msEnd << endl;
+        cout << i << '\t' << tmpItem.url << endl;
+        cout << "range:" << tmpItem.msBeg << "-" << tmpItem.msEnd << endl;
     }
 }

@@ -1,9 +1,12 @@
 #include "ConvTaskFactory.h"
+
 #include <plugin/IDecoder.h>
 #include <plugin/IEncoder.h>
+using namespace mous;
+
+#include <scx/Conv.hpp>
 #include <scx/FileHelper.hpp>
 using namespace scx;
-using namespace mous;
 
 IConvTaskFactory* IConvTaskFactory::Create()
 {
@@ -104,10 +107,10 @@ vector<string> ConvTaskFactory::EncoderNames() const
     return list;
 }
 
-IConvTask* ConvTaskFactory::CreateTask(const MediaItem* item, const std::string& encoder) const
+IConvTask* ConvTaskFactory::CreateTask(const MediaItem& item, const std::string& encoder) const
 {
     const IPluginAgent* decAgent = NULL;
-    const string& suffix = FileHelper::FileSuffix(item->url);
+    const string& suffix = ToLower(FileHelper::FileSuffix(item.url));
     DecAgentMapConstIter decAgentIter = m_DecAgentMap.find(suffix);
     if (decAgentIter != m_DecAgentMap.end()) {
         vector<const IPluginAgent*> list = *(decAgentIter->second);
@@ -121,7 +124,7 @@ IConvTask* ConvTaskFactory::CreateTask(const MediaItem* item, const std::string&
     }
 
     IConvTask* task = NULL;
-    if (item != NULL && decAgent != NULL && encAgent != NULL) {
+    if (decAgent != NULL && encAgent != NULL) {
         task = IConvTask::Create(item, decAgent, encAgent);
     }
     return task;
