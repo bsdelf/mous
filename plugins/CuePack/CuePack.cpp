@@ -84,56 +84,56 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const
         delete data;
     }
 
-    MediaItem tmpItem;
+    list.resize(ntrack);
     for (int i = 1; i <= ntrack; ++i) {
-        list.push_back(tmpItem);
+        MediaItem& item = list[i-1];
 
         Track* track = cd_get_track(cd, i);
-        tmpItem.url = dir + track_get_filename(track);
-        tmpItem.hasRange = true;
+        item.url = dir + track_get_filename(track);
+        item.hasRange = true;
         //item->msBeg = (track_get_start(track))/75*1000;
         //item->msEnd = item->msBeg + ((uint64_t)track_get_length(track))/75*1000;
-        tmpItem.msBeg = ((track_get_start(track)
+        item.msBeg = ((track_get_start(track)
                     //+ track_get_index(track, 1)
                     - track_get_zero_pre(track)) * 1000) / 75;
-        tmpItem.msEnd = ((track_get_start(track) + track_get_length(track)
+        item.msEnd = ((track_get_start(track) + track_get_length(track)
                     //- track_get_index(track, 1)
                     + track_get_zero_pre(track)) * 1000) / 75;
-        if (tmpItem.msBeg >= tmpItem.msEnd || i == ntrack)
-            tmpItem.msEnd = -1;
+        if (item.msBeg >= item.msEnd || i == ntrack)
+            item.msEnd = -1;
 
         Cdtext* text = track_get_cdtext(track);
 
-        tmpItem.tag.album = album;
-        tmpItem.tag.year = year;
+        item.tag.album = album;
+        item.tag.year = year;
 
         data = cdtext_get(PTI_TITLE, text);
         if (data != NULL) {
-            tmpItem.tag.title = data;
+            item.tag.title = data;
             delete data;
         }
 
         data = cdtext_get(PTI_PERFORMER, text);
         if (data != NULL) {
-            tmpItem.tag.artist = data;
+            item.tag.artist = data;
             delete data;
         } else {
-            tmpItem.tag.artist = artist;
+            item.tag.artist = artist;
         }
 
         data = cdtext_get(PTI_GENRE, text);
         if (data != NULL) {
-            tmpItem.tag.genre = data;
+            item.tag.genre = data;
             delete data;
         } else {
-            tmpItem.tag.genre = genre;
+            item.tag.genre = genre;
         }
 
-        tmpItem.tag.track = i;
+        item.tag.track = i;
 
         //cdtext_delete(text);
 
-        cout << i << '\t' << tmpItem.url << endl;
-        cout << "range:" << tmpItem.msBeg << "-" << tmpItem.msEnd << endl;
+        cout << i << '\t' << item.url << endl;
+        cout << "range:" << item.msBeg << "-" << item.msEnd << endl;
     }
 }
