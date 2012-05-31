@@ -38,8 +38,6 @@ ServerContext::~ServerContext()
     IPluginManager::Free(mgr);
     IMediaLoader::Free(loader);
     IPlayer::Free(player);
-
-    ClearPlaylists();
 }
 
 bool ServerContext::Init()
@@ -80,18 +78,9 @@ void ServerContext::Cleanup()
     mgr->UnloadAll();
 }
 
-void ServerContext::ClearPlaylists()
-{
-    for (size_t i = 0; i < playlists.size(); ++i) {
-        playlist_t& list = playlists[i];
-        for (int n = 0; n < list.Count(); ++n)
-            delete list[n];
-    }
-}
-
 void ServerContext::Dump()
 {
-    typedef PlaylistSerializer<MediaItem*> Serializer;
+    typedef PlaylistSerializer<MediaItem> Serializer;
 
     const Config* config = GlobalConfig::Instance();
     if (config == NULL)
@@ -125,7 +114,7 @@ void ServerContext::Dump()
 
 void ServerContext::Restore()
 {
-    typedef PlaylistSerializer<MediaItem*> Serializer;
+    typedef PlaylistSerializer<MediaItem> Serializer;
 
     const Config* config = GlobalConfig::Instance();
     if (config == NULL)
@@ -177,7 +166,7 @@ bool ServerContext::PlayAt(int iList, int iItem)
     ServerContext::playlist_t& list = playlists[iList];
 
     list.SeqJumpTo(iItem);
-    const MediaItem* item = list.SeqItemAtOffset(0, false);
+    const MediaItem& item = list.SeqItemAtOffset(0, false);
     return PlayItem(item);
 }
 
@@ -185,7 +174,7 @@ bool ServerContext::PlayNext(char direct)
 {
     playlist_t& list = playlists[usedPlaylist];
     if (list.SeqHasOffset(direct)) {
-        const MediaItem* item = list.SeqItemAtOffset(direct, true);
+        const MediaItem& item = list.SeqItemAtOffset(direct, true);
         PlayItem(item);
         sigPlayNextItem(item);
         return true;
@@ -213,18 +202,18 @@ void ServerContext::PausePlayer()
 const MediaItem* ServerContext::ItemInPlaying() const
 {
     const playlist_t& list = playlists[usedPlaylist];
-    return list.SeqHasOffset(0) ? list.SeqItemAtOffset(0, false) : NULL;
+    return list.SeqHasOffset(0) ? &list.SeqItemAtOffset(0, false) : NULL;
 }
 
-bool ServerContext::PlayItem(const MediaItem* item)
+bool ServerContext::PlayItem(const MediaItem& item)
 {
     ClosePlayer();
 
-    if (player->Open(item->url) != mous::ErrorCode::Ok)
+    if (player->Open(item.url) != mous::ErrorCode::Ok)
         return false;
 
-    if (item->hasRange)
-        player->Play(item->msBeg, item->msEnd);
+    if (item.hasRange)
+        player->Play(item.msBeg, item.msEnd);
     else
         player->Play();
 
@@ -251,7 +240,7 @@ void ServerContext::SlotFinished()
 
     playlist_t& list = playlists[usedPlaylist];
     if (list.SeqHasOffset(1)) {
-        const MediaItem* item = list.SeqItemAtOffset(1, true);
+        const MediaItem& item = list.SeqItemAtOffset(1, true);
         PlayItem(item);
         sigPlayNextItem(item);
     }

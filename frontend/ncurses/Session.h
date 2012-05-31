@@ -12,11 +12,7 @@ using namespace scx;
 #include <string>
 using namespace std;
 
-struct ServerContext;
-
-namespace mous {
-    struct MediaItem;
-}
+#include "ServerContext.h"
 
 class Session
 {
@@ -51,14 +47,14 @@ private:
     void PlaylistClear(BufObj&);
     void PlaylistSync(BufObj&);
 
-    void SlotPlayNextItem(const mous::MediaItem*);
+    void SlotPlayNextItem(const MediaItem&);
 
     char* GetPayloadBuffer(char, int);
     void SendOut();
 
     void TryConvertToUtf8(string& str) const;
-    void SendMediaItemsByChunk(char, const deque<mous::MediaItem*>&);
-    void SendMediaItemInfo(const mous::MediaItem*);
+    void SendMediaItemsByChunk(char, const deque<MediaItem>&);
+    void SendMediaItemInfo(const MediaItem&);
 
 private:
     ServerContext* m_Context;

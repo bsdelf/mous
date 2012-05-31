@@ -19,7 +19,7 @@ using namespace mous;
 
 bool gStop = false;
 IPlayer* gPlayer = NULL;
-Playlist<MediaItem*>* gPlaylist = NULL;
+Playlist<MediaItem>* gPlaylist = NULL;
 Mutex gMutexForSwitch;
 
 void OnFinished()
@@ -27,12 +27,12 @@ void OnFinished()
     gMutexForSwitch.Lock();
     if (gPlaylist != NULL && !gStop) {
         if (gPlaylist->SeqHasOffset(1)) {
-            MediaItem* item = gPlaylist->SeqItemAtOffset(1, true);
+            const MediaItem& item = gPlaylist->SeqItemAtOffset(1, true);
             if (gPlayer->Status() != PlayerStatus::Closed)
                 gPlayer->Close();
-            gPlayer->Open(item->url);
-            if (item->hasRange)
-                gPlayer->Play(item->msBeg, item->msEnd);
+            gPlayer->Open(item.url);
+            if (item.hasRange)
+                gPlayer->Play(item.msBeg, item.msEnd);
             else
                 gPlayer->Play();
         }
@@ -166,9 +166,9 @@ int main(int argc, char** argv)
     loader->RegisterTagParserPlugin(tagAgentList);
 
     // Setup playlist
-    Playlist<MediaItem*> playlist;
+    Playlist<MediaItem> playlist;
     gPlaylist = &playlist;
-    deque<MediaItem*> mediaList;
+    deque<MediaItem> mediaList;
     for (int i = 1; i < argc; ++i) {
         loader->LoadMedia(argv[i], mediaList);
         playlist.Append(mediaList);
@@ -201,8 +201,8 @@ int main(int argc, char** argv)
             return 0;
         }
 
-        MediaItem* item = playlist[11];
-        cout << item->url << endl;
+        MediaItem item = playlist[11];
+        cout << item.url << endl;
         IConvTask* task = factory->CreateTask(item, encoders[index-1]);
         task->Run("output.wav");
 
@@ -249,21 +249,21 @@ int main(int argc, char** argv)
     if (playlist.Empty())
         return -1;
 
-    const MediaItem* item = playlist.SeqItemAtOffset(0, false);
+    const MediaItem& item = playlist.SeqItemAtOffset(0, false);
 
     cout << ">>>> Tag Info" << endl;
-    cout << "\ttitle:" << item->tag.title << endl;
-    cout << "\tartist:" << item->tag.artist << endl;
-    cout << "\talbum:" << item->tag.album << endl;
-    cout << "\tcomment:" << item->tag.comment << endl;
-    cout << "\tgenre:" << item->tag.genre << endl;
-    cout << "\tyear:" << item->tag.year << endl;
-    cout << "\ttrack:" << item->tag.track << endl;
+    cout << "\ttitle:" << item.tag.title << endl;
+    cout << "\tartist:" << item.tag.artist << endl;
+    cout << "\talbum:" << item.tag.album << endl;
+    cout << "\tcomment:" << item.tag.comment << endl;
+    cout << "\tgenre:" << item.tag.genre << endl;
+    cout << "\tyear:" << item.tag.year << endl;
+    cout << "\ttrack:" << item.tag.track << endl;
 
-    cout << "item->url:" << item->url << endl;
-    player->Open(item->url);
-    if (item->hasRange) {
-        player->Play(item->msBeg, item->msEnd);
+    cout << "item.url:" << item.url << endl;
+    player->Open(item.url);
+    if (item.hasRange) {
+        player->Play(item.msBeg, item.msEnd);
     } else {
         player->Play();
     }
@@ -290,8 +290,8 @@ int main(int argc, char** argv)
                 break;
 
             case 'r':
-                if (item->hasRange) {
-                    player->Play(item->msBeg, item->msEnd);
+                if (item.hasRange) {
+                    player->Play(item.msBeg, item.msEnd);
                 } else {
                     player->Play();
                 }
@@ -306,10 +306,6 @@ int main(int argc, char** argv)
     player->UnregisterAll();
     mgr->UnloadAll();
     
-    for (size_t i = 0; i < mediaList.size(); ++i) {
-        delete mediaList[i];
-    }
-
     IPlayer::Free(player);
     IMediaLoader::Free(loader);
     IPluginManager::Free(mgr);

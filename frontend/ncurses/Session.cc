@@ -9,7 +9,6 @@ using namespace std;
 using namespace scx;
 
 #include "Config.h"
-#include "ServerContext.h"
 #include "Protocol.h"
 using namespace Protocol;
 
@@ -280,7 +279,8 @@ void Session::PlayerSync(BufObj& buf)
         case BINARY_MASK(0, 1):
         {
             const MediaItem* item = m_Context->ItemInPlaying();
-            SendMediaItemInfo(item);
+            if (item != NULL)
+                SendMediaItemInfo(*item);
         }
         case BINARY_MASK(1, 1):
         {
@@ -393,7 +393,8 @@ void Session::PlaylistPlay(BufObj& buf)
     bool ok = m_Context->PlayAt(iList, iItem);
     if (ok) {
         const MediaItem* item = m_Context->ItemInPlaying();
-        SendMediaItemInfo(item);
+        if (item != NULL)
+            SendMediaItemInfo(*item);
     } 
 
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Play << (char)iList << (char)(ok ? 1 : 0));
@@ -410,14 +411,14 @@ void Session::PlaylistAppend(BufObj& buf)
     if (iList < 0 || (size_t)iList >= m_Context->playlists.size())
         return;
 
-    deque<MediaItem*> list;
+    deque<MediaItem> list;
     if (m_Context->loader->LoadMedia(path, list) != ErrorCode::Ok)
         return;
     if (list.empty())
         return;
 
     for (size_t i = 0; i < list.size(); ++i) {
-        MediaTag& tag = list[i]->tag;
+        MediaTag& tag = list[i].tag;
         TryConvertToUtf8(tag.title);
         TryConvertToUtf8(tag.artist);
         TryConvertToUtf8(tag.album);
@@ -438,7 +439,6 @@ void Session::PlaylistRemove(BufObj& buf)
 
     if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
         if (iItem >= 0 && iItem < m_Context->playlists[iList].Count()) {
-            delete m_Context->playlists[iList][iItem];
             m_Context->playlists[iList].Remove(iItem);
         }
     }
@@ -456,9 +456,6 @@ void Session::PlaylistClear(BufObj& buf)
     MutexLocker locker(&m_Context->mutex);
 
     if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
-        for (int i = 0; i < m_Context->playlists[iList].Count(); ++i) {
-            delete m_Context->playlists[iList][i];
-        }
         m_Context->playlists[iList].Clear();
     }
 
@@ -476,7 +473,7 @@ void Session::PlaylistSync(BufObj& buf)
 
     // send playlist
     if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
-        const deque<MediaItem*>& list = m_Context->playlists[iList].Items();
+        const deque<MediaItem>& list = m_Context->playlists[iList].Items();
         SendMediaItemsByChunk(iList, list);
     }
 
@@ -491,7 +488,7 @@ void Session::PlaylistSync(BufObj& buf)
     }
 }
 
-void Session::SlotPlayNextItem(const mous::MediaItem* item)
+void Session::SlotPlayNextItem(const mous::MediaItem& item)
 {
     SendMediaItemInfo(item);
 }
@@ -530,7 +527,7 @@ void Session::TryConvertToUtf8(string& str) const
     }
 }
 
-void Session::SendMediaItemsByChunk(char index, const deque<MediaItem*>& list)
+void Session::SendMediaItemsByChunk(char index, const deque<MediaItem>& list)
 {
     // assume less than 65535
     for (size_t off = 0, count = 0; off < list.size(); off += count) {
@@ -539,13 +536,13 @@ void Session::SendMediaItemsByChunk(char index, const deque<MediaItem*>& list)
         BufObj buf(NULL);
         buf << (char)Op::Playlist::Append << index << (int32_t)count;
         for (size_t i = 0; i < count; ++i) {
-            *list[off+i] >> buf;
+            list[off+i] >> buf;
         }
 
         buf.SetBuffer(GetPayloadBuffer(Group::Playlist, buf.Offset()));
         buf << (char)Op::Playlist::Append << index << (int32_t)count;
         for (size_t i = 0; i < count; ++i) {
-            *list[off+i] >> buf;
+            list[off+i] >> buf;
         }
 
         SendOut();
@@ -553,11 +550,8 @@ void Session::SendMediaItemsByChunk(char index, const deque<MediaItem*>& list)
     }
 }
 
-void Session::SendMediaItemInfo(const MediaItem* item)
+void Session::SendMediaItemInfo(const MediaItem& item)
 {
-    if (item == NULL)
-        return;
-
     char op = Op::Player::ItemInfo;
 
     int32_t sampleRate = m_Context->player->SamleRate();
@@ -565,12 +559,12 @@ void Session::SendMediaItemInfo(const MediaItem* item)
 
     BufObj buf(NULL);
     buf << op;
-    *item >> buf;
+    item >> buf;
     buf << sampleRate << duration;
 
     buf.SetBuffer(GetPayloadBuffer(Group::Player, buf.Offset()));
     buf << op;
-    *item >> buf;
+    item >> buf;
     buf << sampleRate << duration;
 
     SendOut();

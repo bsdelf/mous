@@ -24,7 +24,7 @@ struct ServerContext
     IMediaLoader* loader;
     IPlayer* player;
 
-    typedef Playlist<MediaItem*> playlist_t;
+    typedef Playlist<MediaItem> playlist_t;
     vector<playlist_t> playlists;
 
     EmPlaylistMode playMode;
@@ -33,7 +33,7 @@ struct ServerContext
     int selectedPlaylist;
     vector<int> selectedItem;
 
-    Signal<void (const MediaItem*)> sigPlayNextItem;
+    Signal<void (const MediaItem&)> sigPlayNextItem;
 
 public:
     ServerContext();
@@ -41,7 +41,6 @@ public:
 
     bool Init();
     void Cleanup();
-    void ClearPlaylists();
 
     void Dump();
     void Restore();
@@ -57,7 +56,7 @@ private:
     void SetPlayMode(EmPlaylistMode mode);
 
     void ClosePlayer();
-    bool PlayItem(const MediaItem* item);
+    bool PlayItem(const MediaItem& item);
 
     void SlotFinished();
 };
