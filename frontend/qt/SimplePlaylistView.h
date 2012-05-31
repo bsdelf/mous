@@ -41,11 +41,13 @@ private:
     };
 
 private:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent * event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
-    void dropEvent(QDropEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent * event);
+    void dropEvent(QDropEvent *event);    
 
 private slots:
     void SlotAppend();
@@ -75,10 +77,13 @@ signals:
 private:
     void LoadMediaItem(const QStringList& pathList);
 
+private slots:
+    void SlotCheckForScroll();
+
 private:
     const mous::IMediaLoader* m_MediaLoader;
 
-    QString m_OldMediaPath;
+    QString m_PrevMediaFilePath;
 
     QStandardItemModel m_StModel;
     mous::Playlist<mous::MediaItem*> m_Playlist;
@@ -89,6 +94,10 @@ private:
     QMutex m_TmpLoadMutex;
     QList<MediaRow> m_TmpLoadList;
     bool m_LoadFinished;
+
+    QPoint m_DragStartPos;
+
+    QTimer m_ScrollTimer;
 };
 
 #endif // SIMPLEPLAYLISTVIEW_H

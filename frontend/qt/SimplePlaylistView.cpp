@@ -15,6 +15,9 @@ using namespace std;
 #include "UiHelper.hpp"
 using namespace sqt;
 
+const QString ITEM_MIME = "index:";
+const QString FILE_MIME = "file://";
+
 SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
     m_MediaLoader(NULL)
@@ -120,11 +123,16 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
 
     setAcceptDrops(true);
     setDragEnabled(true);
+    setDropIndicatorShown(true);
+    setDragDropMode(QAbstractItemView::DragDrop);
 
     setRootIsDecorated(false);
     setItemsExpandable(false);
     setAlternatingRowColors(true);
     setUniformRowHeights(true);
+
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setSelectionBehavior(QAbstractItemView::SelectRows);
 
     setModel(&m_StModel);
     header()->setResizeMode(QHeaderView::Stretch);
@@ -155,6 +163,7 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     connect(this, SIGNAL(SigLoadFinished()), this, SLOT(SlotLoadFinished()), Qt::BlockingQueuedConnection);
     connect(this, SIGNAL(SigMediaRowGot(MediaRow*)), this, SLOT(SlotMediaRowGot(MediaRow*)), Qt::BlockingQueuedConnection);
 
+    connect(&m_ScrollTimer, SIGNAL(timeout()), this, SLOT(SlotCheckForScroll));
     //connect(&m_PickMediaItemTimer, SIGNAL(timeout()), this, SLOT(SlotPickMediaItem()));
 }
 
@@ -206,26 +215,50 @@ int SimplePlaylistView::ItemCount() const
 }
 
 /* Override qt methods */
-void SimplePlaylistView::dragEnterEvent(QDragEnterEvent *event)
+void SimplePlaylistView::mousePressEvent(QMouseEvent *event)
 {
-    qDebug() << "+drag" << event->mimeData()->text();
-    event->acceptProposedAction();
+    QTreeView::mousePressEvent(event);
+
+    if (event->button() == Qt::LeftButton && !selectedIndexes().empty())
+        m_DragStartPos = event->pos();
 }
 
-void SimplePlaylistView::dragMoveEvent(QDragMoveEvent *event)
+void SimplePlaylistView::mouseMoveEvent(QMouseEvent *event)
 {
-    qDebug() << "~drag" << event->mimeData()->text();
-}
+    // Prepare for drag
+    if (!(event->buttons() & Qt::LeftButton))
+        return;
+    if (m_DragStartPos.isNull() ||
+            (event->pos() - m_DragStartPos).manhattanLength() < QApplication::startDragDistance())
+        return;
 
-void SimplePlaylistView::dragLeaveEvent(QDragLeaveEvent *event)
-{
-    qDebug() << "-drag";
-}
+    // Pick selected indexes
+    QModelIndexList list = selectedIndexes();
+    if (list.empty() || !list.contains(indexAt(event->pos())))
+        return;
+    QSet<int> indexes;
+    QString strIndexes = ITEM_MIME;
+    for (int i = 0; i < list.size(); ++i) {
+        int row = list[i].row();
+        if (!indexes.contains(row)) {
+            indexes.insert(row);
+            strIndexes.append(QString::number(row)).append(":");
+        }
+    }
 
-void SimplePlaylistView::dropEvent(QDropEvent *event)
-{
-    qDebug() << "!drop" << event->mimeData()->text();
-    event->acceptProposedAction();
+    QDrag* drag = new QDrag(this);
+    QMimeData* mimeData = new QMimeData;
+    mimeData->setText(strIndexes);
+    drag->setMimeData(mimeData);
+
+    Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
+
+    if (!m_DragStartPos.isNull()) {
+        m_DragStartPos.setX(0);
+        m_DragStartPos.setY(0);
+    }
+
+    qDebug() << "done";
 }
 
 void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
@@ -244,13 +277,90 @@ void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
     emit SigPlayMediaItem(this, item);
 }
 
+void SimplePlaylistView::dragEnterEvent(QDragEnterEvent *event)
+{
+    qDebug() << "+drag" << event->mimeData()->text();
+    event->acceptProposedAction();
+}
+
+void SimplePlaylistView::dragMoveEvent(QDragMoveEvent *event)
+{
+    QString head = "file://";
+    QString text = event->mimeData()->text();
+    qDebug() << "~drag" << event->mimeData()->text();
+
+    event->accept();
+
+    QRect contentRect = viewport()->contentsRect();
+    if (event->pos().y() >= contentRect.bottom() - 20) {
+        //m_ScrollTimer.is
+        //m_ScrollTimer.start(100);
+    } else if (event->pos().y() <= contentRect.top() + 20) {
+        //m_ScrollTimer.start(100);
+    }
+
+    QModelIndex indexUnderCursor = indexAt(event->pos());
+    if (indexUnderCursor.isValid()) {
+        QModelIndex nextIndex = indexBelow(indexUnderCursor);
+        //if (nextIndex.isValid() && !visualRect(nextIndex).isValid()) {
+            scrollTo(nextIndex);
+        //}
+    }
+}
+
+void SimplePlaylistView::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    qDebug() << "-drag";
+
+    // Clear for drag
+    if (!m_DragStartPos.isNull()) {
+        m_DragStartPos.setX(0);
+        m_DragStartPos.setY(0);
+    }
+}
+
+void SimplePlaylistView::dropEvent(QDropEvent *event)
+{
+    const QString& text = event->mimeData()->text();
+
+    if (text.startsWith(ITEM_MIME)) {
+        qDebug() << "!drop:movement";
+
+        QStringList strIndexes = text.split(":", QString::SkipEmptyParts);
+        if (strIndexes.size() <= 1)
+            return;
+        QList<int> indexes;
+        for (int i = 1; i < strIndexes.size(); ++i) {
+            indexes << strIndexes[i].toInt();
+        }
+    } else if (text.startsWith(FILE_MIME)) {
+        qDebug() << "!drop:append file";
+
+        QStringList files = text.split(FILE_MIME, QString::SkipEmptyParts);
+        for (int i = 0; i < files.size(); ++i) {
+            files[i] = files[i].trimmed();
+        }
+
+        scx::Function<void (const QStringList&)> fn(&SimplePlaylistView::LoadMediaItem, this);
+        m_LoadMediaThread.Run(fn, files);
+        m_LoadMediaThread.Detach();
+    } else {
+        return;
+    }
+    // Clear for drag
+    if (!m_DragStartPos.isNull()) {
+        m_DragStartPos.setX(0);
+        m_DragStartPos.setY(0);
+    }
+}
+
 /* Action menus */
 void SimplePlaylistView::SlotAppend()
 {
     // Get media path
     QString oldPath("~");
-    if (!m_OldMediaPath.isEmpty()) {
-        QFileInfo info(m_OldMediaPath);
+    if (!m_PrevMediaFilePath.isEmpty()) {
+        QFileInfo info(m_PrevMediaFilePath);
         oldPath = info.dir().dirName();
     }
     QStringList pathList = QFileDialog::getOpenFileNames(
@@ -258,9 +368,10 @@ void SimplePlaylistView::SlotAppend()
     if (pathList.isEmpty())
         return;
 
-    m_OldMediaPath = pathList.first();
+    m_PrevMediaFilePath = pathList.first();
     scx::Function<void (const QStringList&)> fn(&SimplePlaylistView::LoadMediaItem, this);
     m_LoadMediaThread.Run(fn, pathList);
+    m_LoadMediaThread.Detach();
 }
 
 void SimplePlaylistView::SlotRemove()
@@ -365,6 +476,9 @@ void SimplePlaylistView::SlotMediaRowGot(MediaRow* mediaRow)
 
 void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
 {
+    if (pathList.empty())
+        return;
+
     m_LoadFinished = false;
     m_TmpLoadList.clear();
 
@@ -373,10 +487,17 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
     std::deque<mous::MediaItem*> mediaItemList;
 
     for (int i = 0; i < pathList.size(); ++i) {
-        m_MediaLoader->LoadMedia(pathList.at(i).toUtf8().data(), mediaItemList);
+        if (pathList.at(i).isEmpty())
+            continue;
+
+        // Although load ok, the item may still invaild(player won't be able to it)
+        if (m_MediaLoader->LoadMedia(pathList.at(i).toUtf8().data(), mediaItemList) != ErrorCode::Ok)
+            continue;
 
         for(size_t j = 0; j < mediaItemList.size(); ++j) {
             MediaItem* item = mediaItemList[j];
+            if (item == NULL)
+                continue;
 
             MediaRow mediaRow;
             mediaRow.item = item;
@@ -436,4 +557,9 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
 
     emit SigLoadFinished();
     m_LoadFinished = true;
+}
+
+void SimplePlaylistView::SlotCheckForScroll()
+{
+
 }
