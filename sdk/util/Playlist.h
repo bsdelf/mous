@@ -233,6 +233,8 @@ public:
         for (size_t i = 0; i < m_ItemQueue.size(); ++i) {
             if (item == m_ItemQueue[i]) {
                 m_ItemQueue.erase(m_ItemQueue.begin() + i);
+                AdjustSeqPosition();
+                AdjustShuffleRange();
                 return true;
             }
         }
