@@ -27,6 +27,7 @@ public:
     virtual ~SimplePlaylistView();
 
     virtual void SetMediaLoader(const IMediaLoader* loader);
+    virtual void SetClipboard(PlaylistClipboard<mous::MediaItem>* clipboard);
 
     virtual const MediaItem* NextItem() const;
     virtual const MediaItem* PrevItem() const;
@@ -47,6 +48,9 @@ private:
 private:
     void SetupShortcuts();
 
+    /*
+    void paintEvent(QPaintEvent *event);
+    */
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent * event);
@@ -84,6 +88,7 @@ signals:
 
 private:
     void LoadMediaItem(const QStringList& pathList);
+    QList<int> PickSelectedRows() const;
     ListRow BuildListRow(MediaItem &item) const;
 
 private slots:
@@ -91,6 +96,7 @@ private slots:
 
 private:
     const IMediaLoader* m_MediaLoader;
+    PlaylistClipboard<mous::MediaItem>* m_Clipboard;
 
     QString m_PrevMediaFilePath;
 
@@ -102,6 +108,7 @@ private:
 
     PlaylistActionHistory<MediaItem> m_History;
 
+    bool m_DragStarted;
     QPoint m_DragStartPos;
 
     QTimer m_ScrollTimer;

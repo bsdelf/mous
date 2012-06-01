@@ -20,6 +20,7 @@ using namespace std;
 #include "FrmTagEditor.h"
 #include "IPlaylistView.h"
 #include "DlgConvertTask.h"
+#include "PlaylistClipboard.h"
 
 namespace Ui {
     class MainWindow;
@@ -90,14 +91,15 @@ private:
     QTimer* m_TimerUpdateUi;
     const int m_UpdateInterval;
 
-    mous::IPluginManager* m_PluginManager;
-    mous::IMediaLoader* m_MediaLoader;
-    mous::IPlayer* m_Player;
-    mous::IConvTaskFactory* m_ConvFactory;
-    mous::ITagParserFactory* m_ParserFactory;
+    IPluginManager* m_PluginManager;
+    IMediaLoader* m_MediaLoader;
+    IPlayer* m_Player;
+    IConvTaskFactory* m_ConvFactory;
+    ITagParserFactory* m_ParserFactory;
 
     IPlaylistView* m_UsedPlaylistView;
-    const mous::MediaItem* m_UsedMediaItem;
+    const MediaItem* m_UsedMediaItem;
+    PlaylistClipboard<MediaItem> m_Clipboard;
 
     bool m_SliderPlayingPreempted;
 

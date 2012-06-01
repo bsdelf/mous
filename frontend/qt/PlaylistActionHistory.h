@@ -2,7 +2,7 @@
 #define PLAYLISTACTIONHISTORY_H
 
 #include <deque>
-#include <vector>
+#include <utility>
 
 template <class T>
 class PlaylistActionHistory
@@ -15,7 +15,7 @@ public:
         Remove
     };
 
-    typedef std::vector<std::pair<int, T> > ActionItemList;
+    typedef std::deque<std::pair<int, T> > ActionItemList;
 
     struct Action
     {
@@ -50,7 +50,7 @@ public:
             m_UndoStack.pop_front();
         }
 
-        m_RedoQueue.clear();
+        m_RedoStack.clear();
     }
 
     bool HasUndoAction()
@@ -62,19 +62,19 @@ public:
     {
         Action action = m_UndoStack.back();
         m_UndoStack.pop_back();
-        m_RedoQueue.push_back(action);
+        m_RedoStack.push_back(action);
         return action;
     }
 
     bool HasRedoAction()
     {
-        return !m_RedoQueue.empty();
+        return !m_RedoStack.empty();
     }
 
     Action TakeRedoAction()
     {
-        Action action = m_RedoQueue.front();
-        m_RedoQueue.pop_front();
+        Action action = m_RedoStack.back();
+        m_RedoStack.pop_back();
         m_UndoStack.push_back(action);
         return action;
     }
@@ -82,13 +82,13 @@ public:
     void ClearHistory()
     {
         m_UndoStack.clear();
-        m_RedoQueue.clear();
+        m_RedoStack.clear();
     }
 
 public:
     int m_MaxHistory;
     std::deque<Action> m_UndoStack;
-    std::deque<Action> m_RedoQueue;
+    std::deque<Action> m_RedoStack;
 };
 
 #endif // PLAYLISTACTIONHISTORY_H

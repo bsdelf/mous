@@ -301,6 +301,7 @@ void MainWindow::SlotWidgetPlayListDoubleClick()
 {
     SimplePlaylistView* view = new SimplePlaylistView(this);
     view->SetMediaLoader(m_MediaLoader);
+    view->SetClipboard(&m_Clipboard);
 
     connect(view, SIGNAL(SigPlayMediaItem(IPlaylistView*, const MediaItem&)),
             this, SLOT(SlotPlayMediaItem(IPlaylistView*, const MediaItem&)));

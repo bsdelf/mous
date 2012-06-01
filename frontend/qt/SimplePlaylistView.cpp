@@ -20,9 +20,56 @@ const QString FILE_MIME = "file://";
 
 typedef PlaylistActionHistory<MediaItem> ActionHistory;
 
+class FoobarStyle : public QProxyStyle
+{
+public:
+    FoobarStyle(QStyle *baseStyle = 0):
+        QProxyStyle(baseStyle),
+        m_MinY(0),
+        m_MaxY(0)
+    {
+    }
+
+    void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+    {
+        if (element == QStyle::PE_IndicatorItemViewItemDrop) {
+            int y = option->rect.topLeft().y();
+            if (option->rect.isNull())
+                y = m_MaxY;
+
+            if (m_MinY > y)
+                m_MinY = y;
+            if (m_MaxY < y)
+                m_MaxY = y;
+
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            QColor c(Qt::black);
+            QPen pen(c);
+            pen.setWidth(2);
+            QBrush brush(c);
+            painter->setPen(pen);
+            painter->setBrush(brush);
+
+            QPoint a = widget->rect().topLeft();
+            QPoint b = widget->rect().topRight();
+            a.setY(y);
+            b.setY(y);
+            painter->drawLine(a, b);
+        } else {
+            QProxyStyle::drawPrimitive(element, option, painter, widget);
+        }
+    }
+
+private:
+    mutable int m_MinY;
+    mutable int m_MaxY;
+};
+
 SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
     m_MediaLoader(NULL),
+    m_Clipboard(NULL),
+    m_DragStarted(false),
     m_ShortcutCopy(qobject_cast<QWidget*>(this)),
     m_ShortcutCut(qobject_cast<QWidget*>(this)),
     m_ShortcutPaste(qobject_cast<QWidget*>(this)),
@@ -30,6 +77,8 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     m_ShortcutUndo(qobject_cast<QWidget*>(this)),
     m_ShortcutRedo(qobject_cast<QWidget*>(this))
 {
+    setStyle(new FoobarStyle(style()));
+
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
     QList<QAction*> actionList;
@@ -131,8 +180,8 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     setActionSeparator(actionList);
     addActions(actionList);
 
-    setAcceptDrops(true);
     setDragEnabled(true);
+    setAcceptDrops(true);
     setDropIndicatorShown(true);
     setDragDropMode(QAbstractItemView::DragDrop);
 
@@ -207,6 +256,11 @@ void SimplePlaylistView::SetMediaLoader(const IMediaLoader* loader)
     m_MediaLoader = loader;
 }
 
+void SimplePlaylistView::SetClipboard(PlaylistClipboard<mous::MediaItem>* clipboard)
+{
+    m_Clipboard = clipboard;
+}
+
 const MediaItem* SimplePlaylistView::NextItem() const
 {
     return m_Playlist.SeqHasOffset(1) ? &m_Playlist.SeqItemAtOffset(1, true) : NULL;
@@ -241,48 +295,54 @@ void SimplePlaylistView::SetupShortcuts()
 }
 
 /* Override qt methods */
+/*
+void SimplePlaylistView::paintEvent(QPaintEvent * event)
+{
+    QPainter painter(viewport());
+    drawTree(&painter, event->region());
+}
+*/
+
 void SimplePlaylistView::mousePressEvent(QMouseEvent *event)
 {
     QTreeView::mousePressEvent(event);
 
-    if (event->button() == Qt::LeftButton && !selectedIndexes().empty())
+    if (event->button() == Qt::LeftButton && indexAt(event->pos()).isValid())
         m_DragStartPos = event->pos();
 }
 
 void SimplePlaylistView::mouseMoveEvent(QMouseEvent *event)
 {
+    //QTreeView::mouseMoveEvent(event);
+
     // Prepare for drag
     if (!(event->buttons() & Qt::LeftButton))
         return;
-    if (m_DragStartPos.isNull() ||
+    if (m_DragStarted ||
             (event->pos() - m_DragStartPos).manhattanLength() < QApplication::startDragDistance())
         return;
+
+    m_DragStarted = true;
 
     // Pick selected indexes
     QModelIndexList list = selectedIndexes();
     if (list.empty() || !list.contains(indexAt(event->pos())))
         return;
-    QSet<int> indexes;
-    QString strIndexes = ITEM_MIME;
-    for (int i = 0; i < list.size(); ++i) {
-        int row = list[i].row();
-        if (!indexes.contains(row)) {
-            indexes.insert(row);
-            strIndexes.append(QString::number(row)).append(":");
-        }
+    QString strRows = ITEM_MIME;
+    QList<int> rowList = PickSelectedRows();
+    for (int i = 0; i < rowList.size(); ++i) {
+        strRows.append(QString::number(rowList[i])).append(":");
     }
 
     QDrag* drag = new QDrag(this);
     QMimeData* mimeData = new QMimeData;
-    mimeData->setText(strIndexes);
+    mimeData->setText(strRows);
     drag->setMimeData(mimeData);
 
-    Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
+    //Qt::DropAction dropAction = drag->exec(Qt::MoveAction);
+    drag->exec(Qt::MoveAction);
 
-    if (!m_DragStartPos.isNull()) {
-        m_DragStartPos.setX(0);
-        m_DragStartPos.setY(0);
-    }
+    m_DragStarted = false;
 
     qDebug() << "done";
 }
@@ -305,17 +365,24 @@ void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
 
 void SimplePlaylistView::dragEnterEvent(QDragEnterEvent *event)
 {
+    //QTreeView::dragEnterEvent(event);
+
+    event->accept();
+
     qDebug() << "+drag" << event->mimeData()->text();
-    event->acceptProposedAction();
+
 }
 
 void SimplePlaylistView::dragMoveEvent(QDragMoveEvent *event)
 {
+    //QTreeView::dragMoveEvent(event);
+
+    event->accept();
+
     QString head = "file://";
     QString text = event->mimeData()->text();
     qDebug() << "~drag" << event->mimeData()->text();
 
-    event->accept();
 
     QRect contentRect = viewport()->contentsRect();
     if (event->pos().y() >= contentRect.bottom() - 20) {
@@ -329,25 +396,29 @@ void SimplePlaylistView::dragMoveEvent(QDragMoveEvent *event)
     if (indexUnderCursor.isValid()) {
         QModelIndex nextIndex = indexBelow(indexUnderCursor);
         //if (nextIndex.isValid() && !visualRect(nextIndex).isValid()) {
-            scrollTo(nextIndex);
+            //scrollTo(nextIndex);
         //}
     }
+
+    //repaint();
 }
 
 void SimplePlaylistView::dragLeaveEvent(QDragLeaveEvent *event)
 {
-    qDebug() << "-drag";
+    //QTreeView::dragLeaveEvent(event);
 
-    // Clear for drag
-    if (!m_DragStartPos.isNull()) {
-        m_DragStartPos.setX(0);
-        m_DragStartPos.setY(0);
-    }
+    qDebug() << "-drag";
 }
 
 void SimplePlaylistView::dropEvent(QDropEvent *event)
 {
+    //QTreeView::dropEvent(event);
+
+    event->accept();
+
     const QString& text = event->mimeData()->text();
+
+    qDebug() << text;
 
     if (text.startsWith(ITEM_MIME)) {
         qDebug() << "!drop:movement";
@@ -372,11 +443,6 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
         m_LoadMediaThread.Detach();
     } else {
         return;
-    }
-    // Clear for drag
-    if (!m_DragStartPos.isNull()) {
-        m_DragStartPos.setX(0);
-        m_DragStartPos.setY(0);
     }
 }
 
@@ -469,21 +535,90 @@ void SimplePlaylistView::SlotListRowGot(const ListRow& listRow)
 void SimplePlaylistView::SlotShortcutCopy()
 {
     qDebug() << "copy";
+
+    if (m_Clipboard == NULL)
+        return;
+
+    QList<int> selectedRows = PickSelectedRows();
+    if (selectedRows.empty()) {
+        m_Clipboard->Clear();
+        return;
+    }
+
+    deque<MediaItem> contents;
+    for (int i = 0; i < selectedRows.size(); ++i) {
+        contents.push_back(m_Playlist[selectedRows[i]]);
+    }
+    m_Clipboard->SetContent(contents);
 }
 
 void SimplePlaylistView::SlotShortcutCut()
 {
     qDebug() << "cut";
+
+    SlotShortcutCopy();
+    SlotShortcutDelete();
 }
 
 void SimplePlaylistView::SlotShortcutPaste()
 {
     qDebug() << "paste";
+
+    if (m_Clipboard == NULL || m_Clipboard->Empty())
+        return;
+
+    deque<MediaItem> content = m_Clipboard->Content();
+
+    // insert or append(optimized?)
+    QList<int> selectedRows = PickSelectedRows();
+    int insertPos = selectedRows.count() == 1 ? selectedRows[0] : -1;
+
+    ActionHistory::Action action;
+    action.type = ActionHistory::Insert;
+    action.insertPos = insertPos;
+
+    for (size_t i = 0; i < content.size(); ++i) {
+        const ListRow& listRow = BuildListRow(content[i]);
+        if (insertPos != -1) {
+            m_Playlist.Insert(insertPos+i, listRow.item);
+            m_ItemModel.insertRow(insertPos+i, listRow.fields);
+        } else {
+            m_Playlist.Append(listRow.item);
+            m_ItemModel.appendRow(listRow.fields);
+        }
+        action.srcItemList.push_back(std::pair<int, MediaItem>(-1, listRow.item));
+    }
+
+    // Record operation
+    if (!action.srcItemList.empty())
+        m_History.PushUndoAction(action);
 }
 
 void SimplePlaylistView::SlotShortcutDelete()
 {
     qDebug() << "delete";
+
+    QList<int> selectedRows = PickSelectedRows();
+    if (selectedRows.empty())
+        return;
+    qSort(selectedRows);
+
+    ActionHistory::Action action;
+    action.type = ActionHistory::Remove;
+
+    for (int i = selectedRows.size()-1; i >= 0; --i) {
+        int delPos = selectedRows[i];
+
+        // push at front to ensure asc seq
+        action.srcItemList.push_front(std::pair<int, MediaItem>(delPos, m_Playlist[delPos]));
+
+        m_Playlist.Remove(delPos);
+        m_ItemModel.removeRow(delPos);
+    }
+
+    // Record operation
+    if (!action.srcItemList.empty())
+        m_History.PushUndoAction(action);
 }
 
 void SimplePlaylistView::SlotShortcutUndo()
@@ -492,29 +627,33 @@ void SimplePlaylistView::SlotShortcutUndo()
 
     if (m_History.HasUndoAction()) {
         ActionHistory::Action action = m_History.PopUndoAction();
+        const int n = action.srcItemList.size();
         switch (action.type) {
         case ActionHistory::Insert:
         {
-            // append?
-            if (action.insertPos == -1) {
-                assert(!m_Playlist.Empty() && m_ItemModel.rowCount() != 0);
-                int n = action.srcItemList.size();
-                int begin = m_Playlist.Count() - n;
-                vector<int> indexes(n);
-                for (int i = 0; i < n; ++i) {
-                    indexes[i] = begin + i;
-                }
-                m_Playlist.Remove(indexes);
-                m_ItemModel.removeRows(begin, n);
-            } else {
+            assert(!m_Playlist.Empty() && m_ItemModel.rowCount() != 0);
 
+            // previously inserted or appended ?
+            const int rmSince = action.insertPos != -1 ? action.insertPos : m_Playlist.Count() - n;
+            vector<int> indexes(n);
+            for (int i = 0; i < n; ++i) {
+                indexes[i] = rmSince + i;
             }
+            m_Playlist.Remove(indexes);
+            m_ItemModel.removeRows(rmSince, n);
         }
             break;
 
         case ActionHistory::Remove:
         {
-
+            // the seq should already be asc here
+            for (int i = 0; i < n; ++i) {
+                int insertPos = action.srcItemList[i].first;
+                MediaItem& item = action.srcItemList[i].second;
+                const ListRow& listRow = BuildListRow(item);
+                m_Playlist.Insert(insertPos, listRow.item);
+                m_ItemModel.insertRow(insertPos, listRow.fields);
+            }
         }
             break;
 
@@ -535,27 +674,38 @@ void SimplePlaylistView::SlotShortcutRedo()
 
     if (m_History.HasRedoAction()) {
         ActionHistory::Action action = m_History.TakeRedoAction();
+        const int n = action.srcItemList.size();
         switch (action.type) {
         case ActionHistory::Insert:
         {
-            // append?
-            if (action.insertPos == -1) {
-                SlotReadyToLoad();
-                for (size_t i = 0; i < action.srcItemList.size(); ++i) {
-                    ListRow listRow = BuildListRow(action.srcItemList[i].second);
-                    SlotListRowGot(listRow);
+            // insert or append
+            for (int i = 0; i < n; ++i) {
+                ListRow listRow = BuildListRow(action.srcItemList[i].second);
+                if (action.insertPos != -1) {
+                    m_Playlist.Insert(action.insertPos+i, listRow.item);
+                    m_ItemModel.insertRow(action.insertPos+i, listRow.fields);
+                } else {
+                    m_Playlist.Append(listRow.item);
+                    m_ItemModel.appendRow(listRow.fields);
                 }
-                SlotLoadFinished();
-            } else {
-
             }
         }
             break;
 
         case ActionHistory::Remove:
+        {
+            // original seq is asc
+            for (int i = n-1; i >= 0; --i) {
+                int delPos = action.srcItemList[i].first;
+                m_Playlist.Remove(delPos);
+                m_ItemModel.removeRow(delPos);
+            }
+        }
             break;
 
         case ActionHistory::Move:
+        {
+        }
             break;
 
         default:
@@ -600,6 +750,21 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
         m_History.PushUndoAction(action);
 
     emit SigLoadFinished();
+}
+
+QList<int> SimplePlaylistView::PickSelectedRows() const
+{
+    QList<int> rowList;
+    QModelIndexList indexList = selectedIndexes();
+    QSet<int> rowSet;
+    for (int i = 0; i < indexList.size(); ++i) {
+        int row = indexList[i].row();
+        if (!rowSet.contains(row)) {
+            rowSet.insert(row);
+            rowList.append(row);
+        }
+    }
+    return rowList;
 }
 
 SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) const
