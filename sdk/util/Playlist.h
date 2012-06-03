@@ -16,6 +16,9 @@
 #define MOUS_FIND(container, var) \
     std::find(container.begin(), container.end(), var)
 
+#define MOUS_CONTAINS(container, var) \
+    (std::find(container.begin(), container.end(), var) != container.end())
+
 namespace mous {
 
 namespace PlaylistMode {
@@ -207,6 +210,54 @@ public:
         AdjustShuffleRange();
     }
 
+    void Move(std::vector<int> oldPos, int newPos)
+    {
+        using namespace std;
+
+        sort(oldPos.begin(), oldPos.end());
+
+        int realNewPos = newPos;
+        for (size_t i = 0; i < oldPos.size(); ++i) {
+            if (oldPos[i] < newPos)
+                --realNewPos;
+        }
+
+        // backup & remove & insert
+        deque<item_t> tmpList(oldPos.size());
+        for (size_t i = 0; i < oldPos.size(); ++i) {
+            tmpList[i] = m_ItemQueue[oldPos[i]];
+        }
+        Remove(oldPos);
+        Insert(realNewPos, tmpList);
+
+        // calc new seq index
+        int seqIndex = (m_Mode == PlaylistMode::Shuffle 
+                || m_Mode == PlaylistMode::ShuffleRepeat) ? 
+            m_SeqShuffleQueue[m_SeqIndex] : m_SeqIndex;
+
+        vector<int>::iterator iter = find(oldPos.begin(), oldPos.end(), seqIndex);
+        if (iter != oldPos.end()) {
+            seqIndex = realNewPos + (iter - oldPos.begin());
+        } else {
+            int tmp = seqIndex;
+            for (size_t i = 0; i < oldPos.size(); ++i) {
+                if (oldPos[i] < seqIndex)
+                    --tmp;
+                else
+                    break;
+            }
+            if (realNewPos <= tmp)
+                tmp += oldPos.size();
+            seqIndex = tmp;
+        }
+        
+        assert(seqIndex >= 0 && seqIndex < m_ItemQueue.size());
+
+        m_SeqIndex = (m_Mode == PlaylistMode::Shuffle
+                || m_Mode == PlaylistMode::ShuffleRepeat) ? 
+            MOUS_FIND(m_SeqShuffleQueue, seqIndex) - m_SeqShuffleQueue.begin() : seqIndex;
+    }
+
     void Insert(int index, const std::deque<item_t>& items)
     {
         m_ItemQueue.insert(m_ItemQueue.begin()+index, items.begin(), items.end());
@@ -364,5 +415,6 @@ private:
 
 #undef MOUS_HAS
 #undef MOUS_FIND
+#undef MOUS_CONTAINS
 
 #endif
