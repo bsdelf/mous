@@ -16,6 +16,8 @@ using namespace mous;
 #include "DlgLoadingMedia.h"
 #include "PlaylistActionHistory.h"
 
+class FoobarStyle;
+
 class SimplePlaylistView : public QTreeView, public IPlaylistView
 {
     Q_OBJECT
@@ -48,15 +50,9 @@ private:
 private:
     void SetupShortcuts();
 
-    /*
-    void paintEvent(QPaintEvent *event);
-    */
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent * event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
-    void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);    
 
 private slots:
@@ -108,10 +104,7 @@ private:
 
     PlaylistActionHistory<MediaItem> m_History;
 
-    bool m_DragStarted;
-    QPoint m_DragStartPos;
-
-    QTimer m_ScrollTimer;
+    FoobarStyle* m_FoobarStyle;
 
     QShortcut m_ShortcutCopy;
     QShortcut m_ShortcutCut;

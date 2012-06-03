@@ -48,7 +48,8 @@ HEADERS  += MainWindow.h \
     IPlaylistView.h \
     SimplePlaylistView.h \
     PlaylistActionHistory.h \
-    PlaylistClipboard.h
+    PlaylistClipboard.h \
+    FoobarStyle.h
 
 FORMS    += MainWindow.ui \
     DlgListSelect.ui \
