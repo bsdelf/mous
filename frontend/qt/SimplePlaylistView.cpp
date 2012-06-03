@@ -327,7 +327,8 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
             // insert or append(optimized?)
             ActionHistory::Action action;
             action.type = ActionHistory::Move;
-            action.insertPos = realInsertPos;
+            action.moveVisualPos = visualInsertPos;
+            action.moveInsertPos = realInsertPos;
 
             for (size_t i = 0; i < content.size(); ++i) {
                 const ListRow& listRow = BuildListRow(content[i]);
@@ -335,7 +336,9 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
                 action.srcItemList.push_back(std::pair<int, MediaItem>(rowList[i], listRow.item));
             }
 
+            // as for playlist, we already have "move"
             m_Playlist.Move(rowList.toVector().toStdVector(), visualInsertPos);
+
             // Record operation
             if (!action.srcItemList.empty())
                 m_History.PushUndoAction(action);
@@ -558,6 +561,13 @@ void SimplePlaylistView::SlotShortcutUndo()
 
         case ActionHistory::Move:
         {
+            for (int i = 0; i < n; ++i) {
+                MediaItem& item = action.srcItemList[i].second;
+                const ListRow& listRow = BuildListRow(item);
+                m_ItemModel.removeRow(action.moveInsertPos + i);
+                m_ItemModel.insertRow(action.srcItemList[i].first, listRow.fields);
+                m_Playlist.Move(vector<int>(1, action.moveInsertPos + i), action.srcItemList[i].first);
+            }
         }
             break;
 
@@ -604,6 +614,22 @@ void SimplePlaylistView::SlotShortcutRedo()
 
         case ActionHistory::Move:
         {
+            // remove
+            for (int i = n-1; i >= 0; --i) {
+                int delPos = action.srcItemList[i].first;
+                m_ItemModel.removeRow(delPos);
+            }
+
+            vector<int> oldPos(n);
+            int begPos = action.moveInsertPos;
+            for (int i = 0; i < n; ++i) {
+                oldPos[i] = action.srcItemList[i].first;
+                const ListRow& listRow = BuildListRow(action.srcItemList[i].second);
+                m_ItemModel.insertRow(begPos+i, listRow.fields);
+            }
+
+            // as for playlist, we already have "move"
+            m_Playlist.Move(oldPos, action.moveVisualPos);
         }
             break;
 
@@ -716,9 +742,4 @@ SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) co
     }
 
     return listRow;
-}
-
-void SimplePlaylistView::SlotCheckForScroll()
-{
-
 }

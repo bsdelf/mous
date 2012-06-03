@@ -87,9 +87,6 @@ private:
     QList<int> PickSelectedRows() const;
     ListRow BuildListRow(MediaItem &item) const;
 
-private slots:
-    void SlotCheckForScroll();
-
 private:
     const IMediaLoader* m_MediaLoader;
     PlaylistClipboard<mous::MediaItem>* m_Clipboard;

@@ -22,6 +22,8 @@ public:
         ActionType type;
         ActionItemList srcItemList;
         int insertPos;
+        int moveVisualPos;
+        int moveInsertPos;
     };
 
 public:
