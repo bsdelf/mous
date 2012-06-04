@@ -302,7 +302,7 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
         qSort(rowList);
         if (!rowList.empty()) {
             // calc insert pos
-            int visualInsertPos = indexAt(m_FoobarStyle->ItemPos()).row();
+            int visualInsertPos = indexAt(m_FoobarStyle->BelowIndicator()).row();
             if (visualInsertPos == -1)
                 visualInsertPos = m_Playlist.Count();
 
@@ -312,6 +312,7 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
                     --realInsertPos;
             }
 
+            qDebug() << "visualInsertPos" << visualInsertPos;
             qDebug() << "realInsertPos" << realInsertPos;
 
             // copy & remove
@@ -561,12 +562,13 @@ void SimplePlaylistView::SlotShortcutUndo()
 
         case ActionHistory::Move:
         {
+            int moveInsertPos = action.moveInsertPos;
             for (int i = 0; i < n; ++i) {
                 MediaItem& item = action.srcItemList[i].second;
                 const ListRow& listRow = BuildListRow(item);
-                m_ItemModel.removeRow(action.moveInsertPos + i);
+                m_ItemModel.removeRow(moveInsertPos + i);
                 m_ItemModel.insertRow(action.srcItemList[i].first, listRow.fields);
-                m_Playlist.Move(vector<int>(1, action.moveInsertPos + i), action.srcItemList[i].first);
+                m_Playlist.Move(vector<int>(1, moveInsertPos + i), action.srcItemList[i].first);
             }
         }
             break;
