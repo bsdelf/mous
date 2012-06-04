@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "AppEnv.h"
 
 #include <iostream>
 using namespace std;
@@ -31,7 +31,7 @@ namespace Field {
     const char* const IfNotUtf8 = "IfNotUtf8";
 }
 
-bool Config::Init()
+bool AppEnv::Init()
 {
     // prepare installed dir
     FileInfo pluginDirInfo(string(CMAKE_INSTALL_PREFIX) + Path::PluginRoot);
@@ -68,7 +68,7 @@ bool Config::Init()
     return LoadContent();
 }
 
-bool Config::SaveDefault()
+bool AppEnv::SaveDefault()
 {
     ConfigFile config;
 
@@ -94,7 +94,7 @@ bool Config::SaveDefault()
     }
 }
 
-bool Config::LoadContent()
+bool AppEnv::LoadContent()
 {
     ConfigFile config;
     if (!config.Load(configFile, '#'))

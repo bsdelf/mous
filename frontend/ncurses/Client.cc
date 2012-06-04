@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "Protocol.h"
-#include "Config.h"
+#include "AppEnv.h"
 using namespace Protocol;
 
 const size_t PAYLOADBUF_MAX_KEEP = 1024;
@@ -32,14 +32,14 @@ Client::~Client()
 
 bool Client::Run()
 {
-    const Config* config = GlobalConfig::Instance();
-    if (config == NULL)
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (env == NULL)
         return false;
 
     m_ConnectStopRetry = false;
 
     Function<void (const string&, int)> fn(&Client::ThRecvLoop, this);
-    return m_RecvThread.Run(fn, config->serverIp, config->serverPort) == 0;
+    return m_RecvThread.Run(fn, env->serverIp, env->serverPort) == 0;
 }
 
 void Client::Stop()

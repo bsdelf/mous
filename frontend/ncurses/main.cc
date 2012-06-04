@@ -7,17 +7,17 @@
 #include <fstream>
 using namespace std;
 
-#include "Config.h"
+#include "AppEnv.h"
 #include "Server.h"
 #include "MainUi.h"
 
 pid_t FetchPid()
 {
     pid_t pid = 0;
-    const Config* config = GlobalConfig::Instance();
-    if (config != NULL) {
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (env != NULL) {
         fstream stream;
-        stream.open(config->pidFile.c_str(), ios::in);
+        stream.open(env->pidFile.c_str(), ios::in);
         if (stream.is_open()) {
             stream >> pid;
         }
@@ -28,7 +28,7 @@ pid_t FetchPid()
 
 void StorePid()
 {
-    const Config* config = GlobalConfig::Instance();
+    const AppEnv* config = GlobalAppEnv::Instance();
     if (config != NULL) {
         fstream stream;
         stream.open(config->pidFile.c_str(), ios::out);
@@ -39,15 +39,15 @@ void StorePid()
 
 void ClearPid()
 {
-    const Config* config = GlobalConfig::Instance();
-    if (config != NULL) {
-        unlink(config->pidFile.c_str());
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (env != NULL) {
+        unlink(env->pidFile.c_str());
     }
 }
 
 int main(int argc, char** argv)
 {
-    if (!GlobalConfig::Instance()->Init())
+    if (!GlobalAppEnv::Instance()->Init())
         return 1;
 
     pid_t pid = FetchPid();

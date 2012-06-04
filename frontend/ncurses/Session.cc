@@ -8,7 +8,7 @@ using namespace std;
 #include <scx/IconvHelper.hpp>
 using namespace scx;
 
-#include "Config.h"
+#include "AppEnv.h"
 #include "Protocol.h"
 using namespace Protocol;
 
@@ -521,8 +521,8 @@ void Session::TryConvertToUtf8(string& str) const
     const char* c = str.c_str();
     const size_t n = str.size();
     const char* bad = "?????";
-    const Config* config = GlobalConfig::Instance();
-    if (!IsUtf8(c) && (config == NULL || !ConvFromTo(config->ifNotUtf8, "UTF-8", c, n, str))) {
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (!IsUtf8(c) && (env == NULL || !ConvFromTo(env->ifNotUtf8, "UTF-8", c, n, str))) {
         str = bad;
     }
 }

@@ -1,5 +1,5 @@
+#include "AppEnv.h"
 #include "Server.h"
-#include "Config.h"
 #include "Session.h"
 #include "ServerContext.h"
 
@@ -30,8 +30,8 @@ int Server::Exec()
     if (!m_Context->Init())
         return 1;
 
-    const Config* config = GlobalConfig::Instance();
-    if (config == NULL)
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (env == NULL)
         return 2;
 
     m_Context->Restore();
@@ -42,7 +42,7 @@ int Server::Exec()
     opt.keepAlive = true;
     m_Socket.SetOption(opt);
 
-    if (!m_Socket.Bind(config->serverIp, config->serverPort))
+    if (!m_Socket.Bind(env->serverIp, env->serverPort))
         return 1;
     if (!m_Socket.Listen())
         return 1;

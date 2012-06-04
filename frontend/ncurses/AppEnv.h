@@ -1,10 +1,10 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef APPENV_H
+#define APPENV_H
 
 #include <string>
 #include <scx/Singleton.hpp>
 
-struct Config
+struct AppEnv
 {
     bool Init();
 
@@ -29,6 +29,6 @@ private:
     bool LoadContent();
 };
 
-typedef scx::Singleton<Config> GlobalConfig;
+typedef scx::Singleton<AppEnv> GlobalAppEnv;
 
 #endif

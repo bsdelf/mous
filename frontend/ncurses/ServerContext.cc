@@ -11,7 +11,7 @@ using namespace scx;
 #include <util/PlaylistSerializer.h>
 using namespace mous;
 
-#include "Config.h"
+#include "AppEnv.h"
 
 const int VERSION = 1;
 
@@ -42,11 +42,11 @@ ServerContext::~ServerContext()
 
 bool ServerContext::Init()
 {
-    const Config* config = GlobalConfig::Instance();
-    if (config == NULL)
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (env == NULL)
         return false;
 
-    if (!mgr->LoadPluginDir(config->pluginDir))
+    if (!mgr->LoadPluginDir(env->pluginDir))
         return false;
 
     typedef vector<const IPluginAgent*> PluginAgentArray;
@@ -82,8 +82,8 @@ void ServerContext::Dump()
 {
     typedef PlaylistSerializer<MediaItem> Serializer;
 
-    const Config* config = GlobalConfig::Instance();
-    if (config == NULL)
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (env == NULL)
         return;
 
     // save context
@@ -100,14 +100,14 @@ void ServerContext::Dump()
     buf.PutArray(selectedItem);
 
     fstream outfile;
-    outfile.open(config->contextFile.c_str(), ios::binary | ios::out);
+    outfile.open(env->contextFile.c_str(), ios::binary | ios::out);
     outfile.write(&outbuf[0], outbuf.size());
     outfile.close();
     
     // save playlists
-    vector<char> nameBuf(config->playlistFile.size() + 2);
+    vector<char> nameBuf(env->playlistFile.size() + 2);
     for (size_t i = 0; i < playlists.size(); ++i) {
-        snprintf(&nameBuf[0], nameBuf.size(), config->playlistFile.c_str(), i);
+        snprintf(&nameBuf[0], nameBuf.size(), env->playlistFile.c_str(), i);
         Serializer::Store(playlists[i], &nameBuf[0]);
     }
 }
@@ -116,14 +116,14 @@ void ServerContext::Restore()
 {
     typedef PlaylistSerializer<MediaItem> Serializer;
 
-    const Config* config = GlobalConfig::Instance();
-    if (config == NULL)
+    const AppEnv* env = GlobalAppEnv::Instance();
+    if (env == NULL)
         return;
 
     // load context
     stringstream stream;
     fstream infile;
-    infile.open(config->contextFile.c_str(), ios::binary | ios::in);
+    infile.open(env->contextFile.c_str(), ios::binary | ios::in);
     stream << infile.rdbuf();
     infile.close();
 
@@ -145,9 +145,9 @@ void ServerContext::Restore()
     selectedPlaylist = selected;
 
     // load playlists
-    vector<char> nameBuf(config->playlistFile.size() + 2);
+    vector<char> nameBuf(env->playlistFile.size() + 2);
     for (size_t i = 0; i < playlists.size(); ++i) {
-        snprintf(&nameBuf[0], nameBuf.size(), config->playlistFile.c_str(), i);
+        snprintf(&nameBuf[0], nameBuf.size(), env->playlistFile.c_str(), i);
         Serializer::Load(playlists[i], &nameBuf[0]);
     }
 }

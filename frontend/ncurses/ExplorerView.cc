@@ -10,7 +10,7 @@ using namespace std;
 #include <scx/Dir.hpp>
 using namespace scx;
 
-#include "Config.h"
+#include "AppEnv.h"
 
 const string STR_TITLE = "[ Explorer ]";
 
@@ -37,7 +37,7 @@ ExplorerView::ExplorerView():
     m_Focused(false),
     m_HideDot(true)
 {
-    const Config* config = GlobalConfig::Instance();
+    const AppEnv* config = GlobalAppEnv::Instance();
     if (config != NULL)
         m_UniPinYin.LoadMap(config->pyMapFile);
 
