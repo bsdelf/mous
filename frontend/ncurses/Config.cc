@@ -11,7 +11,7 @@ using namespace std;
 using namespace scx;
 
 namespace Path {
-    const char* const ConfigRoot = "/.config/mous/";
+    const char* const ConfigRoot = "/.config/mous/ncurses/";
     const char* const PluginRoot = "/lib/mous/";
     const char* const ResourceRoot = "/share/mous/";
     const char* const ResourcePinYin = "/pinyin/";
