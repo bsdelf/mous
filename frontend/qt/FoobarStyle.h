@@ -15,6 +15,7 @@ public:
     void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
     {
         if (element == QStyle::PE_IndicatorItemViewItemDrop) {
+            qDebug() << option->rect;
             int y = 0;
             if (!option->rect.isNull()) {
                 y = option->rect.y();
@@ -28,12 +29,12 @@ public:
                 y = lastRect.bottom();
             }
 
-            if (option->rect.height() != 0) {
-                m_ItemPos.setX(widget->rect().width()/2);
-                m_ItemPos.setY(y + option->rect.height()/2);
+            if (!option->rect.isNull()) {
+                m_BelowIndicator.setX(widget->rect().width()/2);
+                m_BelowIndicator.setY(y + option->rect.height()/2);
             } else {
-                m_ItemPos.setX(-1);
-                m_ItemPos.setY(-1);
+                m_BelowIndicator.setX(-1);
+                m_BelowIndicator.setY(-1);
             }
 
             painter->setRenderHint(QPainter::Antialiasing, true);
@@ -48,23 +49,23 @@ public:
             QPoint b(widget->rect().width(), y);
             painter->drawLine(a, b);
 
-            painter->drawPoint(m_ItemPos);
+            painter->drawPoint(m_BelowIndicator);
 
         } else {
-            m_ItemPos.setX(-1);
-            m_ItemPos.setY(-1);
+            m_BelowIndicator.setX(-1);
+            m_BelowIndicator.setY(-1);
 
             QProxyStyle::drawPrimitive(element, option, painter, widget);
         }
     }
 
-    QPoint ItemPos() const
+    QPoint BelowIndicator() const
     {
-        return m_ItemPos;
+        return m_BelowIndicator;
     }
 
 private:
-    mutable QPoint m_ItemPos;
+    mutable QPoint m_BelowIndicator;
 };
 
 #endif // FOOBARSTYLE_H
