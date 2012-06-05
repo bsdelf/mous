@@ -198,9 +198,10 @@ void MainWindow::SlotUpdateUi()
     //==== Update statusbar.
     int total = m_Player->RangeDuration();
     int ms = m_Player->OffsetMs();
+    int hz = m_Player->SamleRate();
     int kbps = m_Player->BitRate();
 
-    const QString& status = QString("%1 kbps | %2:%3/%4:%5").arg(kbps).
+    const QString& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6").arg(hz).arg(kbps, 4).
             arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0')).
             arg(total/1000/60, 2, 10, QChar('0')).arg(total/1000%60, 2, 10, QChar('0'));
 
