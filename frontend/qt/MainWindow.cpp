@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "AppEnv.h"
 #include "DlgListSelect.h"
 #include "DlgConvertOption.h"
 #include "SimplePlaylistView.h"
@@ -60,7 +61,7 @@ void MainWindow::InitMousCore()
     m_ConvFactory = IConvTaskFactory::Create();
     m_ParserFactory = ITagParserFactory::Create();
 
-    m_PluginManager->LoadPluginDir("./plugins");
+    m_PluginManager->LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
     vector<string> pathList;
     m_PluginManager->DumpPluginPath(pathList);
 

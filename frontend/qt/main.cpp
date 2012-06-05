@@ -1,17 +1,22 @@
 #include <QtGui/QApplication>
 #include <QtCore/QTranslator>
+
+#include "AppEnv.h"
 #include "MainWindow.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    AppEnv* env = GlobalAppEnv::Instance();
+    env->Init();
 
-    QTranslator trans;
-    trans.load("QMous");
-    a.installTranslator(&trans);
+    QApplication app(argc, argv);
 
-    MainWindow w;
-    w.show();
+    QTranslator translator;
+    translator.load(env->translationFile);
+    app.installTranslator(&translator);
 
-    return a.exec();
+    MainWindow win;
+    win.show();
+
+    return app.exec();
 }

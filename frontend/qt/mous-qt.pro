@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     DlgConvertOption.cpp \
     FrmToolBar.cpp \
     FrmTagEditor.cpp \
-    SimplePlaylistView.cpp
+    SimplePlaylistView.cpp \
+    AppEnv.cpp
 
 HEADERS  += MainWindow.h \
     CustomHeadTabWidget.hpp \
@@ -49,7 +50,8 @@ HEADERS  += MainWindow.h \
     SimplePlaylistView.h \
     PlaylistActionHistory.h \
     PlaylistClipboard.h \
-    FoobarStyle.h
+    FoobarStyle.h \
+    AppEnv.h
 
 FORMS    += MainWindow.ui \
     DlgListSelect.ui \
@@ -60,7 +62,7 @@ FORMS    += MainWindow.ui \
     FrmToolBar.ui \
     FrmTagEditor.ui
 
-TRANSLATIONS = mous-qt.ts
+TRANSLATIONS = mous-qt_zh_CN.ts
 
 RESOURCES += \
     AllRes.qrc

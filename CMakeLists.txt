@@ -127,11 +127,13 @@ if(WithFrontendQt)
     file(GLOB EXE_MOUS_QT_SOURCES frontend/qt/*.cpp)
     file(GLOB EXE_MOUS_QT_UI frontend/qt/*.ui)
     file(GLOB EXE_MOUS_QT_QRC frontend/qt/*.qrc)
+    file(GLOB EXE_MOUS_QT_TS frontend/qt/*.ts)
     QT4_WRAP_CPP(EXE_MOUS_QT_WCPP ${EXE_MOUS_QT_HEADS})
     QT4_WRAP_UI(EXE_MOUS_QT_WUI ${EXE_MOUS_QT_UI})
     QT4_ADD_RESOURCES(EXE_MOUS_QT_WRES ${EXE_MOUS_QT_QRC})
+    QT4_CREATE_TRANSLATION(EXE_MOUS_QT_QM ${EXE_MOUS_QT_TS})
     add_executable(mous-qt ${EXE_MOUS_QT_SOURCES}
-        ${EXE_MOUS_QT_WCPP} ${EXE_MOUS_QT_WUI} ${EXE_MOUS_QT_WRES})
+        ${EXE_MOUS_QT_WCPP} ${EXE_MOUS_QT_WUI} ${EXE_MOUS_QT_WRES} ${EXE_MOUS_QT_QM})
     add_dependencies(mous-qt MousCore)
     set(EXE_MOUS_QT_LIBS MousCore ${QT_LIBRARIES})
     if(IS_FREEBSD)
@@ -251,6 +253,10 @@ endif()
 if(WithFrontendQt)
     install(TARGETS mous-qt
         RUNTIME DESTINATION bin)
+    install(
+        CODE "file(GLOB TRANSLATION_FILES \"${PROJECT_BINARY_DIR}/*.qm\")"
+        CODE "file(INSTALL \${TRANSLATION_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/mous/qt)"
+    )
 endif()
 
 if(WithHeadFiles)
