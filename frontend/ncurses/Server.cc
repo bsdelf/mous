@@ -91,6 +91,7 @@ int Server::Exec()
         }
     }
 
+    m_Context->Dump();
     m_Context->Cleanup();
 
     return 0;
@@ -107,8 +108,6 @@ void Server::StopService()
         delete *iter;
     }
     m_SessionSet.clear();
-
-    m_Context->Dump();
 
     cout << "StopService()" << endl;
 }
