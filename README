@@ -46,16 +46,17 @@ but of course it will be useless!
 Supported   Dependence          Reason
 O           NONE                ALSA Renderer
 O           NONE                OSS Renderer
+O           audio/libao         libao Renderer
 
 O           NONE                WAV Decoder
-O           audio/mpg123        MP3 Decoder
-O           audio/mac           APE Decoder
-O           audio/flac          FLAC Decoder
-O           audio/faad          MP4 Decoder(m4a only, no aac)
-
 O           NONE                WAV Encoder
+O           audio/mpg123        MP3 Decoder
 O           audio/lame          MP3 Encoder
+O           audio/faad          MP4 Decoder(m4a only, no aac)
 O           audio/faac          MP4 Encoder(m4a only, no aac)
+O           audio/mac           APE Decoder
+X           NONE                APE Decoder based on MACLib4.x
+O           audio/flac          FLAC Decoder
 X           audio/flac          FLAC Encoder
 X           audio/wavpack       WavPack Encoder
 
