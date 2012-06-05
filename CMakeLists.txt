@@ -150,18 +150,18 @@ if(WithPluginOssRenderer)
     target_link_libraries(OssRenderer)
 endif()
 
-# AO plugin
-if(WithPluginAoRenderer)
-    file(GLOB SRC_AO_RENDERER plugins/AoRenderer/*)
-    add_library(AoRenderer SHARED ${SRC_AO_RENDERER})
-    target_link_libraries(AoRenderer -lao)
-endif()
-
 # ALSA plugin
 if(WithPluginAlsaRenderer)
     file(GLOB SRC_ALSA_RENDERER plugins/AlsaRenderer/*)
     add_library(AlsaRenderer SHARED ${SRC_ALSA_RENDERER})
     target_link_libraries(AlsaRenderer -lasound)
+endif()
+
+# AO plugin
+if(WithPluginAoRenderer)
+    file(GLOB SRC_AO_RENDERER plugins/AoRenderer/*)
+    add_library(AoRenderer SHARED ${SRC_AO_RENDERER})
+    target_link_libraries(AoRenderer -lao)
 endif()
 
 # WAV plugin
@@ -193,7 +193,7 @@ if(WithPluginMacDecoder)
     target_link_libraries(MacDecoder -lmac)
 endif()
 
-# Mac4 plugin
+# Mac4 plugin(still buggy)
 if(WithPluginMac4Decoder)
     file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/* contrib/MACLib/*)
     add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER})
@@ -258,8 +258,10 @@ if(WithHeadFiles)
     install(DIRECTORY ${HEAD_FILES} DESTINATION include/mous)
 endif()
 
-file(GLOB PLUGIN_FILES "${PROJECT_BINARY_DIR}/plugins/*.so")
-install(FILES ${PLUGIN_FILES} DESTINATION lib/mous)
+install(
+    CODE "file(GLOB PLUGIN_FILES \"${PROJECT_BINARY_DIR}/plugins/*.so\")"
+    CODE "file(INSTALL \${PLUGIN_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/mous)"
+)
 
 file(GLOB RESOURCE_FILES "${MOUS_SOURCE_DIR}/resource/*")
 install(DIRECTORY ${RESOURCE_FILES} DESTINATION share/mous)
