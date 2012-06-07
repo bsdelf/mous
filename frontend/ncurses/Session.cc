@@ -518,11 +518,20 @@ void Session::TryConvertToUtf8(string& str) const
     using namespace CharsetHelper;
     using namespace IconvHelper;
 
-    const char* c = str.c_str();
-    const size_t n = str.size();
+    if (str.empty()) {
+        str = "(empty)";
+        return;
+    }
+
+    if (IsUtf8(str.c_str()))
+        return;
+
     const char* bad = "?????";
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (!IsUtf8(c) && (env == NULL || !ConvFromTo(env->ifNotUtf8, "UTF-8", c, n, str))) {
+    string tmp;
+    if (ConvFromTo(env->ifNotUtf8, "UTF-8", str.data(), str.size(), tmp)) {
+        str = tmp;
+    } else {
         str = bad;
     }
 }
