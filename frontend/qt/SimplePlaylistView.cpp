@@ -15,6 +15,7 @@ using namespace std;
 #include "UiHelper.hpp"
 using namespace sqt;
 
+#include "AppEnv.h"
 #include "FoobarStyle.h"
 
 const QString FILE_MIME = "file://";
@@ -653,6 +654,8 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
     action.type = ActionHistory::Insert;
     action.insertPos = -1;
 
+    string ifNotUtf8 = GlobalAppEnv::Instance()->ifNotUtf8.toStdString();
+
     for (int i = 0; i < pathList.size(); ++i) {
         if (pathList.at(i).isEmpty())
             continue;
@@ -666,6 +669,7 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
 
         for(size_t j = 0; j < mediaItemList.size(); ++j) {
             MediaItem& item = mediaItemList[j];
+            CorrectTagCharset(item.tag, ifNotUtf8);
             ListRow listRow = BuildListRow(item);
             action.srcItemList.push_back(std::pair<int, MediaItem>(-1, item));
             emit SigListRowGot(listRow);
@@ -694,6 +698,47 @@ QList<int> SimplePlaylistView::PickSelectedRows() const
     return rowList;
 }
 
+// TODO: this function should be seprated in to a head file,
+// then FrmTagEditor::LoadMediaItem() can be LoadMediaFile()
+void SimplePlaylistView::CorrectTagCharset(MediaTag& tag, const string& ifNotUtf8) const
+{
+    string tmp;
+    // artist
+    if (!CharsetHelper::IsUtf8(tag.artist.c_str())
+            && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.artist.data(), tag.artist.size(), tmp))
+        tag.artist = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(tag.artist.c_str());
+
+    // album
+    if (!CharsetHelper::IsUtf8(tag.album.c_str())
+            && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.album.data(), tag.album.size(), tmp))
+        tag.album = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(tag.album.c_str());
+
+    // title
+    if (!CharsetHelper::IsUtf8(tag.title.c_str())
+            && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.title.data(), tag.title.size(), tmp))
+        tag.title = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(tag.title.c_str());
+
+    // comment
+    if (!CharsetHelper::IsUtf8(tag.comment.c_str())
+            && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.comment.data(), tag.comment.size(), tmp))
+        tag.comment = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(tag.comment.c_str());
+
+    // genre
+    if (!CharsetHelper::IsUtf8(tag.genre.c_str())
+            && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.genre.data(), tag.genre.size(), tmp))
+        tag.genre = tmp;
+    else
+        qDebug() << "no touch:" << QString::fromUtf8(tag.genre.c_str());
+}
+
 SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) const
 {
     ListRow listRow;
@@ -711,25 +756,6 @@ SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) co
     }
     QString strDuration;
     strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
-
-    string tmp;
-    if (!CharsetHelper::IsUtf8(item.tag.artist.c_str())
-            && IconvHelper::ConvFromTo("GBK", "UTF-8", item.tag.artist.data(), item.tag.artist.size(), tmp))
-        item.tag.artist = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(item.tag.artist.c_str());
-
-    if (!CharsetHelper::IsUtf8(item.tag.album.c_str())
-            && IconvHelper::ConvFromTo("GBK", "UTF-8", item.tag.album.data(), item.tag.album.size(), tmp))
-        item.tag.album = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(item.tag.album.c_str());
-
-    if (!CharsetHelper::IsUtf8(item.tag.title.c_str())
-            && IconvHelper::ConvFromTo("GBK", "UTF-8", item.tag.title.data(), item.tag.title.size(), tmp))
-        item.tag.title = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(item.tag.title.c_str());
 
     // Build fields
     listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.artist.c_str()));

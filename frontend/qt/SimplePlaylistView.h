@@ -85,6 +85,7 @@ signals:
 private:
     void LoadMediaItem(const QStringList& pathList);
     QList<int> PickSelectedRows() const;
+    void CorrectTagCharset(MediaTag& tag, const std::string& ifNotUtf8) const;
     ListRow BuildListRow(MediaItem &item) const;
 
 private:
