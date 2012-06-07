@@ -224,7 +224,11 @@ endif()
 if(WithPluginTagLibParser)
     file(GLOB SRC_TAGLIB_PARSER plugins/TagLibParser/*)
     add_library(TagLibParser SHARED ${SRC_TAGLIB_PARSER})
-    target_link_libraries(TagLibParser -ltag)
+    if(IS_FREEBSD)
+        target_link_libraries(TagLibParser -ltag -liconv)
+    elseif(IS_LINUX)
+        target_link_libraries(TagLibParser -ltag)
+    endif()
 endif()
 
 # CuePack plugin

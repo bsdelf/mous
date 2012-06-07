@@ -2,8 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+
 #include <iostream>
+#include <vector>
+
 #include <scx/FileHelper.hpp>
+#include <scx/IconvHelper.hpp>
+using namespace scx;
+
 #include <taglib/mp4file.h>
 #include <taglib/mp4tag.h>
 #include <taglib/mp4coverart.h>
@@ -11,6 +17,20 @@
 #include <taglib/id3v2tag.h>
 #include <taglib/id3v2frame.h>
 #include <taglib/attachedpictureframe.h>
+
+static string StringToStdString(const String& str)
+{
+    if (str.isLatin1()) {
+        return str.to8Bit();
+    } else {
+        string stdStr;
+        const ByteVector& v = str.data(String::UTF16BE);
+        if (IconvHelper::ConvFromTo("UTF-16BE", "UTF-8", v.data(), v.size(), stdStr))
+            return stdStr;
+        else
+            return str.to8Bit();
+    }
+}
 
 TagLibParser::TagLibParser():
     m_pFileRef(NULL),
@@ -59,27 +79,6 @@ void TagLibParser::Close()
     m_FileName.clear();
 }
 
-string WStringToStdString(const std::wstring& str)
-{
-    const size_t buflen = (str.size()+1) * MB_LEN_MAX;
-    char* buf = new char[buflen];
-    size_t ret = wcstombs(buf, str.c_str(), buflen);
-    if (ret != (size_t)-1) {
-        string target(buf, ret);
-        delete[] buf;
-        return target;
-    } else {
-        delete[] buf;
-        return "";
-    }
-}
-
-string StringToStdString(const TagLib::String& str)
-{
-    return ( str.isLatin1() || str.isAscii() ) ? 
-        str.to8Bit() : WStringToStdString(str.toWString());
-}
-
 bool TagLibParser::HasTag() const
 {
     return (m_pTag != NULL) ? !m_pTag->isEmpty() : false;
@@ -88,7 +87,6 @@ bool TagLibParser::HasTag() const
 string TagLibParser::Title() const
 {
     if (m_pTag != NULL) {
-        //return m_pTag->title().to8Bit();
         return StringToStdString(m_pTag->title());
     } else {
         return "";
@@ -98,7 +96,6 @@ string TagLibParser::Title() const
 string TagLibParser::Artist() const
 {
     if (m_pTag != NULL) {
-        //return m_pTag->artist().to8Bit();
         return StringToStdString(m_pTag->artist());
     } else {
         return "";
@@ -108,7 +105,6 @@ string TagLibParser::Artist() const
 string TagLibParser::Album() const
 {
     if (m_pTag != NULL) {
-        //return m_pTag->album().to8Bit();
         return StringToStdString(m_pTag->album());
     } else {
         return "";
@@ -118,7 +114,6 @@ string TagLibParser::Album() const
 string TagLibParser::Comment() const
 {
     if (m_pTag != NULL) {
-        //return m_pTag->comment().to8Bit();
         return StringToStdString(m_pTag->comment());
     } else {
         return "";
@@ -128,7 +123,6 @@ string TagLibParser::Comment() const
 string TagLibParser::Genre() const
 {
     if (m_pTag != NULL) {
-        //return m_pTag->genre().to8Bit();
         return StringToStdString(m_pTag->genre());
     } else {
         return "";
