@@ -196,6 +196,24 @@ public:
         }
     }
 
+    int SeqCurrentIndex() const
+    {
+        using namespace PlaylistMode;
+        switch (m_Mode) {
+            case Normal:
+            case Repeat:
+            case RepeatOne:
+                return m_SeqIndex;
+
+            case Shuffle:
+            case ShuffleRepeat:
+                return m_SeqShuffleQueue[m_SeqIndex];
+
+            default:
+                return -1;
+        }
+    }
+
     void Assign(const std::deque<item_t>& items)
     {
         m_ItemQueue.assign(items.begin(), items.end());
