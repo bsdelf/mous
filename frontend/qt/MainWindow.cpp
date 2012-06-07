@@ -354,7 +354,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
         m_Player->Play();
     m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
 
-    setWindowTitle(QString::fromUtf8(item.tag.title.c_str()));
+    setWindowTitle("Mous ( " + QString::fromUtf8(item.tag.title.c_str()) + " )");
 
     m_UsedPlaylistView = view;
 
