@@ -3,8 +3,12 @@
 
 #include <QtGui>
 #include <QtCore>
+
 #include <core/ITagParserFactory.h>
+using namespace mous;
+
 #include <string>
+using namespace std;
 
 namespace Ui {
 class FrmTagEditor;
@@ -17,7 +21,10 @@ class FrmTagEditor : public QWidget
 public:
     explicit FrmTagEditor(QWidget *parent = 0);
     ~FrmTagEditor();
-    
+
+    void SaveUiStatus();
+    void RestoreUiStatus();
+
     void SetTagParserFactory(const mous::ITagParserFactory* _factory);    
     void WaitForLoadFinished();
     void LoadFileTag(const std::string& fileName);
@@ -34,7 +41,7 @@ private slots:
     void SlotBtnCancel();
     void SlotSplitterMoved(int pos, int index);
 
-private:
+public:
     Ui::FrmTagEditor *ui;
 
     const mous::ITagParserFactory* factory;

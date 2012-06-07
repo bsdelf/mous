@@ -44,6 +44,9 @@ public:
     ~MainWindow();
 
 private:
+    void closeEvent(QCloseEvent *);
+
+private:
     void InitMyUi();
     void InitMousCore();
     void ClearMousCore();
@@ -78,6 +81,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QDockWidget* m_Dock;
     FrmToolBar m_FrmToolBar;
     FrmTagEditor m_FrmTagEditor;
     sqt::MidClickTabBar* m_TabBarPlaylist;

@@ -31,6 +31,11 @@ MainWindow::MainWindow(QWidget *parent) :
     InitMousCore();
     InitMyUi();
     InitQtSlots();
+
+    m_FrmTagEditor.RestoreUiStatus();
+    const AppEnv* env = GlobalAppEnv::Instance();
+    restoreGeometry(env->windowGeometry);
+    restoreState(env->windowState);
 }
 
 MainWindow::~MainWindow()
@@ -51,6 +56,16 @@ MainWindow::~MainWindow()
     delete ui;
 
     ClearMousCore();
+}
+
+void MainWindow::closeEvent(QCloseEvent*)
+{
+    AppEnv* env = GlobalAppEnv::Instance();
+    env->tagEditorSplitterState = m_FrmTagEditor.saveGeometry();
+    env->windowGeometry = saveGeometry();
+    env->windowState = saveState();
+
+    m_FrmTagEditor.SaveUiStatus();
 }
 
 void MainWindow::InitMousCore()
@@ -142,10 +157,11 @@ void MainWindow::InitMyUi()
     // Show default playlist
     SlotWidgetPlayListDoubleClick();
 
-    QDockWidget* dock = new QDockWidget(tr("Metadata"));
-    dock->setWidget(&m_FrmTagEditor);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
-    dock->setFeatures(QDockWidget::NoDockWidgetFeatures | QDockWidget::DockWidgetMovable);
+    m_Dock = new QDockWidget(tr("Metadata"));
+    m_Dock->setObjectName("Dock");
+    m_Dock->setWidget(&m_FrmTagEditor);
+    addDockWidget(Qt::LeftDockWidgetArea, m_Dock);
+    m_Dock->setFeatures(QDockWidget::NoDockWidgetFeatures | QDockWidget::DockWidgetMovable);
 
     ui->toolBar->addWidget(&m_FrmToolBar);
     ui->toolBar->setMovable(false);

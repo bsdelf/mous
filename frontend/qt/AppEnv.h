@@ -8,24 +8,28 @@ struct AppEnv
 {
 public:
     bool Init();
+    void Save();
 
 public:
     // path
     QString pluginDir;
     QString resourceDir;
 
+    QString configFile;
     QString translationFile;
 
     // config
     QString ifNotUtf8;
 
-    // ui
-    int width;
-    int height;
+    // ui    
+    QByteArray windowGeometry;
+    QByteArray windowState;
+    QByteArray tagEditorSplitterState;
 
 private:
-    void ChooseTranslation();
-
+    void InitFilePath();
+    bool LoadConfig();
+    bool CheckDefaultConfig();
 };
 
 typedef scx::Singleton<AppEnv> GlobalAppEnv;

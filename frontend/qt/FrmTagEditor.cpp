@@ -1,6 +1,6 @@
 #include "FrmTagEditor.h"
 #include "ui_FrmTagEditor.h"
-using namespace mous;
+#include "AppEnv.h"
 
 FrmTagEditor::FrmTagEditor(QWidget *parent) :
     QWidget(parent),
@@ -52,6 +52,18 @@ FrmTagEditor::~FrmTagEditor()
 {
     delete ui;
     delete m_LabelImage;
+}
+
+void FrmTagEditor::SaveUiStatus()
+{
+    AppEnv* env = GlobalAppEnv::Instance();
+    env->tagEditorSplitterState = ui->splitter->saveState();
+}
+
+void FrmTagEditor::RestoreUiStatus()
+{
+    const AppEnv* env = GlobalAppEnv::Instance();
+    ui->splitter->restoreState(env->tagEditorSplitterState);
 }
 
 void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *_factory)
