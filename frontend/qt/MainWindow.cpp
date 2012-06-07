@@ -356,7 +356,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 
     m_UsedPlaylistView = view;
 
-    m_FrmTagEditor.LoadFileTag(item.url);
+    m_FrmTagEditor.LoadMediaItem(item);
 }
 
 void MainWindow::SlotConvertMediaItem(const MediaItem& item)

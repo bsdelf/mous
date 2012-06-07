@@ -5,7 +5,7 @@
 FrmTagEditor::FrmTagEditor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FrmTagEditor),
-    factory(NULL),
+    m_ParserFactory(NULL),
     m_CurrentParser(NULL),
     m_LabelImage(NULL),
     m_SemLoadFinished(1)
@@ -66,34 +66,34 @@ void FrmTagEditor::RestoreUiStatus()
     ui->splitter->restoreState(env->tagEditorSplitterState);
 }
 
-void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *_factory)
+void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *factory)
 {
-    if (_factory == NULL && factory != NULL && m_CurrentParser != NULL) {
+    if (m_ParserFactory == NULL && m_ParserFactory != NULL && m_CurrentParser != NULL) {
         m_CurrentParser->Close();
-        factory->FreeParser(m_CurrentParser);
+        m_ParserFactory->FreeParser(m_CurrentParser);
     }
-    factory = _factory;
+    m_ParserFactory = factory;
 }
 
-void FrmTagEditor::LoadFileTag(const std::string &fileName)
+void FrmTagEditor::LoadMediaItem(const mous::MediaItem& item)
 {
     if (!m_SemLoadFinished.tryAcquire())
         return;
-    DoLoadFileTag(fileName);
+    m_CurrentItem = item;
+    DoLoadFileTag(item.url);
     m_SemLoadFinished.release();
 }
 
 void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
 {
-    if (factory == NULL)
+    if (m_ParserFactory == NULL)
         return;
 
     if (m_CurrentParser != NULL) {
         m_CurrentParser->Close();
-        factory->FreeParser(m_CurrentParser);
+        m_ParserFactory->FreeParser(m_CurrentParser);
     }
-    m_CurrentParser = factory->CreateParser(fileName);
-    if (m_CurrentParser == NULL) {
+    if ((m_CurrentParser = m_ParserFactory->CreateParser(fileName)) == NULL) {
         return;
     }
     m_CurrentParser->Open(fileName);
@@ -148,13 +148,13 @@ void FrmTagEditor::UpdateTag()
         valList << val;
     }
 
-    valList[0]->setText(QString::fromUtf8(m_CurrentParser->Album().c_str()));
-    valList[1]->setText(QString::fromUtf8(m_CurrentParser->Title().c_str()));
-    valList[2]->setText(QString::fromUtf8(m_CurrentParser->Artist().c_str()));
-    valList[3]->setText(QString::fromUtf8(m_CurrentParser->Genre().c_str()));
-    valList[4]->setText(QString::number(m_CurrentParser->Year()));
-    valList[5]->setText(QString::number(m_CurrentParser->Track()));
-    valList[6]->setText(QString::fromUtf8(m_CurrentParser->Comment().c_str()));
+    valList[0]->setText(QString::fromUtf8(m_CurrentItem.tag.album.c_str()));
+    valList[1]->setText(QString::fromUtf8(m_CurrentItem.tag.title.c_str()));
+    valList[2]->setText(QString::fromUtf8(m_CurrentItem.tag.artist.c_str()));
+    valList[3]->setText(QString::fromUtf8(m_CurrentItem.tag.genre.c_str()));
+    valList[4]->setText(QString::number(m_CurrentItem.tag.year));
+    valList[5]->setText(QString::number(m_CurrentItem.tag.track));
+    valList[6]->setText(QString::fromUtf8(m_CurrentItem.tag.comment.c_str()));
 }
 
 void FrmTagEditor::UpdateCoverArt()

@@ -4,6 +4,7 @@
 #include <QtGui>
 #include <QtCore>
 
+#include <util/MediaItem.h>
 #include <core/ITagParserFactory.h>
 using namespace mous;
 
@@ -25,9 +26,9 @@ public:
     void SaveUiStatus();
     void RestoreUiStatus();
 
-    void SetTagParserFactory(const mous::ITagParserFactory* _factory);    
+    void SetTagParserFactory(const mous::ITagParserFactory* factory);
     void WaitForLoadFinished();
-    void LoadFileTag(const std::string& fileName);
+    void LoadMediaItem(const mous::MediaItem& item);
 
 private:   
     void DoLoadFileTag(const std::string& fileName);
@@ -44,8 +45,10 @@ private slots:
 public:
     Ui::FrmTagEditor *ui;
 
-    const mous::ITagParserFactory* factory;
+    const mous::ITagParserFactory* m_ParserFactory;
     mous::ITagParser* m_CurrentParser;
+    mous::MediaItem m_CurrentItem;
+
     QPixmap m_CurrentImage;
     QLabel* m_LabelImage;
 
