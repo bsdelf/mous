@@ -116,10 +116,10 @@ struct Window
     {
         if (win != NULL) {
             if (!styled) {
-                mvwprintw(win, y, x, "%s", _str.c_str());
+                mvwaddstr(win, y, x, _str.c_str());
             } else {
                 const std::string& str = ParseStyle(_str);
-                mvwprintw(win, y, x, "%s", str.c_str());
+                mvwaddstr(win, y, x, str.c_str());
                 CloseStyle();
             }
         }
