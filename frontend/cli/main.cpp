@@ -252,9 +252,9 @@ int main(int argc, char** argv)
     const MediaItem& item = playlist.SeqItemAtOffset(0, false);
 
     cout << ">>>> Tag Info" << endl;
-    cout << "\ttitle:" << item.tag.title << endl;
-    cout << "\tartist:" << item.tag.artist << endl;
-    cout << "\talbum:" << item.tag.album << endl;
+    cout << "\ttitle(" << item.tag.title.size() << "):" << item.tag.title << endl;
+    cout << "\tartist(" << item.tag.artist.size() << "):" << item.tag.artist << endl;
+    cout << "\talbum(" << item.tag.album.size() << "):" << item.tag.album << endl;
     cout << "\tcomment:" << item.tag.comment << endl;
     cout << "\tgenre:" << item.tag.genre << endl;
     cout << "\tyear:" << item.tag.year << endl;
