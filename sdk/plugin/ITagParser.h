@@ -19,7 +19,7 @@ public:
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
 
-    // tag related calls
+    // read tag
     virtual bool HasTag() const = 0;
     virtual std::string Title() const = 0; 
     virtual std::string Artist() const = 0;
@@ -29,22 +29,22 @@ public:
     virtual int32_t Year() const = 0;
     virtual int32_t Track() const = 0;
 
-    // tag edit calls
-    virtual bool CanEditTag() const = 0;
-    virtual bool SaveTag() = 0;
-    virtual void SetTitle(const std::string& title) = 0;
-    virtual void SetArtist(const std::string& artist) = 0;
-    virtual void SetAlbum(const std::string& album) = 0;
-    virtual void SetComment(const std::string& comment) = 0;
-    virtual void SetGenre(const std::string& genre) = 0;
-    virtual void SetYear(int32_t year) = 0;;
-    virtual void SetTrack(int32_t track) = 0;;
+    // edit tag
+    virtual bool CanEdit() const { return false; };
+    virtual bool Save() { return false; };
+    virtual void SetTitle(const std::string& title) { };
+    virtual void SetArtist(const std::string& artist) { };
+    virtual void SetAlbum(const std::string& album) { };
+    virtual void SetComment(const std::string& comment) { };
+    virtual void SetGenre(const std::string& genre) { };
+    virtual void SetYear(int32_t year) { };
+    virtual void SetTrack(int32_t track) { };
 
-    // cover art calls
-    virtual bool DumpCoverArt(char*& buf, size_t& len) = 0;
-    virtual bool StoreCoverArt(const char* buf, size_t len) = 0;
+    // cover art
+    virtual bool DumpCoverArt(char*& buf, size_t& len) { return false; };
+    virtual bool StoreCoverArt(const char* buf, size_t len) { return false; };
 
-    // property related calls
+    // audio property
     virtual bool HasProperties() const { return false; }
     virtual int32_t Duration() const { return -1; }
     virtual int32_t BitRate() const { return -1; }
