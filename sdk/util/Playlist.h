@@ -251,7 +251,7 @@ public:
             seqIndex = tmp;
         }
         
-        assert(seqIndex >= 0 && seqIndex < m_ItemQueue.size());
+        assert(seqIndex >= 0 && (size_t)seqIndex < m_ItemQueue.size());
 
         m_SeqIndex = (m_Mode == PlaylistMode::Shuffle
                 || m_Mode == PlaylistMode::ShuffleRepeat) ? 
