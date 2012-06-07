@@ -35,6 +35,8 @@ public:
     virtual const MediaItem* PrevItem() const;
     virtual int ItemCount() const;
 
+    virtual void OnMediaItemUpdated(const mous::MediaItem& item);
+
 signals:
     void SigPlayMediaItem(IPlaylistView *view, const MediaItem& item);
     void SigConvertMediaItem(const MediaItem& item);

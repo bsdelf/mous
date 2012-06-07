@@ -184,6 +184,8 @@ void MainWindow::InitQtSlots()
 
     connect(m_TabBarPlaylist, SIGNAL(SigMidClick(int)), this, SLOT(SlotBarPlayListMidClick(int)));
     connect(m_TabWidgetPlaylist, SIGNAL(SigDoubleClick()), this, SLOT(SlotWidgetPlayListDoubleClick()));
+
+    connect(&m_FrmTagEditor, SIGNAL(SigMediaItemChanged(const MediaItem&)), this, SLOT(SlotTagUpdated(const MediaItem&)));
 }
 
 void MainWindow::FormatTime(QString& str, int ms)
@@ -411,4 +413,10 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 void MainWindow::SlotConvertMediaItems(const QList<MediaItem>& items)
 {
 
+}
+
+void MainWindow::SlotTagUpdated(const MediaItem& item)
+{
+    if (m_UsedPlaylistView != NULL)
+        m_UsedPlaylistView->OnMediaItemUpdated(item);
 }

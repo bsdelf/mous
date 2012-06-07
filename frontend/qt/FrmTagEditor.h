@@ -30,19 +30,26 @@ public:
     void WaitForLoadFinished();
     void LoadMediaItem(const mous::MediaItem& item);
 
+signals:
+    void SigMediaItemChanged(const MediaItem& item);
+
 private:   
     void DoLoadFileTag(const std::string& fileName);
     void ShowBottomBtns(bool show);
     void UpdateTag();
     void UpdateCoverArt();
+
+private:
     void resizeEvent(QResizeEvent * event);
 
 private slots:
     void SlotBtnSave();
     void SlotBtnCancel();
     void SlotSplitterMoved(int pos, int index);
+    void SlotCellChanged(int row, int column);
+    void SlotHideLabelFailed();
 
-public:
+private:
     Ui::FrmTagEditor *ui;
 
     const mous::ITagParserFactory* m_ParserFactory;
@@ -53,6 +60,10 @@ public:
     QLabel* m_LabelImage;
 
     QSemaphore m_SemLoadFinished;
+
+    QSet<QPair<int, int> > m_UnsavedFields;
+
+    QTimer m_DelayTimer;
 };
 
 #endif // FRMTAGEDITOR_H

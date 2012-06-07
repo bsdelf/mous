@@ -156,7 +156,7 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
 
     // Header
     QStringList headList;
-    headList << tr("Artist") << tr("Album") << tr("Title") << tr("Track") << tr("Duration");
+    headList << tr("Album") << tr("Artist") << tr("Title") << tr("Track") << tr("Duration");
     m_ItemModel.setHorizontalHeaderLabels(headList);
     m_ItemModel.setColumnCount(headList.size());
 
@@ -233,6 +233,28 @@ const MediaItem* SimplePlaylistView::PrevItem() const
 int SimplePlaylistView::ItemCount() const
 {
     return m_Playlist.Count();
+}
+
+void SimplePlaylistView::OnMediaItemUpdated(const mous::MediaItem& item)
+{
+    if (m_Playlist.Empty())
+        return;
+
+    // we SHOULD check all items here!!!
+    for (int row = 0; row < m_Playlist.Count(); ++row) {
+        MediaItem& destItem = m_Playlist[row];
+        if (destItem.url == item.url &&
+                destItem.duration == item.duration &&
+                destItem.hasRange == item.hasRange &&
+                destItem.msBeg == item.msBeg &&
+                destItem.msEnd == item.msEnd) {
+            destItem = item;
+            m_ItemModel.item(row, 0)->setText(QString::fromUtf8(item.tag.album.c_str()));
+            m_ItemModel.item(row, 1)->setText(QString::fromUtf8(item.tag.artist.c_str()));
+            m_ItemModel.item(row, 2)->setText(QString::fromUtf8(item.tag.title.c_str()));
+            m_ItemModel.item(row, 3)->setText(QString::number(item.tag.track));
+        }
+    }
 }
 
 void SimplePlaylistView::SetupShortcuts()
@@ -758,8 +780,8 @@ SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) co
     strDuration.sprintf("%.2d:%.2d", secDuration/60, secDuration%60);
 
     // Build fields
-    listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.artist.c_str()));
     listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.album.c_str()));
+    listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.artist.c_str()));    
     listRow.fields << new QStandardItem(QString::fromUtf8(item.tag.title.c_str()));
     listRow.fields << new QStandardItem(QString::number(item.tag.track));
     listRow.fields << new QStandardItem(strDuration);

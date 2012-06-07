@@ -2,6 +2,9 @@
 #include "ui_FrmTagEditor.h"
 #include "AppEnv.h"
 
+#include <string>
+using namespace std;
+
 FrmTagEditor::FrmTagEditor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FrmTagEditor),
@@ -17,35 +20,41 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     ui->scrollAreaCover->setWidget(m_LabelImage);
     ui->scrollAreaCover->setWidgetResizable(true);
 
-    //ShowBottomBtns(false);
-    ui->tableTag->setAlternatingRowColors(true);
-    ui->tableTag->setShowGrid(false);
-    ui->tableTag->setColumnCount(2);
-    ui->tableTag->setHorizontalHeaderLabels(QStringList(tr("Name")) << tr("Value"));
-    ui->tableTag->horizontalHeader()->setVisible(true);
-    ui->tableTag->horizontalHeader()->setStretchLastSection(true);
-    ui->tableTag->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    ui->tagTable->setAlternatingRowColors(true);
+    ui->tagTable->setShowGrid(false);
+    ui->tagTable->setColumnCount(2);
+    ui->tagTable->setHorizontalHeaderLabels(QStringList(tr("Name")) << tr("Value"));
+    ui->tagTable->horizontalHeader()->setVisible(true);
+    ui->tagTable->horizontalHeader()->setStretchLastSection(true);
+    ui->tagTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    ui->tagTable->setEnabled(false);
+
+    ShowBottomBtns(false);
+
+    ui->labelFailed->clear();
+    ui->labelFailed->hide();
 
     QList<QString> names;
     names << tr("Album") << tr("Title") << tr("Artist")
           << tr("Genre") << tr("Year") << tr("Track") << tr("Comment");
-    ui->tableTag->setRowCount(names.size());
+    ui->tagTable->setRowCount(names.size());
 
     for (int i = 0; i < names.size(); ++i) {
         QTableWidgetItem* key = new QTableWidgetItem(names[i]);
-        ui->tableTag->setItem(i, 0, key);
+        ui->tagTable->setItem(i, 0, key);
         key->setFlags(Qt::NoItemFlags | Qt::ItemIsEnabled);
 
         QTableWidgetItem* val = new QTableWidgetItem("");
-        ui->tableTag->setItem(i, 1, val);
+        ui->tagTable->setItem(i, 1, val);
         val->setFlags(val->flags() | Qt::ItemIsEditable);
 
-        ui->tableTag->setRowHeight(i, 22);
+        ui->tagTable->setRowHeight(i, 22);
     }
 
     connect(ui->btnSave, SIGNAL(clicked()), this, SLOT(SlotBtnSave()));
     connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(SlotBtnCancel()));
     connect(ui->splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(SlotSplitterMoved(int,int)));
+    connect(ui->tagTable, SIGNAL(cellChanged(int,int)), this, SLOT(SlotCellChanged(int,int)));
 }
 
 FrmTagEditor::~FrmTagEditor()
@@ -79,8 +88,13 @@ void FrmTagEditor::LoadMediaItem(const mous::MediaItem& item)
 {
     if (!m_SemLoadFinished.tryAcquire())
         return;
+
     m_CurrentItem = item;
     DoLoadFileTag(item.url);
+
+    m_UnsavedFields.clear();
+    ShowBottomBtns(false);
+
     m_SemLoadFinished.release();
 }
 
@@ -97,6 +111,8 @@ void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
         return;
     }
     m_CurrentParser->Open(fileName);
+    if (m_CurrentParser->CanEdit())
+        ui->tagTable->setEnabled(true);
     UpdateTag();
 
     char* buf = NULL; size_t len = 0;
@@ -124,11 +140,73 @@ void FrmTagEditor::ShowBottomBtns(bool show)
 
 void FrmTagEditor::SlotBtnSave()
 {
+    if (m_CurrentParser == NULL)
+        return;
+
+    MediaItem tmpItem = m_CurrentItem;
+
+    typedef QPair<int, int> Cell;
+    foreach (const Cell& cell, m_UnsavedFields) {
+        qDebug() << cell;
+        QString qtext = ui->tagTable->item(cell.first, cell.second)->text();
+        string text = qtext.toUtf8().data();
+        switch (cell.first) {
+        case 0:
+            tmpItem.tag.album = text;
+            m_CurrentParser->SetAlbum(text);
+            break;
+
+        case 1:
+            tmpItem.tag.title = text;
+            m_CurrentParser->SetTitle(text);
+            break;
+
+        case 2:
+            tmpItem.tag.artist = text;
+            m_CurrentParser->SetArtist(text);
+            break;
+
+        case 3:
+            tmpItem.tag.genre = text;
+            m_CurrentParser->SetGenre(text);
+            break;
+
+        case 4:
+            tmpItem.tag.year = qtext.toInt();
+            m_CurrentParser->SetYear(qtext.toInt());
+            break;
+
+        case 5:
+            tmpItem.tag.track = qtext.toInt();
+            m_CurrentParser->SetTrack(qtext.toInt());
+            break;
+
+        case 6:
+            tmpItem.tag.comment = text;
+            m_CurrentParser->SetComment(text);
+            break;
+        }
+    }
+    if (m_CurrentParser->Save()) {
+        m_CurrentItem = tmpItem;
+        emit SigMediaItemChanged(m_CurrentItem);
+    } else {
+        ui->labelFailed->setText(tr("Failed to save!"));
+        ui->labelFailed->show();
+        connect(&m_DelayTimer, SIGNAL(timeout()), this, SLOT(SlotHideLabelFailed()));
+        m_DelayTimer.setSingleShot(true);
+        m_DelayTimer.start(2.5*1000);
+        UpdateTag();
+    }
+
+    m_UnsavedFields.clear();
     ShowBottomBtns(false);
 }
 
 void FrmTagEditor::SlotBtnCancel()
 {
+    UpdateTag();
+    m_UnsavedFields.clear();
     ShowBottomBtns(false);
 }
 
@@ -137,14 +215,26 @@ void FrmTagEditor::SlotSplitterMoved(int pos, int index)
     UpdateCoverArt();
 }
 
+void FrmTagEditor::SlotCellChanged(int row, int column)
+{
+    m_UnsavedFields.insert(QPair<int, int>(row, column));
+    ShowBottomBtns(true);
+}
+
+void FrmTagEditor::SlotHideLabelFailed()
+{
+    m_DelayTimer.disconnect(this, SLOT(SlotHideLabelFailed()));
+    ui->labelFailed->hide();
+}
+
 void FrmTagEditor::UpdateTag()
 {
     if (m_CurrentParser == NULL)
         return;
 
     QList<QTableWidgetItem*> valList;
-    for (int i = 0; i < ui->tableTag->rowCount(); ++i) {
-        QTableWidgetItem* val = ui->tableTag->item(i, 1);
+    for (int i = 0; i < ui->tagTable->rowCount(); ++i) {
+        QTableWidgetItem* val = ui->tagTable->item(i, 1);
         valList << val;
     }
 

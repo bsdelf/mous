@@ -79,6 +79,8 @@ private slots:
     void SlotConvertMediaItem(const MediaItem& item);
     void SlotConvertMediaItems(const QList<MediaItem>& items);
 
+    void SlotTagUpdated(const MediaItem& item);
+
 private:
     Ui::MainWindow *ui;
     QDockWidget* m_Dock;

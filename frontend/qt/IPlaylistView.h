@@ -19,6 +19,8 @@ public:
     virtual const mous::MediaItem* PrevItem() const = 0;
     virtual const mous::MediaItem* NextItem() const = 0;
     virtual int ItemCount() const = 0;
+
+    virtual void OnMediaItemUpdated(const mous::MediaItem& item) = 0;
 };
 
 #endif // IPLAYLISTVIEW_H
