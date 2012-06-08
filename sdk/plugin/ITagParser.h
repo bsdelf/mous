@@ -41,7 +41,7 @@ public:
     virtual void SetTrack(int32_t track) { };
 
     // cover art
-    virtual bool DumpCoverArt(char*& buf, size_t& len) { return false; };
+    virtual void DumpCoverArt(std::vector<char>& buf) { buf.clear(); };
     virtual bool StoreCoverArt(const char* buf, size_t len) { return false; };
 
     // audio property

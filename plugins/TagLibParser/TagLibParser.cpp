@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 
+#include <scx/Conv.hpp>
 #include <scx/FileHelper.hpp>
 #include <scx/IconvHelper.hpp>
 using namespace scx;
@@ -13,6 +14,7 @@ using namespace scx;
 #include <taglib/mp4file.h>
 #include <taglib/mp4tag.h>
 #include <taglib/mp4coverart.h>
+
 #include <taglib/mpegfile.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/id3v2frame.h>
@@ -222,21 +224,17 @@ void TagLibParser::SetTrack(int32_t track)
         m_pTag->setTrack(track);
 }
 
-bool TagLibParser::DumpCoverArt(char*& buf, size_t& len)
+void TagLibParser::DumpCoverArt(vector<char>& buf)
 {
     if (m_FileName.empty())
-        return false;
+        return;
 
-    const string& ext = scx::FileHelper::FileSuffix(m_FileName);
+    const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
     cout << "ext:" << ext << endl;
     if (m_Dumpers.find(ext) == m_Dumpers.end())
-        return false;
+        return;
 
-    buf = NULL;
-    len = 0;
-    m_Dumpers[ext](m_FileName, buf, len);
-
-    return buf != NULL;
+    m_Dumpers[ext](m_FileName, buf);
 }
 
 bool TagLibParser::StoreCoverArt(const char* buf, size_t len)
@@ -247,7 +245,7 @@ bool TagLibParser::StoreCoverArt(const char* buf, size_t len)
     return true;
 }
 
-void TagLibParser::DumpID3v2Cover(ID3v2::Tag* mp3Tag, char*& buf, size_t& len)
+void TagLibParser::DumpID3v2Cover(ID3v2::Tag* mp3Tag, vector<char>& buf)
 {
     if (mp3Tag == NULL){
         cout << "no id3v2 tag found!" << endl;
@@ -265,11 +263,14 @@ void TagLibParser::DumpID3v2Cover(ID3v2::Tag* mp3Tag, char*& buf, size_t& len)
             for (; iter != frameList.end(); ++iter) {
                 frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
                 cout << "type: " << (int) frame->type() << endl;
-                cout << "mime: " << frame->mimeType().toCString() << endl;
+                cout << "mime: " << frame->mimeType().to8Bit() << endl;
 
-                len = frame->picture().size();
-                buf = new char[len];
-                memcpy(buf, frame->picture().data(), len);
+                const ByteVector& v = frame->picture();
+                if (v.size() == 0)
+                    return;
+                buf.resize(v.size());
+                memcpy(&buf[0], v.data(), v.size());
+
                 return;
             }
         } else {
@@ -278,13 +279,13 @@ void TagLibParser::DumpID3v2Cover(ID3v2::Tag* mp3Tag, char*& buf, size_t& len)
     }
 }
 
-void TagLibParser::DumpMp3Cover(const string& path, char*& buf, size_t& len)
+void TagLibParser::DumpMp3Cover(const string& path, vector<char>& buf)
 {
     TagLib::MPEG::File file(path.c_str());
-    DumpID3v2Cover(file.ID3v2Tag(), buf, len);
+    DumpID3v2Cover(file.ID3v2Tag(), buf);
 }
 
-void TagLibParser::DumpMp4Cover(const string& path, char*& buf, size_t& len)
+void TagLibParser::DumpMp4Cover(const string& path, vector<char>& buf)
 {
     TagLib::MP4::File file(path.c_str());
     MP4::Tag* mp4tag = file.tag();
@@ -304,9 +305,11 @@ void TagLibParser::DumpMp4Cover(const string& path, char*& buf, size_t& len)
 
         cout << "type: " << list[0].format() << endl;
 
-        len = list[0].data().size();
-        buf = new char[len];
-        memcpy(buf, list[0].data().data(), len);
+        const ByteVector& v = list[0].data();
+        if (v.size() == 0)
+            return;
+        buf.resize(v.size());
+        memcpy(&buf[0], v.data(), v.size());
         return;
     } else {
         cout << "\"covr\" not found!" << endl;
