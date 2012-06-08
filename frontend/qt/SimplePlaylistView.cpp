@@ -404,7 +404,11 @@ void SimplePlaylistView::SlotConvert()
     if (m_Playlist.Empty())
         return;
 
-    QModelIndex index(selectedIndexes()[0]);
+    QModelIndexList list = selectedIndexes();
+    if (list.empty())
+        return;
+
+    QModelIndex index(list[0]);
     qDebug() << index.row();
 
     MediaItem item = m_Playlist[index.row()];
