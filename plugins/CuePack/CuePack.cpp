@@ -29,6 +29,8 @@ void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& list,
     const std::map<std::string, IMediaPack*>* pMap) const
 {
     FILE* file = fopen(path.c_str(), "r");
+    if (file == NULL)
+        return;
     Cd* cd = cue_parse_file(file);
     fclose(file);
 
