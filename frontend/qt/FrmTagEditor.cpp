@@ -3,6 +3,7 @@
 #include "AppEnv.h"
 
 #include <string>
+#include <iostream>
 using namespace std;
 
 FrmTagEditor::FrmTagEditor(QWidget *parent) :
@@ -115,18 +116,17 @@ void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
         ui->tagTable->setEnabled(true);
     UpdateTag();
 
-    char* buf = NULL; size_t len = 0;
-    m_CurrentParser->DumpCoverArt(buf, len);
+    vector<char> buf;
+    m_CurrentParser->DumpCoverArt(buf);
 
     qDebug() << fileName.c_str();
-    qDebug() << "cover art size:" << len;
+    qDebug() << "cover art size:" << buf.size();
 
-    if (buf != NULL && len != 0) {
-        if (m_CurrentImage.loadFromData((const uchar *)buf, (uint)len)) {
+    if (!buf.empty()) {
+        if (m_CurrentImage.loadFromData((const uchar *)(&buf[0]), (uint)buf.size())) {
             UpdateCoverArt();
             ui->scrollAreaCover->show();
         }
-        delete[] buf;
     } else {
         ui->scrollAreaCover->hide();
     }
