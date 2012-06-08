@@ -729,36 +729,36 @@ void SimplePlaylistView::CorrectTagCharset(MediaTag& tag, const string& ifNotUtf
     if (!CharsetHelper::IsUtf8(tag.artist.c_str())
             && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.artist.data(), tag.artist.size(), tmp))
         tag.artist = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(tag.artist.c_str());
+    //else
+    //    qDebug() << "no touch:" << QString::fromUtf8(tag.artist.c_str());
 
     // album
     if (!CharsetHelper::IsUtf8(tag.album.c_str())
             && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.album.data(), tag.album.size(), tmp))
         tag.album = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(tag.album.c_str());
+    //else
+    //    qDebug() << "no touch:" << QString::fromUtf8(tag.album.c_str());
 
     // title
     if (!CharsetHelper::IsUtf8(tag.title.c_str())
             && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.title.data(), tag.title.size(), tmp))
         tag.title = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(tag.title.c_str());
+    //else
+    //    qDebug() << "no touch:" << QString::fromUtf8(tag.title.c_str());
 
     // comment
     if (!CharsetHelper::IsUtf8(tag.comment.c_str())
             && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.comment.data(), tag.comment.size(), tmp))
         tag.comment = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(tag.comment.c_str());
+    //else
+    //    qDebug() << "no touch:" << QString::fromUtf8(tag.comment.c_str());
 
     // genre
     if (!CharsetHelper::IsUtf8(tag.genre.c_str())
             && IconvHelper::ConvFromTo(ifNotUtf8, "UTF-8", tag.genre.data(), tag.genre.size(), tmp))
         tag.genre = tmp;
-    else
-        qDebug() << "no touch:" << QString::fromUtf8(tag.genre.c_str());
+    //else
+    //    qDebug() << "no touch:" << QString::fromUtf8(tag.genre.c_str());
 }
 
 SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) const
