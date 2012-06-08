@@ -222,7 +222,6 @@ void SimplePlaylistView::SetClipboard(PlaylistClipboard<mous::MediaItem>* clipbo
 const MediaItem* SimplePlaylistView::NextItem() const
 {
     return m_Playlist.SeqHasOffset(1) ? &m_Playlist.SeqItemAtOffset(1, true) : NULL;
-
 }
 
 const MediaItem* SimplePlaylistView::PrevItem() const
@@ -314,7 +313,8 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
 
         QStringList files = text.split(FILE_MIME, QString::SkipEmptyParts);
         for (int i = 0; i < files.size(); ++i) {
-            files[i] = files[i].trimmed();
+            files[i] = QUrl(files[i].trimmed()).toLocalFile();
+            qDebug() << files[i];
         }
 
         scx::Function<void (const QStringList&)> fn(&SimplePlaylistView::LoadMediaItem, this);
@@ -382,7 +382,7 @@ void SimplePlaylistView::SlotAppend()
         oldPath = info.dir().dirName();
     }
     QStringList pathList = QFileDialog::getOpenFileNames(
-                this, tr("Open Media"), oldPath, tr("*"));
+                this, tr("Open Media"), oldPath, "*");
     if (pathList.isEmpty())
         return;
 
@@ -690,6 +690,7 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
         // the item may still invaild(player won't be able to play it)
         deque<MediaItem> mediaItemList;
         const char* filePath = pathList.at(i).toUtf8().data();
+
         if (m_MediaLoader->LoadMedia(filePath, mediaItemList) != ErrorCode::Ok)
             continue;
 
