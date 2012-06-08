@@ -425,8 +425,9 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
     }
 
     //==== do work
+    QString filePath = QFileInfo(dlgOption.Dir(), dlgOption.FileName()).absoluteFilePath();
     m_DlgConvertTask.show();
-    m_DlgConvertTask.AddTask(newTask, fileName);
+    m_DlgConvertTask.AddTask(newTask, filePath);
 }
 
 void MainWindow::SlotConvertMediaItems(const QList<MediaItem>& items)

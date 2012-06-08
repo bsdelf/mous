@@ -73,9 +73,11 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     actionList << new QAction(this);
 
     // Action tagging
+    /*
     action = new QAction(tr("Tagging"), this);
     connect(action, SIGNAL(triggered()), this, SLOT(SlotTagging()));
     actionList << action;
+    */
 
     // Action convert
     action = new QAction(tr("Convert"), this);
@@ -83,10 +85,13 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     actionList << action;
 
     // Action properties
+    /*
     action = new QAction(tr("Properties"), this);
     connect(action, SIGNAL(triggered()), this, SLOT(SlotProperties()));
     actionList << action;
+    */
 
+    /*
     actionList << new QAction(this);
 
     // Action playlist menu
@@ -106,6 +111,7 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     action = new QAction(tr("Save As"), this);
     menu->addAction(action);
     connect(action, SIGNAL(triggered()), this, SLOT(SlotPlaylistSaveAs()));
+    */
 
     // Action play mode menu
     action = new QAction(tr("Play Mode"), this);

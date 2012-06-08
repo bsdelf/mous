@@ -25,9 +25,19 @@ DlgConvertOption::~DlgConvertOption()
     delete ui;
 }
 
+QString DlgConvertOption::Dir() const
+{
+    return ui->editDir->text();
+}
+
 void DlgConvertOption::SetDir(const QString &dir)
 {
     ui->editDir->setText(dir);
+}
+
+QString DlgConvertOption::FileName() const
+{
+    return ui->editFile->text();
 }
 
 void DlgConvertOption::SetFileName(const QString &name)
