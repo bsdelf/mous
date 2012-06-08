@@ -149,7 +149,7 @@ void MainWindow::InitMyUi()
     // Status bar buttons
     m_BtnPreference = new QToolButton(ui->statusBar);
     m_BtnPreference->setAutoRaise(true);
-    m_BtnPreference->setText("P");
+    m_BtnPreference->setText(QChar((int)0x263A));
     m_BtnPreference->setToolTip(tr("Preference"));
 
     ui->statusBar->addPermanentWidget(m_BtnPreference, 0);
@@ -213,11 +213,18 @@ void MainWindow::SlotUiPlayerFinished()
 /* Qt slots */
 void MainWindow::SlotUpdateUi()
 {
+    int total = -1;
+    int ms = -1;
+    int hz = -1;
+    int kbps = -1;
+
     //==== Update statusbar.
-    int total = m_Player->RangeDuration();
-    int ms = m_Player->OffsetMs();
-    int hz = m_Player->SamleRate();
-    int kbps = m_Player->BitRate();
+    if (m_Player->Status() != PlayerStatus::Closed) {
+        total = m_Player->RangeDuration();
+        ms = m_Player->OffsetMs();
+        hz = m_Player->SamleRate();
+        kbps = m_Player->BitRate();
+    }
 
     const QString& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6").arg(hz).arg(kbps, 4).
             arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0')).
@@ -239,8 +246,8 @@ void MainWindow::SlotBtnPlay()
     switch (m_Player->Status()) {
     case PlayerStatus::Closed:
         if (m_UsedMediaItem != NULL) {
-            m_Player->Open(m_UsedMediaItem->url);
-            SlotBtnPlay();
+            if (m_Player->Open(m_UsedMediaItem->url) == ErrorCode::Ok)
+                SlotBtnPlay();
         }
         break;
 
@@ -269,6 +276,9 @@ void MainWindow::SlotBtnPlay()
 
 void MainWindow::SlotBtnPrev()
 {
+    if (m_UsedPlaylistView == NULL)
+        return;
+
     const mous::MediaItem* item = m_UsedPlaylistView->PrevItem();
     if (item != NULL)
         SlotPlayMediaItem(m_UsedPlaylistView, *item);
@@ -276,6 +286,9 @@ void MainWindow::SlotBtnPrev()
 
 void MainWindow::SlotBtnNext()
 {
+    if (m_UsedPlaylistView == NULL)
+        return;
+
     const mous::MediaItem* item = m_UsedPlaylistView->NextItem();
     if (item != NULL)
         SlotPlayMediaItem(m_UsedPlaylistView, *item);
@@ -346,7 +359,13 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 
     m_UsedMediaItem = &item;
 
-    m_Player->Open(item.url);
+    if (m_Player->Open(item.url) != ErrorCode::Ok) {
+        setWindowTitle("Mous ( " + tr("Failed to open!") + " )");
+        usleep(100*1000);
+        SlotBtnNext();
+        return;
+    }
+
     m_TimerUpdateUi->start(m_UpdateInterval);
     if (item.hasRange)
         m_Player->Play(item.msBeg, item.msEnd);
