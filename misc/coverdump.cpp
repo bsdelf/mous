@@ -2,16 +2,25 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+
 #include <taglib/flacfile.h>
 #include <taglib/flacpicture.h>
 #include <taglib/xiphcomment.h>
+
 #include <taglib/mp4file.h>
 #include <taglib/mp4tag.h>
 #include <taglib/mp4coverart.h>
+
 #include <taglib/mpegfile.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/id3v2frame.h>
 #include <taglib/attachedpictureframe.h>
+
+#include <taglib/apefile.h>
+#include <taglib/apetag.h>
+#include <taglib/apeitem.h>
+#include <taglib/tmap.h>
+
 using namespace std;
 using namespace TagLib;
 
@@ -120,6 +129,17 @@ void DumpFlac(const string& filename)
     }
 }
 
+void DumpApe(const string& filename)
+{
+    APE::File file(filename.c_str());
+    APE::Tag* tag = file.APETag(false);
+    const APE::ItemListMap& map = tag->itemListMap();
+    for (APE::ItemListMap::ConstIterator iter = map.begin();
+            iter != map.end(); ++iter) {
+        cout << "name:" << iter->first.to8Bit() << endl;
+    }
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 2) {
@@ -135,9 +155,12 @@ int main(int argc, char** argv)
     dumpers["m4a"] = &DumpMP4;
     dumpers["mp3"] = &DumpMP3;
     dumpers["flac"] = &DumpFlac;
+    dumpers["ape"] = &DumpApe;
     
     if (dumpers.find(ext) != dumpers.end()) {
         dumpers[ext](path);
+    } else {
+        cout << "unsupported audio format!" << endl;
     }
 
     return 0;
