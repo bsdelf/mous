@@ -45,7 +45,7 @@ public:
     virtual bool StoreCoverArt(const char* buf, size_t len) { return false; };
 
     // audio property
-    virtual bool HasProperties() const { return false; }
+    virtual bool HasAudioProperty() const { return false; }
     virtual int32_t Duration() const { return -1; }
     virtual int32_t BitRate() const { return -1; }
 

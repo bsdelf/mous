@@ -37,8 +37,8 @@ public:
     virtual int32_t Year() const;
     virtual int32_t Track() const;
 
-    virtual bool CanEditTag() const;
-    virtual bool SaveTag();
+    virtual bool CanEdit() const;
+    virtual bool Save();
     virtual void SetTitle(const string& title);
     virtual void SetArtist(const string& artist); 
     virtual void SetAlbum(const string& album); 
@@ -50,7 +50,7 @@ public:
     virtual bool DumpCoverArt(char*& buf, size_t& len);
     virtual bool StoreCoverArt(const char* buf, size_t len);
 
-    virtual bool HasProperties() const;
+    virtual bool HasAudioProperty() const;
     virtual int32_t Duration() const;
     virtual int32_t BitRate() const;
 

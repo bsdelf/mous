@@ -230,10 +230,11 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem>& list) const
             cout << "WARN: no tag!!" << endl;
         }
 
-        if (parser->HasProperties()) {
+        if (parser->HasAudioProperty()) {
             if (item.duration < 0)
                 item.duration = parser->Duration();
         } else {
+            item.duration = 0;
             cout << "FATAL: no properties!!" << endl;
         }
 

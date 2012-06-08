@@ -147,7 +147,7 @@ int32_t TagLibParser::Track() const
     }
 }
 
-bool TagLibParser::HasProperties() const
+bool TagLibParser::HasAudioProperty() const
 {
     return (m_pProp != NULL) ? true : false;
 }
@@ -170,12 +170,12 @@ int32_t TagLibParser::BitRate() const
     }
 }
 
-bool TagLibParser::CanEditTag() const
+bool TagLibParser::CanEdit() const
 {
     return true;
 }
 
-bool TagLibParser::SaveTag()
+bool TagLibParser::Save()
 {
     return m_pFileRef != NULL ? m_pFileRef->save() : false;
 }
