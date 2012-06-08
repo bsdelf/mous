@@ -310,6 +310,7 @@ void TagLibParser::DumpMp4Cover(const string& path, vector<char>& buf)
             return;
         buf.resize(v.size());
         memcpy(&buf[0], v.data(), v.size());
+
         return;
     } else {
         cout << "\"covr\" not found!" << endl;
