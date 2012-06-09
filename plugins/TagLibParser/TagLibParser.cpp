@@ -36,7 +36,7 @@ TagLibParser::TagLibParser():
     m_DumpHandlers["m4a"] = &DumpMp4Cover;
 
     m_StoreHandlers["mp3"] = &StoreMp3Cover;
-    m_StoreHandlers["mp4"] = &StoreMp4Cover;
+    m_StoreHandlers["m4a"] = &StoreMp4Cover;
 }
 
 TagLibParser::~TagLibParser()
