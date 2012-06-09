@@ -1,5 +1,5 @@
-#ifndef SCX_FILE_HELPER_HPP
-#define SCX_FILE_HELPEr_HPP
+#ifndef SCX_FILEHELPER_HPP
+#define SCX_FILEHELPER_HPP
 
 #include <inttypes.h>
 #include <sys/types.h>
