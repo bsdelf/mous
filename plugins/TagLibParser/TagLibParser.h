@@ -13,11 +13,12 @@ using namespace TagLib;
 #include <vector>
 using namespace std;
 
-namespace TagLib{
-namespace ID3v2
+namespace TagLib
 {
-    class Tag;
-}
+    namespace ID3v2
+    {
+        class Tag;
+    }
 }
 
 class TagLibParser: public ITagParser
@@ -59,9 +60,7 @@ public:
 
 private:
     typedef void (*FnDumpCover)(const string& path, vector<char>& buf);
-    static void DumpID3v2Cover(ID3v2::Tag* mp3Tag, vector<char>& buf);
-    static void DumpMp3Cover(const string& path, vector<char>& buf);
-    static void DumpMp4Cover(const string& path, vector<char>& buf);
+    typedef bool (*FnStoreCover)(const string& path, const char* buf, size_t len);
 
 private:
     std::string m_FileName;
@@ -70,7 +69,8 @@ private:
     Tag* m_pTag;
     AudioProperties* m_pProp;
 
-    std::map<std::string, FnDumpCover> m_Dumpers;
+    std::map<std::string, FnDumpCover> m_DumpHandlers;
+    std::map<std::string, FnStoreCover> m_StoreHandlers;
 };
 
 #endif

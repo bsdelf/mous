@@ -11,14 +11,7 @@
 #include <scx/IconvHelper.hpp>
 using namespace scx;
 
-#include <taglib/mp4file.h>
-#include <taglib/mp4tag.h>
-#include <taglib/mp4coverart.h>
-
-#include <taglib/mpegfile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/id3v2frame.h>
-#include <taglib/attachedpictureframe.h>
+#include "CoverArt.h"
 
 static string StringToStdString(const String& str)
 {
@@ -39,13 +32,16 @@ TagLibParser::TagLibParser():
     m_pTag(NULL),
     m_pProp(NULL)
 {
-    m_Dumpers["mp3"] = &TagLibParser::DumpMp3Cover;
-    m_Dumpers["m4a"] = &TagLibParser::DumpMp4Cover;
+    m_DumpHandlers["mp3"] = &DumpMp3Cover;
+    m_DumpHandlers["m4a"] = &DumpMp4Cover;
+
+    m_StoreHandlers["mp3"] = &StoreMp3Cover;
+    m_StoreHandlers["mp4"] = &StoreMp4Cover;
 }
 
 TagLibParser::~TagLibParser()
 {
-    m_Dumpers.clear();
+    m_DumpHandlers.clear();
     Close();
 }
 
@@ -230,11 +226,10 @@ void TagLibParser::DumpCoverArt(vector<char>& buf)
         return;
 
     const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
-    cout << "ext:" << ext << endl;
-    if (m_Dumpers.find(ext) == m_Dumpers.end())
-        return;
+    cout << "dump file ext:" << ext << endl;
 
-    m_Dumpers[ext](m_FileName, buf);
+    if (m_DumpHandlers.find(ext) != m_DumpHandlers.end())
+        m_DumpHandlers[ext](m_FileName, buf);
 }
 
 bool TagLibParser::StoreCoverArt(const char* buf, size_t len)
@@ -242,77 +237,11 @@ bool TagLibParser::StoreCoverArt(const char* buf, size_t len)
     if (m_FileName.empty())
         return false;
 
-    return true;
-}
+    const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
+    cout << "store file ext:" << ext << endl;
 
-void TagLibParser::DumpID3v2Cover(ID3v2::Tag* mp3Tag, vector<char>& buf)
-{
-    if (mp3Tag == NULL){
-        cout << "no id3v2 tag found!" << endl;
-        return;
-    } 
-
-    ID3v2::FrameList frameList;
-    ID3v2::AttachedPictureFrame* frame;
-
-    const char* picId[] = { "APIC", "PIC" };
-    for (int i = 0; i < 2; ++i) {
-        frameList = mp3Tag->frameListMap()[picId[i]];
-        if (!frameList.isEmpty()) {
-            ID3v2::FrameList::ConstIterator iter = frameList.begin();
-            for (; iter != frameList.end(); ++iter) {
-                frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
-                cout << "type: " << (int) frame->type() << endl;
-                cout << "mime: " << frame->mimeType().to8Bit() << endl;
-
-                const ByteVector& v = frame->picture();
-                if (v.size() == 0)
-                    return;
-                buf.resize(v.size());
-                memcpy(&buf[0], v.data(), v.size());
-
-                return;
-            }
-        } else {
-            cout << picId[i] << " not found!" << endl;
-        }
-    }
-}
-
-void TagLibParser::DumpMp3Cover(const string& path, vector<char>& buf)
-{
-    TagLib::MPEG::File file(path.c_str());
-    DumpID3v2Cover(file.ID3v2Tag(), buf);
-}
-
-void TagLibParser::DumpMp4Cover(const string& path, vector<char>& buf)
-{
-    TagLib::MP4::File file(path.c_str());
-    MP4::Tag* mp4tag = file.tag();
-
-    if (mp4tag == NULL) {
-        cout << "no mp4 tag found!" << endl;
-        return;
-    }
-
-    MP4::ItemListMap::Iterator iter = mp4tag->itemListMap().find("covr");
-    if (iter != mp4tag->itemListMap().end()) {
-        MP4::CoverArtList list = iter->second.toCoverArtList();
-        if (list.isEmpty()) {
-            cout << "no cover art!" << endl;
-        }
-        cout << "CoverArtList count: " << list.size() << endl;
-
-        cout << "type: " << list[0].format() << endl;
-
-        const ByteVector& v = list[0].data();
-        if (v.size() == 0)
-            return;
-        buf.resize(v.size());
-        memcpy(&buf[0], v.data(), v.size());
-
-        return;
-    } else {
-        cout << "\"covr\" not found!" << endl;
-    }
+    if (m_StoreHandlers.find(ext) != m_StoreHandlers.end())
+        return m_StoreHandlers[ext](m_FileName, buf, len);
+    else
+        return true;
 }
