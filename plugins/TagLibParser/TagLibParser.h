@@ -51,16 +51,16 @@ public:
     virtual void SetYear(int32_t year);
     virtual void SetTrack(int32_t track);
 
-    virtual void DumpCoverArt(vector<char>& buf);
-    virtual bool StoreCoverArt(const char* buf, size_t len);
+    virtual EmCoverFormat DumpCoverArt(vector<char>& buf);
+    virtual bool StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len);
 
     virtual bool HasAudioProperty() const;
     virtual int32_t Duration() const;
     virtual int32_t BitRate() const;
 
 private:
-    typedef void (*FnDumpCover)(const string& path, vector<char>& buf);
-    typedef bool (*FnStoreCover)(const string& path, const char* buf, size_t len);
+    typedef EmCoverFormat (*FnDumpCover)(const string& path, vector<char>& buf);
+    typedef bool (*FnStoreCover)(const string& path, EmCoverFormat fmt, const char* buf, size_t len);
 
 private:
     std::string m_FileName;

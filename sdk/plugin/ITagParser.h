@@ -9,8 +9,21 @@
 
 namespace mous {
 
+namespace CoverFormat {
+    enum e
+    {
+        None = 0,
+        JPEG,
+        PNG,
+    };
+}
+typedef CoverFormat::e EmCoverFormat;
+
 class ITagParser
 {
+public:
+    
+
 public:
     virtual ~ITagParser() { }
 
@@ -41,8 +54,8 @@ public:
     virtual void SetTrack(int32_t track) { };
 
     // cover art
-    virtual void DumpCoverArt(std::vector<char>& buf) { buf.clear(); };
-    virtual bool StoreCoverArt(const char* buf, size_t len) { return false; };
+    virtual EmCoverFormat DumpCoverArt(std::vector<char>& buf) { buf.clear(); return CoverFormat::None; };
+    virtual bool StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len) { return false; };
 
     // audio property
     virtual bool HasAudioProperty() const { return false; }

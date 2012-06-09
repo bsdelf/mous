@@ -2,8 +2,11 @@
 #include <string>
 using namespace std;
 
-void DumpMp3Cover(const string& path, vector<char>& buf);
-void DumpMp4Cover(const string& path, vector<char>& buf);
+#include <plugin/ITagParser.h>
+using namespace mous;
 
-bool StoreMp3Cover(const string& path, const char* buf, size_t len);
-bool StoreMp4Cover(const string& path, const char* buf, size_t len);
+EmCoverFormat DumpMp3Cover(const string& path, vector<char>& buf);
+EmCoverFormat DumpMp4Cover(const string& path, vector<char>& buf);
+
+bool StoreMp3Cover(const string& path, EmCoverFormat fmt, const char* buf, size_t len);
+bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_t len);

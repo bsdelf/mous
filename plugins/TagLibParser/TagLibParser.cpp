@@ -220,28 +220,30 @@ void TagLibParser::SetTrack(int32_t track)
         m_pTag->setTrack(track);
 }
 
-void TagLibParser::DumpCoverArt(vector<char>& buf)
+EmCoverFormat TagLibParser::DumpCoverArt(vector<char>& buf)
 {
     if (m_FileName.empty())
-        return;
+        return CoverFormat::None;
 
     const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
-    cout << "dump file ext:" << ext << endl;
+    cout << "DumpCoverArt ext:" << ext << endl;
 
     if (m_DumpHandlers.find(ext) != m_DumpHandlers.end())
-        m_DumpHandlers[ext](m_FileName, buf);
+        return m_DumpHandlers[ext](m_FileName, buf);
+    else
+        return CoverFormat::None;
 }
 
-bool TagLibParser::StoreCoverArt(const char* buf, size_t len)
+bool TagLibParser::StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len)
 {
     if (m_FileName.empty())
         return false;
 
     const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
-    cout << "store file ext:" << ext << endl;
+    cout << "StoreCoverArt ext:" << ext << endl;
 
     if (m_StoreHandlers.find(ext) != m_StoreHandlers.end())
-        return m_StoreHandlers[ext](m_FileName, buf, len);
+        return m_StoreHandlers[ext](m_FileName, fmt, buf, len);
     else
-        return true;
+        return false;
 }
