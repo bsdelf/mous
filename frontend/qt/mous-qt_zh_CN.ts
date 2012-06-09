@@ -139,59 +139,75 @@
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="24"/>
-        <source>Change Cover Art</source>
-        <translation>更改封面图片</translation>
+        <location filename="FrmTagEditor.cpp" line="26"/>
+        <location filename="FrmTagEditor.cpp" line="272"/>
+        <source>Save Image As</source>
+        <translation>图片另存为</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="30"/>
+        <location filename="FrmTagEditor.cpp" line="28"/>
+        <source>Change Cover Art</source>
+        <translation>更换封面图片</translation>
+    </message>
+    <message>
+        <location filename="FrmTagEditor.cpp" line="36"/>
         <source>Name</source>
         <translation>属性</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="30"/>
+        <location filename="FrmTagEditor.cpp" line="36"/>
         <source>Value</source>
         <translation>值</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="42"/>
+        <location filename="FrmTagEditor.cpp" line="48"/>
         <source>Album</source>
         <translation>专辑</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="42"/>
+        <location filename="FrmTagEditor.cpp" line="48"/>
         <source>Title</source>
         <translation>标题</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="42"/>
+        <location filename="FrmTagEditor.cpp" line="48"/>
         <source>Artist</source>
         <translation>艺术家</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="43"/>
+        <location filename="FrmTagEditor.cpp" line="49"/>
         <source>Genre</source>
         <translation>风格</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="43"/>
+        <location filename="FrmTagEditor.cpp" line="49"/>
         <source>Year</source>
         <translation>年代</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="43"/>
+        <location filename="FrmTagEditor.cpp" line="49"/>
         <source>Track</source>
         <translation>轨道</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="43"/>
+        <location filename="FrmTagEditor.cpp" line="49"/>
         <source>Comment</source>
         <translation>备注</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="200"/>
+        <location filename="FrmTagEditor.cpp" line="210"/>
         <source>Failed to save!</source>
         <translation>保存失败！</translation>
+    </message>
+    <message>
+        <location filename="FrmTagEditor.cpp" line="292"/>
+        <source>Select Image File</source>
+        <translation>选择图片</translation>
+    </message>
+    <message>
+        <location filename="FrmTagEditor.cpp" line="292"/>
+        <source>Images (*.jpg *.png)</source>
+        <translation>图片格式 (*.jpg *png)</translation>
     </message>
 </context>
 <context>
@@ -268,107 +284,92 @@
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="76"/>
-        <source>Tagging</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="SimplePlaylistView.cpp" line="81"/>
+        <location filename="SimplePlaylistView.cpp" line="83"/>
         <source>Convert</source>
         <translation>格式转换</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="86"/>
         <source>Properties</source>
-        <translation>文件属性</translation>
+        <translation type="obsolete">文件属性</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="93"/>
         <source>Playlist</source>
-        <translation>播放列表</translation>
+        <translation type="obsolete">播放列表</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="98"/>
         <source>Load</source>
-        <translation>载入</translation>
+        <translation type="obsolete">载入</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="102"/>
         <source>Rename</source>
-        <translation>重命名</translation>
+        <translation type="obsolete">重命名</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="106"/>
         <source>Save As</source>
-        <translation>另存为</translation>
+        <translation type="obsolete">另存为</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="111"/>
+        <location filename="SimplePlaylistView.cpp" line="117"/>
         <source>Play Mode</source>
         <translation>播放模式</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="117"/>
+        <location filename="SimplePlaylistView.cpp" line="123"/>
         <source>Normal</source>
         <translation>常规播放</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="120"/>
+        <location filename="SimplePlaylistView.cpp" line="126"/>
         <source>Repeat</source>
         <translation>重复播放</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="124"/>
+        <location filename="SimplePlaylistView.cpp" line="130"/>
         <source>Shuffle</source>
         <translation>随机播放</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="127"/>
+        <location filename="SimplePlaylistView.cpp" line="133"/>
         <source>Shuffle Repeat</source>
         <translation>随机重复播放</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="130"/>
+        <location filename="SimplePlaylistView.cpp" line="136"/>
         <source>Repeat One</source>
         <translation>单曲 &amp;&amp; 重复播放</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="159"/>
+        <location filename="SimplePlaylistView.cpp" line="165"/>
         <source>Artist</source>
         <translation>艺术家</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="159"/>
+        <location filename="SimplePlaylistView.cpp" line="165"/>
         <source>Album</source>
         <translation>专辑</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="159"/>
+        <location filename="SimplePlaylistView.cpp" line="165"/>
         <source>Title</source>
         <translation>标题</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="159"/>
+        <location filename="SimplePlaylistView.cpp" line="165"/>
         <source>Track</source>
         <translation>轨道</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="159"/>
+        <location filename="SimplePlaylistView.cpp" line="165"/>
         <source>Duration</source>
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="385"/>
+        <location filename="SimplePlaylistView.cpp" line="397"/>
         <source>Open Media</source>
         <translation>打开媒体文件</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="385"/>
-        <source>*</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="SimplePlaylistView.cpp" line="443"/>
+        <location filename="SimplePlaylistView.cpp" line="455"/>
         <source>Loading</source>
         <translation></translation>
     </message>

@@ -49,6 +49,9 @@ private slots:
     void SlotCellChanged(int row, int column);
     void SlotHideLabelFailed();
 
+    void SlotSaveImageAs();
+    void SlotChangeCoverArt();
+
 private:
     Ui::FrmTagEditor *ui;
 
@@ -58,6 +61,9 @@ private:
 
     QPixmap m_CurrentImage;
     QLabel* m_LabelImage;
+    EmCoverFormat m_CurrentImgFmt;
+    vector<char> m_CurrentImgData;
+    QString m_OldImagePath;
 
     QSemaphore m_SemLoadFinished;
 

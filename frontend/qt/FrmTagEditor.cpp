@@ -12,6 +12,7 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     m_ParserFactory(NULL),
     m_CurrentParser(NULL),
     m_LabelImage(NULL),
+    m_OldImagePath(QDir::homePath()),
     m_SemLoadFinished(1)
 {
     ui->setupUi(this);
@@ -20,6 +21,14 @@ FrmTagEditor::FrmTagEditor(QWidget *parent) :
     m_LabelImage->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     ui->scrollAreaCover->setWidget(m_LabelImage);
     ui->scrollAreaCover->setWidgetResizable(true);
+
+    ui->scrollAreaCover->setContextMenuPolicy(Qt::ActionsContextMenu);
+    QAction* actionSaveImageAs = new QAction(tr("Save Image As"), ui->scrollAreaCover);
+    ui->scrollAreaCover->addAction(actionSaveImageAs);
+    QAction* actionChangeCoverArt = new QAction(tr("Change Cover Art"), ui->scrollAreaCover);
+    ui->scrollAreaCover->addAction(actionChangeCoverArt);
+    connect(actionSaveImageAs, SIGNAL(triggered()), this, SLOT(SlotSaveImageAs()));
+    connect(actionChangeCoverArt, SIGNAL(triggered()), this, SLOT(SlotChangeCoverArt()));
 
     ui->tagTable->setAlternatingRowColors(true);
     ui->tagTable->setShowGrid(false);
@@ -116,20 +125,27 @@ void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
         ui->tagTable->setEnabled(true);
     UpdateTag();
 
-    vector<char> buf;
-    m_CurrentParser->DumpCoverArt(buf);
+    {
+        vector<char> buf;
+        m_CurrentImgFmt = m_CurrentParser->DumpCoverArt(buf);
+        m_CurrentImgData.swap(buf);
+        qDebug() << fileName.c_str();
+        qDebug() << "cover art size:" << m_CurrentImgData.size();
+    }
 
-    qDebug() << fileName.c_str();
-    qDebug() << "cover art size:" << buf.size();
-
-    if (!buf.empty()) {
-        if (m_CurrentImage.loadFromData((const uchar *)(&buf[0]), (uint)buf.size())) {
+    if (!m_CurrentImgData.empty()) {
+        const uchar* data = (const uchar*)&m_CurrentImgData[0];
+        const uint size = m_CurrentImgData.size();
+        if (m_CurrentImage.loadFromData(data, size)) {
             UpdateCoverArt();
             ui->scrollAreaCover->show();
         }
     } else {
-        ui->scrollAreaCover->hide();
-    }
+        m_CurrentImage.detach();
+        m_CurrentImage = QPixmap();
+        UpdateCoverArt();
+        //ui->scrollAreaCover->hide();
+    }   
 }
 
 void FrmTagEditor::ShowBottomBtns(bool show)
@@ -212,6 +228,9 @@ void FrmTagEditor::SlotBtnCancel()
 
 void FrmTagEditor::SlotSplitterMoved(int pos, int index)
 {
+    Q_UNUSED(pos);
+    Q_UNUSED(index);
+
     UpdateCoverArt();
 }
 
@@ -225,6 +244,87 @@ void FrmTagEditor::SlotHideLabelFailed()
 {
     m_DelayTimer.disconnect(this, SLOT(SlotHideLabelFailed()));
     ui->labelFailed->hide();
+}
+
+void FrmTagEditor::SlotSaveImageAs()
+{
+    qDebug() << m_CurrentImgFmt;
+    qDebug() << m_CurrentImgData.size();
+
+    QString fmt;
+    switch (m_CurrentImgFmt) {
+    case CoverFormat::JPEG:
+        fmt = "(*.jpg)";
+        break;
+
+    case CoverFormat::PNG:
+        fmt = "(*.png)";
+        break;
+
+    default:
+        fmt.clear();
+    }
+
+    if (fmt.isEmpty() || m_CurrentImgData.empty())
+        return;
+
+    QString fileName =
+            QFileDialog::getSaveFileName(this, tr("Save Image As"), m_OldImagePath, fmt);
+    if (fileName.isEmpty())
+        return;
+
+    m_OldImagePath = QFileInfo(fileName).absolutePath();
+
+    QFile outfile(fileName);
+    outfile.open(QIODevice::WriteOnly);
+    if (outfile.isOpen()) {
+        outfile.write(&m_CurrentImgData[0], m_CurrentImgData.size());
+    }
+    outfile.close();
+}
+
+void FrmTagEditor::SlotChangeCoverArt()
+{
+    if (m_CurrentParser == NULL)
+        return;
+
+    QString fileName =
+            QFileDialog::getOpenFileName(this, tr("Select Image File"), m_OldImagePath, tr("Images (*.jpg *.png)"));
+
+    // check format
+    QString suffix = QFileInfo(fileName).suffix();
+    EmCoverFormat fmt = CoverFormat::None;
+    if (suffix == "jpg") {
+        fmt = CoverFormat::JPEG;
+    } else if (suffix == "png") {
+        fmt = CoverFormat::PNG;
+    } else {
+        return;
+    }
+
+    // read data
+    QByteArray bytes;
+    QFile imgFile(fileName);
+    imgFile.open(QIODevice::ReadOnly);
+    if (imgFile.isOpen()) {
+        bytes = imgFile.readAll();
+    }
+    imgFile.close();
+    if (bytes.isEmpty())
+        return;
+
+    // modify media file & show it
+    const char* data = bytes.data();
+    const size_t size = bytes.size();
+    if (m_CurrentParser->StoreCoverArt(fmt, data, size)) {
+        m_CurrentImgFmt = fmt;
+        m_CurrentImgData.resize(size);
+        memcpy(&m_CurrentImgData[0], data, size);
+        if (m_CurrentImage.loadFromData((uchar*)data, size)) {
+            UpdateCoverArt();
+            ui->scrollAreaCover->show();
+        }
+    }
 }
 
 void FrmTagEditor::UpdateTag()
@@ -249,13 +349,14 @@ void FrmTagEditor::UpdateTag()
 
 void FrmTagEditor::UpdateCoverArt()
 {
-    if (m_CurrentImage.isNull() || m_LabelImage == NULL)
-        return;
-
-    QSize size = m_CurrentImage.size();
-    size.scale(ui->scrollAreaCover->viewport()->size(), Qt::KeepAspectRatio);
-    const QPixmap& img = m_CurrentImage.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    m_LabelImage->setPixmap(img);
+    if (m_CurrentImage.isNull() || m_LabelImage == NULL) {
+        m_LabelImage->setPixmap(QPixmap());
+    } else {
+        QSize size = m_CurrentImage.size();
+        size.scale(ui->scrollAreaCover->viewport()->size(), Qt::KeepAspectRatio);
+        const QPixmap& img = m_CurrentImage.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        m_LabelImage->setPixmap(img);
+    }
 }
 
 void FrmTagEditor::resizeEvent(QResizeEvent *event)
