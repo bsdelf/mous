@@ -251,6 +251,7 @@ void FrmTagEditor::SlotSaveImageAs()
     qDebug() << m_CurrentImgFmt;
     qDebug() << m_CurrentImgData.size();
 
+    // check format & has data
     QString fmt;
     switch (m_CurrentImgFmt) {
     case CoverFormat::JPEG:
@@ -264,17 +265,17 @@ void FrmTagEditor::SlotSaveImageAs()
     default:
         fmt.clear();
     }
-
     if (fmt.isEmpty() || m_CurrentImgData.empty())
         return;
 
+    // pick file name
     QString fileName =
             QFileDialog::getSaveFileName(this, tr("Save Image As"), m_OldImagePath, fmt);
     if (fileName.isEmpty())
         return;
-
     m_OldImagePath = QFileInfo(fileName).absolutePath();
 
+    // write it
     QFile outfile(fileName);
     outfile.open(QIODevice::WriteOnly);
     if (outfile.isOpen()) {
