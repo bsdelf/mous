@@ -22,9 +22,6 @@ typedef CoverFormat::e EmCoverFormat;
 class ITagParser
 {
 public:
-    
-
-public:
     virtual ~ITagParser() { }
 
     virtual std::vector<std::string> FileSuffix() const = 0;
@@ -43,19 +40,19 @@ public:
     virtual int32_t Track() const = 0;
 
     // edit tag
-    virtual bool CanEdit() const { return false; };
-    virtual bool Save() { return false; };
-    virtual void SetTitle(const std::string& title) { };
-    virtual void SetArtist(const std::string& artist) { };
-    virtual void SetAlbum(const std::string& album) { };
-    virtual void SetComment(const std::string& comment) { };
-    virtual void SetGenre(const std::string& genre) { };
-    virtual void SetYear(int32_t year) { };
-    virtual void SetTrack(int32_t track) { };
+    virtual bool CanEdit() const { return false; }
+    virtual bool Save() { return false; }
+    virtual void SetTitle(const std::string& title) { }
+    virtual void SetArtist(const std::string& artist) { }
+    virtual void SetAlbum(const std::string& album) { }
+    virtual void SetComment(const std::string& comment) { }
+    virtual void SetGenre(const std::string& genre) { }
+    virtual void SetYear(int32_t year) { }
+    virtual void SetTrack(int32_t track) { }
 
     // cover art
-    virtual EmCoverFormat DumpCoverArt(std::vector<char>& buf) { buf.clear(); return CoverFormat::None; };
-    virtual bool StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len) { return false; };
+    virtual EmCoverFormat DumpCoverArt(std::vector<char>& buf) { buf.clear(); return CoverFormat::None; }
+    virtual bool StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len) { return false; }
 
     // audio property
     virtual bool HasAudioProperty() const { return false; }
@@ -63,11 +60,7 @@ public:
     virtual int32_t BitRate() const { return -1; }
 
     // reimplement this to provide options
-    virtual bool Options(std::vector<const BaseOption*>& list) const
-    {
-        list.clear();
-        return false; 
-    };
+    virtual bool Options(std::vector<const BaseOption*>& list) const { list.clear(); return false; }
 };
 
 }
