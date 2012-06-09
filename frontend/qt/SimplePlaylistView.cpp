@@ -319,7 +319,13 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
 
         QStringList files = text.split(FILE_MIME, QString::SkipEmptyParts);
         for (int i = 0; i < files.size(); ++i) {
-            files[i] = QUrl(files[i].trimmed()).toLocalFile();
+            QString file = QUrl(files[i].trimmed()).toLocalFile();
+            // try parse
+            if (!QFileInfo(file).isFile()) {
+                file = QUrl::fromEncoded(file.toLocal8Bit()).toLocalFile();
+            }
+            files[i] = file;
+
             qDebug() << files[i];
         }
 
