@@ -81,6 +81,8 @@ EmErrorCode WmaDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
     if (m_UnitIndex < m_UnitCount) {
         AVPacket packet;
         if (av_read_frame(m_FormatCtx, &packet) < 0) {
+            m_UnitIndex = m_UnitCount;
+            unitCount = m_UnitCount;
             return ErrorCode::DecoderOutOfRange;
         }
 
@@ -105,7 +107,8 @@ EmErrorCode WmaDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
         }
         return ErrorCode::Ok;
     } else {
-        used = 0;
+        m_UnitIndex = m_UnitCount;
+        unitCount = m_UnitCount;
         return ErrorCode::DecoderOutOfRange;
     }
 }
