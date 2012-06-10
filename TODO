@@ -1,6 +1,7 @@
 core:
 1.实现 filter 接口
 2.播放状态接口
+3.更可靠的 player 实现？
 
 plugin:
 1.libmad 解码
@@ -11,6 +12,7 @@ plugin:
 6.音量均衡插件
 7.播放统计插件
 8.APE/FLAC 内嵌 CUE 的 MediaPack 插件
+9.支持除了 FrontCover 之外的封面，flac，ape 等格式的封面
 
 sdk:
 1.m3u 播放列表读取
@@ -19,7 +21,7 @@ sdk:
 
 qt:
 1.涉及 player, playlist 的操作需要 mutex 保护
-2.播放列表排序，改变列顺序，添加删除 tag 列
+2.播放列表排序，改变列顺序，添加删除列
 3.更多设置选项
 4.音效
 5.频谱，可视化
