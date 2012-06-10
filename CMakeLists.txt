@@ -52,6 +52,7 @@ option(WithPluginAoRenderer "AO output" off)
 
 option(WithPluginWavDecoder "WAV Decoder" on)
 option(WithPluginWavEncoder "WAV Encoder" on)
+option(WithPluginWmaDecoder "WMA Decoder" off)
 option(WithPluginMacDecoder "MAC Decoder" off)
 option(WithPluginMac4Decoder "MAC4.x Decoder" off)
 option(WithPluginMpg123Decoder "MPG123 Decoder" off)
@@ -186,6 +187,16 @@ if(WithPluginLameEncoder)
     file(GLOB SRC_LAME_ENCODER plugins/LameEncoder/*)
     add_library(LameEncoder SHARED ${SRC_LAME_ENCODER})
     target_link_libraries(LameEncoder -lmp3lame)
+endif()
+
+# Wma plugin
+if(WithPluginWmaDecoder)
+    file(GLOB SRC_FFWMA contrib/ffmpeg-strip-wma/*.c)
+    file(GLOB SRC_WMA_DECODER plugins/WmaDecoder/*)
+    add_library(WmaDecoder SHARED ${SRC_FFWMA} ${SRC_WMA_DECODER})
+    set_target_properties(WmaDecoder PROPERTIES 
+        COMPILE_FLAGS "-fno-strict-aliasing -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE")
+    target_link_libraries(WmaDecoder)
 endif()
 
 # Mac plugin

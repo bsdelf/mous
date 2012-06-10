@@ -3,16 +3,16 @@
 因为在 BSD/Linux 下没有找到类似 foobar2000 的播放器，所以我启动了这个项目。
 
 mous 是一个简洁，用户友好，功能全面，基于插件的播放器。
-* 它计划支持大部分常见格式，包括开源界所不屑的 APE、WMA 。
+* 它计划支持大部分常见格式，包括 APE、WMA 。
 * 它还要支持格式转换，封面编辑，tag 信息编辑，至少这是我常用的功能。
 * 它还要支持字符集转换，减少乱码现象。
 * 它的依赖关系也力求最少，每项依赖都有合理的解释，解什么码用什么库，
   例如不想放 APE 就可以不装 APE 插件，从而不依赖 MACLib 。
 
 目前提供 Qt 前端和 ncurses 前端，但尚未发布第一版。
-* Qt 前端支持格式转换，显示封面，编辑 tag，转换GBK编码。
-* ncurses 前端类似 mocp 播放器，有文件浏览器和多个播放列表，播放进程是驻留在后台的。
-* 插件方面，已经支持 CUE，解码 WAV/MP3/APE/FLAC/M4A，编码 MP3/M4A，输出 OSS/ALSA/libao。
+* Qt 前端类似 foobar2000。支持格式转换，编辑 tag 和封面，自动转换 GBK 编码。
+* ncurses 前端类似 mocp 播放器。有文件浏览器和多个播放列表，播放进程驻留在后台。
+* 插件方面，支持 CUE 列表，解码 WAV/MP3/M4A/WMA/APE/FLAC，编码 WAV/MP3/M4A，输出 OSS/ALSA/libao。
 
 欢迎试用反馈。
 
@@ -28,14 +28,13 @@ X           mous-gtk        Gtk+ based frontend??
 
 2.Features
 Supported   Description
-O           Decode media
-O           Format convert
+O           Format Conversion
+O           Tag/CoverArt Edit
+O           Charset Conversion
 X           Media management
 X           Sound Effect
 X           Dynamic Normalizer
 X           FFTW
-X           Tag/CoverArt edit
-X           Auto detect charset
 
 3.Plugin Dependence(FreeBSD ports)
 You can use ccmake to turn ON/OFF the following plugins.
@@ -54,6 +53,7 @@ O           audio/mpg123        MP3 Decoder
 O           audio/lame          MP3 Encoder
 O           audio/faad          MP4 Decoder(m4a only, no aac)
 O           audio/faac          MP4 Encoder(m4a only, no aac)
+O           NONE                WMA Decoder
 O           audio/mac           APE Decoder
 X           NONE                APE Decoder based on MACLib4.x
 O           audio/flac          FLAC Decoder
