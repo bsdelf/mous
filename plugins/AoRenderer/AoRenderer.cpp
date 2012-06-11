@@ -37,6 +37,8 @@ AoRenderer::~AoRenderer()
 
 EmErrorCode AoRenderer::Open()
 {
+    Close();
+
     m_Device = ao_open_live(m_Driver, &m_Format, NULL);
     return m_Device != NULL ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
 }
