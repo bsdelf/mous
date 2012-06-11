@@ -3,6 +3,8 @@
 #ifndef APE_STDLIBFILEIO_H
 #define APE_STDLIBFILEIO_H
 
+#include <wchar.h>
+
 #include "IO.h"
 
 class CStdLibFileIO : public CIO
@@ -14,7 +16,7 @@ public:
     ~CStdLibFileIO();
 
     // open / close
-    int Open(LPCTSTR pName, BOOL bOpenReadOnly = FALSE);
+    int Open(const wchar_t* pName, BOOL bOpenReadOnly = FALSE);
     int Close();
     
     // read / write
@@ -28,18 +30,18 @@ public:
     int SetEOF();
 
     // creation / destruction
-    int Create(const char * pName);
+    int Create(const wchar_t * pName);
     int Delete();
 
     // attributes
     int GetPosition();
     int GetSize();
-    int GetName(char * pBuffer);
+    int GetName(wchar_t * pBuffer);
     int GetHandle();
 
 private:
     
-    char m_cFileName[MAX_PATH];
+    wchar_t m_cFileName[MAX_PATH];
     BOOL m_bReadOnly;
     FILE * m_pFile;
 };

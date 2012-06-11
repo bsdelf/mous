@@ -63,28 +63,28 @@ public:
         m_bDelete = a_bDelete;
     }
 
-    __forceinline TYPE * GetPtr() const
+    TYPE * GetPtr() const
     {
         return m_pObject;
     }
 
-    __forceinline operator TYPE * () const
+    operator TYPE * () const
     {
         return m_pObject;
     }
 
-    __forceinline TYPE * operator ->() const
+    TYPE * operator ->() const
     {
         return m_pObject;
     }
 
     // declare assignment, but don't implement (compiler error if we try to use)
     // that way we can't carelessly mix smart pointers and regular pointers
-    __forceinline void * operator =(void *) const;
+    void * operator =(void *) const;
 };
 
 #ifdef _MSC_VER
     #pragma warning(pop)
-#endif _MSC_VER
+#endif
 
 #endif // #ifndef APE_SMARTPTR_H

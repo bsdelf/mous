@@ -165,9 +165,9 @@ int CAPEDecompressOld::Seek(int nBlockOffset)
     return ERROR_SUCCESS;
 }
 
-int CAPEDecompressOld::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nParam2)
+intptr_t CAPEDecompressOld::GetInfo(APE_DECOMPRESS_FIELDS Field, intptr_t nParam1, intptr_t nParam2)
 {
-    int nRetVal = 0;
+    intptr_t nRetVal = 0;
     BOOL bHandled = TRUE;
 
     switch (Field)
@@ -179,7 +179,7 @@ int CAPEDecompressOld::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nPa
     {
         int nSampleRate = m_spAPEInfo->GetInfo(APE_INFO_SAMPLE_RATE, 0, 0);
         if (nSampleRate > 0)
-            nRetVal = int((double(m_nCurrentBlock) * double(1000)) / double(nSampleRate));
+            nRetVal = intptr_t((double(m_nCurrentBlock) * double(1000)) / double(nSampleRate));
         break;
     }
     case APE_DECOMPRESS_TOTAL_BLOCKS:
@@ -189,7 +189,7 @@ int CAPEDecompressOld::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nPa
     {
         int nSampleRate = m_spAPEInfo->GetInfo(APE_INFO_SAMPLE_RATE, 0, 0);
         if (nSampleRate > 0)
-            nRetVal = int((double(m_nFinishBlock - m_nStartBlock) * double(1000)) / double(nSampleRate));
+            nRetVal = intptr_t((double(m_nFinishBlock - m_nStartBlock) * double(1000)) / double(nSampleRate));
         break;
     }
     case APE_DECOMPRESS_CURRENT_BITRATE:
@@ -250,7 +250,7 @@ int CAPEDecompressOld::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nPa
             }
             else
             {
-                WAVEFORMATEX wfeFormat; GetInfo(APE_INFO_WAVEFORMATEX, (int) &wfeFormat, 0);
+                WAVEFORMATEX wfeFormat; GetInfo(APE_INFO_WAVEFORMATEX, (intptr_t) &wfeFormat, 0);
                 WAVE_HEADER WAVHeader; FillWaveHeader(&WAVHeader, 
                     (m_nFinishBlock - m_nStartBlock) * GetInfo(APE_INFO_BLOCK_ALIGN), 
                     &wfeFormat,    0);

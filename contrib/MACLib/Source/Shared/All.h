@@ -48,7 +48,7 @@ Global compiler settings (useful for porting)
 // that disabling BACKWARDS_COMPATIBILITY would have any effect on a normal user.  For
 // porting or third party usage, it's probably best to not bother with BACKWARDS_COMPATIBILITY.
 // A future release of Monkey's Audio itself may remove support for these obsolete files.
-#define BACKWARDS_COMPATIBILITY
+//#define BACKWARDS_COMPATIBILITY
 
 // compression modes
 #define ENABLE_COMPRESSION_MODE_FAST
@@ -235,5 +235,13 @@ Error Codes
     { ERROR_BAD_PARAMETER                         , _T("bad parameter") },                          \
     { ERROR_APE_COMPRESS_TOO_MUCH_DATA            , _T("APE compress too much data") },             \
     { ERROR_UNDEFINED                             , _T("undefined") },                              \
+
+
+#include <wchar.h>
+#define LPCWSTR const wchar_t*
+#define LPCTSTR const char*
+#define UCHAR unsigned char
+#define _wcsicmp wcscasecmp
+#define _wcsnicmp wcsncasecmp
 
 #endif // #ifndef APE_ALL_H

@@ -17,14 +17,14 @@ public:
     int MaxGet();
 
     // direct writing
-    __forceinline unsigned char * CCircleBuffer::GetDirectWritePointer()
+    __forceinline unsigned char * GetDirectWritePointer()
     {
         // return a pointer to the tail -- note that it will always be safe to write
         // at least m_nMaxDirectWriteBytes since we use an end cap region
         return &m_pBuffer[m_nTail];
     }
 
-    __forceinline void CCircleBuffer::UpdateAfterDirectWrite(int nBytes)
+    __forceinline void UpdateAfterDirectWrite(int nBytes)
     {
         // update the tail
         m_nTail += nBytes;

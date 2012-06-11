@@ -47,6 +47,9 @@ unsigned int CUnBitArray::DecodeValue(DECODE_VALUE_METHOD DecodeMethod, int nPar
     {
     case DECODE_VALUE_METHOD_UNSIGNED_INT:
         return DecodeValueXBits(32);
+
+    default:
+        break;
     }
     
     return 0;

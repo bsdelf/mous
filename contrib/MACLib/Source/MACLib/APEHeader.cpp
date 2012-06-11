@@ -111,7 +111,7 @@ int CAPEHeader::Analyze(APE_FILE_INFO * pInfo)
 {
     // error check
     if ((m_pIO == NULL) || (pInfo == NULL))
-        return ERROR_INVALID_PARAMETER;
+        return ERROR_INVALID_FUNCTION_PARAMETER;
 
     // variables
     unsigned int nBytesRead = 0;

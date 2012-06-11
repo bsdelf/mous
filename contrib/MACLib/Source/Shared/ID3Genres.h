@@ -4,7 +4,7 @@
 #define GENRE_UNDEFINED		255
 #define GENRE_COUNT			148
 
-const LPCWSTR g_ID3Genre[GENRE_COUNT] = 
+LPCWSTR g_ID3Genre[GENRE_COUNT] = 
 { 
 	L"Blues", L"Classic Rock", L"Country", L"Dance", L"Disco", L"Funk", L"Grunge", L"Hip-Hop",
 	L"Jazz", L"Metal", L"New Age", L"Oldies", L"Other", L"Pop", L"R&B", L"Rap", L"Reggae", L"Rock", L"Techno",

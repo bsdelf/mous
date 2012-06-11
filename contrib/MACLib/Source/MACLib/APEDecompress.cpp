@@ -23,7 +23,7 @@ CAPEDecompress::CAPEDecompress(int * pErrorCode, CAPEInfo * pAPEInfo, int nStart
     }
 
     // get format information
-    GetInfo(APE_INFO_WAVEFORMATEX, (int) &m_wfeInput);
+    GetInfo(APE_INFO_WAVEFORMATEX, (intptr_t) &m_wfeInput);
     m_nBlockAlign = GetInfo(APE_INFO_BLOCK_ALIGN);
 
     // initialize other stuff
@@ -429,9 +429,9 @@ int CAPEDecompress::SeekToFrame(int nFrameIndex)
 /*****************************************************************************************
 Get information from the decompressor
 *****************************************************************************************/
-int CAPEDecompress::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nParam2)
+intptr_t CAPEDecompress::GetInfo(APE_DECOMPRESS_FIELDS Field, intptr_t nParam1, intptr_t nParam2)
 {
-    int nRetVal = 0;
+    intptr_t nRetVal = 0;
     BOOL bHandled = TRUE;
 
     switch (Field)
@@ -443,7 +443,7 @@ int CAPEDecompress::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nParam
     {
         int nSampleRate = m_spAPEInfo->GetInfo(APE_INFO_SAMPLE_RATE, 0, 0);
         if (nSampleRate > 0)
-            nRetVal = int((double(m_nCurrentBlock) * double(1000)) / double(nSampleRate));
+            nRetVal = intptr_t((double(m_nCurrentBlock) * double(1000)) / double(nSampleRate));
         break;
     }
     case APE_DECOMPRESS_TOTAL_BLOCKS:
@@ -453,7 +453,7 @@ int CAPEDecompress::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nParam
     {
         int nSampleRate = m_spAPEInfo->GetInfo(APE_INFO_SAMPLE_RATE, 0, 0);
         if (nSampleRate > 0)
-            nRetVal = int((double(m_nFinishBlock - m_nStartBlock) * double(1000)) / double(nSampleRate));
+            nRetVal = intptr_t((double(m_nFinishBlock - m_nStartBlock) * double(1000)) / double(nSampleRate));
         break;
     }
     case APE_DECOMPRESS_CURRENT_BITRATE:
@@ -514,7 +514,7 @@ int CAPEDecompress::GetInfo(APE_DECOMPRESS_FIELDS Field, int nParam1, int nParam
             }
             else
             {
-                WAVEFORMATEX wfeFormat; GetInfo(APE_INFO_WAVEFORMATEX, (int) &wfeFormat, 0);
+                WAVEFORMATEX wfeFormat; GetInfo(APE_INFO_WAVEFORMATEX, (intptr_t) &wfeFormat, 0);
                 WAVE_HEADER WAVHeader; FillWaveHeader(&WAVHeader, 
                     (m_nFinishBlock - m_nStartBlock) * GetInfo(APE_INFO_BLOCK_ALIGN), 
                     &wfeFormat,    0);

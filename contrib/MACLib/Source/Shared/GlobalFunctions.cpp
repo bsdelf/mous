@@ -1,10 +1,10 @@
 #include "All.h"
 #include "GlobalFunctions.h"
 #include "IO.h"
+#include  "CharacterHelper.h"
 
-/*
-#ifndef __GNUC_IA32__
-
+///*
+//#ifndef __GNUC_IA32__
 extern "C" BOOL GetMMXAvailable(void)
 {
 #ifdef ENABLE_ASSEMBLY
@@ -34,8 +34,8 @@ extern "C" BOOL GetMMXAvailable(void)
 #endif
 }
 
-#endif // #ifndef __GNUC_IA32__
-*/
+//#endif // #ifndef __GNUC_IA32__
+//*/
 
 int ReadSafe(CIO * pIO, void * pBuffer, int nBytes)
 {
@@ -84,7 +84,7 @@ BOOL FileExists(wchar_t * pFilename)
 
 #else
 
-    CSmartPtr<char> spANSI(GetANSIFromUTF16(pFilename), TRUE);
+    CSmartPtr<char> spANSI(CAPECharacterHelper::GetANSIFromUTF16(pFilename), TRUE);
 
     struct stat b;
 

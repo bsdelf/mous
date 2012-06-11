@@ -462,7 +462,8 @@ int CAPETag::CreateID3Tag(ID3_TAG * pID3Tag)
     // track number
     str_utf16 cBuffer[256] = { 0 }; int nBufferCharacters = 255;
     GetFieldString(APE_TAG_FIELD_TRACK, cBuffer, &nBufferCharacters);
-    pID3Tag->Track = (unsigned char) _wtoi(cBuffer);
+    wchar_t* stopwcs;
+    pID3Tag->Track = (unsigned char) wcstol(cBuffer, &stopwcs, 10);
     
     // genre
     cBuffer[0] = 0; nBufferCharacters = 255;
