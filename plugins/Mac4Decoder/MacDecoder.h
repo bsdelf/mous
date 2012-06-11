@@ -2,9 +2,10 @@
 #define MACDECODER_H
 
 #include <plugin/IDecoder.h>
-#include "MACLib/All.h"
-#include "MACLib/NoWindows.h"
-#include "MACLib/APEDecompress.h"
+#include <MACLib/Source/Shared/All.h>
+#include <MACLib/Source/Shared/NoWindows.h>
+#include <MACLib/Source/Shared/CharacterHelper.h>
+#include <MACLib/Source/MACLib/APEDecompress.h>
 using namespace std;
 using namespace mous;
 

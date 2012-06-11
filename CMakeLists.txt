@@ -54,7 +54,7 @@ option(WithPluginWavDecoder "WAV Decoder" on)
 option(WithPluginWavEncoder "WAV Encoder" on)
 option(WithPluginWmaDecoder "WMA Decoder" off)
 option(WithPluginMacDecoder "MAC Decoder" off)
-option(WithPluginMac4Decoder "MAC4.x Decoder" off)
+option(WithPluginMac4Decoder "MAC4.11 Decoder" off)
 option(WithPluginMpg123Decoder "MPG123 Decoder" off)
 option(WithPluginLameEncoder "LAME Encoder" off)
 option(WithPluginFlacDecoder "FLAC Decoder" off)
@@ -208,8 +208,12 @@ endif()
 
 # Mac4 plugin(still buggy)
 if(WithPluginMac4Decoder)
-    file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/* contrib/MACLib/*)
-    add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER})
+    file(GLOB SRC_MAC4_LIB contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp)
+    file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/*)
+    add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER} ${SRC_MAC4_LIB})
+    set_target_properties(Mac4Decoder PROPERTIES 
+        COMPILE_FLAGS "-fno-strict-aliasing -I${MOUS_SOURCE_DIR}/contrib/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM")
+    target_link_libraries(Mac4Decoder)
 endif()
 
 # Flac plugin

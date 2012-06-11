@@ -1,5 +1,7 @@
 #include "MacDecoder.h"
 
+#include <stdio.h>
+
 MacDecoder::MacDecoder():
     m_pDecompress(NULL)
 {
@@ -25,7 +27,9 @@ EmErrorCode MacDecoder::Open(const string& url)
 {
     int err = ERROR_SUCCESS;
 
-    m_pDecompress = CreateIAPEDecompress(url.c_str(), &err);
+    str_utf16* pFileName = CAPECharacterHelper::GetUTF16FromANSI(url.c_str());
+    m_pDecompress = CreateIAPEDecompress(pFileName, &err);
+    delete[] pFileName;
 
     if (m_pDecompress == NULL || err != ERROR_SUCCESS)
         return ErrorCode::DecoderFailedToOpen;
@@ -65,13 +69,27 @@ EmErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
 
     m_BitRate = m_pDecompress->GetInfo(APE_DECOMPRESS_CURRENT_BITRATE);
 
-    if (m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv) == ERROR_SUCCESS) {
-        m_BlockIndex += blocksRecv;
-        used = blocksRecv * m_BlockAlign;
-        unitCount = blocksRecv;
-    } else {
-        used = 0;
+    int ret = m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv);
+    switch (ret) {
+        case ERROR_SUCCESS:
+        {
+            m_BlockIndex += blocksRecv;
+            used = blocksRecv * m_BlockAlign;
+            unitCount = blocksRecv;
+        }
+            return ErrorCode::Ok;
+
+        case ERROR_INVALID_CHECKSUM:
+            printf("FATAL: mac invalid checksum!\n");
+            break;
+
+        default:
+            printf("FATAL: mac bad unit!\n");
+            break;
     }
+
+    used = 0;
+    unitCount = 0;
     return ErrorCode::Ok;
 }
 
