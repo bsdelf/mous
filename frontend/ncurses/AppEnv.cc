@@ -17,10 +17,10 @@ namespace Path {
     const char* const ResourcePinYin = "/pinyin/";
 
     const char* const PyMapFile = "unipy.map";
-    const char* const ConfigFile = "ncurses.config";
+    const char* const ConfigFile = "config";
     const char* const PidFile = "server.pid";
 
-    const char* const ContextFile = "ncurses.context";
+    const char* const ContextFile = "context.dat";
     const char* const PlaylistFile = "playlist%d.dat";
 }
 
