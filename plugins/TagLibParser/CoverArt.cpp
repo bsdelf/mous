@@ -1,5 +1,7 @@
 #include "CoverArt.h"
 
+#include <string.h>
+
 #include <scx/Conv.hpp>
 using namespace scx;
 

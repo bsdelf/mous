@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <limits>
 
 #include <scx/BufObj.hpp>
 
@@ -88,7 +89,7 @@ public:
         if (Store(list, buffer)) {
             outfile.open(file.c_str(), ios::binary | ios::out);
             if (outfile.is_open()
-                    && (outfile.write(&buffer[0], buffer.size()).tellp() == buffer.size())) {
+                    && (outfile.write(&buffer[0], buffer.size()).tellp() == (streampos)buffer.size())) {
                 ret = true;
             }
             outfile.close();
