@@ -8,7 +8,7 @@ AlsaRenderer::AlsaRenderer():
     m_DeviceName("default"),
     m_PcmHandle(NULL),
     m_Dir(0),
-    m_Resample(0),
+    m_Resample(1),
     m_FrameLength(0),
     m_BitsPerSample(0)
 {
@@ -53,6 +53,7 @@ EmErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t&
     }
     if ((unsigned int)sampleRate != m_SampleRate.val) {
         sampleRate = m_SampleRate.val;
+        //NOTE: just is a workaround :-(
         ok = sampleRate > 1 ? true : false;
     }
     if ((unsigned int)bitsPerSample != m_BitsPerSample) {
