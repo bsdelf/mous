@@ -242,6 +242,7 @@ void CPrepare::Unprepare(int X, int Y, const WAVEFORMATEX * pWaveFormatEx, unsig
             // error check (for overflows)
             if ((nR < -32768) || (nR > 32767) || (nL < -32768) || (nL > 32767))
             {
+                printf("X:%d, Y:%d, nL:%d, nR:%d \n", X, Y, nL, nR);
                 throw(-1);
             }
 
