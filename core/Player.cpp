@@ -557,7 +557,7 @@ void Player::ThRenderer()
         m_SemRendererBegin.Post();
 
         for (UnitBuffer* buf = NULL; ; ) {
-            //cout << m_UnitBuffers->DataCount() << flush;
+            //cout << m_UnitBuffers.DataCount() << endl;
             buf = m_UnitBuffers.TakeData();
             if (m_SuspendRenderer)
                 break;
