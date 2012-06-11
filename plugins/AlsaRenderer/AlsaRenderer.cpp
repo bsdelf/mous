@@ -51,9 +51,9 @@ EmErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t&
         channels = m_Channels.val;
         ok = false;
     }
-    if ((unsigned int)sampleRate != m_Channels.val) {
-        sampleRate = m_Channels.val;
-        ok = false;
+    if ((unsigned int)sampleRate != m_SampleRate.val) {
+        sampleRate = m_SampleRate.val;
+        ok = sampleRate > 1 ? true : false;
     }
     if ((unsigned int)bitsPerSample != m_BitsPerSample) {
         bitsPerSample = m_BitsPerSample;
@@ -136,6 +136,8 @@ bool AlsaRenderer::SetupHwParams()
     snd_pcm_hw_params_get_rate_min(params, &m_SampleRate.min, &m_Dir);
     if (m_SampleRate.val < m_SampleRate.min || m_SampleRate.val > m_SampleRate.max)
         m_SampleRate.val = m_SampleRate.min;
+    printf("sample rate max:%d, min:%d, val:%d\n", 
+            m_SampleRate.max, m_SampleRate.min, m_SampleRate.val);
     snd_pcm_hw_params_set_rate(m_PcmHandle, params, m_SampleRate.val, m_Dir);
 
     /* we can set period and buffer by size or time */
