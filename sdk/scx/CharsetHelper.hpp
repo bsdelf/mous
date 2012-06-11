@@ -2,6 +2,7 @@
 #define SCX_CHARSETHELPER_HPP
 
 #include <stdlib.h>
+#include <limits.h>
 #include <wchar.h>
 #include <string.h>
 
@@ -12,6 +13,7 @@ namespace CharsetHelper {
 
 static const wchar_t bad_wchar = 0xFFFD;
 
+// depends on locale
 static inline std::string WStringToMBStr(const std::wstring& str)
 {
     using namespace std;
