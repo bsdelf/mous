@@ -20,6 +20,7 @@ const char* const STR_ARRAY[] =
     "SPACE  pause/resume",
     "p      play previous one",
     "n      play next one",
+    "m      next play mode",
     "",
     "TAB    switch focus between file explorer/playlist",
     "",
