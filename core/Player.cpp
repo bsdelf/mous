@@ -531,9 +531,9 @@ void Player::ThDecoder()
             assert(buf->data != NULL);
 
             m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
+            m_DecoderIndex += buf->unitCount;
             m_UnitBuffers.RecycleFree(buf);
 
-            m_DecoderIndex += buf->unitCount;
             if (m_DecoderIndex >= m_UnitEnd) {
                 m_SuspendDecoder = true;
                 break;
@@ -567,9 +567,9 @@ void Player::ThRenderer()
 
             if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok)
                 usleep(10*1000);
+            m_RendererIndex += buf->unitCount;
             m_UnitBuffers.RecycleData(buf);
 
-            m_RendererIndex += buf->unitCount;
             if (m_RendererIndex >= m_UnitEnd) {
                 m_SuspendRenderer = true;
                 break;
