@@ -12,6 +12,12 @@
 #include "Mutex.hpp"
 #include "Function.hpp"
 
+#ifdef CLOCK_MONOTONIC
+#define SCX_CLOCK_TYPE CLOCK_MONOTONIC 
+#else
+#define SCX_CLOCK_TYPE CLOCK_REALTIME
+#endif
+
 namespace scx {
 
 class TaskSchedule
@@ -130,7 +136,7 @@ private:
     static inline struct timeval CurrentTimeVal()
     {
         struct timespec ts = { 0L, 0L };
-        clock_gettime(CLOCK_MONOTONIC, &ts);
+        clock_gettime(SCX_CLOCK_TYPE, &ts);
         struct timeval tv = { ts.tv_sec, ts.tv_nsec / 1000L };
         return tv;
     }
@@ -212,5 +218,7 @@ private:
 };
 
 }
+
+#undef SCX_CLOCK_TYPE
 
 #endif
