@@ -12,6 +12,11 @@
 #include "Mutex.hpp"
 #include "Function.hpp"
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 namespace scx {
 
 class TaskSchedule
