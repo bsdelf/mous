@@ -243,5 +243,6 @@ Error Codes
 #define UCHAR unsigned char
 #define _wcsicmp wcscasecmp
 #define _wcsnicmp wcsncasecmp
+#define _wtoi(ws) wcstol(ws, NULL, 2)
 
 #endif // #ifndef APE_ALL_H
