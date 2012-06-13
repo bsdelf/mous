@@ -36,7 +36,7 @@ size_t PluginManager::LoadPluginDir(const string& dir)
         if (files[i].substr(0, 3) == "lib") {
             string full = dir + "/" + files[i];
             FileInfo info(full);
-            if (info.Type() == FileType::Regular && info.Suffix() == "so")
+            if (info.Type() == FileType::Regular)
                 LoadPlugin(full);
         }
     }
