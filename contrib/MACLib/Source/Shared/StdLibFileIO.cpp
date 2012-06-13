@@ -198,11 +198,13 @@ int CStdLibFileIO::SetEOF()
 
 int CStdLibFileIO::GetPosition()
 {
+    /*
     fpos_t fPosition;
 
     memset(&fPosition, 0, sizeof(fPosition));
     fgetpos(m_pFile, &fPosition);
-    //return _FPOSOFF(fPosition);
+    return _FPOSOFF(fPosition);
+    */
     return ftell(m_pFile);
 }
 
