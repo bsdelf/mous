@@ -28,6 +28,12 @@ elseif(APPLE)
     set(IS_APPLE true)
 endif()
 
+#==== amd64/x86 ====#
+set(Bitness 32)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(Bitness 64)
+endif()
+
 #==== Compiler ====#
 option(UseCompileClang "Use Clang C compiler" off)
 
@@ -205,11 +211,22 @@ if(WithPluginMac4Decoder)
     file(GLOB SRC_MAC4_ASM contrib/MACLib/Source/MACLib/Assembly/*.asm)
     file(GLOB SRC_MAC4_LIB contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp contrib/MACLib/Source/MACLib/Assembly/*.cpp)
     file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/*)
-    add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER} ${SRC_MAC4_LIB} ${SRC_MAC4_ASM})
+
+    set(YASM_FLAG " -m x86")
+    if(Bitness EQUAL 64)
+        set(YASM_FLAG " -m amd64")
+    endif()
     set_source_files_properties(${SRC_MAC4_ASM}
-        COMPILE_FLAGS "-f elf -m amd64")
+        COMPILE_FLAGS "-f elf ${YASM_FLAG}" )
+
+    set(MAC_FLAG " -DARCH_X86")
+    if(Bitness EQUAL 64)
+        set(MAC_FLAG " -DARCH_X86_64")
+    endif()
     set_source_files_properties(${SRC_MAC4_DECODER} ${SRC_MAC4_LIB}
-        COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/contrib/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM -DENABLE_ASSEMBLY -DARCH_X86_64")
+        COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/contrib/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM -DENABLE_ASSEMBLY ${MAC_FLAG}")
+
+    add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER} ${SRC_MAC4_LIB} ${SRC_MAC4_ASM})
     target_link_libraries(Mac4Decoder)
 endif()
 
@@ -298,3 +315,4 @@ message("Precessor:	" ${CMAKE_SYSTEM_PROCESSOR})
 message("Build type:	" ${CMAKE_BUILD_TYPE})
 message("Project root:	" ${MOUS_SOURCE_DIR})
 message("Work root:	" ${PROJECT_BINARY_DIR})
+message("Build for Arch:" ${Bitness})
