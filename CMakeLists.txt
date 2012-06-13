@@ -208,16 +208,17 @@ endif()
 if(WithPluginMac4Decoder)
     enable_language(ASM_NASM)
     set(CMAKE_ASM_NASM_COMPILER "yasm")
-    file(GLOB SRC_MAC4_ASM contrib/MACLib/Source/MACLib/Assembly/*.asm)
-    file(GLOB SRC_MAC4_LIB contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp contrib/MACLib/Source/MACLib/Assembly/*.cpp)
-    file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/*)
 
+    file(GLOB SRC_MAC4_ASM contrib/MACLib/Source/MACLib/Assembly/x86_mmx.asm)
     set(YASM_FLAG " -m x86")
     if(Bitness EQUAL 64)
+        file(GLOB SRC_MAC4_ASM contrib/MACLib/Source/MACLib/Assembly/x86_64_mmx.asm)
         set(YASM_FLAG " -m amd64")
     endif()
-    set_source_files_properties(${SRC_MAC4_ASM}
-        COMPILE_FLAGS "-f elf ${YASM_FLAG}" )
+    set_source_files_properties(${SRC_MAC4_ASM} COMPILE_FLAGS "-f elf ${YASM_FLAG}" )
+
+    file(GLOB SRC_MAC4_LIB contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp contrib/MACLib/Source/MACLib/Assembly/*.cpp)
+    file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/*)
 
     set(MAC_FLAG " -DARCH_X86")
     if(Bitness EQUAL 64)
