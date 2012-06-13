@@ -65,20 +65,20 @@ bool MacDecoder::IsFormatVaild() const
 
 EmErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
-    int blocksRecv = 0;
-
     if (m_BlockIndex < m_BlockCount) {
         m_BitRate = m_pDecompress->GetInfo(APE_DECOMPRESS_CURRENT_BITRATE);
 
+        int blocksRecv = 0;
         int ret = m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv);
         switch (ret) {
             case ERROR_SUCCESS:
             {
-                m_BlockIndex += blocksRecv;
                 used = blocksRecv * m_BlockAlign;
                 unitCount = blocksRecv;
-            }
+                m_BlockIndex += blocksRecv;
                 return ErrorCode::Ok;
+            }
+                break;
 
             case ERROR_INVALID_CHECKSUM:
                 printf("FATAL: mac invalid checksum!\n");
@@ -88,11 +88,13 @@ EmErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
                 printf("FATAL: mac bad unit!\n");
                 break;
         }
-    } else {
-        used = 0;
-        unitCount = m_BlockCount;
-        m_BlockIndex = m_BlockCount;
-    }
+    } 
+
+    printf("FATAL: mac hit end or error occured!\n");
+
+    used = 0;
+    unitCount = m_BlockCount;
+    m_BlockIndex = m_BlockCount;
 
     return ErrorCode::DecoderOutOfRange;
 }
