@@ -109,7 +109,7 @@ if(WithFrontendNcurses)
     if(IS_FREEBSD OR IS_APPLE)
         target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS} -liconv)
     elseif(IS_LINUX)
-        target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS} -ldl)
+        target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS} -ldl -lrt)
     endif()
 endif()
 
