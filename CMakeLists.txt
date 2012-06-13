@@ -200,11 +200,16 @@ endif()
 
 # Mac4 plugin(still buggy)
 if(WithPluginMac4Decoder)
-    file(GLOB SRC_MAC4_LIB contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp)
+    enable_language(ASM_NASM)
+    set(CMAKE_ASM_NASM_COMPILER "yasm")
+    file(GLOB SRC_MAC4_ASM contrib/MACLib/Source/MACLib/Assembly/*.asm)
+    file(GLOB SRC_MAC4_LIB contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp contrib/MACLib/Source/MACLib/Assembly/*.cpp)
     file(GLOB SRC_MAC4_DECODER plugins/Mac4Decoder/*)
-    add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER} ${SRC_MAC4_LIB})
-    set_target_properties(Mac4Decoder PROPERTIES 
-        COMPILE_FLAGS "-fno-strict-aliasing -I${MOUS_SOURCE_DIR}/contrib/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM")
+    add_library(Mac4Decoder SHARED ${SRC_MAC4_DECODER} ${SRC_MAC4_LIB} ${SRC_MAC4_ASM})
+    set_source_files_properties(${SRC_MAC4_ASM}
+        COMPILE_FLAGS "-f elf -m amd64")
+    set_source_files_properties(${SRC_MAC4_DECODER} ${SRC_MAC4_LIB}
+        COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/contrib/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM -DENABLE_ASSEMBLY -DARCH_X86_64")
     target_link_libraries(Mac4Decoder)
 endif()
 

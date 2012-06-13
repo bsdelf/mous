@@ -3,10 +3,11 @@
 #include "IO.h"
 #include  "CharacterHelper.h"
 
-///*
+/*
 //#ifndef __GNUC_IA32__
 extern "C" BOOL GetMMXAvailable(void)
 {
+    return TRUE;
 #ifdef ENABLE_ASSEMBLY
 
     unsigned long nRegisterEDX;
@@ -35,7 +36,7 @@ extern "C" BOOL GetMMXAvailable(void)
 }
 
 //#endif // #ifndef __GNUC_IA32__
-//*/
+*/
 
 int ReadSafe(CIO * pIO, void * pBuffer, int nBytes)
 {

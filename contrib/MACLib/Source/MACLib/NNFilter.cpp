@@ -42,7 +42,7 @@ int CNNFilter::Compress(int nInput)
     // figure a dot product
     int nDotProduct;
     if (m_bMMXAvailable)
-        nDotProduct = CalculateDotProduct(&m_rbInput[-m_nOrder], &m_paryM[0], m_nOrder);
+        nDotProduct = -CalculateDotProduct(&m_rbInput[-m_nOrder], &m_paryM[0], m_nOrder);
     else
         nDotProduct = CalculateDotProductNoMMX(&m_rbInput[-m_nOrder], &m_paryM[0], m_nOrder);
 
@@ -85,7 +85,7 @@ int CNNFilter::Decompress(int nInput)
     int nDotProduct;
 
     if (m_bMMXAvailable)
-        nDotProduct = CalculateDotProduct(&m_rbInput[-m_nOrder], &m_paryM[0], m_nOrder);
+        nDotProduct = -CalculateDotProduct(&m_rbInput[-m_nOrder], &m_paryM[0], m_nOrder);
     else
         nDotProduct = CalculateDotProductNoMMX(&m_rbInput[-m_nOrder], &m_paryM[0], m_nOrder);
     

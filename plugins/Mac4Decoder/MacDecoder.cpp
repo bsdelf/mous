@@ -67,30 +67,34 @@ EmErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
 {
     int blocksRecv = 0;
 
-    m_BitRate = m_pDecompress->GetInfo(APE_DECOMPRESS_CURRENT_BITRATE);
+    if (m_BlockIndex < m_BlockCount) {
+        m_BitRate = m_pDecompress->GetInfo(APE_DECOMPRESS_CURRENT_BITRATE);
 
-    int ret = m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv);
-    switch (ret) {
-        case ERROR_SUCCESS:
-        {
-            m_BlockIndex += blocksRecv;
-            used = blocksRecv * m_BlockAlign;
-            unitCount = blocksRecv;
+        int ret = m_pDecompress->GetData(data, m_BlocksPerRead, &blocksRecv);
+        switch (ret) {
+            case ERROR_SUCCESS:
+            {
+                m_BlockIndex += blocksRecv;
+                used = blocksRecv * m_BlockAlign;
+                unitCount = blocksRecv;
+            }
+                return ErrorCode::Ok;
+
+            case ERROR_INVALID_CHECKSUM:
+                printf("FATAL: mac invalid checksum!\n");
+                break;
+
+            default:
+                printf("FATAL: mac bad unit!\n");
+                break;
         }
-            return ErrorCode::Ok;
-
-        case ERROR_INVALID_CHECKSUM:
-            printf("FATAL: mac invalid checksum!\n");
-            break;
-
-        default:
-            printf("FATAL: mac bad unit!\n");
-            break;
+    } else {
+        used = 0;
+        unitCount = m_BlockCount;
+        m_BlockIndex = m_BlockCount;
     }
 
-    used = 0;
-    unitCount = 0;
-    return ErrorCode::Ok;
+    return ErrorCode::DecoderOutOfRange;
 }
 
 EmErrorCode MacDecoder::SetUnitIndex(uint64_t index)
