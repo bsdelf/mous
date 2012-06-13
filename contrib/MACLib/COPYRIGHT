@@ -1,4 +1,11 @@
-This port is based on MACLib SDK 4.11,
-and it still follows its original license.
+1.This port is based on MACLib SDK 4.11,
+and it still follows its original license(means Monkey's audio's license).
+
+2.The *.asm file under MACLib/Assembly/ 
+still follows its original license(means the license of mac3.99).
+
+3.If [2] does not compatible with [1], let me know that!
+I will totally *remove* [2], and *rewite* that assembly codes by myself.
+Acturlly, as for me, *any* license is fine, I just want to decode ape!Please!Thanks!
 
 Maintainer: Yanhui Shen <shen.elf@gmail.com>
