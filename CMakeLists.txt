@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 2.8)
 project(MOUS)
 
 #=== Compile Flags ====#
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 #set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wall")
 #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
-add_definitions(-Wall)
+#add_definitions(-Wall)
 
 #==== Library path ====#
 include_directories(SYSTEM /usr/local/include)
@@ -221,7 +221,7 @@ if(WithPluginMac4Decoder)
             set(MAC_FLAG " -DENABLE_ASSEMBLY -DARCH_X86")
         endif()
 
-        set_source_files_properties(${SRC_MAC4_ASM} COMPILE_FLAGS "-f elf ${YASM_FLAG}" )
+        set_source_files_properties(${SRC_MAC4_ASM} COMPILE_FLAGS "-f elf ${YASM_FLAG}") 
     endif()
 
     file(GLOB SRC_MAC4_LIB contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp contrib/MACLib/Source/MACLib/Assembly/*.cpp)
