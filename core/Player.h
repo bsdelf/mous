@@ -60,6 +60,9 @@ public:
     void SeekTime(uint64_t msPos);
     void SeekPercent(double percent);
 
+    void PauseDecoder();
+    void ResumeDecoder();
+
     int32_t BitRate() const;
     int32_t SamleRate() const;
     uint64_t Duration() const;
@@ -132,8 +135,10 @@ private:
 private:
     EmPlayerStatus m_Status;
 
+    string m_DecodeFile;
     bool m_StopDecoder;
     bool m_SuspendDecoder;
+    bool m_PauseDecoder;
     IDecoder* m_Decoder;
     scx::Thread m_ThreadForDecoder;
     Semaphore m_SemWakeDecoder;

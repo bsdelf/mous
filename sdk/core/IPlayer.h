@@ -62,6 +62,13 @@ public:
     virtual void SeekTime(uint64_t msPos) = 0;
     virtual void SeekPercent(double percent) = 0;
 
+    // with these pair of routines, 
+    // you'll be able to close the media file temporarily,
+    // but keep the renderer still working.
+    // after resume, the media file will be opened for decoding again.
+    virtual void PauseDecoder() = 0;
+    virtual void ResumeDecoder() = 0;
+
     virtual int32_t BitRate() const = 0;
     virtual int32_t SamleRate() const = 0;
     virtual uint64_t Duration() const = 0;

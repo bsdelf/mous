@@ -31,6 +31,7 @@ Player::Player():
     m_Status(PlayerStatus::Closed),
     m_StopDecoder(false),
     m_SuspendDecoder(true),
+    m_PauseDecoder(false),
     m_Decoder(NULL),
     m_StopRenderer(false),
     m_SuspendRenderer(true),
@@ -42,7 +43,7 @@ Player::Player():
     m_UnitPerMs(0),
     m_RendererPlugin(NULL)
 {
-    m_UnitBuffers.AllocBuffer(5);
+    m_UnitBuffers.AllocBuffer(102);
 
     m_ThreadForDecoder.Run(Function<void (void)>(&Player::ThDecoder, this));
 
@@ -223,8 +224,10 @@ EmErrorCode Player::Open(const string& path)
 
     EmErrorCode err = m_Decoder->Open(path);
     if (err != ErrorCode::Ok) {
-        cout << "Failed to open!" << endl;
+        cout << "FATAL: failed to open!" << endl;
         return err;
+    } else {
+        m_DecodeFile = path;
     }
 
     uint32_t maxBytesPerUnit = m_Decoder->MaxBytesPerUnit();
@@ -234,13 +237,14 @@ EmErrorCode Player::Open(const string& path)
         if (buf->max < maxBytesPerUnit) {
             if (buf->data != NULL) {
                 delete[] buf->data;
-                cout << "free unit buf:" << buf->max << endl;
+                //cout << "free unit buf:" << buf->max << endl;
             }
             buf->data = new char[maxBytesPerUnit];
             buf->max = maxBytesPerUnit;
-            cout << "alloc unit buf:" << buf->max << endl;
+            //cout << "alloc unit buf:" << buf->max << endl;
         }
     }
+    cout << "unit buf size:" << maxBytesPerUnit << endl;
 
     m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
 
@@ -252,10 +256,10 @@ EmErrorCode Player::Open(const string& path)
     cout << "bitsPerSamle:" << bitsPerSamle << endl;
     err = m_Renderer->Setup(channels, samleRate, bitsPerSamle);
     if (err != ErrorCode::Ok) {
-        cout << "failed to set renderer:" << err << endl;
-        cout << "   channels:" << channels << endl;
-        cout << "   samleRate:" << samleRate << endl;
-        cout << "   bitsPerSamle:" << bitsPerSamle << endl;
+        cout << "FATAL: failed to set renderer:" << err << endl;
+        cout << "       channels:" << channels << endl;
+        cout << "       samleRate:" << samleRate << endl;
+        cout << "       bitsPerSamle:" << bitsPerSamle << endl;
         return err;
     }
 
@@ -337,15 +341,17 @@ void Player::Pause()
     if (m_Status == PlayerStatus::Paused)
         return;
 
+    // suspend renderer
     if (!m_SuspendRenderer) {
         m_SuspendRenderer = true;
-        m_UnitBuffers.RecycleFree(NULL);
+        m_UnitBuffers.RecycleFree();
     }
     m_SemRendererEnd.Wait();
 
+    // suspend decoder
     if (!m_SuspendDecoder) {
         m_SuspendDecoder = true;
-        m_UnitBuffers.RecycleData(NULL);
+        m_UnitBuffers.RecycleData();
     }
     m_SemDecoderEnd.Wait();
 
@@ -361,6 +367,7 @@ void Player::Resume()
 
     m_UnitBuffers.ResetPV();
 
+    // resume renderer & decoder
     m_SuspendRenderer = false;
     m_SemWakeRenderer.Post();
     m_SuspendDecoder = false;
@@ -428,6 +435,32 @@ void Player::DoSeekUnit(uint64_t unit)
 
     m_DecoderIndex = unit;
     m_RendererIndex = unit;
+}
+
+void Player::PauseDecoder()
+{
+    cout << "data:" << m_UnitBuffers.DataCount() << endl;
+    cout << "free:" << m_UnitBuffers.FreeCount() << endl;
+
+    if (!m_PauseDecoder) {
+        m_PauseDecoder = true;
+    }
+    m_SemDecoderEnd.Wait();
+
+    m_Decoder->Close();
+}
+
+void Player::ResumeDecoder()
+{
+    cout << "data:" << m_UnitBuffers.DataCount() << endl;
+    cout << "free:" << m_UnitBuffers.FreeCount() << endl;
+
+    m_Decoder->Open(m_DecodeFile);
+    m_Decoder->SetUnitIndex(m_DecoderIndex);
+
+    m_PauseDecoder = false;
+    m_SemWakeDecoder.Post();
+    m_SemDecoderBegin.Wait();
 }
 
 int32_t Player::BitRate() const
@@ -523,6 +556,9 @@ void Player::ThDecoder()
         m_SemDecoderBegin.Post();
 
         for (UnitBuffer* buf = NULL; ; ) {
+            if (m_PauseDecoder)
+                break;
+
             buf = m_UnitBuffers.TakeFree();
             if (m_SuspendDecoder)
                 break;
@@ -532,7 +568,7 @@ void Player::ThDecoder()
 
             m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
             m_DecoderIndex += buf->unitCount;
-            m_UnitBuffers.RecycleFree(buf);
+            m_UnitBuffers.RecycleFree();
 
             if (m_DecoderIndex >= m_UnitEnd) {
                 m_SuspendDecoder = true;
@@ -557,7 +593,6 @@ void Player::ThRenderer()
         m_SemRendererBegin.Post();
 
         for (UnitBuffer* buf = NULL; ; ) {
-            //cout << m_UnitBuffers.DataCount() << endl;
             buf = m_UnitBuffers.TakeData();
             if (m_SuspendRenderer)
                 break;
@@ -565,10 +600,11 @@ void Player::ThRenderer()
             assert(buf != NULL);
             assert(buf->data != NULL);
 
+            // avoid busy write
             if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok)
                 usleep(10*1000);
             m_RendererIndex += buf->unitCount;
-            m_UnitBuffers.RecycleData(buf);
+            m_UnitBuffers.RecycleData();
 
             if (m_RendererIndex >= m_UnitEnd) {
                 m_SuspendRenderer = true;
