@@ -1,30 +1,53 @@
-简介：
+==== 简介 ====
 
-因为在 BSD/Linux 下没有找到类似 foobar2000 的播放器，所以我启动了这个项目。
+mous 是一个简洁，用户友好，基于插件的播放器。
+它的依赖关系非常单一，放什么格式装什么插件。
+它提供了开发插件的 SDK，开发者可轻易编写插件。
+它的目标是成为 FreeBSD/Linux/OSX 上的 foobar2000。
 
-mous 是一个简洁，用户友好，功能全面，基于插件的播放器。
-* 它计划支持大部分常见格式，包括 APE、WMA 。
-* 它还要支持格式转换，封面编辑，tag 信息编辑，至少这是我常用的功能。
-* 它还要支持字符集转换，减少乱码现象。
-* 它的依赖关系也力求最少，每项依赖都有合理的解释，解什么码用什么库，
-  例如不想放 APE 就可以不装 APE 插件，从而不依赖 MACLib 。
+==== 用户界面 ====
 
-目前提供 Qt 前端和 ncurses 前端，但尚未发布第一版。
-* Qt 前端类似 foobar2000。支持格式转换，编辑 tag 和封面，自动转换 GBK 编码。
-* ncurses 前端类似 mocp 播放器。有文件浏览器和多个播放列表，播放进程驻留在后台。
-* 插件方面，支持 CUE 列表，解码 WAV/MP3/M4A/WMA/APE/FLAC，编码 WAV/MP3/M4A，输出 OSS/ALSA/libao。
+1.mous-qt: Qt 前端
+* 标签页式的播放列表，可以像 foobar 那样复制/剪切/粘贴/拖拽
+* 支持格式转换
+* Tag/封面编辑
+* 转换字符编码，杜绝乱码
 
-欢迎试用反馈。
+2.mous-ncurses: ncurses 前端
+* vim 式的键盘操作
+* 播放进程驻留于后台
+* 便利的文件浏览器
+* 多个播放列表
+* 很小的内存占用
+* 转换字符编码，杜绝乱码
+
+3.mous-cli: 命令行前端
+* 用于测试
+
+==== 现有插件 ====
+
+* 解码：wav/mp3/m4a/wma/ape/flac
+* 编码：wav/mp3/m4a
+* 输出：OSS/ALSA/libao
+* Tag 解析
+* CUE 列表
+
+==== 规划中的插件 ====
+
+* 解码：wavpack/ogg
+* 编码：flac
+* 内嵌 CUE 列表
+* 音量均衡
+* 音效处理
 
 ---------------------------------------------
 
 1.Sub Project
-Started     Name            Description
+Supported   Name            Description
 O           libMousCore     mous core/sdk
 O           mous-cli        Only for test
 O           mous-qt         Qt based frontend
 O           mous-ncurses    ncurses based frontend
-X           mous-gtk        Gtk+ based frontend??
 
 2.Features
 Supported   Description
