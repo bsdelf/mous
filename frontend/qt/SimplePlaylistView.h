@@ -104,6 +104,7 @@ private:
 
     QStandardItemModel m_ItemModel;
     Playlist<MediaItem> m_Playlist;
+    mutable QMutex m_PlaylistMutex;
 
     DlgLoadingMedia m_DlgLoadingMedia;
     scx::Thread m_LoadMediaThread;

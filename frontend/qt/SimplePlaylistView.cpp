@@ -228,22 +228,28 @@ void SimplePlaylistView::SetClipboard(PlaylistClipboard<mous::MediaItem>* clipbo
 
 const MediaItem* SimplePlaylistView::NextItem() const
 {
+    QMutexLocker locker(&m_PlaylistMutex);
     return m_Playlist.SeqHasOffset(1) ? &m_Playlist.SeqItemAtOffset(1, true) : NULL;
 }
 
 const MediaItem* SimplePlaylistView::PrevItem() const
 {
+    QMutexLocker locker(&m_PlaylistMutex);
     return m_Playlist.SeqHasOffset(-1) ? &m_Playlist.SeqItemAtOffset(-1, true) : NULL;
 }
 
 int SimplePlaylistView::ItemCount() const
 {
+    QMutexLocker locker(&m_PlaylistMutex);
     return m_Playlist.Count();
 }
 
 const char* SimplePlaylistView::PlayMode() const
 {
+    QMutexLocker locker(&m_PlaylistMutex);
     int mode = (int)m_Playlist.Mode();
+    locker.unlock();
+
     if (mode < 0 || mode > m_PlayModeGroup.actions().size())
         return "";
     else
@@ -257,12 +263,16 @@ void SimplePlaylistView::SetPlayMode(int mode)
 
 void SimplePlaylistView::Save(const char* filename) const
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     typedef PlaylistSerializer<MediaItem> Serializer;
     Serializer::Store(m_Playlist, filename);
 }
 
 void SimplePlaylistView::Load(const char* filename)
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     typedef PlaylistSerializer<MediaItem> Serializer;
     Serializer::Load(m_Playlist, filename);
 
@@ -277,6 +287,8 @@ void SimplePlaylistView::Load(const char* filename)
 
 void SimplePlaylistView::OnMediaItemUpdated(const mous::MediaItem& item)
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     if (m_Playlist.Empty())
         return;
 
@@ -319,6 +331,8 @@ void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
 {
     QTreeView::mouseDoubleClickEvent(event);
 
+    QMutexLocker locker(&m_PlaylistMutex);
+
     if (m_Playlist.Empty())
         return;
 
@@ -348,6 +362,8 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
     event->accept();
 
     const QString& text = event->mimeData()->text();
+
+    QMutexLocker locker(&m_PlaylistMutex);
 
     if (text.startsWith(FILE_MIME)) {
         qDebug() << "!drop:append file";
@@ -448,6 +464,8 @@ void SimplePlaylistView::SlotTagging()
 
 void SimplePlaylistView::SlotConvert()
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     if (m_Playlist.Empty())
         return;
 
@@ -458,7 +476,7 @@ void SimplePlaylistView::SlotConvert()
     QModelIndex index(list[0]);
     qDebug() << index.row();
 
-    MediaItem item = m_Playlist[index.row()];
+    MediaItem& item = m_Playlist[index.row()];
 
     emit SigConvertMediaItem(item);
 }
@@ -505,12 +523,16 @@ void SimplePlaylistView::SlotListRowGot(const ListRow& listRow)
 
     m_DlgLoadingMedia.SetFileName(fileName);
 
+    QMutexLocker locker(&m_PlaylistMutex);
+
     m_Playlist.Append(listRow.item);
     m_ItemModel.appendRow(listRow.fields);
 }
 
 void SimplePlaylistView::SlotPlayModeMenu(QAction* action)
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     int index = m_PlayModeGroup.actions().indexOf(action);
     if (index < 0)
         return;
@@ -519,6 +541,8 @@ void SimplePlaylistView::SlotPlayModeMenu(QAction* action)
 
 void SimplePlaylistView::SlotShortcutCopy()
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     qDebug() << "copy";
 
     if (m_Clipboard == NULL)
@@ -547,6 +571,8 @@ void SimplePlaylistView::SlotShortcutCut()
 
 void SimplePlaylistView::SlotShortcutPaste()
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     qDebug() << "paste";
 
     if (m_Clipboard == NULL || m_Clipboard->Empty())
@@ -581,6 +607,8 @@ void SimplePlaylistView::SlotShortcutPaste()
 
 void SimplePlaylistView::SlotShortcutDelete()
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     qDebug() << "delete";
 
     QList<int> selectedRows = PickSelectedRows();
@@ -608,6 +636,8 @@ void SimplePlaylistView::SlotShortcutDelete()
 
 void SimplePlaylistView::SlotShortcutUndo()
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     qDebug() << "undo";
 
     if (m_History.HasUndoAction()) {
@@ -663,6 +693,8 @@ void SimplePlaylistView::SlotShortcutUndo()
 
 void SimplePlaylistView::SlotShortcutRedo()
 {
+    QMutexLocker locker(&m_PlaylistMutex);
+
     qDebug() << "redo";
 
     if (m_History.HasRedoAction()) {
