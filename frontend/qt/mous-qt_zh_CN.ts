@@ -140,7 +140,7 @@
     </message>
     <message>
         <location filename="FrmTagEditor.cpp" line="26"/>
-        <location filename="FrmTagEditor.cpp" line="272"/>
+        <location filename="FrmTagEditor.cpp" line="273"/>
         <source>Save Image As</source>
         <translation>图片另存为</translation>
     </message>
@@ -200,12 +200,12 @@
         <translation>保存失败！</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="292"/>
+        <location filename="FrmTagEditor.cpp" line="293"/>
         <source>Select Image File</source>
         <translation>选择图片</translation>
     </message>
     <message>
-        <location filename="FrmTagEditor.cpp" line="292"/>
+        <location filename="FrmTagEditor.cpp" line="293"/>
         <source>Images (*.jpg *.png)</source>
         <translation>图片格式 (*.jpg *png)</translation>
     </message>
@@ -231,27 +231,32 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="153"/>
+        <location filename="MainWindow.cpp" line="168"/>
         <source>Preference</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="160"/>
+        <location filename="MainWindow.cpp" line="185"/>
         <source>Metadata</source>
         <translation>元信息</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="363"/>
+        <location filename="MainWindow.cpp" line="375"/>
+        <source>List</source>
+        <translation>列表</translation>
+    </message>
+    <message>
+        <location filename="MainWindow.cpp" line="392"/>
         <source>Failed to open!</source>
         <translation>打开失败！</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="396"/>
+        <location filename="MainWindow.cpp" line="425"/>
         <source>Available Encoders</source>
         <translation>可用的编码器</translation>
     </message>
     <message>
-        <location filename="MainWindow.cpp" line="419"/>
+        <location filename="MainWindow.cpp" line="448"/>
         <source>Config</source>
         <translation>配置</translation>
     </message>
@@ -259,32 +264,32 @@
 <context>
     <name>SimplePlaylistView</name>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="47"/>
+        <location filename="SimplePlaylistView.cpp" line="48"/>
         <source>Append</source>
         <translation>添加</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="54"/>
+        <location filename="SimplePlaylistView.cpp" line="55"/>
         <source>Remove</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="59"/>
+        <location filename="SimplePlaylistView.cpp" line="60"/>
         <source>Copy</source>
         <translation>复制</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="64"/>
+        <location filename="SimplePlaylistView.cpp" line="65"/>
         <source>Cut</source>
         <translation>剪切</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="69"/>
+        <location filename="SimplePlaylistView.cpp" line="70"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="83"/>
+        <location filename="SimplePlaylistView.cpp" line="84"/>
         <source>Convert</source>
         <translation>格式转换</translation>
     </message>
@@ -309,7 +314,7 @@
         <translation type="obsolete">另存为</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="117"/>
+        <location filename="SimplePlaylistView.cpp" line="118"/>
         <source>Play Mode</source>
         <translation>播放模式</translation>
     </message>
@@ -364,12 +369,12 @@
         <translation>时间</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="397"/>
+        <location filename="SimplePlaylistView.cpp" line="429"/>
         <source>Open Media</source>
         <translation>打开媒体文件</translation>
     </message>
     <message>
-        <location filename="SimplePlaylistView.cpp" line="455"/>
+        <location filename="SimplePlaylistView.cpp" line="487"/>
         <source>Loading</source>
         <translation></translation>
     </message>
