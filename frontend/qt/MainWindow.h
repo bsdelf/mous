@@ -100,6 +100,7 @@ private:
     IPlayer* m_Player;
     IConvTaskFactory* m_ConvFactory;
     ITagParserFactory* m_ParserFactory;
+    QMutex m_PlayerMutex;
 
     IPlaylistView* m_UsedPlaylistView;
     const MediaItem* m_UsedMediaItem;

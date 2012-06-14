@@ -42,6 +42,8 @@ MainWindow::~MainWindow()
 {
     m_FrmTagEditor.WaitForLoadFinished();
 
+    QMutexLocker locker(&m_PlayerMutex);
+
     m_Player->SigFinished()->DisconnectReceiver(this);
 
     if (m_Player->Status() == PlayerStatus::Playing) {
@@ -66,7 +68,9 @@ void MainWindow::closeEvent(QCloseEvent*)
     env->windowState = saveState();
     env->tabCount = m_TabWidgetPlaylist->count();
     env->tabIndex = m_TabWidgetPlaylist->currentIndex();
+    QMutexLocker locker(&m_PlayerMutex);
     env->volume = m_Player->Volume();
+    locker.unlock();
     m_FrmTagEditor.SaveUiStatus();
 
     for (int i = 0 ; i < m_TabWidgetPlaylist->count(); ++i) {
@@ -231,8 +235,6 @@ void MainWindow::SlotUiPlayerFinished()
         const MediaItem* item = m_UsedPlaylistView->NextItem();
         if (item != NULL) {
             SlotPlayMediaItem(m_UsedPlaylistView, *item);
-        } else {
-
         }
     }
 }
@@ -240,38 +242,39 @@ void MainWindow::SlotUiPlayerFinished()
 /* Qt slots */
 void MainWindow::SlotUpdateUi()
 {
-    int total = -1;
-    int ms = -1;
-    int hz = -1;
-    int kbps = -1;
+    // Update statusbar & progress slider
+    if (!m_PlayerMutex.tryLock())
+        return;
 
-    //==== Update statusbar.
-    if (m_Player->Status() != PlayerStatus::Closed) {
-        total = m_Player->RangeDuration();
-        ms = m_Player->OffsetMs();
-        hz = m_Player->SamleRate();
-        kbps = m_Player->BitRate();
+    if (m_Player->Status() == PlayerStatus::Playing) {
+        long total = m_Player->RangeDuration();
+        long ms = m_Player->OffsetMs();
+        long hz = m_Player->SamleRate();
+        long kbps = m_Player->BitRate();
+        m_PlayerMutex.unlock();
+
+        const QString& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6").arg(hz).arg(kbps, 4).
+                arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0')).
+                arg(total/1000/60, 2, 10, QChar('0')).arg(total/1000%60, 2, 10, QChar('0'));
+
+        ui->statusBar->showMessage(status);
+
+        if (!m_SliderPlayingPreempted) {
+            int val = (double)ms / total * m_FrmToolBar.SliderPlaying()->maximum();
+            m_FrmToolBar.SliderPlaying()->setSliderPosition(val);
+        }
+
     } else {
+        m_PlayerMutex.unlock();
         ui->statusBar->showMessage("");
         m_FrmToolBar.SliderPlaying()->setSliderPosition(0);
-        return;
-    }
-
-    const QString& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6").arg(hz).arg(kbps, 4).
-            arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0')).
-            arg(total/1000/60, 2, 10, QChar('0')).arg(total/1000%60, 2, 10, QChar('0'));
-
-    ui->statusBar->showMessage(status);
-
-    //==== Update slider.
-    if (!m_SliderPlayingPreempted) {
-        int val = (double)ms / total * m_FrmToolBar.SliderPlaying()->maximum();
-        m_FrmToolBar.SliderPlaying()->setSliderPosition(val);
     }
 }
 
 void MainWindow::SlotBtnPlay()
 {
+    QMutexLocker locker(&m_PlayerMutex);
+
     qDebug() << m_Player->Status();
 
     switch (m_Player->Status()) {
@@ -327,6 +330,7 @@ void MainWindow::SlotBtnNext()
 
 void MainWindow::SlotSliderVolumeValueChanged(int val)
 {
+    QMutexLocker locker(&m_PlayerMutex);
     m_Player->SetVolume(val);
 }
 
@@ -346,7 +350,10 @@ void MainWindow::SlotSliderPlayingValueChanged(int val)
         return;
 
     const double& percent = (double)val / m_FrmToolBar.SliderPlaying()->maximum();
-    m_Player->SeekPercent(percent);
+
+    QMutexLocker locker(&m_PlayerMutex);
+    if (m_Player->Status() != PlayerStatus::Closed)
+        m_Player->SeekPercent(percent);
 }
 
 void MainWindow::SlotBarPlayListMidClick(int index)
@@ -383,6 +390,8 @@ void MainWindow::SlotWidgetPlayListDoubleClick()
 
 void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 {
+    QMutexLocker locker(&m_PlayerMutex);
+
     if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
     }
