@@ -268,6 +268,7 @@ void MainWindow::SlotUpdateUi()
         m_PlayerMutex.unlock();
         ui->statusBar->showMessage("");
         m_FrmToolBar.SliderPlaying()->setSliderPosition(0);
+        setWindowTitle("Mous");
     }
 }
 
