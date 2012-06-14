@@ -12,6 +12,7 @@ public:
 
 public:
     // path
+    QString configDir;
     QString pluginDir;
     QString resourceDir;
 
@@ -21,10 +22,13 @@ public:
     // config
     QString ifNotUtf8;
 
-    // ui    
+    // ui && status
     QByteArray windowGeometry;
     QByteArray windowState;
     QByteArray tagEditorSplitterState;
+    int tabCount;
+    int tabIndex;
+    int volume;
 
 private:
     void InitFilePath();

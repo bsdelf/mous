@@ -64,8 +64,16 @@ void MainWindow::closeEvent(QCloseEvent*)
     env->tagEditorSplitterState = m_FrmTagEditor.saveGeometry();
     env->windowGeometry = saveGeometry();
     env->windowState = saveState();
-
+    env->tabCount = m_TabWidgetPlaylist->count();
+    env->tabIndex = m_TabWidgetPlaylist->currentIndex();
+    env->volume = m_Player->Volume();
     m_FrmTagEditor.SaveUiStatus();
+
+    for (int i = 0 ; i < m_TabWidgetPlaylist->count(); ++i) {
+        SimplePlaylistView* view =  qobject_cast<SimplePlaylistView*>(m_TabWidgetPlaylist->widget(i));
+        QString filePath = env->configDir + QString("/playlist%1.dat").arg(i);
+        view->Save(filePath.toAscii());
+    }
 }
 
 void MainWindow::InitMousCore()
@@ -132,12 +140,19 @@ void MainWindow::ClearMousCore()
 
 void MainWindow::InitMyUi()
 {
+    AppEnv* env = GlobalAppEnv::Instance();
+
     // Playing & Paused icon
     m_IconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);
     m_IconPaused.addFile(QString::fromUtf8(":/img/resource/pause.png"), QSize(), QIcon::Normal, QIcon::On);
 
     // Volume
-    m_FrmToolBar.SliderVolume()->setValue(m_Player->Volume());
+    if (env->volume < 0) {
+        env->volume = m_Player->Volume();
+    } else {
+        m_Player->SetVolume(env->volume);
+    }
+    m_FrmToolBar.SliderVolume()->setValue(env->volume);
 
     // PlayList View
     m_TabBarPlaylist = new MidClickTabBar(this);
@@ -154,15 +169,26 @@ void MainWindow::InitMyUi()
 
     ui->statusBar->addPermanentWidget(m_BtnPreference, 0);
 
-    // Show default playlist
-    SlotWidgetPlayListDoubleClick();
+    // Recover previous playlist
+    for (int i = 0; i < env->tabCount; ++i) {
+        SlotWidgetPlayListDoubleClick();
+        SimplePlaylistView* view =  qobject_cast<SimplePlaylistView*>(m_TabWidgetPlaylist->widget(i));
+        QString filePath = env->configDir + QString("/playlist%1.dat").arg(i);
+        if (QFileInfo(filePath).isFile())
+            view->Load(filePath.toAscii());
+        else
+            qDebug() << filePath << "not exist!";
+    }
+    m_TabWidgetPlaylist->setCurrentIndex(env->tabIndex);
 
+    // Show left-side Dock
     m_Dock = new QDockWidget(tr("Metadata"));
     m_Dock->setObjectName("Dock");
     m_Dock->setWidget(&m_FrmTagEditor);
     addDockWidget(Qt::LeftDockWidgetArea, m_Dock);
     m_Dock->setFeatures(QDockWidget::NoDockWidgetFeatures | QDockWidget::DockWidgetMovable);
 
+    // Show top slider
     ui->toolBar->addWidget(&m_FrmToolBar);
     ui->toolBar->setMovable(false);
     setContextMenuPolicy(Qt::NoContextMenu);
@@ -320,6 +346,9 @@ void MainWindow::SlotSliderPlayingValueChanged(int val)
 
 void MainWindow::SlotBarPlayListMidClick(int index)
 {
+    if (m_TabWidgetPlaylist->count() <= 1)
+        return;
+
     SimplePlaylistView* view = (SimplePlaylistView*)m_TabWidgetPlaylist->widget(index);
     m_TabWidgetPlaylist->removeTab(index);
 
@@ -343,7 +372,7 @@ void MainWindow::SlotWidgetPlayListDoubleClick()
     connect(view, SIGNAL(SigConvertMediaItems(const QList<MediaItem>&)),
             this, SLOT(SlotConvertMediaItems(const QList<MediaItem>&)));
 
-    m_TabWidgetPlaylist->addTab(view, QString::number(m_TabWidgetPlaylist->count()));
+    m_TabWidgetPlaylist->addTab(view, tr("List") + " " + QString::number(m_TabWidgetPlaylist->count()));
     m_TabWidgetPlaylist->setCurrentIndex(m_TabWidgetPlaylist->count()-1);
 }
 

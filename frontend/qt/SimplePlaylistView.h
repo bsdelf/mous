@@ -34,6 +34,10 @@ public:
     virtual const MediaItem* NextItem() const;
     virtual const MediaItem* PrevItem() const;
     virtual int ItemCount() const;
+    virtual const char* PlayMode() const;
+    virtual void SetPlayMode(int mode);
+    virtual void Save(const char* filename) const;
+    virtual void Load(const char* filename);
 
     virtual void OnMediaItemUpdated(const mous::MediaItem& item);
 
@@ -72,6 +76,8 @@ private slots:
     void SlotLoadFinished();
     void SlotListRowGot(const ListRow& listRow);
 
+    void SlotPlayModeMenu(QAction*);
+
     void SlotShortcutCopy();
     void SlotShortcutCut();
     void SlotShortcutPaste();
@@ -106,6 +112,7 @@ private:
 
     FoobarStyle* m_FoobarStyle;
 
+    QActionGroup m_PlayModeGroup;
     QShortcut m_ShortcutCopy;
     QShortcut m_ShortcutCut;
     QShortcut m_ShortcutPaste;

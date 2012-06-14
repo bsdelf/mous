@@ -3,6 +3,7 @@
 #include <QtGui>
 
 #include <util/MediaItem.h>
+#include <util/PlaylistSerializer.h>
 #include <core/IMediaLoader.h>
 using namespace mous;
 
@@ -26,6 +27,7 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
     m_MediaLoader(NULL),
     m_Clipboard(NULL),
+    m_PlayModeGroup(this),
     m_ShortcutCopy(qobject_cast<QWidget*>(this)),
     m_ShortcutCut(qobject_cast<QWidget*>(this)),
     m_ShortcutPaste(qobject_cast<QWidget*>(this)),
@@ -40,7 +42,6 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
 
     QList<QAction*> actionList;
     QAction* action = NULL;
-    QActionGroup* group = NULL;
     QMenu* menu = NULL;
 
     // Action append
@@ -118,26 +119,25 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     actionList << action;
     menu = new QMenu(this);
     action->setMenu(menu);
-    group = new QActionGroup(this);
 
     action = new QAction(tr("Normal"), this);
     action->setCheckable(true);
-    group->addAction(action);
+    m_PlayModeGroup.addAction(action);
     action = new QAction(tr("Repeat"), this);
     action->setCheckable(true);
-    group->addAction(action);
+    m_PlayModeGroup.addAction(action);
     action->setChecked(true);
     action = new QAction(tr("Shuffle"), this);
     action->setCheckable(true);
-    group->addAction(action);
+    m_PlayModeGroup.addAction(action);
     action = new QAction(tr("Shuffle Repeat"), this);
     action->setCheckable(true);
-    group->addAction(action);
+    m_PlayModeGroup.addAction(action);
     action = new QAction(tr("Repeat One"), this);
     action->setCheckable(true);
-    group->addAction(action);
-    menu->addActions(group->actions());
-    //group->setExclusive(true);
+    m_PlayModeGroup.addAction(action);
+    m_PlayModeGroup.setExclusive(true);
+    menu->addActions(m_PlayModeGroup.actions());
 
     // Style
     setActionSeparator(actionList);
@@ -189,7 +189,8 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     connect(this, SIGNAL(SigListRowGot(const ListRow&)),
             this, SLOT(SlotListRowGot(const ListRow&)), Qt::BlockingQueuedConnection);
 
-    //connect(&m_ScrollTimer, SIGNAL(timeout()), this, SLOT(SlotCheckForScroll));
+    connect(&m_PlayModeGroup, SIGNAL(triggered(QAction*)), this, SLOT(SlotPlayModeMenu(QAction*)));
+
     SetupShortcuts();
 }
 
@@ -238,6 +239,37 @@ const MediaItem* SimplePlaylistView::PrevItem() const
 int SimplePlaylistView::ItemCount() const
 {
     return m_Playlist.Count();
+}
+
+const char* SimplePlaylistView::PlayMode() const
+{
+    int mode = (int)m_Playlist.Mode();
+    if (mode < 0 || mode > m_PlayModeGroup.actions().size())
+        return "";
+    else
+        return m_PlayModeGroup.actions()[mode]->text().toLocal8Bit().data();
+}
+
+void SimplePlaylistView::SetPlayMode(int mode)
+{
+    m_PlayModeGroup.actions()[mode]->setChecked(true);
+}
+
+void SimplePlaylistView::Save(const char* filename) const
+{
+    typedef PlaylistSerializer<MediaItem> Serializer;
+    Serializer::Store(m_Playlist, filename);
+}
+
+void SimplePlaylistView::Load(const char* filename)
+{
+    typedef PlaylistSerializer<MediaItem> Serializer;
+    Serializer::Load(m_Playlist, filename);
+
+    for (int i = 0; i < m_Playlist.Count(); ++i) {
+        ListRow listRow = BuildListRow(m_Playlist[i]);
+        m_ItemModel.appendRow(listRow.fields);
+    }
 }
 
 void SimplePlaylistView::OnMediaItemUpdated(const mous::MediaItem& item)
@@ -474,6 +506,14 @@ void SimplePlaylistView::SlotListRowGot(const ListRow& listRow)
     m_ItemModel.appendRow(listRow.fields);
 }
 
+void SimplePlaylistView::SlotPlayModeMenu(QAction* action)
+{
+    int index = m_PlayModeGroup.actions().indexOf(action);
+    if (index < 0)
+        return;
+    m_Playlist.SetMode((EmPlaylistMode)index);
+}
+
 void SimplePlaylistView::SlotShortcutCopy()
 {
     qDebug() << "copy";
@@ -685,7 +725,7 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
     if (pathList.empty())
         return;
 
-    emit SigReadyToLoad();
+    //emit SigReadyToLoad();
 
     // Prepare for history
     ActionHistory::Action action;
@@ -719,7 +759,7 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
     if (!action.srcItemList.empty())
         m_History.PushUndoAction(action);
 
-    emit SigLoadFinished();
+    //emit SigLoadFinished();
 }
 
 QList<int> SimplePlaylistView::PickSelectedRows() const

@@ -12,6 +12,9 @@ namespace Key {
     const QString TagEditorSplitterState = "TagEditorSplitterState";
     const QString WindowGeometry = "WindowGeometry";
     const QString WindowState = "WindowState";
+    const QString TabCount = "TabCount";
+    const QString TabIndex = "TabIndex";
+    const QString Volume = "Volume";
 }
 
 bool AppEnv::Init()
@@ -52,12 +55,17 @@ void AppEnv::Save()
     settings.setValue(Key::WindowGeometry, windowGeometry);
     settings.setValue(Key::WindowState, windowState);
     settings.setValue(Key::TagEditorSplitterState, tagEditorSplitterState);
+    settings.setValue(Key::TabCount, tabCount);
+    settings.setValue(Key::TabIndex, tabIndex);
+    settings.setValue(Key::Volume, volume);
     settings.sync();
 }
 
 void AppEnv::InitFilePath()
 {
-    configFile = QDir::homePath() + Path::Config + "/qt/config";
+    configDir = QDir::homePath() + Path::Config + "/qt";
+
+    configFile = configDir + "/config";
     qDebug() << "configFile" << configFile;
 
     QString locale = QLocale::system().name();
@@ -76,6 +84,9 @@ bool AppEnv::LoadConfig()
     windowGeometry = settings.value(Key::WindowGeometry).toByteArray();
     windowState = settings.value(Key::WindowState).toByteArray();
     tagEditorSplitterState = settings.value(Key::TagEditorSplitterState).toByteArray();
+    tabCount = settings.value(Key::TabCount).toInt();
+    tabIndex = settings.value(Key::TabIndex).toInt();
+    volume = settings.value(Key::Volume).toInt();
     return true;
 }
 
@@ -105,6 +116,9 @@ bool AppEnv::CheckDefaultConfig()
     settings.setValue(Key::WindowGeometry, QByteArray());
     settings.setValue(Key::WindowState, QByteArray());
     settings.setValue(Key::TagEditorSplitterState, QByteArray());
+    settings.setValue(Key::TabCount, 1);
+    settings.setValue(Key::TabIndex, 0);
+    settings.setValue(Key::Volume, -1);
     settings.sync();
 
     return true;
