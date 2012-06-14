@@ -270,6 +270,9 @@ void SimplePlaylistView::Load(const char* filename)
         ListRow listRow = BuildListRow(m_Playlist[i]);
         m_ItemModel.appendRow(listRow.fields);
     }
+
+    int index = (int)m_Playlist.Mode();
+    m_PlayModeGroup.actions()[index]->setChecked(true);
 }
 
 void SimplePlaylistView::OnMediaItemUpdated(const mous::MediaItem& item)
