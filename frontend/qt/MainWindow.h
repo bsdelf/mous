@@ -52,8 +52,6 @@ private:
     void ClearMousCore();
     void InitQtSlots();
 
-    void FormatTime(QString& str, int ms);
-
 private:
     void SlotPlayerFinished();
 private slots:

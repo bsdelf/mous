@@ -111,6 +111,8 @@ void MainWindow::InitMousCore()
     m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
 
     m_ParserFactory->RegisterTagParserPlugin(tagAgentList);
+
+    m_FrmTagEditor.SetPlayer(m_Player);
     m_FrmTagEditor.SetTagParserFactory(m_ParserFactory);
 
     qDebug() << ">> MediaPack count:" << packAgentList.size();
@@ -123,6 +125,7 @@ void MainWindow::InitMousCore()
 void MainWindow::ClearMousCore()
 {
     m_Player->SigFinished()->DisconnectReceiver(this);
+    m_FrmTagEditor.SetPlayer(NULL);
     m_FrmTagEditor.SetTagParserFactory(NULL);
 
     m_Player->UnregisterAll();
@@ -214,12 +217,6 @@ void MainWindow::InitQtSlots()
     connect(&m_FrmTagEditor, SIGNAL(SigMediaItemChanged(const MediaItem&)), this, SLOT(SlotTagUpdated(const MediaItem&)));
 }
 
-void MainWindow::FormatTime(QString& str, int ms)
-{
-    int sec = ms/1000;
-    str.sprintf("%.2d:%.2d", (int)(sec/60), (int)(sec%60));
-}
-
 /* MousCore slots */
 void MainWindow::SlotPlayerFinished()
 {
@@ -228,11 +225,15 @@ void MainWindow::SlotPlayerFinished()
 
 void MainWindow::SlotUiPlayerFinished()
 {
-    qDebug() << "Stopped!";
+    qDebug() << "SlotUiPlayerFinished()";
+
     if (m_UsedPlaylistView != NULL) {
         const MediaItem* item = m_UsedPlaylistView->NextItem();
-        if (item != NULL)
+        if (item != NULL) {
             SlotPlayMediaItem(m_UsedPlaylistView, *item);
+        } else {
+
+        }
     }
 }
 
@@ -250,6 +251,10 @@ void MainWindow::SlotUpdateUi()
         ms = m_Player->OffsetMs();
         hz = m_Player->SamleRate();
         kbps = m_Player->BitRate();
+    } else {
+        ui->statusBar->showMessage("");
+        m_FrmToolBar.SliderPlaying()->setSliderPosition(0);
+        return;
     }
 
     const QString& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6").arg(hz).arg(kbps, 4).
@@ -260,8 +265,8 @@ void MainWindow::SlotUpdateUi()
 
     //==== Update slider.
     if (!m_SliderPlayingPreempted) {
-        int percent = (double)ms / total * m_FrmToolBar.SliderPlaying()->maximum();
-        m_FrmToolBar.SliderPlaying()->setSliderPosition(percent);
+        int val = (double)ms / total * m_FrmToolBar.SliderPlaying()->maximum();
+        m_FrmToolBar.SliderPlaying()->setSliderPosition(val);
     }
 }
 

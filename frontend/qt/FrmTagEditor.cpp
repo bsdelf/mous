@@ -9,6 +9,7 @@ using namespace std;
 FrmTagEditor::FrmTagEditor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FrmTagEditor),
+    m_Player(NULL),
     m_ParserFactory(NULL),
     m_CurrentParser(NULL),
     m_LabelImage(NULL),
@@ -83,6 +84,11 @@ void FrmTagEditor::RestoreUiStatus()
 {
     const AppEnv* env = GlobalAppEnv::Instance();
     ui->splitter->restoreState(env->tagEditorSplitterState);
+}
+
+void FrmTagEditor::SetPlayer(IPlayer *player)
+{
+    m_Player = player;
 }
 
 void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *factory)
@@ -203,7 +209,12 @@ void FrmTagEditor::SlotBtnSave()
             break;
         }
     }
-    if (m_CurrentParser->Save()) {
+
+    m_Player->PauseDecoder();
+    bool saveOk = m_CurrentParser->Save();
+    m_Player->ResumeDecoder();
+
+    if (saveOk) {
         m_CurrentItem = tmpItem;
         emit SigMediaItemChanged(m_CurrentItem);
     } else {
@@ -317,7 +328,10 @@ void FrmTagEditor::SlotChangeCoverArt()
     // modify media file & show it
     const char* data = bytes.data();
     const size_t size = bytes.size();
-    if (m_CurrentParser->StoreCoverArt(fmt, data, size)) {
+    m_Player->PauseDecoder();
+    bool storeOk = m_CurrentParser->StoreCoverArt(fmt, data, size);
+    m_Player->ResumeDecoder();
+    if (storeOk) {
         m_CurrentImgFmt = fmt;
         m_CurrentImgData.resize(size);
         memcpy(&m_CurrentImgData[0], data, size);
