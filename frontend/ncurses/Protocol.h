@@ -169,6 +169,10 @@ enum e
     // S:op(char) playlist(char) pos(int32_t)
     Remove,
 
+    // C:op(char) playlist(char) pos(int32_t) direct(char -1/1)
+    // S:op(char) playlist(char) pos(int32_t) direct(char -1/1)
+    Move,
+
     // C:op(char) playlist(char)
     // S:op(char) playlist(char)
     Clear,
@@ -179,7 +183,7 @@ enum e
 
     // C:op(char) playlist1(char) pos1(int32_t) playlist2(char) pos2(int32_t)
     // S:op(char) playlist1(char) pos2(int32_t) playlist2(char) pos2(int32_t)
-    Move,
+    //Move,
 
     Top
 };

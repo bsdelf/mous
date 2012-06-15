@@ -57,8 +57,8 @@ const char* const STR_ARRAY[] =
     "ENTER  play item",
     "d      remove item",
     "C      clear playlist",
-//    "J      move item down",
-//    "K      move item up"
+    "K      move item up"
+    "J      move item down",
     "",
 
     "^bIn Help:",

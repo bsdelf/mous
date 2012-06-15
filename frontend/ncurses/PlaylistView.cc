@@ -232,17 +232,12 @@ bool PlaylistView::InjectKey(int key)
             }
             return true;
 
-        case 'c':
-            break;
-
-        case 'y':
-            break;
-
-        case 'p':
-            break;
-
-        case 'e':
-            break;
+        case 'K':
+        case 'J':
+            if (!empty) {
+                ReqMove(m_ItemSelected, key == 'K' ? -1 : 1);
+            }
+            return true;
 
         case 'C':
             if (!empty) {
@@ -308,6 +303,7 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
         m_PlaylistHandler->SigPlay().DisconnectReceiver(this);
         m_PlaylistHandler->SigAppend().DisconnectReceiver(this);
         m_PlaylistHandler->SigRemove().DisconnectReceiver(this);
+        m_PlaylistHandler->SigMove().DisconnectReceiver(this);
         m_PlaylistHandler->SigClear().DisconnectReceiver(this);
     }
 
@@ -316,6 +312,7 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
         handler->SigPlay().Connect(&PlaylistView::SlotPlay, this);
         handler->SigAppend().Connect(&PlaylistView::SlotAppend, this);
         handler->SigRemove().Connect(&PlaylistView::SlotRemove, this);
+        handler->SigMove().Connect(&PlaylistView::SlotMove, this);
         handler->SigClear().Connect(&PlaylistView::SlotClear, this);
     }
 
@@ -374,6 +371,17 @@ void PlaylistView::ReqRemove(int pos)
     if (m_PlaylistHandler != NULL) {
         m_WaitReply = true;
         m_PlaylistHandler->Remove(m_Index, pos);
+    }
+}
+
+void PlaylistView::ReqMove(int pos, char direct)
+{
+    if (m_WaitReply)
+        return;
+
+    if (m_PlaylistHandler != NULL) {
+        m_WaitReply = true;
+        m_PlaylistHandler->Move(m_Index, pos, direct);
     }
 }
 
@@ -437,6 +445,29 @@ void PlaylistView::SlotRemove(int i, int pos)
 
         if (!m_List.empty() && m_ItemSelected >= (int)m_List.size()-1)
             m_ItemSelected = m_List.size() - 1;
+
+        if (d.shown) {
+            ++m_NeedRefresh;
+        }
+    }
+
+    m_WaitReply = false;
+
+    ReqSelect();
+}
+
+void PlaylistView::SlotMove(int i, int pos, char direct)
+{
+    MutexLocker locker(&m_NeedRefreshMutex);
+
+    if (i != m_Index)
+        return;
+
+    int newPos = direct > 0 ? pos+1 : pos-1;
+    if (!m_List.empty() && (newPos >= 0 && (size_t)newPos < m_List.size())) {
+
+        std::swap(m_List[pos], m_List[newPos]);
+        m_ItemSelected = newPos;
 
         if (d.shown) {
             ++m_NeedRefresh;

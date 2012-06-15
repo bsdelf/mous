@@ -44,6 +44,7 @@ private:
     void PlaylistPlay(BufObj&);
     void PlaylistAppend(BufObj&);
     void PlaylistRemove(BufObj&);
+    void PlaylistMove(BufObj&);
     void PlaylistClear(BufObj&);
     void PlaylistSync(BufObj&);
 

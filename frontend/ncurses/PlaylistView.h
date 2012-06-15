@@ -48,12 +48,14 @@ private:
     void ReqSelect();
     void ReqPlay(int);
     void ReqRemove(int);
+    void ReqMove(int, char);
     void ReqClear();
 
     void SlotSelect(int, int);
     void SlotPlay(int, bool);
     void SlotAppend(int, deque<MediaItem*>&);
     void SlotRemove(int, int);
+    void SlotMove(int, int, char);
     void SlotClear(int);
 
 public:

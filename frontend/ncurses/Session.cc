@@ -333,6 +333,10 @@ void Session::HandlePlaylist(char* _buf, int len)
             PlaylistRemove(buf);
             break;
 
+        case Op::Playlist::Move:
+            PlaylistMove(buf);
+            break;
+
         case Op::Playlist::Clear:
             PlaylistClear(buf);
             break;
@@ -446,6 +450,31 @@ void Session::PlaylistRemove(BufObj& buf)
     locker.Unlock();
 
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Remove << iList << iItem);
+}
+
+void Session::PlaylistMove(BufObj& buf)
+{
+    char iList;
+    int32_t iItem;
+    char direct;
+    buf >> iList >> iItem >> direct;
+
+    MutexLocker locker(&m_Context->mutex);
+
+    const int total = m_Context->playlists[iList].Count();
+    if (total > 0 && iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
+        int newPos = direct > 0 ? iItem+2 : iItem-1;
+        if (newPos >= 0 && newPos <= total) {
+            if (newPos >= 0 && iItem <= total) {
+                vector<int> oldPos(1, iItem);
+                m_Context->playlists[iList].Move(oldPos, newPos);
+            }
+        }
+    }
+
+    locker.Unlock();
+
+    SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Move << iList << iItem << direct);
 }
 
 void Session::PlaylistClear(BufObj& buf)

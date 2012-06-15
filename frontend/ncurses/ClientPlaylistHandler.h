@@ -30,6 +30,7 @@ public:
 
     void Append(int playlist, const string& path);
     void Remove(int playlist, int pos);
+    void Move(int playlist, int pos, char direct);
     void Clear(int playlist);
     void Sync(int playlist);
 
@@ -61,6 +62,11 @@ public:
         return m_SigRemove;
     }
 
+    const Signal<void (int, int, char)>& SigMove() const
+    {
+        return m_SigMove;
+    }
+
     const Signal<void (int)>& SigClear() const
     {
         return m_SigClear;
@@ -75,6 +81,7 @@ private:
     Signal<void (int, bool)> m_SigPlay;
     Signal<void (int, deque<MediaItem*>&)> m_SigAppend;
     Signal<void (int, int)> m_SigRemove;
+    Signal<void (int, int, char)> m_SigMove;
     Signal<void (int)> m_SigClear;
 };
 

@@ -82,6 +82,16 @@ void ClientPlaylistHandler::Handle(char* buf, int len)
         }
             break;
 
+        case Op::Playlist::Move:
+        {
+            char playlist;
+            int32_t pos;
+            char direct;
+            bufObj >> playlist >> pos >> direct;
+            m_SigMove(playlist, pos, direct);
+        }
+            break;
+
         case Op::Playlist::Clear:
         {
             m_SigClear(bufObj.Fetch<char>());
@@ -116,6 +126,11 @@ void ClientPlaylistHandler::Append(int playlist, const string& path)
 void ClientPlaylistHandler::Remove(int playlist, int pos)
 {
     SEND_PACKET(<< (char)Op::Playlist::Remove << (char)playlist << (int32_t)pos);
+}
+
+void ClientPlaylistHandler::Move(int playlist, int pos, char direct)
+{
+    SEND_PACKET(<< (char)Op::Playlist::Move << (char)playlist << (int32_t)pos << (char)direct);
 }
 
 void ClientPlaylistHandler::Clear(int playlist)
