@@ -109,6 +109,7 @@ void MainWindow::InitMousCore()
 
     m_Player->RegisterRendererPlugin(rendererAgentList[0]);
     m_Player->RegisterDecoderPlugin(decoderAgentList);
+    m_Player->SetBufferCount(102);
     m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
 
     m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
