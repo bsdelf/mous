@@ -49,11 +49,15 @@ public:
     virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
+    virtual int BufferCount() const = 0;
+    virtual void SetBufferCount(int count) = 0;
+
     virtual int Volume() const = 0;
     virtual void SetVolume(int level) = 0;
 
     virtual EmErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
+    virtual std::string FileName() const = 0;
 
     virtual void Play() = 0;
     virtual void Play(uint64_t msBegin, uint64_t msEnd) = 0;

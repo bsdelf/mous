@@ -43,7 +43,7 @@ Player::Player():
     m_UnitPerMs(0),
     m_RendererPlugin(NULL)
 {
-    m_UnitBuffers.AllocBuffer(102);
+    m_UnitBuffers.AllocBuffer(5);
 
     m_ThreadForDecoder.Run(Function<void (void)>(&Player::ThDecoder, this));
 
@@ -197,6 +197,17 @@ void Player::UnregisterAll()
     UnsetRendererPlugin(m_RendererPlugin);
 }
 
+int Player::BufferCount() const
+{
+    return m_UnitBuffers.BufferCount();
+}
+
+void Player::SetBufferCount(int count)
+{
+    m_UnitBuffers.ClearBuffer();
+    m_UnitBuffers.AllocBuffer(count);
+}
+
 int Player::Volume() const
 {
     return m_Renderer != NULL ? m_Renderer->VolumeLevel() : -1;
@@ -277,8 +288,14 @@ void Player::Close()
 
     m_Decoder->Close();
     m_Decoder = NULL;
+    m_DecodeFile.clear();
 
     m_Status = PlayerStatus::Closed;
+}
+
+string Player::FileName() const
+{
+    return m_DecodeFile;
 }
 
 void Player::Play()

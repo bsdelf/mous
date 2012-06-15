@@ -47,11 +47,15 @@ public:
     void UnregisterPlugin(vector<const IPluginAgent*>& agents);
     void UnregisterAll();
 
+    int BufferCount() const;
+    void SetBufferCount(int count);
+
     int Volume() const;
     void SetVolume(int level);
 
     EmErrorCode Open(const std::string& path);
     void Close();
+    std::string FileName() const;
 
     void Play();
     void Play(uint64_t msBegin, uint64_t msEnd);
