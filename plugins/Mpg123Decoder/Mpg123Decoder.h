@@ -1,5 +1,5 @@
-#ifndef MP3DECODER_H
-#define MP3DECODER_H
+#ifndef MPG123DECODER_H
+#define MPG123DECODER_H
 
 #include <plugin/IDecoder.h>
 #include <mpg123.h>
