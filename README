@@ -40,6 +40,16 @@ mous 是一个简洁，用户友好，基于插件的播放器。
 * 音量均衡
 * 音效处理
 
+==== 依赖关系(未列出则无依赖) ====
+
+Qt 前端：Qt
+mp3 解码：mpg123，编码：lame
+m4a 解码：faad2，编码：faac
+flac 解码：flac
+libao 输出：libao
+Tag 解析：taglib
+CUE 列表：libcue
+
 ---------------------------------------------
 
 1.Sub Project
