@@ -1,5 +1,5 @@
-#ifndef MP3DECODER_H
-#define MP3DECODER_H
+#ifndef WMADECODER_H
+#define WMADECODER_H
 
 #include <plugin/IDecoder.h>
 using namespace std;
