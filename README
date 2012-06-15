@@ -49,6 +49,7 @@ flac 解码：flac
 libao 输出：libao
 Tag 解析：taglib
 CUE 列表：libcue
+ape 解码汇编优化：yasm
 
 ---------------------------------------------
 
