@@ -6,7 +6,7 @@
 
 namespace sqt {
 
-static inline void  setActionSeparator(QList<QAction*> list)
+static inline void  SetActionSeparator(QList<QAction*> list)
 {
     for (int i = 0; i < list.size(); ++i) {
         QAction* action = list[i];
@@ -15,7 +15,7 @@ static inline void  setActionSeparator(QList<QAction*> list)
     }
 }
 
-static inline void adjustAllStackPages(QStackedWidget* stack, QSizePolicy plicy)
+static inline void AdjustAllStackPages(QStackedWidget* stack, QSizePolicy plicy)
 {
     for (int i = 0; i < stack->count(); ++i)
     {
@@ -23,7 +23,7 @@ static inline void adjustAllStackPages(QStackedWidget* stack, QSizePolicy plicy)
     }
 }
 
-static inline void switchStackPage(QStackedWidget* stack, int index)
+static inline void SwitchStackPage(QStackedWidget* stack, int index)
 {
     const int pageCount = stack->count();
     if (pageCount != 0)
@@ -39,7 +39,7 @@ static inline void switchStackPage(QStackedWidget* stack, int index)
         else
         {
             // minimal all page
-            adjustAllStackPages(stack, policyMin);
+            AdjustAllStackPages(stack, policyMin);
         }
         // show and maximal new page
         stack->setCurrentIndex(index);

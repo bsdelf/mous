@@ -140,7 +140,7 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     menu->addActions(m_PlayModeGroup.actions());
 
     // Style
-    setActionSeparator(actionList);
+    sqt::SetActionSeparator(actionList);
     addActions(actionList);
 
     setDragEnabled(true);
