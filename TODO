@@ -4,6 +4,7 @@ core:
 3.更可靠的 player 实现？
 
 plugin:
+*.return vector<BaseOption*> directly!
 1.libmad 解码
 2.MP4 插件的 AAC 支持
 3.音效插件
