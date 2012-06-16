@@ -197,6 +197,9 @@ if(WithPluginOggDecoder)
     target_link_libraries(OggDecoder -lvorbisfile)
 endif()
 if(WithPluginOggEncoder)
+    file(GLOB SRC_OGG_ENCODER plugins/OggEncoder/*)
+    add_library(OggEncoder SHARED ${SRC_OGG_ENCODER})
+    target_link_libraries(OggEncoder -lvorbisfile)
 endif()
 
 # Wma plugin
