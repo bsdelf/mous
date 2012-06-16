@@ -24,17 +24,26 @@ FaacEncoder::FaacEncoder():
     m_OutputBufferUsed(0),
     m_MediaTag(NULL)
 {
-    m_OptQuality.desc = "Quantizer quality(VBR)";
+    m_OptQuality.desc = "Quantizer quality";
     m_OptQuality.min = 10;
     m_OptQuality.max = 500;
     m_OptQuality.defaultVal = 100;
     m_OptQuality.userVal = 100;
 
-    m_OptBitRate.desc = "Bit Rate(ABR, 0=disabled)";
-    m_OptBitRate.min = 0;
+    m_OptBitRate.desc = "Bit Rate";
+    m_OptBitRate.min = 8;
     m_OptBitRate.max = 480;
-    m_OptBitRate.defaultVal = 0;
-    m_OptBitRate.userVal = 0;
+    m_OptBitRate.defaultVal = 160;
+    m_OptBitRate.userVal = 160;
+
+    m_OptVbrOrAbr.desc = "Encode with";
+    m_OptVbrOrAbr.groups.resize(2);
+    m_OptVbrOrAbr.groups[0].first = "VBR";
+    m_OptVbrOrAbr.groups[0].second.push_back(&m_OptQuality);
+    m_OptVbrOrAbr.groups[1].first = "ABR";
+    m_OptVbrOrAbr.groups[1].second.push_back(&m_OptBitRate);
+    m_OptVbrOrAbr.defaultUse = 0;
+    m_OptVbrOrAbr.userUse = 0;
 
     m_OptTns.desc = "TNS";
     m_OptTns.detail = "Use Temporal Noise Shaping";
@@ -91,8 +100,10 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
     faacEncConfigurationPtr conf = faacEncGetCurrentConfiguration(m_EncHandle);
     conf->aacObjectType = LOW;
     conf->mpegVersion = MPEG4;
-    conf->quantqual = m_OptQuality.userVal;
-    conf->bitRate = (m_OptBitRate.userVal * 1000) / m_Channels;
+    if (m_OptVbrOrAbr.userUse == 0)
+        conf->quantqual = m_OptQuality.userVal;
+    else
+        conf->bitRate = (m_OptBitRate.userVal * 1000) / m_Channels;
     conf->allowMidside = m_OptMidSide.userChoice ? 1 : 0;
     conf->useTns = m_OptTns.userChoice ? 1 : 0;
     conf->bandWidth = 0; // disable cutoff
@@ -252,12 +263,11 @@ void FaacEncoder::SetMediaTag(const MediaTag* tag)
 
 bool FaacEncoder::Options(std::vector<const BaseOption*>& list) const
 {
-    list.resize(5);
-    list[0] = &m_OptQuality;
-    list[1] = &m_OptBitRate;
-    list[2] = &m_OptTns;
-    list[3] = &m_OptMidSide;
-    list[4] = &m_OptOptimize;
+    list.resize(4);
+    list[0] = &m_OptVbrOrAbr;
+    list[1] = &m_OptTns;
+    list[2] = &m_OptMidSide;
+    list[3] = &m_OptOptimize;
     return true;
 }
 

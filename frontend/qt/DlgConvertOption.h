@@ -6,11 +6,12 @@
 #include <vector>
 
 namespace Ui {
-class DlgConvertOption;
+    class DlgConvertOption;
 }
 
 namespace mous {
-struct BaseOption;
+    struct BaseOption;
+    struct GroupedOption;
 }
 
 class DlgConvertOption : public QDialog
@@ -28,11 +29,16 @@ public:
 
     void BindWidgetAndOption(const std::vector<const mous::BaseOption*>& opts);
 
+private:
+    void BuildWidgetAndOption(QBoxLayout* layout, const mous::BaseOption* option);
+
 private slots:
+    void SlotGroupChanged(int index);
     void SlotIntValChanged(int val);
 
 private:
     Ui::DlgConvertOption *ui;
+    QHash<QObject*, QPair<QStackedWidget*, const mous::GroupedOption*> > m_ComboxWidgetHash;
     QHash<QObject*, const mous::BaseOption*> m_WidgetOptionHash;
 };
 

@@ -37,6 +37,8 @@ private:
 private:
     RangedIntOption m_OptQuality;
     RangedIntOption m_OptBitRate;
+    GroupedOption m_OptVbrOrAbr;
+
     BooleanOption m_OptTns;
     BooleanOption m_OptMidSide;
     BooleanOption m_OptOptimize;
