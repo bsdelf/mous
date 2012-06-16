@@ -34,8 +34,8 @@ mous 是一个简洁，用户友好，基于插件的播放器。
 
 ==== 规划中的插件 ====
 
-* 解码：wavpack/ogg
-* 编码：flac
+* 解码：wavpack
+* 编码：wavpack/flac/ogg
 * 内嵌 CUE 列表
 * 音量均衡
 * 音效处理
