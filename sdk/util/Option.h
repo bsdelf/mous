@@ -22,7 +22,9 @@ enum e {
     EnumedString,
 
     RangedInt,
-    RangedFloat
+    RangedFloat,
+
+    Grouped
 };
 }
 typedef OptionType::e EmOptionType;
@@ -59,6 +61,9 @@ inline const char* ToString(EmOptionType type)
 
         case OptionType::RangedFloat:
             return "RangedFloat";
+
+        case OptionType::Grouped:
+            return "Grouped";
     }
     return "";
 }
@@ -84,8 +89,10 @@ struct IntOption: public BaseOption
 
 struct FloatOption: public BaseOption
 {
-    double defaultVal;
+    int32_t defaultVal;
     mutable double userVal; 
+
+    int point;  // double = defaultVal/point eg. 123/10=12.3
 
     FloatOption(): BaseOption(OptionType::Float) {}
 };
@@ -118,9 +125,11 @@ struct EnumedIntOption: public BaseOption
 
 struct EnumedFloatOption: public BaseOption
 {
-    std::vector<double> enumedtVal;
+    std::vector<int32_t> enumedVal;
     size_t defaultChoice;
     mutable size_t userChoice; 
+
+    int point;  // double = defaultVal/point eg. 123/10=12.3
 
     EnumedFloatOption(): BaseOption(OptionType::EnumedFloat) {}
 };
@@ -146,15 +155,25 @@ struct RangedIntOption: public BaseOption
 
 struct RangedFloatOption: public BaseOption
 {
-    double min;
-    double max;
-    double defaultVal;
-    mutable double userVal; 
+    int32_t min;
+    int32_t max;
+    int32_t defaultVal;
+    mutable int32_t userVal; 
+
+    int point;  // double = defaultVal/point eg. 123/10=12.3
 
     RangedFloatOption(): BaseOption(OptionType::RangedFloat) {}
+};
+
+struct GroupedOption: public BaseOption
+{
+    std::vector<std::pair<std::string, std::vector<BaseOption*> > > groups;
+    int defaultUse;
+    mutable int userUse;
+
+    GroupedOption(): BaseOption(OptionType::Grouped) { }
 };
 
 }
 
 #endif
-
