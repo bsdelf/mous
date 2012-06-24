@@ -82,7 +82,7 @@ public:
 
     void Start()
 	{
-        CurrentTimeSpec(m_End);
+        CurrentTimeSpec(m_Begin);
         m_Started = true;
     }
 
