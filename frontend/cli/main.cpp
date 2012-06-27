@@ -1,7 +1,11 @@
+#include <assert.h>
+#include <unistd.h> // for usleep()
+
 #include <iostream>
 #include <vector>
 #include <string>
-#include <cassert>
+using namespace std;
+
 #include <util/MediaItem.h>
 #include <util/PluginOption.h>
 #include <util/Playlist.h>
@@ -10,12 +14,12 @@
 #include <core/IPluginManager.h>
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
+using namespace mous;
+
 #include <scx/Mutex.hpp>
 #include <scx/Thread.hpp>
 #include <scx/Signal.hpp>
-using namespace std;
 using namespace scx;
-using namespace mous;
 
 bool gStop = false;
 IPlayer* gPlayer = NULL;

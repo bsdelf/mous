@@ -1,4 +1,6 @@
 #include "Mpg123Decoder.h"
+
+#include <unistd.h> // for off_t
 #include <string.h>
 
 Mpg123Decoder::Mpg123Decoder()

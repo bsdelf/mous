@@ -10,6 +10,8 @@
 #include "CustomHeadTabWidget.hpp"
 using namespace sqt;
 
+#include <unistd.h> // for usleep()
+
 #include <scx/Signal.hpp>
 using namespace scx;
 
