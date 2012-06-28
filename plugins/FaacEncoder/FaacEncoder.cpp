@@ -145,7 +145,7 @@ void FaacEncoder::CloseOutput()
         UpdateMediaTag();
 
         if (m_OptOptimize.userChoice && !m_FileName.empty())
-            MP4Optimize(m_FileName.c_str(), NULL, 0);
+            MP4Optimize(m_FileName.c_str(), NULL);
     }
 
     if (m_EncHandle != NULL) {
