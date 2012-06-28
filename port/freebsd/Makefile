@@ -62,7 +62,7 @@ CMAKE_ARGS+= -DWithFrontendNcurses=0
 PLIST_SUB+= NCURSES="@comment "
 .endif
 .if defined(WITH_QT4)
-USE_QT4= gui corelib moc_build rcc_build uic_build
+USE_QT4= gui corelib moc_build rcc_build uic_build linguist_build
 CMAKE_ARGS+= -DWithFrontendQt=1
 PLIST_SUB+= QT4=""
 .else
