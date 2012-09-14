@@ -215,7 +215,7 @@ void MainUi::BeginNcurses()
     cbreak();
     noecho();
     refresh();
-    halfdelay(1);
+    halfdelay(8);
 }
 
 void MainUi::EndNcurses()
