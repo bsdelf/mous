@@ -19,6 +19,8 @@ link_directories(/opt/local/lib)
 include_directories(BEFORE sdk)
 include_directories(BEFORE contrib)
 
+SET(CMAKE_INSTALL_RPATH "\${CMAKE_INSTALL_PREFIX}/lib:\${CMAKE_INSTALL_PREFIX}/bin")
+
 #==== OS Check ====#
 if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     set(IS_FREEBSD true)
@@ -70,6 +72,7 @@ option(WithPluginFlacDecoder "FLAC Decoder" off)
 option(WithPluginFlacEncoder "FLAC Encoder" off)
 option(WithPluginFaadDecoder "FAAD Decoder" off)
 option(WithPluginFaacEncoder "FAAC Encoder" off)
+option(WithPluginWvDecoder "WavPack Decoder" off)
 
 option(WithPluginTagLibParser "TagLib Parser" on)
 option(WithPluginCuePack "Cue sheet Parser" on)
@@ -253,6 +256,13 @@ if(WithPluginFlacDecoder)
     file(GLOB SRC_FLAC_DECODER plugins/FlacDecoder/*)
     add_library(FlacDecoder SHARED ${SRC_FLAC_DECODER})
     target_link_libraries(FlacDecoder -lFLAC)
+endif()
+
+# WavPack plugin
+if(WithPluginWvDecoder)
+    file(GLOB SRC_WV_DECODER plugins/WvDecoder/*)
+    add_library(WvDecoder SHARED ${SRC_WV_DECODER})
+    target_link_libraries(WvDecoder -lwavpack)
 endif()
 
 # FAAD & FAAC plugin
