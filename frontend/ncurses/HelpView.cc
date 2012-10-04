@@ -23,6 +23,8 @@ const char* const STR_ARRAY[] =
     "n          play next one",
     "<          -3 seconds",
     ">          +3 seconds",
+    "-/_        volume up",
+    "+/=        volume down",
     "",
     "TAB        switch focus between file explorer/playlist",
     "",
