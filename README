@@ -27,7 +27,7 @@ mous 是一个简洁，用户友好，基于插件的播放器。
 
 ==== 现有插件 ====
 
-* 解码：wav/mp3/m4a/ogg/wma/ape/flac
+* 解码：wav/mp3/m4a/ogg/wma/ape/flac/wv
 * 编码：wav/mp3/m4a
 * 输出：OSS/ALSA/libao
 * Tag 解析
@@ -35,8 +35,8 @@ mous 是一个简洁，用户友好，基于插件的播放器。
 
 ==== 规划中的插件 ====
 
-* 解码：wavpack
-* 编码：wavpack/flac/ogg
+* 解码：tta
+* 编码：wv/flac/ogg
 * 内嵌 CUE 列表
 * 音量均衡
 * 音效处理
@@ -46,6 +46,7 @@ mous 是一个简洁，用户友好，基于插件的播放器。
 Qt 前端：Qt
 mp3 解码：mpg123，编码：lame
 m4a 解码：faad2，编码：faac
+wv 解码：wavpack
 ogg 编解码：libvorbis
 flac 编解码：flac
 libao 输出：libao
@@ -95,7 +96,7 @@ O           audio/mac           APE Decoder
 X           NONE                APE Decoder based on MACLib4.x
 O           audio/flac          FLAC Decoder
 X           audio/flac          FLAC Encoder
-X           audio/wavpack       WavPack Encoder
+O           audio/wavpack       WavPack Decoder
 
 O           audio/taglib        Tag support
 O           textproc/libcue     CUE sheet parser
