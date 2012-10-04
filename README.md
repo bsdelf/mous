@@ -9,13 +9,13 @@ Mous Player
 
 Front End
 ==============
-### Qt: mous-qt
+### 1.Qt: mous-qt
 * foobar2000 like
 * audio format conversion
 * tag/cover editor
 * charset conversion
 
-### Curses: mous-ncurses
+### 2.Curses: mous-ncurses
 * vim like key binding
 * file explorer
 * multi playlists
@@ -24,7 +24,7 @@ Front End
 * charset conversion
 (NOTE: please type 'H' to read usage after install)
 
-### Command Line: mous-cli
+### 3.Command Line: mous-cli
 
 Plugins
 ==============
@@ -74,13 +74,13 @@ Mous 播放器
 
 三种前端
 ==============
-### Qt 界面: mous-qt
+### 1.Qt 界面: mous-qt
 * 类似 foobar2000
 * 格式转换
 * 标签&封面编辑
 * 自动转换字符编码
 
-### 字符界面: mous-ncurses
+### 2.字符界面: mous-ncurses
 * vim 式的按键
 * 便利的文件浏览器
 * 多个播放列表
@@ -89,7 +89,7 @@ Mous 播放器
 * 自动转换字符编码
 (注意：安装运行后，按 H 可以显示帮助文档)
 
-### 命令行: mous-cli
+### 3.命令行: mous-cli
 
 现有插件
 ==============
