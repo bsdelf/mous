@@ -1,103 +1,129 @@
-==== 简介 ====
+==== License ====
+BSDL
 
-mous 是一个简洁，用户友好，基于插件的播放器。
-它的依赖关系非常单一，放什么格式装什么插件。
-它提供了开发插件的 SDK，开发者可轻易编写插件。
-它的目标是成为 FreeBSD/Linux/OSX 上的 foobar2000。
+--------------------------------------------------------->%
 
-==== 用户界面 ====
+==== Mous Player ====
+* lightweight
+* plugin mechanism
+* few dependencies
+* support FreeBSD/Linux/OS X
 
-1.mous-qt: Qt 前端
-* 标签页式的播放列表，可以像 foobar 那样复制/剪切/粘贴/拖拽
-* 支持格式转换
-* Tag/封面编辑
-* 转换字符编码，杜绝乱码
+==== Front End ====
+1. Qt: mous-qt
+* foobar2000 like
+* audio format conversion
+* tag/cover editor
+* charset conversion
 
-2.mous-ncurses: ncurses 前端
-* vim 式的键盘操作
-* 播放进程驻留于后台
+2. Curses: mous-ncurses
+* vim like key binding
+* file explorer
+* multi playlists
+* low in memory requirements
+* play in background
+* charset conversion
+(NOTE: please type 'H' to read usage after install)
+
+3. Command Line: mous-cli
+
+==== Plugins ====
+
+* decoding: ape/flac/m4a/mp3/ogg/wav/wma/wv
+* encoding: m4a/mp3/wav
+* output: oss/alsa/libao
+* tag parser(ID3/mp4/etc.)
+* cue playlist
+
+==== Dependencies ====
+
+mous-ncurses:       (none)
+mous-qt:            Qt
+mous-cli:           (none)
+
+mp3 decoding:       mpg123
+mp3 encoding:       lame
+m4a decoding:       faad2
+m4a encoding:       faac
+wv codec:           wavpack
+ogg codec:          libvorbis
+flac codec:         flac
+ape encoding:       (integrated)
+ape optimize:       yasm
+wma decoding:       (integrated)
+
+alsa output:        (none)
+oss output:         (none)
+libao output:       libao
+
+Tag parse:          taglib
+Cue playlist:       libcue
+
+--------------------------------------------------------->%
+
+==== mous 播放器 ====
+
+* 轻量简洁
+* 格式较全
+* 插件机制
+* 极少的依赖
+* 支持 FreeBSD/Linux/OS X
+
+==== 三种前端 ====
+
+1.Qt 界面: mous-qt
+* 类似 foobar2000
+* 格式转换
+* 标签&封面编辑
+* 自动转换字符编码
+
+2.字符界面: mous-ncurses
+* vim 式的按键
 * 便利的文件浏览器
 * 多个播放列表
 * 很小的内存占用
-* 转换字符编码，杜绝乱码
+* 后台播放
+* 自动转换字符编码
 (注意：安装运行后，按 H 可以显示帮助文档)
 
-3.mous-cli: 命令行前端
-* 用于测试
+3.命令行: mous-cli
 
 ==== 现有插件 ====
 
-* 解码：wav/mp3/m4a/ogg/wma/ape/flac/wv
-* 编码：wav/mp3/m4a
-* 输出：OSS/ALSA/libao
-* Tag 解析
+* 解码：ape/flac/m4a/mp3/ogg/wav/wma/wv
+* 编码：m4a/mp3/wav
+* 输出：oss/alsa/libao
+* ID3 等标签解析
 * CUE 列表
 
 ==== 规划中的插件 ====
 
 * 解码：tta
 * 编码：wv/flac/ogg
-* 内嵌 CUE 列表
+* 内嵌 CUE
 * 音量均衡
 * 音效处理
 
-==== 依赖关系(未列出则无依赖) ====
+==== 依赖关系 ====
 
-Qt 前端：Qt
-mp3 解码：mpg123，编码：lame
-m4a 解码：faad2，编码：faac
-wv 解码：wavpack
-ogg 编解码：libvorbis
-flac 编解码：flac
-libao 输出：libao
-Tag 解析：taglib
-CUE 列表：libcue
-ape 解码汇编优化：yasm
+字符界面：      无
+Qt 界面：       Qt
+命令行：        无
 
----------------------------------------------
+mp3 解码：      mpg123
+mp3 编码：      lame
+m4a 解码：      faad2
+m4a 编码：      faac
+wv 解码：       wavpack
+ogg 编解码：    libvorbis
+flac 编解码：   flac
+ape 解码：      自带
+ape 汇编优化：  yasm
+wma 解码：      自带
 
-1.Sub Project
-Supported   Name            Description
-O           libMousCore     mous core/sdk
-O           mous-cli        Only for test
-O           mous-qt         Qt based frontend
-O           mous-ncurses    ncurses based frontend
+alsa 输出：     无
+oss 输出：      无
+libao 输出：    libao
 
-2.Features
-Supported   Description
-O           Format Conversion
-O           Tag/CoverArt Edit
-O           Charset Conversion
-X           Media management
-X           Sound Effect
-X           Dynamic Normalizer
-X           FFTW
-
-3.Plugin Dependence(FreeBSD ports)
-You can use ccmake to turn ON/OFF the following plugins.
-All plugins will be dynamically loaded at runtime.
-Even NONE of them are built, mous will still be able to launch,
-but of course it will be useless!
-
-Supported   Dependence          Reason
-O           NONE                ALSA Renderer
-O           NONE                OSS Renderer
-O           audio/libao         libao Renderer
-
-O           NONE                WAV Decoder
-O           NONE                WAV Encoder
-O           audio/mpg123        MP3 Decoder
-O           audio/lame          MP3 Encoder
-O           audio/faad          MP4 Decoder(m4a only, no aac)
-O           audio/faac          MP4 Encoder(m4a only, no aac)
-O           audio/libvorbis     OGG Decoder
-O           NONE                WMA Decoder
-O           audio/mac           APE Decoder
-X           NONE                APE Decoder based on MACLib4.x
-O           audio/flac          FLAC Decoder
-X           audio/flac          FLAC Encoder
-O           audio/wavpack       WavPack Decoder
-
-O           audio/taglib        Tag support
-O           textproc/libcue     CUE sheet parser
-X           databases/sqlite3   Media management
+Tag 解析：      taglib
+CUE 列表：      libcue
