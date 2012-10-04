@@ -139,8 +139,11 @@ BSDL
 Screenshots
 =============
 ### mous-ncurses
-![ncurses frontend](https://github.com/0x02/mous/raw/master/screenshot/mous-ncurses.png)
+![ncurses frontend 1](https://github.com/0x02/mous/raw/master/screenshot/ncurses-play.png)
+![ncurses frontend 2](https://github.com/0x02/mous/raw/master/screenshot/ncurses-explorer.png)
+
 ### mous-qt
-![qt frontend](https://github.com/0x02/mous/raw/master/screenshot/mous-qt.png)
+![qt frontend 1](https://github.com/0x02/mous/raw/master/screenshot/qt.png)
+![qt frontend 2](https://github.com/0x02/mous/raw/master/screenshot/qt-conv.png)
 
 </font>
