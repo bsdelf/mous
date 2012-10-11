@@ -22,27 +22,23 @@ vector<string> WvDecoder::FileSuffix() const
 EmErrorCode WvDecoder::Open(const std::string& url)
 {
     m_Ctx = WavpackOpenFileInput(url.c_str(), NULL, 0, 0);
+    if (m_Ctx == NULL)
+        return ErrorCode::DecoderFailedToOpen;
 
     if (WavpackGetNumSamples(m_Ctx) == (uint32_t) -1)
         return ErrorCode::DecoderFailedToInit;
-
-    /*
-    if (ov_fopen(url.c_str(), &m_File) != 0)
-        return ErrorCode::DecoderFailedToOpen;
-    if (ov_streams(&m_File) < 1)
-        return ErrorCode::DecoderFailedToInit;
-    */
-
-    m_UnitCount = WavpackGetNumSamples(m_Ctx);
-    m_UnitIndex = 0;
 
     m_Duration = (double)WavpackGetNumSamples(m_Ctx) / WavpackGetSampleRate(m_Ctx) * 1000;
     m_Channels = WavpackGetNumChannels(m_Ctx);
     m_SampleRate = WavpackGetSampleRate(m_Ctx);
     m_BitsPerSample = WavpackGetBitsPerSample(m_Ctx);
-
-    m_Buf.resize(MaxBytesPerUnit());
     m_BytesPerSample = WavpackGetBytesPerSample(m_Ctx);
+
+    // one sample may not be enough to build a full channel
+    m_UnitCount = WavpackGetNumSamples(m_Ctx)/m_Channels;
+    m_UnitIndex = 0;
+
+    m_Buf.resize(10 * m_Channels * sizeof(int32_t)); // 1~10 full-samples
 
     return ErrorCode::Ok;
 }
@@ -60,11 +56,13 @@ bool WvDecoder::IsFormatVaild() const
 EmErrorCode WvDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_UnitIndex < m_UnitCount) {
-        uint32_t nsamples = WavpackUnpackSamples(m_Ctx, (int32_t*)&m_Buf[0], 1*m_Channels);
+        unitCount = 1;
 
-        format_samples(m_BytesPerSample, (unsigned char*)data, &m_Buf[0], nsamples);
+        // according to wavpack's source code cli/wvunpack.c
+        uint32_t nsamples = WavpackUnpackSamples(m_Ctx, (int32_t*)&m_Buf[0], unitCount*m_Channels);
+
+        format_samples(m_BytesPerSample, (unsigned char*)data, &m_Buf[0], nsamples*m_Channels);
         used = nsamples * m_BytesPerSample * m_Channels;
-        unitCount = nsamples;
 
         m_UnitIndex += unitCount;
         m_BitRate = WavpackGetInstantBitrate(m_Ctx)/1000;
@@ -82,7 +80,7 @@ EmErrorCode WvDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCoun
 
 EmErrorCode WvDecoder::SetUnitIndex(uint64_t index)
 {
-    if (index < m_UnitCount && WavpackSeekSample(m_Ctx, index) == 0) {
+    if (index < m_UnitCount && WavpackSeekSample(m_Ctx, index*m_Channels) == 0) {
         m_UnitIndex = index;
         return ErrorCode::Ok;
     } else {
@@ -92,7 +90,7 @@ EmErrorCode WvDecoder::SetUnitIndex(uint64_t index)
 
 uint32_t WvDecoder::MaxBytesPerUnit() const
 {
-    return (4096L * m_Channels * 4);
+    return (10 * m_Channels * m_BytesPerSample);
 }
 
 uint64_t WvDecoder::UnitIndex() const
