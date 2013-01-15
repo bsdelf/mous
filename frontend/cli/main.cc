@@ -1,5 +1,7 @@
 #include <assert.h>
 #include <unistd.h> // for usleep()
+#include <string.h>
+#include <stdlib.h>
 
 #include <iostream>
 #include <vector>
@@ -8,62 +10,144 @@ using namespace std;
 
 #include <util/MediaItem.h>
 #include <util/PluginOption.h>
-#include <util/Playlist.h>
-#include <core/IPlayer.h>
 #include <core/IMediaLoader.h>
 #include <core/IPluginManager.h>
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
 using namespace mous;
 
-#include <scx/Mutex.hpp>
-#include <scx/Thread.hpp>
-#include <scx/Signal.hpp>
+#include <scx/FileInfo.hpp>
 using namespace scx;
 
-bool gStop = false;
-IPlayer* gPlayer = NULL;
-Playlist<MediaItem>* gPlaylist = NULL;
-Mutex gMutexForSwitch;
+#include "cmd.h"
 
-void OnFinished()
+namespace Path {
+    const char* const PluginRoot = "/lib/mous/";
+};
+
+mous_ctx ctx;
+
+struct cmd_action_t
 {
-    gMutexForSwitch.Lock();
-    if (gPlaylist != NULL && !gStop) {
-        if (gPlaylist->SeqHasOffset(1)) {
-            const MediaItem& item = gPlaylist->SeqItemAtOffset(1, true);
-            if (gPlayer->Status() != PlayerStatus::Closed)
-                gPlayer->Close();
-            gPlayer->Open(item.url);
-            if (item.hasRange)
-                gPlayer->Play(item.msBeg, item.msEnd);
-            else
-                gPlayer->Play();
-        }
-    }
-    gMutexForSwitch.Unlock();
-    cout << "Finished!" << endl;
+    const char* cmd;
+    int (*action)(int, char**);
+};
+
+static cmd_action_t cmd_actions[] = {
+    {   "play",   cmd_play      },
+    {   "dec",    cmd_dec       },
+    {   "plugin", cmd_plugin    },
+    {   "help",   cmd_help      }
+};
+
+static const char* cli_name = NULL;
+
+int cmd_help(int, char**)
+{
+    cout << "Usage: " << cli_name << " <command> <options> <files>\n"
+            "play    -r(repeat) -s(shuffle) default command\n"
+            "dec     -f(output)             decode to wav\n"
+            //"cov     m4a/mp3/flac/ogg -f(output) format conversion\n"
+            "img     -f(output)             dump coverart\n"
+            "info                           display file information\n"
+            "plugin                         display plugin information\n"
+            "help                           display help information\n";
+
+    return 0;
 }
 
-void OnPlaying()
+int cmd_plugin(int, char**)
 {
-    while (true) {
-        if (gPlayer == NULL || gStop)
-            break;
-        gMutexForSwitch.Lock();
-        uint64_t ms = gPlayer->OffsetMs();
-        cout << gPlayer->BitRate() << " kbps " <<
-            ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
-        gMutexForSwitch.Unlock();
-        usleep(200*1000);
+    vector<string> path_list;
+    ctx.mgr->DumpPluginPath(path_list);
+    for (size_t i = 0; i < path_list.size(); ++i) {
+        cout << "(" << i+1 << ") ";
+        cout << path_list[i] << endl;
+        const PluginInfo* info = ctx.mgr->QueryPluginInfo(path_list[i]);
+        cout << "   " << info->author << endl;
+        cout << "   " << info->name << endl;
+        cout << "   " << info->desc << endl;
+        cout << "   " << info->version << endl;
     }
+    cout << endl;
+
+    cout << ">> Decoders:   " << ctx.dec_agents.size() << endl;
+    cout << ">> Encoders:   " << ctx.enc_agents.size() << endl;
+    cout << ">> Renderers:  " << ctx.red_agents.size() << endl;
+    cout << ">> MediaPacks: " << ctx.pack_agents.size() << endl;
+    cout << ">> TagParsers: " << ctx.tag_agents.size() << endl;
+    cout << endl;
+
+    return 0;
+}
+
+int main(int argc, char** argv)
+{
+    int ret = 0;
+    cli_name = argc > 0 ? argv[0] : "mous-cli";
+
+    if (argc < 2) {
+        cmd_help(0, NULL);
+        exit(-1);
+    }
+
+    // check plugin path then load it
+    FileInfo dir_info(string(CMAKE_INSTALL_PREFIX) + Path::PluginRoot);
+    const string pluginDir(dir_info.AbsFilePath());
+    if (!dir_info.Exists() 
+        || dir_info.Type() != FileType::Directory
+        || pluginDir.empty()) {
+        cout << "bad plugin directory!" << endl;
+        exit(-1);
+    }
+    ctx.mgr = IPluginManager::Create();
+    ctx.mgr->LoadPluginDir(pluginDir);
+
+    // get plugin agents and check if we have enough
+    ctx.mgr->DumpPluginAgent(ctx.dec_agents, PluginType::Decoder);
+    ctx.mgr->DumpPluginAgent(ctx.enc_agents, PluginType::Encoder);
+    ctx.mgr->DumpPluginAgent(ctx.red_agents, PluginType::Renderer);
+    ctx.mgr->DumpPluginAgent(ctx.pack_agents, PluginType::MediaPack);
+    ctx.mgr->DumpPluginAgent(ctx.tag_agents, PluginType::TagParser);
+    if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
+        cout << "need more plugins!" << endl;
+        cmd_plugin(0, NULL);
+        exit(-1);
+    }
+
+    // setup media loader
+    ctx.loader = IMediaLoader::Create();
+    ctx.loader->RegisterMediaPackPlugin(ctx.pack_agents);
+    ctx.loader->RegisterTagParserPlugin(ctx.tag_agents);
+
+    // match command
+    {
+        const size_t len = strlen(argv[1]);
+        const int count = sizeof(cmd_actions)/sizeof(cmd_action_t);
+        int index = 0;
+        for (; index < count; ++index) {
+            if (strncmp(cmd_actions[index].cmd, argv[1], len) == 0) {
+                ret = cmd_actions[index].action(argc-2, argv+2);
+                break;
+            }
+        }
+
+        // "play" is the default cmd
+        if (index == count) {
+            ret = cmd_play(argc-1, argv+1);
+        }
+    }
+
+    ctx.loader->UnregisterAll();
+    IMediaLoader::Free(ctx.loader);
+
+    ctx.mgr->UnloadAll();
+    IPluginManager::Free(ctx.mgr);
+
+    exit(ret);
 }
 
 /*
-#include <CharsetConv/CharsetConv.h>
-//#include <enca.h>
-*/
-
 void PrintPluginOption(vector<PluginOption>& list)
 {
     for (size_t i = 0; i < list.size(); ++i) {
@@ -76,115 +160,15 @@ void PrintPluginOption(vector<PluginOption>& list)
         }
     }
 }
-
-int main(int argc, char** argv)
-{
-    // Check args enough.
-    if (argc < 2) {
-        cout << "Usage:" << endl;
-        cout << argv[0] << " [file1] [file2] [...]" << endl;
-        return -1;
-    }
-
-    bool paused = false;
-
-    /*
-    string content(ReadAll(argv[1]));
-    cout << "len:" << content.length() << endl;
-
-    UErrorCode uerr = U_ZERO_ERROR;
-    int32_t found = 1;
-    UCharsetDetector* udec = ucsdet_open(&uerr);
-    ucsdet_setText(udec, content.c_str(), content.length(), &uerr);
-    const UCharsetMatch** match = ucsdet_detectAll(udec, &found, &uerr);
-    for (int i = 0; i < found; ++i) {
-        cout << ucsdet_getName(match[i], &uerr) << '\t';
-        cout << ucsdet_getConfidence(match[i], &uerr) << endl;
-    }
-    cout << found << endl;
-    ucsdet_close(udec);
-    return 0;
-    */
-
-    /*
-    CharsetConv conv;
-    string output;
-    bool ok = conv.AutoConv(content.c_str(), content.length(), output);
-    cout << (ok ? output : content) << endl;
-    return 0;
-    */
-
-    //EncaAnalyser ans = enca_analyser_alloc("uk");
-    //EncaEncoding enc = enca_analyse_const(ans, (const unsigned char*)content.c_str(), content.length());
-    //cout << enca_charset_name(enc.charset, ENCA_NAME_STYLE_ICONV) << endl;
-
-    IPluginManager* mgr = IPluginManager::Create();
-    mgr->LoadPluginDir("./plugins");
-
-    // Dump all plugin path.
-    vector<string> pathList;
-    mgr->DumpPluginPath(pathList);
-    for (size_t i = 0; i < pathList.size(); ++i) {
-        cout << ">> " << pathList[i] << endl;
-        const PluginInfo* info = mgr->QueryPluginInfo(pathList[i]);
-        cout << ">>>> " << info->author << endl;
-        cout << ">>>> " << info->name << endl;
-        cout << ">>>> " << info->desc << endl;
-        cout << ">>>> " << info->version << endl;
-    }
-    cout << endl;
-
-    // Get all plugin agents.
-    vector<const IPluginAgent*> decoderAgentList;
-    mgr->DumpPluginAgent(decoderAgentList, PluginType::Decoder);
-    cout << ">> Decoder count:" << decoderAgentList.size() << endl;
-
-    vector<const IPluginAgent*> encoderAgentList;
-    mgr->DumpPluginAgent(encoderAgentList, PluginType::Encoder);
-    cout << ">> Encoder count:" << encoderAgentList.size() << endl;
-
-    vector<const IPluginAgent*> rendererAgentList;
-    mgr->DumpPluginAgent(rendererAgentList, PluginType::Renderer);
-    cout << ">> Renderer count:" << rendererAgentList.size() << endl;
-
-    vector<const IPluginAgent*> packAgentList;
-    mgr->DumpPluginAgent(packAgentList, PluginType::MediaPack);
-    cout << ">> MediaPack count:" << packAgentList.size() << endl;
-
-    vector<const IPluginAgent*> tagAgentList;
-    mgr->DumpPluginAgent(tagAgentList, PluginType::TagParser);
-    cout << ">> TagParser count:" << tagAgentList.size() << endl;
-    cout << endl;
-
-    vector<const IPluginAgent*> pelAgentList;
-    mgr->DumpPluginAgent(pelAgentList, PluginType::EventWatcher);
-    cout << ">> EventWatcher count:" << pelAgentList.size() << endl;
-
-    // Check plugins enough.
-    if (decoderAgentList.empty() || rendererAgentList.empty())
-        return -2;
-
-    // Setup loader
-    IMediaLoader* loader = IMediaLoader::Create();
-    loader->RegisterMediaPackPlugin(packAgentList);
-    loader->RegisterTagParserPlugin(tagAgentList);
-
-    // Setup playlist
-    Playlist<MediaItem> playlist;
-    gPlaylist = &playlist;
-    deque<MediaItem> mediaList;
-    for (int i = 1; i < argc; ++i) {
-        loader->LoadMedia(argv[i], mediaList);
-        playlist.Append(mediaList);
-    }
-    playlist.SetMode(PlaylistMode::Repeat);
+*/
 
     // test for encoder
+    /*
     if (false)
     {
         IConvTaskFactory* factory = IConvTaskFactory::Create();
-        factory->RegisterDecoderPlugin(encoderAgentList);
-        factory->RegisterEncoderPlugin(decoderAgentList);
+        factory->RegisterDecoderPlugin(ctx.enc_agents);
+        factory->RegisterEncoderPlugin(ctx.dec_agents);
 
         vector<string> encoders = factory->EncoderNames();
         if (encoders.empty()) {
@@ -225,17 +209,10 @@ int main(int argc, char** argv)
         IConvTaskFactory::Free(factory);
         return 0;
     }
-
-    // Setup player
-    IPlayer* player = IPlayer::Create();
-    player->SigFinished()->Connect(&OnFinished);
-    player->RegisterRendererPlugin(rendererAgentList[0]);
-    player->RegisterDecoderPlugin(decoderAgentList);
-    for (size_t i = 0; i < pelAgentList.size(); ++i) {
-        //player->RegisterPlugin(pelAgentList[i]);
-    }
+    */
 
     // Show player options 
+    /*
     {
         vector<PluginOption> list;
         cout << ">> Player decoder plugin options:" << endl;
@@ -248,71 +225,6 @@ int main(int argc, char** argv)
         list[0] = opt;
         PrintPluginOption(list);
     }
+    */
 
-    // Begin to play.
-    if (playlist.Empty())
-        return -1;
 
-    const MediaItem& item = playlist.SeqItemAtOffset(0, false);
-
-    cout << ">>>> Tag Info" << endl;
-    cout << "\ttitle(" << item.tag.title.size() << "):" << item.tag.title << endl;
-    cout << "\tartist(" << item.tag.artist.size() << "):" << item.tag.artist << endl;
-    cout << "\talbum(" << item.tag.album.size() << "):" << item.tag.album << endl;
-    cout << "\tcomment:" << item.tag.comment << endl;
-    cout << "\tgenre:" << item.tag.genre << endl;
-    cout << "\tyear:" << item.tag.year << endl;
-    cout << "\ttrack:" << item.tag.track << endl;
-
-    cout << "item.url:" << item.url << endl;
-    player->Open(item.url);
-    if (item.hasRange) {
-        player->Play(item.msBeg, item.msEnd);
-    } else {
-        player->Play();
-    }
-    Thread th;
-    gPlayer = player;
-    th.Run(Function<void (void)>(&OnPlaying));
-
-    char ch = ' ';
-    while (ch != 'q') {
-        cin >> ch;
-        switch (ch) {
-            case 'q':
-                player->Close();
-                break;
-
-            case 'p':
-                if (paused) {
-                    player->Resume();
-                    paused = false;
-                } else {
-                    player->Pause();
-                    paused = true;
-                }
-                break;
-
-            case 'r':
-                if (item.hasRange) {
-                    player->Play(item.msBeg, item.msEnd);
-                } else {
-                    player->Play();
-                }
-                break;
-        }
-    }
-
-    gStop = true;
-    th.Join();
-
-    loader->UnregisterAll();
-    player->UnregisterAll();
-    mgr->UnloadAll();
-    
-    IPlayer::Free(player);
-    IMediaLoader::Free(loader);
-    IPluginManager::Free(mgr);
-
-    return 0;
-}
