@@ -306,6 +306,8 @@ endif()
 install(TARGETS MousCore
         LIBRARY DESTINATION lib)
 
+install(TARGETS mous-cli RUNTIME DESTINATION bin)
+
 if(WithFrontendNcurses)
     install(TARGETS mous-ncurses
         RUNTIME DESTINATION bin)
