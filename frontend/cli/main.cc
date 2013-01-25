@@ -45,13 +45,15 @@ static const char* cli_name = NULL;
 int cmd_help(int, char**)
 {
     cout << "Usage: " << cli_name << " <command> <options> <files>\n"
-            "play    -r(repeat) -s(shuffle) default command\n"
-            "dec     -f(output)             decode to wav\n"
-            //"cov     m4a/mp3/flac/ogg -f(output) format conversion\n"
-            "img     -f(output)             dump coverart\n"
-            "info                           display file information\n"
-            "plugin                         display plugin information\n"
-            "help                           display help information\n";
+            "play   (default command)\n"
+            "       -r(repeat) -s(shuffle)\n"
+            "cov    (format conversion)\n"
+            "       m4a/mp3/flac/ogg -f(output)\n"
+            "img    (dump coverart)\n"
+            "       -f(output)\n"
+            "info   (display file information)\n"
+            "plugin (display plugin information)\n"
+            "help   (display help information)\n";
 
     return 0;
 }
