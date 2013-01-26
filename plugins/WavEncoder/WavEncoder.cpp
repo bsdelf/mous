@@ -3,11 +3,19 @@
 
 WavEncoder::WavEncoder()
 {
+    memset(&m_WavHeader, 0, sizeof(WavHeader));
+
+    memcpy(m_WavHeader.riffId, "RIFF", 4);
+    memcpy(m_WavHeader.riffType, "WAVE", 4);
+
+    memcpy(m_WavHeader.formatId, "fmt ", 4);
+    memcpy(m_WavHeader.dataId, "data", 4);
+
+    m_WavHeader.formatTag = 0x0001;
 }
 
 WavEncoder::~WavEncoder()
 {
-    CloseOutput();
 }
 
 const char* WavEncoder::FileSuffix() const
@@ -21,7 +29,6 @@ EmErrorCode WavEncoder::OpenOutput(const std::string& path)
     if (!m_OutputFile.is_open())
         return ErrorCode::EncoderFailedToOpen;
 
-    InitWavHeader(&m_WavHeader);
     m_OutputFile.write((char*)&m_WavHeader, sizeof(WavHeader));
     return ErrorCode::Ok;
 }
@@ -64,17 +71,4 @@ void WavEncoder::SetSampleRate(int32_t sampleRate)
 void WavEncoder::SetBitsPerSample(int32_t bitsPerSample)
 {
     m_WavHeader.bitsPerSample = bitsPerSample;
-}
-
-void WavEncoder::InitWavHeader(WavHeader* header)
-{
-    memset(header, 0, sizeof(WavHeader));
-
-    memcpy(header->riffId, "RIFF", 4);
-    memcpy(header->riffType, "WAVE", 4);
-
-    memcpy(header->formatId, "fmt ", 4);
-    memcpy(header->dataId, "data", 4);
-
-    header->formatTag = 0x0001;
 }
