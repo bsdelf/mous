@@ -51,9 +51,6 @@ public:
     virtual void SetBitsPerSample(int32_t bitsPerSample);
 
 private:
-    static void InitWavHeader(WavHeader* header);
-
-private:
     fstream m_OutputFile;
     WavHeader m_WavHeader;
 };
