@@ -71,7 +71,6 @@ private:
 
     mp4ff_t* m_Infile;
     NeAACDecHandle m_NeAACDecHandle;
-    NeAACDecFrameInfo m_FrameInfo;
 
     int m_Track;
 
@@ -81,13 +80,8 @@ private:
     int64_t m_TimeScale;
     int32_t m_FrameSize;
 
-    uint32_t m_MaxBytesPerUnit;
     uint64_t m_SampleIndex;
     uint64_t m_SampleCount;
-
-    uint32_t m_BlockAlign;
-    uint32_t m_BlocksPerFrame;
-    uint32_t m_BlocksPerRead;
 
     int32_t m_Channels;
     int32_t m_BitsPerSample;
