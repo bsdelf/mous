@@ -38,7 +38,6 @@ public:
 private:
     IAPEDecompress* m_pDecompress;
 
-    uint32_t m_MaxBytesPerUnit;
     uint64_t m_BlockIndex;
     uint64_t m_BlockCount;
 
