@@ -319,10 +319,6 @@ private:
 LABEL_END:
         return str.substr(off, str.size());
     }
-
-private:
-    short colorId;
-
 };
 
 #endif
