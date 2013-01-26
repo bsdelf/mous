@@ -51,7 +51,6 @@ private:
 private:
     FLAC__StreamDecoder* m_pDecoder;
 
-    uint32_t m_MaxBytesPerUnit;
     uint64_t m_SampleIndex;
     uint64_t m_SampleCount;
 
