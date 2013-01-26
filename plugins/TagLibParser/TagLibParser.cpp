@@ -3,7 +3,6 @@
 #include <string.h>
 #include <limits.h>
 
-#include <iostream>
 #include <vector>
 
 #include <scx/Conv.hpp>
@@ -226,7 +225,6 @@ EmCoverFormat TagLibParser::DumpCoverArt(vector<char>& buf)
         return CoverFormat::None;
 
     const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
-    cout << "DumpCoverArt ext:" << ext << endl;
 
     if (m_DumpHandlers.find(ext) != m_DumpHandlers.end())
         return m_DumpHandlers[ext](m_FileName, buf);
@@ -240,7 +238,6 @@ bool TagLibParser::StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len)
         return false;
 
     const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
-    cout << "StoreCoverArt ext:" << ext << endl;
 
     if (m_StoreHandlers.find(ext) != m_StoreHandlers.end())
         return m_StoreHandlers[ext](m_FileName, fmt, buf, len);

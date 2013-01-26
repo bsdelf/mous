@@ -5,7 +5,7 @@
 #include <scx/Conv.hpp>
 using namespace scx;
 
-#include <iostream>
+//#include <iostream>
 
 #include <taglib/mp4file.h>
 #include <taglib/mp4tag.h>
@@ -35,7 +35,7 @@ EmCoverFormat DumpMp4Cover(const string& path, vector<char>& buf)
     MP4::Tag* mp4tag = file.tag();
 
     if (mp4tag == NULL) {
-        cout << "no mp4 tag found!" << endl;
+        //cout << "no mp4 tag found!" << endl;
         return format;
     }
 
@@ -43,11 +43,11 @@ EmCoverFormat DumpMp4Cover(const string& path, vector<char>& buf)
     if (iter != mp4tag->itemListMap().end()) {
         MP4::CoverArtList list = iter->second.toCoverArtList();
         if (list.isEmpty()) {
-            cout << "no cover art!" << endl;
+            //cout << "no cover art!" << endl;
         }
 
-        cout << "CoverArtList count: " << list.size() << endl;
-        cout << "type: " << list[0].format() << endl;
+        //cout << "CoverArtList count: " << list.size() << endl;
+        //cout << "type: " << list[0].format() << endl;
 
         switch (list[0].format()) {
             case MP4::CoverArt::JPEG:
@@ -70,7 +70,7 @@ EmCoverFormat DumpMp4Cover(const string& path, vector<char>& buf)
         buf.resize(v.size());
         memcpy(&buf[0], v.data(), v.size());
     } else {
-        cout << "\"covr\" not found!" << endl;
+        //cout << "\"covr\" not found!" << endl;
     }
 
     return format;
@@ -81,7 +81,7 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
     EmCoverFormat format = CoverFormat::None;
 
     if (idtag == NULL) {
-        cout << "no id3v2 tag found!" << endl;
+        //cout << "no id3v2 tag found!" << endl;
         return format;
     } 
 
@@ -97,8 +97,8 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
                 frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
                 string mime = ToLower(frame->mimeType().to8Bit());
 
-                cout << "type: " << (int) frame->type() << endl;
-                cout << "mime: " << mime << endl;
+                //cout << "type: " << (int) frame->type() << endl;
+                //cout << "mime: " << mime << endl;
 
                 if (mime.find("jpeg") != string::npos) {
                     format = CoverFormat::JPEG;
@@ -115,7 +115,7 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
                 return format;
             }
         } else {
-            cout << PIC_ID[i] << " not found!" << endl;
+            //cout << PIC_ID[i] << " not found!" << endl;
         }
     }
 
@@ -137,7 +137,7 @@ bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_
     TagLib::MP4::File file(path.c_str(), false);
     MP4::Tag* mp4tag = file.tag();
     if (mp4tag == NULL) {
-        cout << "no mp4 tag found!" << endl;
+        //cout << "no mp4 tag found!" << endl;
         return false;
     }
 
@@ -164,10 +164,10 @@ bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_
     // update
     MP4::ItemListMap::Iterator iter = mp4tag->itemListMap().find("covr");
     if (iter == mp4tag->itemListMap().end()) {
-        cout << "insert \"covr\"" << endl;
+        //cout << "insert \"covr\"" << endl;
         mp4tag->itemListMap().insert("covr", item);
     } else {
-        cout << "update \"covr\"" << endl;
+        //cout << "update \"covr\"" << endl;
         iter->second = item;
     }
 
@@ -177,7 +177,7 @@ bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_
 static bool StoreID3v2Cover(ID3v2::Tag* idtag, EmCoverFormat fmt, const char* buf, size_t len)
 {
     if (idtag == NULL) {
-        cout << "no id3v2 tag found!" << endl;
+        //cout << "no id3v2 tag found!" << endl;
         return false;
     }
 
@@ -209,7 +209,7 @@ static bool StoreID3v2Cover(ID3v2::Tag* idtag, EmCoverFormat fmt, const char* bu
             frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
             if (frame->type() == ID3v2::AttachedPictureFrame::FrontCover) {
                 idtag->removeFrame(frame, true);
-                cout << "remove" << endl;
+                //cout << "remove" << endl;
             }
         }
     }

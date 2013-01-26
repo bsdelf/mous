@@ -1,11 +1,12 @@
 #include "CuePack.h"
-#include <util/MediaItem.h>
+
+#include <cstdio>
+
 #include <scx/FileHelper.hpp>
 #include <scx/Conv.hpp>
-#include <cstdio>
-#include <iostream>
 using namespace scx;
-using namespace std;
+
+#include "util/MediaItem.h"
 
 CuePack::CuePack()
 {
@@ -134,8 +135,5 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const
         item.tag.track = i;
 
         //cdtext_delete(text);
-
-        cout << i << '\t' << item.url << endl;
-        cout << "range:" << item.msBeg << "-" << item.msEnd << endl;
     }
 }

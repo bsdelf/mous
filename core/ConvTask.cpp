@@ -1,8 +1,10 @@
 #include "ConvTask.h"
-#include <iostream>
-using namespace mous;
+//#include <iostream>
+//using namespace mous;
 
-IConvTask* IConvTask::Create(const MediaItem& item, const IPluginAgent* decAgent, const IPluginAgent* encAgent)
+IConvTask* IConvTask::Create(const MediaItem& item, 
+                             const IPluginAgent* decAgent, 
+                             const IPluginAgent* encAgent)
 {
     return new ConvTask(item, decAgent, encAgent);
 }
@@ -13,7 +15,9 @@ void IConvTask::Free(IConvTask* task)
         delete task;
 }
 
-ConvTask::ConvTask(const MediaItem& item, const IPluginAgent* decAgent, const IPluginAgent* encAgent):
+ConvTask::ConvTask(const MediaItem& item, 
+                   const IPluginAgent* decAgent, 
+                   const IPluginAgent* encAgent):
     m_Item(item),
     m_DecAgent(decAgent),
     m_EncAgent(encAgent),
@@ -80,7 +84,7 @@ void ConvTask::DoConvert(const string& output)
     if (err != ErrorCode::Ok) {
         m_Progress = -1;
         m_Finished = true;
-        cout << "Decoder open failed!" << endl;
+        //cout << "Decoder open failed!" << endl;
         return;
     }
 
@@ -93,7 +97,7 @@ void ConvTask::DoConvert(const string& output)
     if (err != ErrorCode::Ok) {
         m_Progress = -1;
         m_Finished = true;
-        cout << "Encoder open failed!" << endl;
+        //cout << "Encoder open failed!" << endl;
         return;
     }
 
@@ -118,7 +122,7 @@ void ConvTask::DoConvert(const string& output)
     unitOff = unitBeg;
     m_Decoder->SetUnitIndex(unitBeg);
 
-    cout << unitBeg << "-" << unitEnd << endl;
+    //cout << unitBeg << "-" << unitEnd << endl;
     while (unitOff < unitEnd && !m_Canceled) {
         m_Decoder->DecodeUnit(unitBuffer, unitBufferUsed, unitCount);
         m_Encoder->Encode(unitBuffer, unitBufferUsed);

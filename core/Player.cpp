@@ -222,7 +222,7 @@ void Player::SetVolume(int level)
 EmErrorCode Player::Open(const string& path)
 {
     string suffix = ToLower(FileHelper::FileSuffix(path));
-    cout << "Suffix:" << suffix << endl;
+    //cout << "Suffix:" << suffix << endl;
     DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
     if (iter != m_DecoderPluginMap.end()) {
         m_Decoder = iter->second.decoder;
@@ -235,7 +235,7 @@ EmErrorCode Player::Open(const string& path)
 
     EmErrorCode err = m_Decoder->Open(path);
     if (err != ErrorCode::Ok) {
-        cout << "FATAL: failed to open!" << endl;
+        //cout << "FATAL: failed to open!" << endl;
         return err;
     } else {
         m_DecodeFile = path;
@@ -255,16 +255,16 @@ EmErrorCode Player::Open(const string& path)
             //cout << "alloc unit buf:" << buf->max << endl;
         }
     }
-    cout << "unit buf size:" << maxBytesPerUnit << endl;
+    //cout << "unit buf size:" << maxBytesPerUnit << endl;
 
     m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
 
     int32_t channels = m_Decoder->Channels();
     int32_t samleRate = m_Decoder->SampleRate();
     int32_t bitsPerSamle = m_Decoder->BitsPerSample();
-    cout << "channels:" << channels << endl;
-    cout << "samleRate:" << samleRate << endl;
-    cout << "bitsPerSamle:" << bitsPerSamle << endl;
+    //cout << "channels:" << channels << endl;
+    //cout << "samleRate:" << samleRate << endl;
+    //cout << "bitsPerSamle:" << bitsPerSamle << endl;
     err = m_Renderer->Setup(channels, samleRate, bitsPerSamle);
     if (err != ErrorCode::Ok) {
         cout << "FATAL: failed to set renderer:" << err << endl;
@@ -324,9 +324,9 @@ void Player::Play(uint64_t msBegin, uint64_t msEnd)
         end = total;
     }
 
-    cout << "begin:" << beg << endl;
-    cout << "end:" << end << endl;
-    cout << "total:" << total << endl;
+    //cout << "begin:" << beg << endl;
+    //cout << "end:" << end << endl;
+    //cout << "total:" << total << endl;
 
     PlayRange(beg, end);
 }
@@ -456,8 +456,8 @@ void Player::DoSeekUnit(uint64_t unit)
 
 void Player::PauseDecoder()
 {
-    cout << "data:" << m_UnitBuffers.DataCount() << endl;
-    cout << "free:" << m_UnitBuffers.FreeCount() << endl;
+    //cout << "data:" << m_UnitBuffers.DataCount() << endl;
+    //cout << "free:" << m_UnitBuffers.FreeCount() << endl;
 
     if (!m_PauseDecoder) {
         m_PauseDecoder = true;
@@ -469,8 +469,8 @@ void Player::PauseDecoder()
 
 void Player::ResumeDecoder()
 {
-    cout << "data:" << m_UnitBuffers.DataCount() << endl;
-    cout << "free:" << m_UnitBuffers.FreeCount() << endl;
+    //cout << "data:" << m_UnitBuffers.DataCount() << endl;
+    //cout << "free:" << m_UnitBuffers.FreeCount() << endl;
 
     m_Decoder->Open(m_DecodeFile);
     m_Decoder->SetUnitIndex(m_DecoderIndex);

@@ -1,8 +1,9 @@
 #include "PluginAgent.h"
 #include <dlfcn.h>
+using namespace mous;
+
 #include <iostream>
 using namespace std;
-using namespace mous;
 
 IPluginAgent* IPluginAgent::Create()
 {

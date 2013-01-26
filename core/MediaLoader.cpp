@@ -1,14 +1,17 @@
 #include "MediaLoader.h"
-#include <iostream>
+
 #include <scx/FileHelper.hpp>
 #include <scx/Conv.hpp>
-#include <util/MediaItem.h>
-#include <plugin/IMediaPack.h>
-#include <plugin/ITagParser.h>
-#include <core/IPluginAgent.h>
-using namespace std;
 using namespace scx;
+
+#include "util/MediaItem.h"
+#include "plugin/IMediaPack.h"
+#include "plugin/ITagParser.h"
+#include "core/IPluginAgent.h"
 using namespace mous;
+
+//#include <iostream>
+//using namespace std;
 
 IMediaLoader* IMediaLoader::Create()
 {
@@ -227,7 +230,7 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem>& list) const
             if (item.tag.track < 0)
                 item.tag.track = parser->Track();
         } else {
-            cout << "WARN: no tag!!" << endl;
+            //cout << "WARN: no tag!!" << endl;
         }
 
         if (parser->HasAudioProperty()) {
@@ -235,7 +238,7 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem>& list) const
                 item.duration = parser->Duration();
         } else {
             item.duration = 0;
-            cout << "FATAL: no properties!!" << endl;
+            //cout << "FATAL: no properties!!" << endl;
         }
 
         parser->Close();

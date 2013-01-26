@@ -1,6 +1,4 @@
 #include "FlacDecoder.h"
-#include <iostream>
-using namespace std;
 
 FlacDecoder::FlacDecoder()
 {
@@ -67,7 +65,6 @@ EmErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCo
         unitCount = gSamplesRead;
         m_SampleIndex += gSamplesRead;
     } else {
-        cout << "bad" << flush;
         used = 0;
         unitCount = 0;
     }
