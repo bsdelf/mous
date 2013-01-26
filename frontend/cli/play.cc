@@ -1,5 +1,7 @@
 #include "cmd.h"
 
+#include <unistd.h>
+
 #include <deque>
 using namespace std;
 
@@ -9,22 +11,23 @@ using namespace std;
 #include <scx/FileInfo.hpp>
 using namespace scx;
 
-#include <util/Playlist.h>
-#include <core/IPlayer.h>
+#include "util/Playlist.h"
+#include "core/IPlayer.h"
 using namespace mous;
 
-static bool gStop = false;
-static Mutex gMutexForSwitch;
+static bool stop = false;
+static Mutex player_mutex;
 
 static IPlayer* player = NULL;
 static Playlist<MediaItem>* playlist = NULL;
 
 void on_finished()
 {
-    gMutexForSwitch.Lock();
-    if (playlist != NULL && !gStop) {
+    if (playlist != NULL && !stop) {
         if (playlist->SeqHasOffset(1)) {
             const MediaItem& item = playlist->SeqItemAtOffset(1, true);
+
+            MutexLocker locker(&player_mutex);
             if (player->Status() != PlayerStatus::Closed)
                 player->Close();
             player->Open(item.url);
@@ -34,37 +37,63 @@ void on_finished()
                 player->Play();
         }
     }
-    gMutexForSwitch.Unlock();
-    cout << "Finished!" << endl;
+    cout << "finished!" << endl;
 }
 
-void on_playing()
+void do_playing()
 {
     while (true) {
-        if (player == NULL || gStop)
+        if (player == NULL || stop)
             break;
-        gMutexForSwitch.Lock();
+
+        player_mutex.Lock();
         uint64_t ms = player->OffsetMs();
-        cout << player->BitRate() << " kbps " <<
-            ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000 << '\r' << flush;
-        gMutexForSwitch.Unlock();
+        int32_t rate = player->BitRate();
+        player_mutex.Unlock();
+
+        cout << rate << " kbps "
+             << ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000
+             << '\r' << flush;
+
         usleep(200*1000);
     }
 }
 
 int cmd_play(int argc, char* argv[])
 {
-    int ret = 0;
+    int rval = 0;
 
-
-    // setup player
+    // init player
     player = IPlayer::Create();
     player->SigFinished()->Connect(&on_finished);
     player->RegisterRendererPlugin(ctx.red_agents[0]);
     player->RegisterDecoderPlugin(ctx.dec_agents);
-
-    // setup playlist
     playlist = new Playlist<MediaItem>();
+    playlist->SetMode(PlaylistMode::Normal);
+
+    // parse arguments
+    for (int ch = -1; (ch = getopt(argc, argv, "rs")) != -1; ) {
+        switch (ch) {
+        case 'r':
+            playlist->SetMode(playlist->Mode() != PlaylistMode::Shuffle ?
+                              PlaylistMode::Repeat :
+                              PlaylistMode::ShuffleRepeat);
+            break;
+            
+        case 's':
+            playlist->SetMode(playlist->Mode() != PlaylistMode::Repeat ?
+                              PlaylistMode::Shuffle :
+                              PlaylistMode::ShuffleRepeat);
+            break;
+
+        default:
+            goto LABEL_CLEANUP;
+        }
+    }
+    argc -= optind;
+    argv += optind;
+
+    // build playlist
     for (int i = 0; i < argc; ++i) {
         deque<MediaItem> media_list;
         FileInfo info(argv[i]);
@@ -75,27 +104,19 @@ int cmd_play(int argc, char* argv[])
             cout << "invaild file: " << argv[i] << endl;
         }
     }
-    playlist->SetMode(PlaylistMode::Repeat);
-
     if (playlist->Empty()) {
-        ret = -1;
-        goto LABEL_END;
+        cout << "playlist is empty!" << endl;
+        rval = -1;
+        goto LABEL_CLEANUP;
     }
 
-    // Begin to play.
+    // begin to play
     {
+        cout << "[n(next)/q(quit)/p(pause)/r(replay)] [enter]" << endl;
+
         const MediaItem& item = playlist->SeqItemAtOffset(0, false);
 
-        cout << ">> Tag Info" << endl;
-        cout << "\ttitle(" << item.tag.title.size() << "):" << item.tag.title << endl;
-        cout << "\tartist(" << item.tag.artist.size() << "):" << item.tag.artist << endl;
-        cout << "\talbum(" << item.tag.album.size() << "):" << item.tag.album << endl;
-        cout << "\tcomment:" << item.tag.comment << endl;
-        cout << "\tgenre:" << item.tag.genre << endl;
-        cout << "\tyear:" << item.tag.year << endl;
-        cout << "\ttrack:" << item.tag.track << endl;
-
-        cout << "item.url:" << item.url << endl;
+        cout << "playing: \"" << item.url << "\""<< endl;
         player->Open(item.url);
         if (item.hasRange) {
             player->Play(item.msBeg, item.msEnd);
@@ -103,13 +124,18 @@ int cmd_play(int argc, char* argv[])
             player->Play();
         }
         Thread thread;
-        thread.Run(Function<void (void)>(&on_playing));
+        thread.Run(Function<void (void)>(&do_playing));
 
         bool paused;
-        char ch = ' ';
-        while (ch != 'q') {
+        for (char ch = ' '; ch != 'q'; ) {
             cin >> ch;
+
+            MutexLocker locker(&player_mutex);
             switch (ch) {
+            case 'n':
+                on_finished();
+                break;
+
             case 'q':
                 player->Close();
                 break;
@@ -125,6 +151,7 @@ int cmd_play(int argc, char* argv[])
                 break;
 
             case 'r':
+                player->Pause();
                 if (item.hasRange) {
                     player->Play(item.msBeg, item.msEnd);
                 } else {
@@ -134,20 +161,16 @@ int cmd_play(int argc, char* argv[])
             }
         }
 
-        gStop = true;
+        stop = true;
         thread.Join();
     }
 
-    //int ch;
-    //while ( ( ch = getopt(argc, argv, "") ) != -1 ) {
-    //}
-
-LABEL_END:
+    // cleanup
+LABEL_CLEANUP:
     playlist->Clear();
     delete playlist;
-
     player->UnregisterAll();
     IPlayer::Free(player);
 
-    return ret;
+    return rval;
 }

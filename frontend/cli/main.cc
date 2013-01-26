@@ -8,12 +8,12 @@
 #include <string>
 using namespace std;
 
-#include <util/MediaItem.h>
-#include <util/PluginOption.h>
-#include <core/IMediaLoader.h>
-#include <core/IPluginManager.h>
-#include <core/IConvTask.h>
-#include <core/IConvTaskFactory.h>
+#include "util/MediaItem.h"
+#include "util/PluginOption.h"
+#include "core/IMediaLoader.h"
+#include "core/IPluginManager.h"
+#include "core/IConvTask.h"
+#include "core/IConvTaskFactory.h"
 using namespace mous;
 
 #include <scx/FileInfo.hpp>
@@ -36,6 +36,8 @@ struct cmd_action_t
 static cmd_action_t cmd_actions[] = {
     {   "play",   cmd_play      },
     {   "dec",    cmd_dec       },
+    {   "img",    cmd_img       },
+    {   "info",   cmd_info      },
     {   "plugin", cmd_plugin    },
     {   "help",   cmd_help      }
 };
@@ -47,10 +49,8 @@ int cmd_help(int, char**)
     cout << "Usage: " << cli_name << " <command> <options> <files>\n"
             "play   (default command)\n"
             "       -r(repeat) -s(shuffle)\n"
-            "cov    (format conversion)\n"
-            "       m4a/mp3/flac/ogg -f(output)\n"
-            "img    (dump coverart)\n"
-            "       -f(output)\n"
+            "dec    (decode to wav)\n"
+            "img    (dump cover art)\n"
             "info   (display file information)\n"
             "plugin (display plugin information)\n"
             "help   (display help information)\n";
@@ -121,6 +121,13 @@ int main(int argc, char** argv)
     ctx.loader = IMediaLoader::Create();
     ctx.loader->RegisterMediaPackPlugin(ctx.pack_agents);
     ctx.loader->RegisterTagParserPlugin(ctx.tag_agents);
+    // setup parser factory
+    ctx.parser_factory = ITagParserFactory::Create();
+    ctx.parser_factory->RegisterTagParserPlugin(ctx.tag_agents);
+    // setup conv factory
+    ctx.conv_factory = IConvTaskFactory::Create();
+    ctx.conv_factory->RegisterDecoderPlugin(ctx.dec_agents);
+    ctx.conv_factory->RegisterEncoderPlugin(ctx.enc_agents);
 
     // match command
     {
@@ -129,19 +136,24 @@ int main(int argc, char** argv)
         int index = 0;
         for (; index < count; ++index) {
             if (strncmp(cmd_actions[index].cmd, argv[1], len) == 0) {
-                ret = cmd_actions[index].action(argc-2, argv+2);
+                ret = cmd_actions[index].action(argc-1, argv+1);
                 break;
             }
         }
 
         // "play" is the default cmd
         if (index == count) {
-            ret = cmd_play(argc-1, argv+1);
+            ret = cmd_play(argc, argv);
         }
     }
 
+    // cleanup
     ctx.loader->UnregisterAll();
     IMediaLoader::Free(ctx.loader);
+    ctx.parser_factory->UnregisterAll();
+    ITagParserFactory::Free(ctx.parser_factory);
+    ctx.conv_factory->UnregisterAll();
+    IConvTaskFactory::Free(ctx.conv_factory);
 
     ctx.mgr->UnloadAll();
     IPluginManager::Free(ctx.mgr);
@@ -163,55 +175,6 @@ void PrintPluginOption(vector<PluginOption>& list)
     }
 }
 */
-
-    // test for encoder
-    /*
-    if (false)
-    {
-        IConvTaskFactory* factory = IConvTaskFactory::Create();
-        factory->RegisterDecoderPlugin(ctx.enc_agents);
-        factory->RegisterEncoderPlugin(ctx.dec_agents);
-
-        vector<string> encoders = factory->EncoderNames();
-        if (encoders.empty()) {
-            cout << "No encoders!" << endl;
-            IConvTaskFactory::Free(factory);
-            return 0;
-        }
-
-        cout << ">> Available encoders:" << endl;
-        for (size_t i = 0; i < encoders.size(); ++i) {
-            cout << i+1 << ": " << encoders[i] << endl;
-        }
-        int index;
-        cout << ">> Select encoder:";
-        cin >> index;
-        if (index < 1) {
-            IConvTaskFactory::Free(factory);
-            return 0;
-        }
-
-        MediaItem item = playlist[11];
-        cout << item.url << endl;
-        IConvTask* task = factory->CreateTask(item, encoders[index-1]);
-        task->Run("output.wav");
-
-        while (!task->IsFinished()) {
-            double percent =  task->Progress();
-            if (percent < 0) {
-                cout << "failed!" << endl;
-                break;
-            }
-            cout << "progress:" << (int)(percent*100) << "%" << "\r" << flush;
-            usleep(1000);
-        }
-        cout << "quit!" << endl;
-
-        IConvTask::Free(task);
-        IConvTaskFactory::Free(factory);
-        return 0;
-    }
-    */
 
     // Show player options 
     /*
