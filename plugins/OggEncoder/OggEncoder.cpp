@@ -47,12 +47,11 @@ EmErrorCode OggEncoder::OpenOutput(const std::string& path)
     if (m_OutputFile == NULL)
         return ErrorCode::EncoderFailedToOpen;
 
-    int ret;
+    int ret = 0;
     vorbis_info_init(&m_VobisInfo);
     if (m_VbrOrAbr.userUse == 0) {
         double point = m_Quality.point;
         ret = vorbis_encode_init_vbr(&m_VobisInfo, m_Channels, m_SampleRate, m_Quality.userVal/point);
-    } else {
     }
 
 
