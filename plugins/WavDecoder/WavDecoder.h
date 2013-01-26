@@ -73,9 +73,9 @@ private:
     size_t m_BlockIndex;
     size_t m_TotalBlocks;
 
-    uint32_t m_MaxBytesPerUnit;
-    uint64_t m_UnitIndex;
-    uint64_t m_UnitCount;
+    //uint32_t m_MaxBytesPerUnit;
+    //uint64_t m_UnitIndex;
+    //uint64_t m_UnitCount;
 
     uint64_t m_Duration;
 };
