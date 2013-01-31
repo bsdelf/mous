@@ -199,6 +199,10 @@ public:
     int SeqCurrentIndex() const
     {
         using namespace PlaylistMode;
+
+        if (m_SeqIndex < 0)
+            return -1;
+
         switch (m_Mode) {
             case Normal:
             case Repeat:
@@ -230,6 +234,9 @@ public:
 
     void Move(std::vector<int> oldPos, int newPos)
     {
+        if (m_ItemQueue.size() < 2)
+            return;
+
         using namespace std;
 
         sort(oldPos.begin(), oldPos.end());
@@ -380,13 +387,14 @@ private:
     {
         if (m_ItemQueue.empty()) {
             m_SeqIndex = -1;
-        } else if (m_SeqIndex == -1) {
-            m_SeqIndex = 0;
-        }
+        };
     }
 
     void AdjustShuffleRange(bool reGenerate = false)
     {
+        if (m_ItemQueue.empty())
+            return;
+
         if (reGenerate)
             m_SeqShuffleQueue.clear();
 
