@@ -229,13 +229,13 @@ void SimplePlaylistView::SetClipboard(PlaylistClipboard<mous::MediaItem>* clipbo
 const MediaItem* SimplePlaylistView::NextItem() const
 {
     QMutexLocker locker(&m_PlaylistMutex);
-    return m_Playlist.SeqHasOffset(1) ? &m_Playlist.SeqItemAtOffset(1, true) : NULL;
+    return m_Playlist.HasNext(1) ? &m_Playlist.NextItem(1, true) : NULL;
 }
 
 const MediaItem* SimplePlaylistView::PrevItem() const
 {
     QMutexLocker locker(&m_PlaylistMutex);
-    return m_Playlist.SeqHasOffset(-1) ? &m_Playlist.SeqItemAtOffset(-1, true) : NULL;
+    return m_Playlist.HasNext(-1) ? &m_Playlist.NextItem(-1, true) : NULL;
 }
 
 int SimplePlaylistView::ItemCount() const
@@ -339,8 +339,8 @@ void SimplePlaylistView::mouseDoubleClickEvent(QMouseEvent * event)
     QModelIndex index(selectedIndexes()[0]);
     qDebug() << index.row();
 
-    m_Playlist.SeqJumpTo(index.row());
-    const MediaItem& item = m_Playlist.SeqItemAtOffset(0, false);
+    m_Playlist.JumpTo(index.row());
+    const MediaItem& item = m_Playlist.NextItem(0, false);
 
     emit SigPlayMediaItem(this, item);
 }

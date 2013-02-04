@@ -111,48 +111,29 @@ public:
         return m_Mode;
     }
 
-    // generally you do not need to call this
-    int SeqOffsetToIndex(int off) const
+    /* check whether there is a next item according to current play mode
+     *
+     * offset:
+     *  < 0 previous
+     *  = 0 current
+     *  > 0 next
+     *
+     * NOTE: this method should be called before NextItem()
+     *
+     */
+    bool HasNext(int offset) const
     {
-        if (m_ItemQueue.empty())
-            return -1;
-
-        int idx = -1;
-        switch (m_Mode) {
-            case PlaylistMode::Normal:
-            case PlaylistMode::Shuffle:
-                idx = m_SeqIndex + off;
-                break;
-
-            case PlaylistMode::Repeat:
-            case PlaylistMode::ShuffleRepeat:
-                idx = (m_SeqIndex + off) % m_ItemQueue.size();
-                break;
-
-            case PlaylistMode::RepeatOne:
-                idx = m_SeqIndex;
-                break;
-
-            default:
-                break;
-        }
-
-        return (idx >= 0 && (size_t)idx < m_ItemQueue.size()) ? idx : -1;
+        return (OffsetToIndex(offset) >= 0);
     }
 
-    bool SeqHasOffset(int off) const
+    const item_t& NextItem(int offset, bool moveTo) const
     {
-        return SeqOffsetToIndex(off) != -1;
+        return (const_cast<Playlist*>(this))->NextItem(offset, moveTo);
     }
 
-    const item_t& SeqItemAtOffset(int off, bool moveTo) const
+    item_t& NextItem(int offset, bool moveTo)
     {
-        return (const_cast<Playlist*>(this))->SeqItemAtOffset(off, moveTo);
-    }
-
-    item_t& SeqItemAtOffset(int off, bool moveTo)
-    {
-        int index = SeqOffsetToIndex(off);
+        int index = OffsetToIndex(offset);
         assert(index >= 0 && (size_t)index < m_ItemQueue.size());
 
         if (moveTo)
@@ -171,7 +152,8 @@ public:
         return m_ItemQueue[index];
     }
 
-    bool SeqJumpTo(int index) const
+    /* try to set index */
+    bool JumpTo(int index) const
     {
         if (index >= 0 && (size_t)index < m_ItemQueue.size()) {
             using namespace PlaylistMode;
@@ -196,7 +178,8 @@ public:
         }
     }
 
-    int SeqCurrentIndex() const
+    /* current index */
+    int CurrentIndex() const
     {
         using namespace PlaylistMode;
 
@@ -383,6 +366,34 @@ public:
     }
 
 private:
+    int OffsetToIndex(int offset) const
+    {
+        if (m_ItemQueue.empty())
+            return -1;
+
+        int idx = -1;
+        switch (m_Mode) {
+            case PlaylistMode::Normal:
+            case PlaylistMode::Shuffle:
+                idx = m_SeqIndex + offset;
+                break;
+
+            case PlaylistMode::Repeat:
+            case PlaylistMode::ShuffleRepeat:
+                idx = (m_SeqIndex + offset) % m_ItemQueue.size();
+                break;
+
+            case PlaylistMode::RepeatOne:
+                idx = m_SeqIndex;
+                break;
+
+            default:
+                break;
+        }
+
+        return (idx >= 0 && (size_t)idx < m_ItemQueue.size()) ? idx : -1;
+    }
+
     void AdjustSeqPosition()
     {
         if (m_ItemQueue.empty()) {

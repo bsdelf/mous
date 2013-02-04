@@ -165,16 +165,16 @@ bool ServerContext::PlayAt(int iList, int iItem)
     usedPlaylist = iList;
     ServerContext::playlist_t& list = playlists[iList];
 
-    list.SeqJumpTo(iItem);
-    const MediaItem& item = list.SeqItemAtOffset(0, false);
+    list.JumpTo(iItem);
+    const MediaItem& item = list.NextItem(0, false);
     return PlayItem(item);
 }
 
 bool ServerContext::PlayNext(char direct)
 {
     playlist_t& list = playlists[usedPlaylist];
-    if (list.SeqHasOffset(direct)) {
-        const MediaItem& item = list.SeqItemAtOffset(direct, true);
+    if (list.HasNext(direct)) {
+        const MediaItem& item = list.NextItem(direct, true);
         PlayItem(item);
         sigPlayNextItem(item);
         return true;
@@ -202,7 +202,7 @@ void ServerContext::PausePlayer()
 const MediaItem* ServerContext::ItemInPlaying() const
 {
     const playlist_t& list = playlists[usedPlaylist];
-    return list.SeqHasOffset(0) ? &list.SeqItemAtOffset(0, false) : NULL;
+    return list.HasNext(0) ? &list.NextItem(0, false) : NULL;
 }
 
 bool ServerContext::PlayItem(const MediaItem& item)
@@ -239,8 +239,8 @@ void ServerContext::SlotFinished()
     MutexLocker locker(&mutex);
 
     playlist_t& list = playlists[usedPlaylist];
-    if (list.SeqHasOffset(1)) {
-        const MediaItem& item = list.SeqItemAtOffset(1, true);
+    if (list.HasNext(1)) {
+        const MediaItem& item = list.NextItem(1, true);
         PlayItem(item);
         sigPlayNextItem(item);
     }

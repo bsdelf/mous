@@ -26,8 +26,8 @@ void on_finished()
     if (PLAYLIST == NULL)
         return;
 
-    if (PLAYLIST->SeqHasOffset(1)) {
-        const MediaItem& item = PLAYLIST->SeqItemAtOffset(1, true);
+    if (PLAYLIST->HasNext(1)) {
+        const MediaItem& item = PLAYLIST->NextItem(1, true);
 
         cout << "playing: \"" << item.url << "\""<< endl;
 
