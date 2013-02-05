@@ -101,11 +101,6 @@ void AlsaRenderer::SetVolumeLevel(int level)
 {
 }
 
-bool AlsaRenderer::Options(vector<const BaseOption*>& list) const
-{
-    return false;
-}
-
 bool AlsaRenderer::SetupHwParams()
 {
     snd_pcm_hw_params_t* params;

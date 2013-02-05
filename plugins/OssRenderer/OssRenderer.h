@@ -21,7 +21,7 @@ public:
     virtual int VolumeLevel() const;
     virtual void SetVolumeLevel(int level);
 
-    virtual bool Options(std::vector<const BaseOption*>& list) const;
+    virtual std::vector<const BaseOption*> Options() const;
 
 private:
     std::string m_PrevPath;

@@ -116,9 +116,8 @@ void OggEncoder::SetMediaTag(const MediaTag* tag)
     m_MediaTag = tag;
 }
 
-bool OggEncoder::Options(std::vector<const BaseOption*>& list) const 
+std::vector<const BaseOption*> OggEncoder::Options() const 
 {
-    list.clear();
-    list.resize(3);
-    return true;
+    std::vector<const BaseOption*> list;
+    return list;
 }

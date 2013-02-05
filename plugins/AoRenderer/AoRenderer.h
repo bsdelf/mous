@@ -22,8 +22,6 @@ public:
     virtual int VolumeLevel() const;
     virtual void SetVolumeLevel(int level);
 
-    virtual bool Options(std::vector<const BaseOption*>& list) const;
-
 private:
     int m_Driver;
     ao_device* m_Device;

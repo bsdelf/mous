@@ -77,8 +77,8 @@ public:
     uint64_t CurrentMs() const;
     EmAudioMode AudioMode() const;
 
-    bool DecoderPluginOption(std::vector<PluginOption>& list) const;
-    bool RendererPluginOption(PluginOption& option) const;
+    std::vector<PluginOption> DecoderPluginOption() const;
+    PluginOption RendererPluginOption() const;
 
 public:
     const scx::Signal<void (void)>* SigFinished() const;

@@ -30,8 +30,6 @@ public:
     virtual int VolumeLevel() const;
     virtual void SetVolumeLevel(int level);
 
-    virtual bool Options(std::vector<const BaseOption*>& list) const;
-
 private:
     bool SetupHwParams();
     void SetupSwParams();

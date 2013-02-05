@@ -127,9 +127,9 @@ void OssRenderer::SetVolumeLevel(int level)
     ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
 }
 
-bool OssRenderer::Options(std::vector<const BaseOption*>& list) const
+std::vector<const BaseOption*> OssRenderer::Options() const
 {
-    list.resize(1);
+    std::vector<const BaseOption*> list(1);
     list[0] = &m_OptDevicePath;
-    return true;
+    return list;
 }

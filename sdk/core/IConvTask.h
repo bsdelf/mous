@@ -20,8 +20,8 @@ public:
 public:
     virtual ~IConvTask() { }
 
-    virtual bool DecoderOptions(std::vector<const BaseOption*>& list) const = 0;
-    virtual bool EncoderOptions(std::vector<const BaseOption*>& list) const = 0;
+    virtual std::vector<const BaseOption*> DecoderOptions() const = 0;
+    virtual std::vector<const BaseOption*> EncoderOptions() const = 0;
     virtual const char* EncoderFileSuffix() const = 0;
 
     virtual void Run(const std::string& output) = 0;

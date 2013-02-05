@@ -18,8 +18,8 @@ public:
     explicit ConvTask(const MediaItem&, const IPluginAgent*, const IPluginAgent*);
     virtual ~ConvTask();
 
-    virtual bool DecoderOptions(std::vector<const BaseOption*>& list) const;
-    virtual bool EncoderOptions(std::vector<const BaseOption*>& list) const;
+    virtual std::vector<const BaseOption*> DecoderOptions() const;
+    virtual std::vector<const BaseOption*> EncoderOptions() const;
     virtual const char* EncoderFileSuffix() const;
 
     virtual void Run(const string& output);

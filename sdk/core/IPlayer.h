@@ -84,8 +84,8 @@ public:
     virtual EmAudioMode AudioMode() const = 0;
 
     // reimplement this to provide options
-    virtual bool DecoderPluginOption(std::vector<PluginOption>& list) const = 0;
-    virtual bool RendererPluginOption(PluginOption& option) const = 0;
+    virtual std::vector<PluginOption> DecoderPluginOption() const = 0;
+    virtual PluginOption RendererPluginOption() const = 0;
 
 public:
     virtual const scx::Signal<void (void)>* SigFinished() const = 0;

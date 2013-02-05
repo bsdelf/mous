@@ -27,7 +27,7 @@ public:
 
     virtual void SetMediaTag(const MediaTag* tag);
 
-    virtual bool Options(std::vector<const BaseOption*>& list) const;
+    virtual std::vector<const BaseOption*> Options() const;
 
 private:
     RangedIntOption m_Quality;

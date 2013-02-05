@@ -454,8 +454,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
         return;
 
     //==== show options
-    vector<const BaseOption*> opts;
-    newTask->EncoderOptions(opts);
+    vector<const BaseOption*> opts = newTask->EncoderOptions();
 
     QString fileName =
             QString::fromUtf8((item.tag.artist + " - " + item.tag.title + "." + newTask->EncoderFileSuffix()).c_str());

@@ -151,14 +151,14 @@ void LameEncoder::SetMediaTag(const MediaTag* tag)
     m_MediaTag = tag;
 }
 
-bool LameEncoder::Options(std::vector<const BaseOption*>& list) const 
+std::vector<const BaseOption*> LameEncoder::Options() const 
 {
-    list.clear();
+    std::vector<const BaseOption*> list(3);
     list.resize(3);
     list[0] = &m_Quality;
     list[1] = &m_BitRate;
     list[2] = &m_ReplayGain;
-    return true;
+    return list;
 }
 
 

@@ -37,14 +37,16 @@ ConvTask::~ConvTask()
     m_EncAgent->FreeObject(m_Encoder);
 }
 
-bool ConvTask::DecoderOptions(std::vector<const BaseOption*>& list) const
+std::vector<const BaseOption*> ConvTask::DecoderOptions() const
 {
-    return m_Decoder != NULL ? m_Decoder->Options(list) : false;
+    return m_Decoder != NULL ?
+        m_Decoder->Options() : std::vector<const BaseOption*>();
 }
 
-bool ConvTask::EncoderOptions(std::vector<const BaseOption*>& list) const
+std::vector<const BaseOption*> ConvTask::EncoderOptions() const
 {
-    return m_Encoder != NULL ? m_Encoder->Options(list) : false;
+    return m_Encoder != NULL ?
+        m_Encoder->Options() : std::vector<const BaseOption*>();
 }
 
 const char* ConvTask::EncoderFileSuffix() const

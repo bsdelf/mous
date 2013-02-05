@@ -36,7 +36,10 @@ public:
     virtual uint64_t Duration() const = 0;
 
     // reimplement this to provide options
-    virtual bool Options(std::vector<const BaseOption*>& list) const { return false; };
+    virtual std::vector<const BaseOption*> Options() const
+    {
+        return std::vector<const BaseOption*>();
+    };
 };
 
 }

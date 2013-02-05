@@ -75,11 +75,3 @@ int AoRenderer::VolumeLevel() const
 void AoRenderer::SetVolumeLevel(int level)
 {
 }
-
-bool AoRenderer::Options(std::vector<const BaseOption*>& list) const
-{
-    list.clear();
-    return false;
-}
-
-

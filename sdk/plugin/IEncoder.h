@@ -37,10 +37,9 @@ public:
     }
 
     // reimplement this to provide options
-    virtual bool Options(std::vector<const BaseOption*>& list) const 
+    virtual std::vector<const BaseOption*> Options() const 
     { 
-        list.clear(); 
-        return false; 
+        return std::vector<const BaseOption*>();
     };
 };
 

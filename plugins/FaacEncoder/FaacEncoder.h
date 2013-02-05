@@ -27,7 +27,7 @@ public:
     virtual void SetBitsPerSample(int32_t bitsPerSample);
 
     virtual void SetMediaTag(const MediaTag* tag);
-    virtual bool Options(std::vector<const BaseOption*>& list) const;
+    virtual std::vector<const BaseOption*> Options() const;
 
 private:
     //size_t WavReadFloat32();
