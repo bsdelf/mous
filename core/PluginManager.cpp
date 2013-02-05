@@ -79,9 +79,10 @@ void PluginManager::UnloadAll()
     m_PluginMap.clear();
 }
 
-void PluginManager::DumpPluginAgent(vector<const IPluginAgent*>& list, EmPluginType type) const
+vector<const IPluginAgent*> PluginManager::PluginAgents(EmPluginType type) const
 {
-    list.clear();
+    vector<const IPluginAgent*> list;
+    list.reserve(m_PluginMap.size());
     for (PluginMapConstIter iter = m_PluginMap.begin();
             iter != m_PluginMap.end(); ++iter) {
         IPluginAgent* pAgent = iter->second;
@@ -89,16 +90,18 @@ void PluginManager::DumpPluginAgent(vector<const IPluginAgent*>& list, EmPluginT
             list.push_back(pAgent);
         }
     }
+    return list;
 }
 
-void PluginManager::DumpPluginPath(vector<string>& list) const
+vector<string> PluginManager::PluginPaths() const
 {
-    list.clear();
+    vector<string> list;
     list.reserve(m_PluginMap.size());
     for (PluginMapConstIter iter = m_PluginMap.begin();
             iter != m_PluginMap.end(); ++iter) {
         list.push_back(iter->first);
     }
+    return list;
 }
 
 const PluginInfo* PluginManager::QueryPluginInfo(const std::string& path) const

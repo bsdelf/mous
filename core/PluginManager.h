@@ -25,8 +25,8 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadAll();
 
-    void DumpPluginAgent(std::vector<const IPluginAgent*>& list, EmPluginType) const;
-    void DumpPluginPath(std::vector<std::string>& list) const;
+    std::vector<const IPluginAgent*> PluginAgents(EmPluginType) const;
+    std::vector<std::string> PluginPaths() const;
     const PluginInfo* QueryPluginInfo(const std::string& path) const;
 
 private:

@@ -60,8 +60,7 @@ int cmd_help(int, char**)
 
 int cmd_plugin(int, char**)
 {
-    vector<string> path_list;
-    ctx.mgr->DumpPluginPath(path_list);
+    const vector<string>& path_list = ctx.mgr->PluginPaths();
     for (size_t i = 0; i < path_list.size(); ++i) {
         cout << "(" << i+1 << ") ";
         cout << path_list[i] << endl;
@@ -106,11 +105,11 @@ int main(int argc, char** argv)
     ctx.mgr->LoadPluginDir(pluginDir);
 
     // get plugin agents and check if we have enough
-    ctx.mgr->DumpPluginAgent(ctx.dec_agents, PluginType::Decoder);
-    ctx.mgr->DumpPluginAgent(ctx.enc_agents, PluginType::Encoder);
-    ctx.mgr->DumpPluginAgent(ctx.red_agents, PluginType::Renderer);
-    ctx.mgr->DumpPluginAgent(ctx.pack_agents, PluginType::MediaPack);
-    ctx.mgr->DumpPluginAgent(ctx.tag_agents, PluginType::TagParser);
+    ctx.dec_agents = ctx.mgr->PluginAgents(PluginType::Decoder);
+    ctx.enc_agents = ctx.mgr->PluginAgents(PluginType::Encoder);
+    ctx.red_agents = ctx.mgr->PluginAgents(PluginType::Renderer);
+    ctx.pack_agents = ctx.mgr->PluginAgents(PluginType::MediaPack);
+    ctx.tag_agents = ctx.mgr->PluginAgents(PluginType::TagParser);
     if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
         cout << "need more plugins!" << endl;
         cmd_plugin(0, NULL);

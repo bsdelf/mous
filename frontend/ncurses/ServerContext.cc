@@ -51,16 +51,12 @@ bool ServerContext::Init()
 
     typedef vector<const IPluginAgent*> PluginAgentArray;
 
-    PluginAgentArray decoders;
-    mgr->DumpPluginAgent(decoders, PluginType::Decoder);
+    PluginAgentArray decoders = mgr->PluginAgents(PluginType::Decoder);
     //PluginAgentArray encoders;
     //mgr->DumpPluginAgent(encoders, PluginType::Encoder);
-    PluginAgentArray renderers;
-    mgr->DumpPluginAgent(renderers, PluginType::Renderer);
-    PluginAgentArray mediaPacks;
-    mgr->DumpPluginAgent(mediaPacks, PluginType::MediaPack);
-    PluginAgentArray tagParsers;
-    mgr->DumpPluginAgent(tagParsers, PluginType::TagParser);
+    PluginAgentArray renderers = mgr->PluginAgents(PluginType::Renderer);
+    PluginAgentArray mediaPacks = mgr->PluginAgents(PluginType::MediaPack);
+    PluginAgentArray tagParsers = mgr->PluginAgents(PluginType::TagParser);
 
     loader->RegisterMediaPackPlugin(mediaPacks);
     loader->RegisterTagParserPlugin(tagParsers);
