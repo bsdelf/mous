@@ -2,6 +2,9 @@ build
 build*
 *.session
 *.swp
-*.pro.user
+*.exe
+*.out
+*.pro.user*
 *.qm
+*.o
 .clang_complete
