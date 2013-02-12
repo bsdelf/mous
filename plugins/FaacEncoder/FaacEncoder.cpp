@@ -358,7 +358,7 @@ void FaacEncoder::UpdateMediaTag()
     MP4TagsSetComments(tag, m_MediaTag->comment.c_str());
     MP4TagsSetGenre(tag, m_MediaTag->genre.c_str());
     MP4TagsSetReleaseDate(tag, scx::NumToStr(m_MediaTag->year).c_str());
-    MP4TagTrack track = { m_MediaTag->track, 0 };
+    MP4TagTrack track = { static_cast<uint16_t>(m_MediaTag->track), 0 };
     MP4TagsSetTrack(tag, &track);
 
     MP4TagsStore(tag, file);

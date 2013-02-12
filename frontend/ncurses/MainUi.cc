@@ -6,6 +6,7 @@
 #include <iostream>
 #include <set>
 #include <stack>
+#include <mutex>
 
 #include <scx/Conv.hpp>
 using namespace scx;
@@ -88,7 +89,7 @@ struct PrivateMainUi
     int iPlaylist;
     stack<LayerInfo> layerStack;
 
-    Mutex needSwitchPlaylistMutex;
+    mutex needSwitchPlaylistMutex;
     int needSwitchPlaylist;
     int switchPlaylistTo;
 
@@ -183,7 +184,7 @@ void MainUi::SlotSwitchPlaylist(bool toNext)
     int n = d->iPlaylist + (toNext ? 1 : -1);
     n = std::min(std::max(n, 0), PLAYLIST_COUNT-1);
 
-    MutexLocker locker(&d->needSwitchPlaylistMutex);
+    lock_guard<mutex> locker(d->needSwitchPlaylistMutex);
     d->switchPlaylistTo = n;
     ++d->needSwitchPlaylist;
 }
@@ -283,7 +284,7 @@ void MainUi::SyncRefresh()
 {
     // switch playlist as needed
     {
-        MutexLocker locker(&d->needSwitchPlaylistMutex);
+        lock_guard<mutex> locker(d->needSwitchPlaylistMutex);
         if (d->needSwitchPlaylist > 0) {
             SwitchPlaylist(d->switchPlaylistTo);
             --d->needSwitchPlaylist;

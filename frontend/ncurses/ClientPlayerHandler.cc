@@ -68,10 +68,11 @@ void ClientPlayerHandler::Handle(char* buf, int len)
 
         case Op::Player::Sync:
         {
-            MutexLocker locker(&m_MutexWaitSyncReply);
+            unique_lock<mutex> locker(m_MutexWaitSyncReply);
 
             m_WaitSyncReply = false;
-            locker.Unlock();
+
+            locker.unlock();
 
             m_Status.playing = bufObj.Fetch<char>() == 1 ? true : false;
         }
@@ -99,7 +100,7 @@ void ClientPlayerHandler::StartSync()
 {
     m_Status.playing = false;
     m_SyncSchedule.Start();
-    m_SyncSchedule.Schedule(&ClientPlayerHandler::OnSyncTask, this, 200);
+    m_SyncSchedule.Schedule(std::bind(&ClientPlayerHandler::OnSyncTask, this), 200);
 }
 
 void ClientPlayerHandler::StopSync()
@@ -159,13 +160,13 @@ void ClientPlayerHandler::PlayPrevious()
 
 void ClientPlayerHandler::OnSyncTask()
 {
-    MutexLocker locker(&m_MutexWaitSyncReply);
+    unique_lock<mutex> locker(m_MutexWaitSyncReply);
 
     if (m_WaitSyncReply)
         return;
     m_WaitSyncReply = true;
 
-    locker.Unlock();
+    locker.unlock();
 
     m_SigStatus(m_Status);
 

@@ -8,9 +8,8 @@
 
 #include <deque>
 #include <algorithm>
-
-#include "Mutex.hpp"
-#include "Function.hpp"
+#include <mutex>
+#include <functional>
 
 #ifdef __MACH__
 #include <mach/clock.h>
@@ -24,15 +23,15 @@ class TaskSchedule
 private:
     struct Task
     {
-        explicit Task(const Function<void (void)>& _invoke):
+        explicit Task(const std::function<void (void)>& _invoke):
             canceled(false),
             invoke(_invoke)
         { }
 
-        Mutex mutex;
+        std::mutex mtx;
         bool canceled;
 
-        Function<void (void)> invoke;
+        std::function<void (void)> invoke;
         bool oneshot;
         struct timeval intval;
         struct timeval attime;
@@ -91,17 +90,7 @@ public:
         }
     }
 
-    template<class T> long Schedule(void (T::*fn)(void), T* obj, int ms, bool oneshot = false)
-    {
-        return Schedule(Function<void (void)>(fn, obj), ms, oneshot);
-    }
-
-    long Schedule(void (*fn)(void), int ms, bool oneshot = false)
-    {
-        return Schedule(Function<void (void)>(fn), ms, oneshot);
-    }
-
-    long Schedule(const Function<void (void)>& fn, int ms, bool oneshot = false)
+    long Schedule(const std::function<void (void)>& fn, int ms, bool oneshot = false)
     {
         Task* task = new Task(fn);
         task->oneshot = oneshot;
@@ -110,9 +99,9 @@ public:
         task->attime.tv_sec = 0;
         task->attime.tv_usec = 0;
 
-        MutexLocker locker(&m_PendingMutex);
+        std::unique_lock<std::mutex> locker(m_PendingMutex);
         m_Pending.push_back(task);
-        locker.Unlock();
+        locker.unlock();
 
         return reinterpret_cast<long>(task);
     }
@@ -121,7 +110,7 @@ public:
     {
         Task* task = reinterpret_cast<Task*>(key);
         if (task != NULL) {
-            MutexLocker locker(&task->mutex);
+            std::lock_guard<std::mutex> locker(task->mtx);
             task->canceled = true;
         }
     }
@@ -183,7 +172,7 @@ private:
                     for (size_t i = 0; i < n && m_Work; ++i) {
                         Task* task = todoList[i];
 
-                        MutexLocker locker(&task->mutex);
+                        std::lock_guard<std::mutex> locker(task->mtx);
 
                         if (!task->canceled)
                             task->invoke();
@@ -200,7 +189,7 @@ private:
                 break;
             }
 
-            MutexLocker locker(&m_PendingMutex);
+            std::lock_guard<std::mutex> locker(m_PendingMutex);
 
             if (!m_Pending.empty()) {
                 Task* task = m_Pending.front();
@@ -223,7 +212,7 @@ private:
     pthread_t m_ThreadId;
     TaskList m_TaskList;
     TaskList m_Pending;
-    mutable Mutex m_PendingMutex;
+    mutable std::mutex m_PendingMutex;
 };
 
 }

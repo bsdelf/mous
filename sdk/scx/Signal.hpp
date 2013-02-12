@@ -2,225 +2,282 @@
 #define SCX_SIGNAL_HPP
 
 #include <vector>
-#include "Function.hpp"
+#include <memory>
+#include <functional>
+
+#include <iostream>
+using namespace std;
 
 namespace scx {
 
-/* Signal class, not support copy now!! */
-template<typename signature>
+template <class S>
 class Signal;
 
-#define SCX_SIGNAL_COPY_SIGNAL_COMMON(Function_t)       \
-public:                                                 \
-    ~Signal()                                           \
-    {                                                   \
-        for (size_t i = 0; i < m_Slots.size(); ++i) {   \
-            delete m_Slots[i];                          \
-        }                                               \
-    }                                                   \
-    \
-    template<typename fn_t, typename pv_t>              \
-    const Function_t* Connect(fn_t fn, pv_t pv) const   \
-    {                                                   \
-        Function_t* pslot = new Function_t(fn, pv);     \
-        m_Slots.push_back(pslot);                       \
-        return pslot;                                   \
-    }                                                   \
-    \
-    template<typename fn_t>                         \
-    const Function_t* Connect(fn_t fn) const        \
-    {                                               \
-        Function_t* pslot = new Function_t(fn);     \
-        m_Slots.push_back(pslot);                   \
-        return pslot;                               \
-    }                                               \
-    \
-    void Connect(Signal* sig) const                 \
-    {                                               \
-        m_Signals.push_back(sig);                   \
-    }                                               \
-    \
-    void Disconnect(const Function_t* fn) const         \
-    {                                                   \
-        for (size_t i = 0; i < m_Slots.size(); ++i) {   \
-            if (m_Slots[i] == fn) {                     \
-                delete fn;                              \
-                m_Slots.erase(m_Slots.begin() + i);     \
-                break;                                  \
-            }                                           \
-        }                                               \
-    }                                                   \
-    \
-    void Disconnect(const Signal* sig) const            \
-    {                                                   \
-        for (size_t i = 0; i < m_Signals.size(); ++i) { \
-            if (m_Signals[i] == sig) {                  \
-                m_Signals.erase(m_Signals.begin() + i); \
-                break;                                  \
-            }                                           \
-        }                                               \
-    }                                                   \
-    \
-    template<typename recv_t>                           \
-    void DisconnectReceiver(recv_t* recv) const         \
-    {                                                   \
-        for (int i = m_Slots.size()-1; i >= 0; --i) {   \
-            if ((m_Slots[i]->Receiver()) == recv) {  \
-                delete m_Slots[i];                      \
-                m_Slots.erase(m_Slots.begin() + i);     \
-            }                                           \
-        }                                               \
-    }                                                   \
-    \
-    void Reserve(const size_t size) const   \
-    {                                       \
-        m_Slots.Reserve(size);              \
-        m_Signals.Reserve(size);            \
-    }                                       \
-    size_t SlotCount() const    \
-    {                           \
-        return m_Slots.size();  \
-    }                           \
-    \
-private:\
-    mutable std::vector<Function_t*> m_Slots;   \
-    mutable std::vector<Signal*> m_Signals
-
-template<typename ret_t, typename arg_t>
-class Signal<ret_t (arg_t)>
+template <class R, class... P>
+class Signal<R (P...)>
 {
-    typedef Function<ret_t (arg_t)> Function_t;
-
-    SCX_SIGNAL_COPY_SIGNAL_COMMON(Function_t);
+public:
+    struct Slot
+    {
+        virtual ~Slot() { }
+        virtual char Type() const = 0;
+        virtual R Invoke(P...) const = 0;
+        virtual const void* Object() const = 0;
+        virtual bool EqualTo(const Slot*) const = 0;
+    };
 
 public:
-    void operator()(arg_t arg)
-    {
-        for (size_t i = 0; i < m_Slots.size(); ++i) {
-            (*m_Slots[i])(arg);
-        }
+    Signal() = default;
+    ~Signal() = default;
+    Signal(const Signal&) = delete;
+    Signal& operator=(const Signal&) = delete;
 
-        for (size_t i = 0; i < m_Signals.size(); ++i) {
-            (*m_Signals[i])(arg);
+    const Slot* Connect(R (*p)(P...))
+    {
+        Slot* slot = new PtrSlot(p);
+        m_slots.push_back(std::unique_ptr<Slot>(slot));
+        return slot;
+    }
+
+    template<typename O>
+    const Slot* Connect(R (O::*f)(P...), O* o)
+    {
+        Slot* slot = new MemSlot<O>(f, o);
+        m_slots.push_back(std::unique_ptr<Slot>(slot));
+        return slot;
+    }
+
+    template<typename O>
+    const Slot* Connect(R (O::*f)(P...) const, const O* o)
+    {
+        Slot* slot = new ConstSlot<O>(f, o);
+        m_slots.push_back(std::unique_ptr<Slot>(slot));
+        return slot;
+    }
+
+    template<typename F>
+    const Slot* Connect(const F& f)
+    {
+        Slot* slot = new FnSlot(f);
+        m_slots.push_back(std::unique_ptr<Slot>(slot));
+        return slot;
+    }
+
+    bool Disconnect(R (*f)(P...))
+    {
+        PtrSlot slot(f);
+        return Disconnect(&slot);
+    }
+
+    template<typename O>
+    bool Disconnect(R (O::*f)(P...), O* o)
+    {
+        MemSlot<O> slot(f, o);
+        return Disconnect(&slot);
+    }
+
+    template<typename O>
+    bool Disconnect(R (O::*f)(P...) const, const O* o)
+    {
+        ConstSlot<O> slot(f, o);
+        return Disconnect(&slot);
+    }
+
+    bool Disconnect(const void* slot)
+    {
+        const Slot* ts = static_cast<const Slot*>(slot);
+        for (size_t i = 0; i < m_slots.size(); ++i) {
+            if (m_slots[i]->EqualTo(ts)) {
+                m_slots.erase(m_slots.begin()+i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool DisconnectObject(const void* o)
+    {
+        if (o != nullptr) {
+            for (size_t i = 0; i < m_slots.size(); ++i) {
+                if (m_slots[i]->Object() == o) {
+                    m_slots.erase(m_slots.begin()+i);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void Clear()
+    {
+        m_slots.clear();
+    }
+
+    void operator()(P... p) const
+    {
+        for (const auto& slot: m_slots) {
+            slot->Invoke(p...);
         }
     }
-};
 
-template<typename ret_t>
-class Signal<ret_t (void)>
-{
-    typedef Function<ret_t (void)> Function_t;
-
-    SCX_SIGNAL_COPY_SIGNAL_COMMON(Function_t);
-
-public:
-    void operator()(void)
+    size_t Count() const
     {
-        for (size_t i = 0; i < m_Slots.size(); ++i) {
-            (*m_Slots[i])();
-        }
-
-        for (size_t i = 0; i < m_Signals.size(); ++i) {
-            (*m_Signals[i])();
-        }
+        return m_slots.size();
     }
-};
 
-template<typename ret_t,
-typename arg1_t,
-typename arg2_t>
-class Signal<ret_t (arg1_t, arg2_t)>
-{
-    typedef Function<ret_t (arg1_t, arg2_t)> Function_t;
-
-    SCX_SIGNAL_COPY_SIGNAL_COMMON(Function_t);
-
-public:
-    void operator()(arg1_t arg1, arg2_t arg2)
+private:
+    struct PtrSlot: public Slot
     {
-        for (size_t i = 0; i < m_Slots.size(); ++i) {
-            (*m_Slots[i])(arg1, arg2);
+        typedef R (*ptr_t)(P...);
+
+        explicit PtrSlot(ptr_t p):
+            ptr(p)
+        {
         }
 
-        for (size_t i = 0; i < m_Signals.size(); ++i) {
-            (*m_Signals[i])(arg1, arg2);
+        virtual char Type() const
+        {
+            return 'p';
         }
-    }
-};
 
-template<typename ret_t,
-typename arg1_t,
-typename arg2_t,
-typename arg3_t>
-class Signal<ret_t (arg1_t, arg2_t, arg3_t)>
-{
-    typedef Function<ret_t (arg1_t, arg2_t, arg3_t)> Function_t;
+        virtual R Invoke(P... p) const
+        {
+            return ptr(p...);
+        }
 
-    SCX_SIGNAL_COPY_SIGNAL_COMMON(Function_t);
+        virtual const void* Object() const
+        {
+            return nullptr;
+        }
 
-public:
-    void operator()(arg1_t arg1, arg2_t arg2, arg3_t arg3)
+        virtual bool EqualTo(const Slot* slot) const
+        {
+            if (Type() == slot->Type()) {
+                // I think dynamic_cast is unnecessary.
+                const PtrSlot* ps = static_cast<const PtrSlot*>(slot);
+                return (ptr == ps->ptr);
+            }
+            return false;
+        }
+        
+    private:
+        ptr_t ptr;
+    };
+
+    template<typename O>
+    struct MemSlot: public Slot
     {
-        for (size_t i = 0; i < m_Slots.size(); ++i) {
-            (*m_Slots[i])(arg1, arg2, arg3);
+        typedef R (O::*fn_t)(P...);
+
+        MemSlot(fn_t f, O* o):
+            fn(f), obj(o)
+        {
         }
 
-        for (size_t i = 0; i < m_Signals.size(); ++i) {
-            (*m_Signals[i])(arg1, arg2, arg3);
+        virtual char Type() const
+        {
+            return 'm';
         }
-    }
-};
 
-template<typename ret_t,
-typename arg1_t,
-typename arg2_t,
-typename arg3_t,
-typename arg4_t>
-class Signal<ret_t (arg1_t, arg2_t, arg3_t, arg4_t)>
-{
-    typedef Function<ret_t (arg1_t, arg2_t, arg3_t, arg4_t)> Function_t;
+        virtual R Invoke(P... p) const
+        {
+            return (obj->*fn)(p...);
+        }
 
-    SCX_SIGNAL_COPY_SIGNAL_COMMON(Function_t);
+        virtual const void* Object() const
+        {
+            return obj;
+        }
 
-public:
-    void operator()(arg1_t arg1, arg2_t arg2, arg3_t arg3, arg4_t arg4)
+        virtual bool EqualTo(const Slot* slot) const
+        {
+            if (Type() == slot->Type()) {
+                const MemSlot* ms = static_cast<const MemSlot*>(slot);
+                return (obj == ms->obj && fn == ms->fn);
+            }
+            return false;
+        }
+
+    private:
+        fn_t fn;
+        O* obj;
+    };
+
+    template<typename O>
+    struct ConstSlot: public Slot
     {
-        for (size_t i = 0; i < m_Slots.size(); ++i) {
-            (*m_Slots[i])(arg1, arg2, arg3, arg4);
+        typedef R (O::*fn_t)(P...) const;
+
+        ConstSlot(fn_t f, const O* o):
+            fn(f), obj(o)
+        {
         }
 
-        for (size_t i = 0; i < m_Signals.size(); ++i) {
-            (*m_Signals[i])(arg1, arg2, arg3, arg4);
+        virtual char Type() const
+        {
+            return 'c';
         }
-    }
-};
 
-template<typename ret_t,
-typename arg1_t,
-typename arg2_t,
-typename arg3_t,
-typename arg4_t,
-typename arg5_t>
-class Signal<ret_t (arg1_t, arg2_t, arg3_t, arg4_t, arg5_t)>
-{
-    typedef Function<ret_t (arg1_t, arg2_t, arg3_t, arg4_t, arg5_t)> Function_t;
+        virtual R Invoke(P... p) const
+        {
+            return (obj->*fn)(p...);
+        }
 
-    SCX_SIGNAL_COPY_SIGNAL_COMMON(Function_t);
+        virtual const void* Object() const
+        {
+            return obj;
+        }
 
-public:
-    void operator()(arg1_t arg1, arg2_t arg2, arg3_t arg3, arg4_t arg4, arg5_t arg5)
+        virtual bool EqualTo(const Slot* slot) const
+        {
+            if (Type() == slot->Type()) {
+                const ConstSlot* cs = static_cast<const ConstSlot*>(slot);
+                return (obj == cs->obj && fn == cs->fn);
+            }
+            return false;
+        }
+
+    private:
+        fn_t fn;
+        const O* obj;
+    };
+
+    struct FnSlot: public Slot
     {
-        for (size_t i = 0; i < m_Slots.size(); ++i) {
-            (*m_Slots[i])(arg1, arg2, arg3, arg4, arg5);
+        typedef std::function<R (P...)> fn_t;
+
+        explicit FnSlot(const fn_t& f):
+            fn(f)
+        {
         }
 
-        for (size_t i = 0; i < m_Signals.size(); ++i) {
-            (*m_Signals[i])(arg1, arg2, arg3, arg4, arg5);
+        virtual char Type() const
+        {
+            return 'f';
         }
-    }
+
+        virtual R Invoke(P... p) const
+        {
+            return fn(p...);
+        }
+
+        virtual const void* Object() const
+        {
+            return nullptr;
+        }
+
+        virtual bool EqualTo(const Slot* slot) const
+        {
+            return (slot == this);
+        }
+
+    private:
+        const fn_t fn;
+    };
+
+private:
+    std::vector<std::unique_ptr<Slot>> m_slots;
 };
-
-#undef SCX_SIGNAL_COPY_SIGNAL_COMMON
 
 }
 

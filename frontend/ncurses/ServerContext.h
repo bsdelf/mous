@@ -2,9 +2,9 @@
 #define SERVERCONTEXT_H
 
 #include <vector>
+#include <mutex>
 using namespace std;
 
-#include <scx/Mutex.hpp>
 #include <scx/Signal.hpp>
 using namespace scx;
 
@@ -18,7 +18,7 @@ using namespace mous;
 
 struct ServerContext
 {
-    Mutex mutex;
+    mutex mtx;
 
     IPluginManager* mgr;
     IMediaLoader* loader;

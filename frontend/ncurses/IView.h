@@ -4,8 +4,7 @@
 #include <ncurses.h>
 
 #include <string>
-
-#include <scx/Function.hpp>
+#include <functional>
 
 class IView
 {
@@ -273,7 +272,7 @@ struct Window
     }
 
 public:
-    void SafelyDo(const scx::Function<void (void)>& fn)
+    void SafelyDo(const std::function<void (void)>& fn)
     {
         use_window(win, &WindowCallback, const_cast<void*>(static_cast<const void*>(&fn)));
     }
@@ -281,8 +280,8 @@ public:
 private:
     static int WindowCallback(WINDOW* _w, void* p)
     {
-        using namespace scx;
-        Function<void (void)>* fn = static_cast<Function<void (void)>*>(p);
+        using namespace std;
+        function<void (void)>* fn = static_cast<function<void (void)>*>(p);
         (*fn)();
         return 0;
     }

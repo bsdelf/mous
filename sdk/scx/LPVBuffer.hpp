@@ -1,7 +1,7 @@
 #ifndef SCX_LPVBUFFER_HPP
 #define SCX_LPVBUFFER_HPP
 
-#include "Mutex.hpp"
+#include <mutex>
 
 #ifndef __MACH__
 #include "SemVar.hpp"
@@ -113,10 +113,10 @@ public:
     item_t* TakeFreeS()
     {
         m_FreeListSemVar.Wait(); 
-        m_FreeListMutex.Lock();
+        m_FreeListMutex.lock();
         m_FreeIndex = (m_FreeIndex+1) % m_BufferCount;
         item_t* item = m_BufferArray + m_FreeIndex;
-        m_FreeListMutex.Unlock();
+        m_FreeListMutex.unlock();
         return item;
     }
 
@@ -135,10 +135,10 @@ public:
     item_t* TakeDataS()
     {
         m_DataListSemVar.Wait(); 
-        m_DataListMutex.Lock();
+        m_DataListMutex.lock();
         m_DataIndex = (m_DataIndex+1) % m_BufferCount;
         item_t* item = m_BufferArray + m_DataIndex;
-        m_DataListMutex.Unlock();
+        m_DataListMutex.unlock();
         return item;
     }
 
@@ -166,8 +166,8 @@ public:
 private:
     Semaphore m_FreeListSemVar;
     Semaphore m_DataListSemVar;
-    Mutex m_FreeListMutex;
-    Mutex m_DataListMutex;
+    std::mutex m_FreeListMutex;
+    std::mutex m_DataListMutex;
 
     size_t m_BufferCount;
     item_t* m_BufferArray;

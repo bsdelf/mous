@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <signal.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -51,7 +52,7 @@ int main(int argc, char** argv)
         return 1;
 
     pid_t pid = FetchPid();
-    if (pid == 0 || (kill(pid, 0) != 0 && errno == ESRCH))
+    if (pid == 0 || (::kill(pid, 0) != 0 && errno == ESRCH))
         pid = fork();
 
     if (pid == 0) {

@@ -5,6 +5,7 @@
 #include <errno.h>
 
 #include <vector>
+#include <functional>
 
 #include "Protocol.h"
 #include "AppEnv.h"
@@ -17,11 +18,11 @@ Client::Client():
     m_ConnectMaxRetry(25),
     m_ConnectRetryInterval(200)
 {
-    m_PlayerHandler.fnGetPayloadBuffer.Bind(&Client::GetPayloadBuffer, this);
-    m_PlayerHandler.fnSendOut.Bind(&Client::SendOut, this);
-
-    m_PlaylistHandler.fnGetPayloadBuffer.Bind(&Client::GetPayloadBuffer, this);
-    m_PlaylistHandler.fnSendOut.Bind(&Client::SendOut, this);
+    namespace phs = std::placeholders;
+    m_PlaylistHandler.fnGetPayloadBuffer = 
+        m_PlayerHandler.fnGetPayloadBuffer = std::bind(&Client::GetPayloadBuffer, this, phs::_1, phs::_2);
+    m_PlayerHandler.fnSendOut = 
+        m_PlaylistHandler.fnSendOut = std::bind(&Client::SendOut, this);
 }
 
 Client::~Client()
@@ -38,15 +39,18 @@ bool Client::Run()
 
     m_ConnectStopRetry = false;
 
-    Function<void (const string&, int)> fn(&Client::ThRecvLoop, this);
-    return m_RecvThread.Run(fn, env->serverIp, env->serverPort) == 0;
+    const auto& f = std::bind(&Client::ThRecvLoop, this,
+                              env->serverIp, env->serverPort);
+    m_RecvThread = thread(f);
+
+    return true;
 }
 
 void Client::Stop()
 {
     m_ConnectStopRetry = true;
     m_Socket.Shutdown();
-    m_RecvThread.Join();
+    m_RecvThread.join();
 }
 
 void Client::SetConnectMaxRetry(int max)
@@ -80,12 +84,12 @@ ClientPlaylistHandler& Client::PlaylistHandler()
     return m_PlaylistHandler;
 }
 
-const Signal<void ()>& Client::SigTryConnect() const
+Signal<void ()>& Client::SigTryConnect()
 {
     return m_SigTryConnect;
 }
 
-const Signal<void ()>& Client::SigConnected() const
+Signal<void ()>& Client::SigConnected()
 {
     return m_SigConnected;
 }
@@ -154,7 +158,7 @@ char* Client::GetPayloadBuffer(char group, int payloadSize)
     Header header(group, payloadSize);
     size_t totalSize = header.TotalSize();
 
-    m_SendOutBufMutex.Lock();
+    m_SendOutBufMutex.lock();
 
     if (m_SendOutBuf.size() <= SENDOUTBUF_MAX_KEEP || totalSize > SENDOUTBUF_MAX_KEEP)
         m_SendOutBuf.resize(totalSize);
@@ -170,5 +174,5 @@ void Client::SendOut()
 {
     m_Socket.SendN(&m_SendOutBuf[0], m_SendOutBuf.size());
 
-    m_SendOutBufMutex.Unlock();
+    m_SendOutBufMutex.unlock();
 }

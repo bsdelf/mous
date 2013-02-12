@@ -2,12 +2,13 @@
 #include <QtCore>
 #include <QtGui>
 
+#include <future>
+
 #include <util/MediaItem.h>
 #include <util/PlaylistSerializer.h>
 #include <core/IMediaLoader.h>
 using namespace mous;
 
-#include <scx/Thread.hpp>
 #include <scx/IconvHelper.hpp>
 #include <scx/CharsetHelper.hpp>
 using namespace scx;
@@ -380,9 +381,8 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
             qDebug() << files[i];
         }
 
-        scx::Function<void (const QStringList&)> fn(&SimplePlaylistView::LoadMediaItem, this);
-        m_LoadMediaThread.Run(fn, files);
-        m_LoadMediaThread.Detach();
+        const auto& f = std::bind(&SimplePlaylistView::LoadMediaItem, this, files);
+        std::async(std::launch::async, f);
     } else if (text.isEmpty()) {
         QList<int> rowList = PickSelectedRows();
         qSort(rowList);
@@ -452,9 +452,8 @@ void SimplePlaylistView::SlotAppend()
     m_PrevMediaFilePath = pathList.first();
 
     // Async load
-    scx::Function<void (const QStringList&)> fn(&SimplePlaylistView::LoadMediaItem, this);
-    m_LoadMediaThread.Run(fn, pathList);
-    m_LoadMediaThread.Detach();
+    const auto& f = std::bind(&SimplePlaylistView::LoadMediaItem, this, pathList);
+    std::async(std::launch::async, f);
 }
 
 void SimplePlaylistView::SlotTagging()

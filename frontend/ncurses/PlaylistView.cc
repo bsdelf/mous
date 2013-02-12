@@ -30,7 +30,7 @@ void PlaylistView::Refresh()
     using namespace CharsetHelper;
     using namespace ncurses;
 
-    MutexLocker locker(&m_NeedRefreshMutex);
+    lock_guard<mutex> locker(m_NeedRefreshMutex);
 
     d.Clear();
 
@@ -148,7 +148,7 @@ void PlaylistView::Refresh()
 
 bool PlaylistView::NeedRefresh() const
 {
-    MutexLocker locker(&m_NeedRefreshMutex);
+    lock_guard<mutex> locker(m_NeedRefreshMutex);
     return m_NeedRefresh != 0;
 }
 
@@ -299,12 +299,12 @@ void PlaylistView::SetIndex(int index)
 void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
 {
     if (m_PlaylistHandler != NULL) {
-        m_PlaylistHandler->SigSelect().DisconnectReceiver(this);
-        m_PlaylistHandler->SigPlay().DisconnectReceiver(this);
-        m_PlaylistHandler->SigAppend().DisconnectReceiver(this);
-        m_PlaylistHandler->SigRemove().DisconnectReceiver(this);
-        m_PlaylistHandler->SigMove().DisconnectReceiver(this);
-        m_PlaylistHandler->SigClear().DisconnectReceiver(this);
+        m_PlaylistHandler->SigSelect().DisconnectObject(this);
+        m_PlaylistHandler->SigPlay().DisconnectObject(this);
+        m_PlaylistHandler->SigAppend().DisconnectObject(this);
+        m_PlaylistHandler->SigRemove().DisconnectObject(this);
+        m_PlaylistHandler->SigMove().DisconnectObject(this);
+        m_PlaylistHandler->SigClear().DisconnectObject(this);
     }
 
     if (handler != NULL) {
@@ -398,7 +398,7 @@ void PlaylistView::ReqClear()
 
 void PlaylistView::SlotSelect(int i, int pos)
 {
-    MutexLocker locker(&m_NeedRefreshMutex);
+    lock_guard<mutex> locker(m_NeedRefreshMutex);
 
     if (i != m_Index)
         return;
@@ -420,7 +420,7 @@ void PlaylistView::SlotPlay(int i, bool ok)
 
 void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 {
-    MutexLocker locker(&m_NeedRefreshMutex);
+    lock_guard<mutex> locker(m_NeedRefreshMutex);
 
     if (i != m_Index)
         return;
@@ -434,7 +434,7 @@ void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 
 void PlaylistView::SlotRemove(int i, int pos)
 {
-    MutexLocker locker(&m_NeedRefreshMutex);
+    lock_guard<mutex> locker(m_NeedRefreshMutex);
 
     if (i != m_Index)
         return;
@@ -458,7 +458,7 @@ void PlaylistView::SlotRemove(int i, int pos)
 
 void PlaylistView::SlotMove(int i, int pos, char direct)
 {
-    MutexLocker locker(&m_NeedRefreshMutex);
+    lock_guard<mutex> locker(m_NeedRefreshMutex);
 
     if (i != m_Index)
         return;
@@ -481,7 +481,7 @@ void PlaylistView::SlotMove(int i, int pos, char direct)
 
 void PlaylistView::SlotClear(int i)
 {
-    MutexLocker locker(&m_NeedRefreshMutex);
+    lock_guard<mutex> locker(m_NeedRefreshMutex);
 
     if (i != m_Index)
         return;

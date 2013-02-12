@@ -1151,9 +1151,9 @@ if(256*256*256*64%(tcount+tskip_count)==0){\
 #define CLAMP_TO_8BIT(d) ((d > 0xff) ? 0xff : (d < 0) ? 0 : d)
 
 /* avoid usage of various functions */
-#define malloc please_use_av_malloc
-#define free please_use_av_free
-#define realloc please_use_av_realloc
+//#define malloc please_use_av_malloc
+//#define free please_use_av_free
+//#define realloc please_use_av_realloc
 
 #define CHECKED_ALLOCZ(p, size)\
 {\

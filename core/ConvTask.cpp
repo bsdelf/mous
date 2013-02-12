@@ -59,13 +59,14 @@ void ConvTask::Run(const string& output)
     m_Progress = 0.0000001;
     m_Finished = false;
     m_Canceled = false;
-    m_WorkThread.Run(Function<void (const string&)>(&ConvTask::DoConvert, this), output);
+    const auto& f = std::bind(&ConvTask::DoConvert, this, output);
+    m_WorkThread = std::thread::thread(f);
 }
 
 void ConvTask::Cancel()
 {
     m_Canceled = true;
-    m_WorkThread.Join();
+    m_WorkThread.join();
 }
 
 double ConvTask::Progress() const

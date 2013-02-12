@@ -2,11 +2,10 @@
 
 #include <unistd.h>
 
+#include <thread>
 #include <deque>
 using namespace std;
 
-#include <scx/Mutex.hpp>
-#include <scx/Thread.hpp>
 #include <scx/Signal.hpp>
 #include <scx/FileInfo.hpp>
 using namespace scx;
@@ -16,7 +15,7 @@ using namespace scx;
 using namespace mous;
 
 static bool QUIT = false;
-static Mutex PLAYER_MUTEX;
+static mutex PLAYER_MUTEX;
 
 static IPlayer* PLAYER = NULL;
 static Playlist<MediaItem>* PLAYLIST = NULL;
@@ -31,7 +30,7 @@ void on_finished()
 
         cout << "playing: \"" << item.url << "\""<< endl;
 
-        MutexLocker locker(&PLAYER_MUTEX);
+        lock_guard<mutex> locker(PLAYER_MUTEX);
         if (PLAYER->Status() != PlayerStatus::Closed)
             PLAYER->Close();
         PLAYER->Open(item.url);
@@ -48,10 +47,10 @@ void on_finished()
 void do_playing()
 {
     while (PLAYER != NULL && !QUIT) {
-        PLAYER_MUTEX.Lock();
+        PLAYER_MUTEX.lock();
         uint64_t ms = PLAYER->OffsetMs();
         int32_t rate = PLAYER->BitRate();
-        PLAYER_MUTEX.Unlock();
+        PLAYER_MUTEX.unlock();
 
         cout << rate << " kbps "
              << ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000
@@ -117,8 +116,7 @@ int cmd_play(int argc, char* argv[])
         //cout << "[n(next)/q(quit)/p(pause)/r(replay)] [enter]" << endl;
 
         on_finished();
-        Thread thread;
-        thread.Run(Function<void (void)>(&do_playing));
+        thread th = thread(std::bind(&do_playing));
 
         /*
         bool paused;
@@ -157,7 +155,7 @@ int cmd_play(int argc, char* argv[])
         }
         */
 
-        thread.Join();
+        th.join();
     }
 
     // cleanup

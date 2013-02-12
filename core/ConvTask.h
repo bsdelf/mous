@@ -1,13 +1,13 @@
 #ifndef MOUS_CONVTASK_H
 #define MOUS_CONVTASK_H
 
+#include <thread>
+using namespace std;
+
 #include <util/MediaItem.h>
 #include <core/IConvTask.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IEncoder.h>
-#include <scx/Thread.hpp>
-using namespace std;
-using namespace scx;
 using namespace mous;
 
 namespace mous {
@@ -35,7 +35,7 @@ private:
     MediaItem m_Item;
     const IPluginAgent* m_DecAgent;
     const IPluginAgent* m_EncAgent;
-    Thread m_WorkThread;
+    std::thread::thread m_WorkThread;
 
     IDecoder* m_Decoder;
     IEncoder* m_Encoder;

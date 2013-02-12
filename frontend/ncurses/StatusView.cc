@@ -47,7 +47,7 @@ void StatusView::Refresh()
     using namespace ncurses;
     using namespace CharsetHelper;
 
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
 
     d.Clear();
 
@@ -165,7 +165,7 @@ void StatusView::Refresh()
 
 bool StatusView::NeedRefresh() const
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     return m_NeedRefresh != 0;
 }
 
@@ -181,7 +181,7 @@ void StatusView::Resize(int w, int h)
 
 bool StatusView::InjectKey(int key)
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     switch (key) {
         case ' ':
             if (!m_WaitReply) {
@@ -265,12 +265,12 @@ int StatusView::MinHeight() const
 void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
 {
     if (m_PlayerHandler != NULL) {
-        m_PlayerHandler->SigPause().DisconnectReceiver(this);
-        m_PlayerHandler->SigSeek().DisconnectReceiver(this);
-        m_PlayerHandler->SigVolume().DisconnectReceiver(this);
-        m_PlayerHandler->SigPlayNext().DisconnectReceiver(this);
-        m_PlayerHandler->SigPlayMode().DisconnectReceiver(this);
-        m_PlayerHandler->SigStatus().DisconnectReceiver(this);
+        m_PlayerHandler->SigPause().DisconnectObject(this);
+        m_PlayerHandler->SigSeek().DisconnectObject(this);
+        m_PlayerHandler->SigVolume().DisconnectObject(this);
+        m_PlayerHandler->SigPlayNext().DisconnectObject(this);
+        m_PlayerHandler->SigPlayMode().DisconnectObject(this);
+        m_PlayerHandler->SigStatus().DisconnectObject(this);
     }
 
     if (handler != NULL) {
@@ -287,19 +287,19 @@ void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
 
 void StatusView::SlotPause()
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     m_WaitReply = false;
 }
 
 void StatusView::SlotSeek()
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     m_WaitReply = false;
 }
 
 void StatusView::SlotVolume(int vol)
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     m_Volume = vol;
     ++m_NeedRefresh;
     m_WaitReply = false;
@@ -307,13 +307,13 @@ void StatusView::SlotVolume(int vol)
 
 void StatusView::SlotPlayNext(bool hasNext)
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     m_WaitReply = false;
 }
 
 void StatusView::SlotPlayMode(const std::string& mode)
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     m_PlayMode = mode;
     ++m_NeedRefresh;
     m_WaitReply = false;
@@ -321,7 +321,7 @@ void StatusView::SlotPlayMode(const std::string& mode)
 
 void StatusView::SlotStatus(const ClientPlayerHandler::PlayerStatus& status)
 {
-    MutexLocker locker(&m_RefreshMutex);
+    std::lock_guard<std::mutex> locker(m_RefreshMutex);
     m_PlayerStatus = status;
     ++m_NeedRefresh;
 }

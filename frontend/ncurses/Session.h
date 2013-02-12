@@ -1,12 +1,11 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <scx/Thread.hpp>
 #include <scx/Socket.hpp>
-#include <scx/Mutex.hpp>
 #include <scx/BufObj.hpp>
 using namespace scx;
 
+#include <thread>
 #include <vector>
 #include <deque>
 #include <string>
@@ -60,7 +59,7 @@ private:
 private:
     ServerContext* m_Context;
 
-    Thread m_RecvThread;
+    thread m_RecvThread;
     TcpSocket m_Socket;
     int m_NotifyFd;
     bool m_GotReqStopService;

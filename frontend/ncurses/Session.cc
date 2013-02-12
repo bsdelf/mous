@@ -1,5 +1,6 @@
 #include "Session.h"
 
+#include <mutex>
 #include <vector>
 #include <algorithm>
 using namespace std;
@@ -37,7 +38,7 @@ Session::Session(ServerContext* data):
     m_Context(data),
     m_GotReqStopService(false)
 {
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
     m_Context->sigPlayNextItem.Connect(&Session::SlotPlayNextItem, this);
 }
 
@@ -45,8 +46,8 @@ Session::~Session()
 {
     m_Socket.Close();
 
-    MutexLocker locker(&m_Context->mutex);
-    m_Context->sigPlayNextItem.DisconnectReceiver(this);
+    lock_guard<mutex> locker(m_Context->mtx);
+    m_Context->sigPlayNextItem.DisconnectObject(this);
     m_Context = NULL;
 }
 
@@ -55,14 +56,14 @@ bool Session::Run(const TcpSocket& socket, int notifyFd)
     m_GotReqStopService = false;
     m_Socket = socket;
     m_NotifyFd = notifyFd;
-    Function<void ()> fn(&Session::ThRecvLoop, this);
-    return m_RecvThread.Run(fn) == 0;
+    m_RecvThread = thread(std::bind(&Session::ThRecvLoop, this));
+    return true;
 }
 
 void Session::Stop()
 {
     m_Socket.Shutdown();
-    m_RecvThread.Join();
+    m_RecvThread.join();
 }
 
 void Session::ThRecvLoop()
@@ -172,7 +173,7 @@ void Session::HandlePlayer(char* _buf, int len)
 
 void Session::PlayerPause(BufObj&)
 {
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
     
     m_Context->PausePlayer();
 
@@ -183,7 +184,7 @@ void Session::PlayerSeek(BufObj& buf)
 {
     char direct = buf.Fetch<char>();
     
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     switch (direct) {
         case 1:
@@ -206,7 +207,7 @@ void Session::PlayerVolume(BufObj& buf)
 {
     char change = buf.Fetch<char>();
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     switch (change) {
         case 0:
@@ -235,7 +236,7 @@ void Session::PlayerPlayMode(BufObj& buf)
 {
     char next = buf.Fetch<char>();
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     switch (next) {
         case 1:
@@ -258,7 +259,7 @@ void Session::PlayerPlayNext(BufObj& buf)
 {
     char direct = buf.Fetch<char>();
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     bool hasNext = m_Context->PlayNext(direct);
 
@@ -269,7 +270,7 @@ void Session::PlayerSync(BufObj& buf)
 {
     int running = buf.Fetch<char>();
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     EmPlayerStatus status = m_Context->player->Status();
     int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
@@ -355,7 +356,7 @@ void Session::PlaylistSwitch(BufObj& buf)
     char iList;
     buf >> iList;
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     if (iList < 0 || (size_t)iList >= m_Context->playlists.size())
         return;
@@ -386,7 +387,7 @@ void Session::PlaylistPlay(BufObj& buf)
     int32_t iItem;
     buf >> iList >> iItem;
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     if (iList < 0 || (size_t)iList >= m_Context->playlists.size())
         return;
@@ -410,7 +411,7 @@ void Session::PlaylistAppend(BufObj& buf)
     string path;
     buf >> iList >> path;
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     if (iList < 0 || (size_t)iList >= m_Context->playlists.size())
         return;
@@ -439,7 +440,7 @@ void Session::PlaylistRemove(BufObj& buf)
     int32_t iItem;
     buf >> iList >> iItem;
 
-    MutexLocker locker(&m_Context->mutex);
+    unique_lock<mutex> locker(m_Context->mtx);
 
     if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
         if (iItem >= 0 && iItem < m_Context->playlists[iList].Count()) {
@@ -447,7 +448,7 @@ void Session::PlaylistRemove(BufObj& buf)
         }
     }
 
-    locker.Unlock();
+    locker.unlock();
 
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Remove << iList << iItem);
 }
@@ -459,7 +460,7 @@ void Session::PlaylistMove(BufObj& buf)
     char direct;
     buf >> iList >> iItem >> direct;
 
-    MutexLocker locker(&m_Context->mutex);
+    unique_lock<mutex> locker(m_Context->mtx);
 
     const int total = m_Context->playlists[iList].Count();
     if (total > 0 && iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
@@ -472,7 +473,7 @@ void Session::PlaylistMove(BufObj& buf)
         }
     }
 
-    locker.Unlock();
+    locker.unlock();
 
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Move << iList << iItem << direct);
 }
@@ -482,13 +483,13 @@ void Session::PlaylistClear(BufObj& buf)
     char iList;
     buf >> iList;
 
-    MutexLocker locker(&m_Context->mutex);
+    unique_lock<mutex> locker(m_Context->mtx);
 
     if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {
         m_Context->playlists[iList].Clear();
     }
 
-    locker.Unlock();
+    locker.unlock();
 
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Clear << iList);
 }
@@ -498,7 +499,7 @@ void Session::PlaylistSync(BufObj& buf)
     char iList;
     buf >> iList;
 
-    MutexLocker locker(&m_Context->mutex);
+    lock_guard<mutex> locker(m_Context->mtx);
 
     // send playlist
     if (iList >= 0 && (size_t)iList < m_Context->playlists.size()) {

@@ -2,10 +2,10 @@
 #define SERVER_H
 
 #include <set>
+#include <thread>
 using namespace std;
 
 #include <scx/Socket.hpp>
-#include <scx/Thread.hpp>
 using namespace scx;
 
 struct ServerContext;

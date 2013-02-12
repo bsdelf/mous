@@ -10,7 +10,6 @@
 
 #include <string>
 #include <iostream>
-using namespace std;
 
 #ifndef SO_REUSEPORT
 #define SCX_SOCKET_SO_REUSEPORT
@@ -164,19 +163,19 @@ public:\
     bool Bind(const std::string& ip, int port)\
     {                                                                                       \
         m_InetAddr.Assign(ip, port);                                                        \
-        return bind(m_Fd, (struct sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0; \
+        return ::bind(m_Fd, (struct sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0; \
     }                                                                                       \
 \
     bool Bind(int port)\
     {                                                                                       \
         m_InetAddr.Assign(port);                                                            \
-        return bind(m_Fd, (struct sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0; \
+        return ::bind(m_Fd, (struct sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0; \
     }                                                                                       \
 \
     bool Bind(const InetAddr& addr)\
     {                                                                                       \
         m_InetAddr = addr;                                                                  \
-        return bind(m_Fd, (struct sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0; \
+        return ::bind(m_Fd, (struct sockaddr*)&m_InetAddr.m_Addr, m_InetAddr.m_AddrLen) == 0; \
     }                                                                                       \
 \
 private:\

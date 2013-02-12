@@ -1,9 +1,10 @@
 #ifndef CLIENTPLAYERHANDLER_H
 #define CLIENTPLAYERHANDLER_H
 
+#include <functional>
+#include <mutex>
+
 #include <scx/Signal.hpp>
-#include <scx/Function.hpp>
-#include <scx/Mutex.hpp>
 #include <scx/TaskSchedule.hpp>
 using namespace scx;
 
@@ -50,32 +51,32 @@ public:
     void PlayNext();
     void PlayPrevious();
 
-    const Signal<void ()>& SigPause() const
+    Signal<void ()>& SigPause()
     {
         return m_SigPause;
     }
 
-    const Signal<void ()>& SigSeek() const
+    Signal<void ()>& SigSeek()
     {
         return m_SigSeek;
     }
 
-    const Signal<void (int)>& SigVolume() const
+    Signal<void (int)>& SigVolume()
     {
         return m_SigVolume;
     }
 
-    const Signal<void (bool)>& SigPlayNext() const
+    Signal<void (bool)>& SigPlayNext()
     {
         return m_SigPlayNext;
     }
 
-    const Signal<void (const std::string&)>& SigPlayMode() const
+    Signal<void (const std::string&)>& SigPlayMode()
     {
         return m_SigPlayMode;
     }
 
-    const Signal<void (const PlayerStatus&)>& SigStatus() const
+    Signal<void (const PlayerStatus&)>& SigStatus()
     {
         return m_SigStatus;
     }
@@ -84,8 +85,8 @@ private:
     void OnSyncTask();
 
 private:
-    Function<char* (char, int)> fnGetPayloadBuffer;
-    Function<void (void)> fnSendOut;
+    function<char* (char, int)> fnGetPayloadBuffer;
+    function<void (void)> fnSendOut;
 
     Signal<void ()> m_SigPause;
     Signal<void ()> m_SigSeek;
@@ -97,7 +98,7 @@ private:
     PlayerStatus m_Status;
 
     bool m_WaitSyncReply;
-    Mutex m_MutexWaitSyncReply;
+    std::mutex m_MutexWaitSyncReply;
 
     TaskSchedule m_SyncSchedule;
 };

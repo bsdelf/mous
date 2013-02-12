@@ -88,7 +88,7 @@ public:
     virtual PluginOption RendererPluginOption() const = 0;
 
 public:
-    virtual const scx::Signal<void (void)>* SigFinished() const = 0;
+    virtual scx::Signal<void (void)>* SigFinished() = 0;
 };
 
 }

@@ -6,8 +6,6 @@
 
 #include <deque>
 
-#include <scx/Thread.hpp>
-
 #include <util/MediaItem.h>
 #include <util/Playlist.h>
 using namespace mous;
@@ -107,7 +105,6 @@ private:
     mutable QMutex m_PlaylistMutex;
 
     DlgLoadingMedia m_DlgLoadingMedia;
-    scx::Thread m_LoadMediaThread;
 
     PlaylistActionHistory<MediaItem> m_History;
 

@@ -3,10 +3,11 @@
 
 #include <vector>
 #include <map>
+#include <thread>
+
 #include <core/IPlayer.h>
 #include <scx/LPVBuffer.hpp>
 #include <scx/Signal.hpp>
-#include <scx/Thread.hpp>
 
 #ifndef __MACH__
 #include <scx/SemVar.hpp>
@@ -81,7 +82,7 @@ public:
     PluginOption RendererPluginOption() const;
 
 public:
-    const scx::Signal<void (void)>* SigFinished() const;
+    scx::Signal<void (void)>* SigFinished();
 
 private:
     void AddDecoderPlugin(const IPluginAgent* pAgent);
@@ -99,8 +100,6 @@ private:
 
     void ThDecoder();
     void ThRenderer();
-
-    void ThPostSigFinished();
 
 private:
     struct UnitBuffer
@@ -144,7 +143,7 @@ private:
     bool m_SuspendDecoder;
     bool m_PauseDecoder;
     IDecoder* m_Decoder;
-    scx::Thread m_ThreadForDecoder;
+    thread m_ThreadForDecoder;
     Semaphore m_SemWakeDecoder;
     Semaphore m_SemDecoderBegin;
     Semaphore m_SemDecoderEnd;
@@ -152,7 +151,7 @@ private:
     bool m_StopRenderer;
     bool m_SuspendRenderer;
     IRenderer* m_Renderer;
-    scx::Thread m_ThreadForRenderer;
+    thread m_ThreadForRenderer;
     Semaphore m_SemWakeRenderer;
     Semaphore m_SemRendererBegin;
     Semaphore m_SemRendererEnd;
@@ -174,7 +173,6 @@ private:
     typedef std::map<std::string, DecoderPluginNode>::iterator DecoderPluginMapIter;
     typedef std::map<std::string, DecoderPluginNode>::const_iterator DecoderPluginMapConstIter;
 
-    scx::Thread m_ThPostSigFinished;
     scx::Signal<void (void)> m_SigFinished;
 };
 

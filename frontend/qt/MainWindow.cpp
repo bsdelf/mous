@@ -46,7 +46,7 @@ MainWindow::~MainWindow()
 
     QMutexLocker locker(&m_PlayerMutex);
 
-    m_Player->SigFinished()->DisconnectReceiver(this);
+    m_Player->SigFinished()->DisconnectObject(this);
 
     if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
@@ -130,7 +130,7 @@ void MainWindow::InitMousCore()
 
 void MainWindow::ClearMousCore()
 {
-    m_Player->SigFinished()->DisconnectReceiver(this);
+    m_Player->SigFinished()->DisconnectObject(this);
     m_FrmTagEditor.SetPlayer(NULL);
     m_FrmTagEditor.SetTagParserFactory(NULL);
 

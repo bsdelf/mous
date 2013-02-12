@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <future>
 using namespace std;
 
 #include <scx/Conv.hpp>
@@ -45,9 +46,11 @@ Player::Player():
 {
     m_UnitBuffers.AllocBuffer(5);
 
-    m_ThreadForDecoder.Run(Function<void (void)>(&Player::ThDecoder, this));
+    const auto& f1 = std::bind(&Player::ThDecoder, this);
+    m_ThreadForDecoder = thread(f1);
 
-    m_ThreadForRenderer.Run(Function<void (void)>(&Player::ThRenderer, this));
+    const auto& f2 = std::bind(&Player::ThRenderer, this);
+    m_ThreadForRenderer = thread(f2);
 }
 
 Player::~Player()
@@ -59,8 +62,8 @@ Player::~Player()
     m_SemWakeDecoder.Post();
     m_SemWakeRenderer.Post();
 
-    m_ThreadForDecoder.Join();
-    m_ThreadForRenderer.Join();
+    m_ThreadForDecoder.join();
+    m_ThreadForRenderer.join();
 
     m_UnitBuffers.ClearBuffer();
 
@@ -560,7 +563,7 @@ PluginOption Player::RendererPluginOption() const
     return option;
 }
 
-const Signal<void (void)>* Player::SigFinished() const
+Signal<void (void)>* Player::SigFinished()
 {
     return &m_SigFinished;
 }
@@ -638,14 +641,7 @@ void Player::ThRenderer()
 
         if (m_RendererIndex >= m_UnitEnd) {
             m_Status = PlayerStatus::Stopped;
-            Function<void (void)> fn(&Player::ThPostSigFinished, this);
-            m_ThPostSigFinished.Run(fn);
-            m_ThPostSigFinished.Detach();
+            std::async(std::launch::async, [this]() { m_SigFinished(); });
         }
     }
-}
-
-void Player::ThPostSigFinished()
-{
-    m_SigFinished();
 }

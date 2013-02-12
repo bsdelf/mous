@@ -31,7 +31,7 @@ ServerContext::ServerContext():
 
 ServerContext::~ServerContext()
 {
-    player->SigFinished()->DisconnectReceiver(this);
+    player->SigFinished()->DisconnectObject(this);
 
     ClosePlayer();
 
@@ -232,7 +232,7 @@ void ServerContext::ClosePlayer()
 
 void ServerContext::SlotFinished()
 {
-    MutexLocker locker(&mutex);
+    lock_guard<mutex> locker(mtx);
 
     playlist_t& list = playlists[usedPlaylist];
     if (list.HasNext(1)) {

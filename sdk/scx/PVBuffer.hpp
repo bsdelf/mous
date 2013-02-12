@@ -2,8 +2,7 @@
 #define SCX_PVBUFFER_HPP
 
 #include <deque>
-
-#include "Mutex.hpp"
+#include <mutex>
 
 #ifndef __MACH__
 #include "SemVar.hpp"
@@ -116,36 +115,36 @@ public:
     item_t* TakeFree()
     {
         m_FreeListSemVar.Wait(); 
-        m_FreeListMutex.Lock();
+        m_FreeListMutex.lock();
         item_t* pItem = m_FreeQueue.front();
         m_FreeQueue.pop_front();
-        m_FreeListMutex.Unlock();
+        m_FreeListMutex.unlock();
         return pItem;
     }
 
     void RecycleFree(item_t* pItem)
     {
-        m_DataListMutex.Lock();
+        m_DataListMutex.lock();
         m_DataQueue.push_back(pItem);
-        m_DataListMutex.Unlock();
+        m_DataListMutex.unlock();
         m_DataListSemVar.Post();
     }
 
     item_t* TakeData()
     {
         m_DataListSemVar.Wait(); 
-        m_DataListMutex.Lock();
+        m_DataListMutex.lock();
         item_t* pItem = m_DataQueue.front();
         m_DataQueue.pop_front();
-        m_DataListMutex.Unlock();
+        m_DataListMutex.unlock();
         return pItem;
     }
 
     void RecycleData(item_t* pItem)
     {
-        m_FreeListMutex.Lock();
+        m_FreeListMutex.lock();
         m_FreeQueue.push_back(pItem);
-        m_FreeListMutex.Unlock();
+        m_FreeListMutex.unlock();
         m_FreeListSemVar.Post();
     }
 
@@ -162,9 +161,9 @@ public:
     void ClearFree()
     {
         m_FreeListSemVar.Clear();
-        m_FreeListMutex.Lock();
+        m_FreeListMutex.lock();
         m_FreeQueue.clear();
-        m_FreeListMutex.Unlock();
+        m_FreeListMutex.unlock();
     }
 
     /**
@@ -173,20 +172,20 @@ public:
     void ClearData()
     {
         m_DataListSemVar.Clear();
-        m_DataListMutex.Lock();
+        m_DataListMutex.lock();
         m_DataQueue.clear();
-        m_DataListMutex.Unlock();
+        m_DataListMutex.unlock();
     }
 
 private:
     std::deque<item_t*> m_BufferQueue;
 
     std::deque<item_t*> m_FreeQueue;
-    Mutex m_FreeListMutex;
+    std::mutex m_FreeListMutex;
     Semaphore m_FreeListSemVar;
 
     std::deque<item_t*> m_DataQueue;
-    Mutex m_DataListMutex;
+    std::mutex m_DataListMutex;
     Semaphore m_DataListSemVar;
 };
 

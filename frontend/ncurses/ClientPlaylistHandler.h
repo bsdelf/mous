@@ -1,12 +1,12 @@
 #ifndef CLIENTPLAYLISTHANDLER_H
 #define CLIENTPLAYLISTHANDLER_H
 
-#include <scx/Signal.hpp>
-#include <scx/Function.hpp>
-using namespace scx;
-
+#include <functional>
 #include <deque>
 using namespace std;
+
+#include <scx/Signal.hpp>
+using namespace scx;
 
 #include <util/MediaItem.h>
 using namespace mous;
@@ -37,44 +37,44 @@ public:
     void MoveItem(int playlist, int oldPos, int newPos);
 
     // server reply
-    const Signal<void (int)>& SigSwitch() const
+    Signal<void (int)>& SigSwitch()
     {
         return m_SigSwitch;
     }
 
-    const Signal<void (int, int)>& SigSelect() const
+    Signal<void (int, int)>& SigSelect()
     {
         return m_SigSelect;
     }
 
-    const Signal<void (int, bool)>& SigPlay() const
+    Signal<void (int, bool)>& SigPlay()
     {
         return m_SigPlay;
     }
 
-    const Signal<void (int, deque<MediaItem*>&)>& SigAppend() const
+    Signal<void (int, deque<MediaItem*>&)>& SigAppend()
     {
         return m_SigAppend;
     }
 
-    const Signal<void (int, int)>& SigRemove() const
+    Signal<void (int, int)>& SigRemove()
     {
         return m_SigRemove;
     }
 
-    const Signal<void (int, int, char)>& SigMove() const
+    Signal<void (int, int, char)>& SigMove()
     {
         return m_SigMove;
     }
 
-    const Signal<void (int)>& SigClear() const
+    Signal<void (int)>& SigClear()
     {
         return m_SigClear;
     }
 
 private:
-    Function<char* (char, int)> fnGetPayloadBuffer;
-    Function<void (void)> fnSendOut;
+    function<char* (char, int)> fnGetPayloadBuffer;
+    function<void (void)> fnSendOut;
 
     Signal<void (int)> m_SigSwitch;
     Signal<void (int, int)> m_SigSelect;

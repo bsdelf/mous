@@ -2,10 +2,10 @@
 #define PLAYLISTVIEW_H
 
 #include <deque>
+#include <mutex>
 using namespace std;
 
 #include <scx/Signal.hpp>
-#include <scx/Mutex.hpp>
 using namespace scx;
 
 #include <util/MediaItem.h>
@@ -65,7 +65,7 @@ private:
     Window d;
 
     int m_NeedRefresh;
-    mutable Mutex m_NeedRefreshMutex;
+    mutable mutex m_NeedRefreshMutex;
 
     bool m_Focused;
     int m_Index;

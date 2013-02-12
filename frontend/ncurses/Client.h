@@ -3,13 +3,12 @@
 
 #include <vector>
 #include <string>
+#include <mutex>
+#include <thread>
 using namespace std;
 
-#include <scx/Mutex.hpp>
-#include <scx/Function.hpp>
 #include <scx/Signal.hpp>
 #include <scx/Socket.hpp>
-#include <scx/Thread.hpp>
 using namespace scx;
 
 #include "ClientPlayerHandler.h"
@@ -34,8 +33,8 @@ public:
     ClientPlayerHandler& PlayerHandler();
     ClientPlaylistHandler& PlaylistHandler();
 
-    const Signal<void ()>& SigTryConnect() const;
-    const Signal<void ()>& SigConnected() const;
+    Signal<void ()>& SigTryConnect();
+    Signal<void ()>& SigConnected();
 
 private:
     void ThRecvLoop(const string&, int);
@@ -44,14 +43,14 @@ private:
     inline void SendOut();
 
 private:
-    Thread m_RecvThread;
+    thread m_RecvThread;
 
     int m_ConnectMaxRetry;
     int m_ConnectRetryInterval;
     bool m_ConnectStopRetry;
 
     TcpSocket m_Socket;
-    Mutex m_SendOutBufMutex;
+    mutex m_SendOutBufMutex;
     vector<char> m_SendOutBuf;
 
     ClientPlayerHandler m_PlayerHandler;

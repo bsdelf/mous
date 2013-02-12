@@ -1,11 +1,10 @@
 #ifndef STATUSVIEW_H
 #define STATUSVIEW_H
 
+#include <mutex>
+
 #include <util/MediaItem.h>
 using namespace mous;
-
-#include <scx/Mutex.hpp>
-using namespace scx;
 
 #include "IView.h"
 #include "ClientPlayerHandler.h"
@@ -45,7 +44,7 @@ private:
 
     ClientPlayerHandler* m_PlayerHandler;
 
-    mutable Mutex m_RefreshMutex;
+    mutable mutex m_RefreshMutex;
     bool m_WaitReply;
     int m_NeedRefresh;
     int m_Volume;
