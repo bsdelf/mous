@@ -2,10 +2,10 @@
 #include <util/PluginHelper.h>
 
 static const PluginInfo info = {
-    .author = "Yanhui Shen",
-    .name = "WavPack Decoder",
-    .desc = "Decoder for WavPack.",
-    .version = 1
+    "Yanhui Shen",
+    "WavPack Decoder",
+    "Decoder for WavPack.",
+    1
 };
 
 MOUS_DEF_PLUGIN(PluginType::Decoder, &info, WvDecoder);
