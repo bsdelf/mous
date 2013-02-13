@@ -149,16 +149,15 @@ public:\
     }                       \
 \
     void SetOption(const SocketOpt& opt)\
-    {                                                                       \
-        int ret;                                                            \
-        int on;                                                             \
-        on = opt.reuseAddr;                                                 \
-        ret = setsockopt(m_Fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));  \
-        on = opt.reusePort;                                                 \
-        ret = setsockopt(m_Fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));  \
-        on = opt.keepAlive;                                                 \
-        ret = setsockopt(m_Fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));  \
-    }                                                                       \
+    {                                                                   \
+        int on;                                                         \
+        on = opt.reuseAddr;                                             \
+        setsockopt(m_Fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));    \
+        on = opt.reusePort;                                             \
+        setsockopt(m_Fd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));    \
+        on = opt.keepAlive;                                             \
+        setsockopt(m_Fd, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));    \
+    }                                                                   \
 \
     bool Bind(const std::string& ip, int port)\
     {                                                                                       \
