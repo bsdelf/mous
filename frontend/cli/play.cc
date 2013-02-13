@@ -156,7 +156,8 @@ int cmd_play(int argc, char* argv[])
         }
         */
 
-        th.join();
+        if (th.joinable())
+            th.join();
     }
 
     // cleanup

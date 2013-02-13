@@ -63,7 +63,8 @@ bool Session::Run(const TcpSocket& socket, int notifyFd)
 void Session::Stop()
 {
     m_Socket.Shutdown();
-    m_RecvThread.join();
+    if (m_RecvThread.joinable())
+        m_RecvThread.join();
 }
 
 void Session::ThRecvLoop()

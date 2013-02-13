@@ -66,7 +66,8 @@ void ConvTask::Run(const string& output)
 void ConvTask::Cancel()
 {
     m_Canceled = true;
-    m_WorkThread.join();
+    if (m_WorkThread.joinable())
+        m_WorkThread.join();
 }
 
 double ConvTask::Progress() const
