@@ -2,7 +2,8 @@
 #include <QtCore>
 #include <QtGui>
 
-#include <future>
+#include <thread>
+using namespace std;
 
 #include <util/MediaItem.h>
 #include <util/PlaylistSerializer.h>
@@ -12,7 +13,6 @@ using namespace mous;
 #include <scx/IconvHelper.hpp>
 #include <scx/CharsetHelper.hpp>
 using namespace scx;
-using namespace std;
 
 #include "UiHelper.hpp"
 using namespace sqt;
@@ -382,7 +382,7 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
         }
 
         const auto& f = std::bind(&SimplePlaylistView::LoadMediaItem, this, files);
-        std::async(std::launch::async, f);
+        std::thread(f).detach();
     } else if (text.isEmpty()) {
         QList<int> rowList = PickSelectedRows();
         qSort(rowList);
@@ -453,7 +453,7 @@ void SimplePlaylistView::SlotAppend()
 
     // Async load
     const auto& f = std::bind(&SimplePlaylistView::LoadMediaItem, this, pathList);
-    std::async(std::launch::async, f);
+    std::thread(f).detach();
 }
 
 void SimplePlaylistView::SlotTagging()

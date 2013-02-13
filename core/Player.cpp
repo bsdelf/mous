@@ -47,10 +47,10 @@ Player::Player():
     m_UnitBuffers.AllocBuffer(5);
 
     const auto& f1 = std::bind(&Player::ThDecoder, this);
-    m_ThreadForDecoder = thread(f1);
+    m_ThreadForDecoder = std::thread(f1);
 
     const auto& f2 = std::bind(&Player::ThRenderer, this);
-    m_ThreadForRenderer = thread(f2);
+    m_ThreadForRenderer = std::thread(f2);
 }
 
 Player::~Player()
@@ -62,8 +62,10 @@ Player::~Player()
     m_SemWakeDecoder.Post();
     m_SemWakeRenderer.Post();
 
-    m_ThreadForDecoder.join();
-    m_ThreadForRenderer.join();
+    if (m_ThreadForDecoder.joinable())
+        m_ThreadForDecoder.join();
+    if (m_ThreadForDecoder.joinable())
+        m_ThreadForRenderer.join();
 
     m_UnitBuffers.ClearBuffer();
 
@@ -639,7 +641,7 @@ void Player::ThRenderer()
 
         if (m_RendererIndex >= m_UnitEnd) {
             m_Status = PlayerStatus::Stopped;
-            std::async(std::launch::async, [this]() { m_SigFinished(); });
+            std::thread([this]() { m_SigFinished(); }).detach();
         }
     }
 }
