@@ -21,7 +21,7 @@ public:
     {
         FileInfo file(path);
         if (file.Exists() && file.Type() == FileType::Directory)
-            return chdir(path.c_str()) == 0;
+            return ::chdir(path.c_str()) == 0;
         else
             return false;
     }
@@ -64,8 +64,8 @@ public:
                 if (info.Type() != FileType::Directory)
                     return false;
             } else {
-                if (mkdir(parent.c_str(), mode) != 0) {
-                    perror(string("MakeDir() " + parent + " failed!").c_str());
+                if (::mkdir(parent.c_str(), mode) != 0) {
+                    ::perror(string("MakeDir() " + parent + " failed!").c_str());
                     return false;
                 }
             }
@@ -80,11 +80,11 @@ public:
     static std::vector<std::string> ListDir(const std::string& path)
     {
         std::vector<std::string> list;
-        DIR* dir = opendir(path.c_str());
-        for (struct dirent* d; (d = readdir(dir)) != NULL; ) {
+        DIR* dir = ::opendir(path.c_str());
+        for (struct dirent* d; (d = ::readdir(dir)) != nullptr; ) {
             list.push_back(d->d_name);
         }
-        closedir(dir);
+        ::closedir(dir);
         return list;
     }
 };

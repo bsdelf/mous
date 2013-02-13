@@ -1,8 +1,8 @@
 #ifndef SCX_SOFTSEMVAR_HPP
 #define SCX_SOFTSEMVAR_HPP
 
-#include "Mutex.hpp"
-#include "CondVar.hpp"
+#include <mutex>
+#include <condition_variable>
 
 namespace scx {
 
@@ -20,14 +20,14 @@ public:
 
     void Post(int n = 1)
     {
-        MutexLocker mlocker(&m_Mutex);
+        std::lock_guard<std::mutex> locker(m_Mutex);
         m_Value += n;
-        m_CondVar.Broadcast();
+        m_CondVar.notify_all();
     }
 
     bool TryWait(int n = 1)
     {
-        MutexLocker mlocker(&m_Mutex);
+        std::lock_guard<std::mutex> locker(m_Mutex);
         if (n > m_Value)
             return false;
         m_Value -= n;
@@ -36,28 +36,28 @@ public:
 
     void Wait(int n = 1)
     {
-        MutexLocker mlocker(&m_Mutex);
+        std::unique_lock<std::mutex> locker(m_Mutex);
         while (n > m_Value)
-            m_CondVar.Wait(&m_Mutex);
+            m_CondVar.wait(locker);
         m_Value -= n;
     }
 
     int Value() const
     {
-        MutexLocker mlocker(const_cast<Mutex*>(&m_Mutex));
+        std::lock_guard<std::mutex> locker(*const_cast<std::mutex*>(&m_Mutex));
         return m_Value;
     }
 
     void Clear()
     {
-        MutexLocker mlocker(&m_Mutex);
+        std::lock_guard<std::mutex> locker(m_Mutex);
         m_Value = 0;
     }
 
 private:
     int m_Value;
-    Mutex m_Mutex;
-    CondVar m_CondVar;
+    std::mutex m_Mutex;
+    std::condition_variable m_CondVar;
 };
 
 }

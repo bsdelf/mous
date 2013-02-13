@@ -21,7 +21,7 @@ extern "C" {\
     }                           \
     \
     void MousFreeObject(void* p) {              \
-        if (p != NULL) {                        \
+        if (p != nullptr) {                     \
             obj_t* op = static_cast<obj_t*>(p); \
             delete op;                          \
         }                                       \

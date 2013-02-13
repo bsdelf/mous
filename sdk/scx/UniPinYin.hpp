@@ -25,7 +25,7 @@ public:
         while (getline(file, line)) {
             if (line.size() <= 5)
                 continue;
-            key = strtol(line.substr(0, 4).c_str(), NULL, 16);
+            key = strtol(line.substr(0, 4).c_str(), nullptr, 16);
             size_t end = line.find('\t', 5);
             m_Map[key] = line.substr(5, end == string::npos ? string::npos : end-5);
         }

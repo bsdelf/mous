@@ -22,7 +22,7 @@ const char* const TmpDir = "TMPDIR";
 static inline std::string Env(const std::string& name)
 {
     char* p = getenv(name.c_str());
-    return p != NULL ? std::string(p) : "";
+    return p != nullptr ? std::string(p) : "";
 }
 
 static inline bool SetEnv(const std::string& name, std::string& value, bool overwrite = true)

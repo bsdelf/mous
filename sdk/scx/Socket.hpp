@@ -81,7 +81,7 @@ public:
     {
         char buf[INET6_ADDRSTRLEN];
         const char* p = inet_ntop(AF_INET, &m_Addr.sin_addr, buf, sizeof(buf));
-        return p != NULL ? p : "";
+        return p != nullptr ? p : "";
     }
 
     int Port() const

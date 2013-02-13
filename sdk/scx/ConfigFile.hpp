@@ -186,7 +186,7 @@ public:
 
     std::string& operator[](const std::string& key)
     {
-        std::string* val = NULL;
+        std::string* val = nullptr;
         if (!m_Index.empty()) {
             if (m_Index.find(key) != m_Index.end())
                 val = &m_Lines[m_Index[key]].val;
@@ -196,7 +196,7 @@ public:
                     val = &m_Lines[i].val;
             }
         }
-        if (val == NULL) {
+        if (val == nullptr) {
             m_Lines.push_back(Line(true, key));
             val = &(m_Lines[m_Lines.size()-1].val);
         }

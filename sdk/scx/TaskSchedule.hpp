@@ -67,7 +67,7 @@ public:
             
         m_Work = true;
         return pthread_create(
-                &m_ThreadId, NULL, 
+                &m_ThreadId, nullptr, 
                 &TaskSchedule::OnThread, static_cast<void*>(this)) == 0;
     }
 
@@ -75,7 +75,7 @@ public:
     void Stop(bool clear = false)
     {
         m_Work = false;
-        pthread_join(m_ThreadId, NULL);
+        pthread_join(m_ThreadId, nullptr);
 
         if (clear) {
             for (size_t i = 0; i < m_TaskList.size(); ++i) {
@@ -109,7 +109,7 @@ public:
     void Cancel(long key)
     {
         Task* task = reinterpret_cast<Task*>(key);
-        if (task != NULL) {
+        if (task != nullptr) {
             std::lock_guard<std::mutex> locker(task->mtx);
             task->canceled = true;
         }
@@ -156,7 +156,7 @@ private:
     {
         while (m_Work) {
             struct timeval tv = { 0L, 2L };
-            if (select(0, NULL, NULL, NULL, &tv) == 0) {
+            if (select(0, nullptr, nullptr, nullptr, &tv) == 0) {
                 struct timeval tv = CurrentTimeVal();
 
                 size_t n = 0;
@@ -204,7 +204,7 @@ private:
     {
         TaskSchedule* ule = static_cast<TaskSchedule*>(pThis);
         ule->DoOnThread();
-        return NULL;
+        return nullptr;
     }
 
 private:

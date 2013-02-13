@@ -48,80 +48,76 @@ class FileInfo
 {
 public:
     FileInfo():
-        m_Exists(false),
-        m_Type(FileType::None)
-    {
-    }
-
-    ~FileInfo()
+        m_exists(false),
+        m_type(FileType::None)
     {
     }
 
     explicit FileInfo(const std::string& file):
-        m_Name(file),
-        m_Exists(false),
-        m_Type(FileType::None)
+        m_name(file),
+        m_exists(false),
+        m_type(FileType::None)
     {
         CheckFileType();
     }
     
     std::string Name() const
     {
-        return m_Name;
+        return m_name;
     }
 
     bool Exists() const
     {
-        return m_Exists;
+        return m_exists;
     }
 
     EmFileType Type() const
     {
-        return m_Type;
+        return m_type;
     }
 
     off_t Size() const
     {
-        return m_Exists ? m_Stat.st_size : -1;
+        return m_exists ? m_stat.st_size : -1;
     }
 
     // NOTE: too strict
     bool IsAbs() const
     {
-        if (m_Name.empty() || !m_Exists)
+        if (m_name.empty() || !m_exists)
             return false;
 
-        if (m_Name[0] != '/')
+        if (m_name[0] != '/')
             return false;
 
-        std::string name(m_Name);
+        std::string name(m_name);
         while (name.size() >= 2 && name[name.size()-1] == '/')
             name.erase(name.size()-1, '/');
-        return name == AbsFilePath();
+        return (name == AbsFilePath());
     }
 
     std::string AbsPath() const
     {
-        if (!m_Exists || m_Name.empty())
+        if (!m_exists || m_name.empty())
             return "";
 
         std::string name(AbsFilePath());
         name = name.substr(0, name.find_last_of('/'));
-        return !name.empty() ? name : "/";
+        return (!name.empty() ? name : "/");
     }
 
     std::string AbsFilePath() const
     {
-        if (!m_Exists)
+        if (!m_exists)
             return "";
 
         char buf[PATH_MAX];
-        return realpath(m_Name.c_str(), buf) != NULL ? std::string(buf) : "";
+        return realpath(m_name.c_str(), buf) != nullptr ? std::string(buf) : "";
     }
 
     std::string BaseName() const
     {
-        if (!m_Exists)
+        if (!m_exists)
             return "";
 
         std::string name(AbsFilePath());
@@ -131,21 +127,21 @@ public:
 
     std::string Suffix() const
     {
-        if (!m_Exists || NotRegularFile())
+        if (!m_exists || NotRegularFile())
             return "";
 
-        size_t pos = m_Name.find_last_of('.');
-        return (pos == std::string::npos) ? "" : m_Name.substr(pos+1);
+        size_t pos = m_name.find_last_of('.');
+        return (pos == std::string::npos) ? "" : m_name.substr(pos+1);
     }
 
 private:
     bool NotRegularFile() const
     {
-        if (m_Name.empty())
+        if (m_name.empty())
             return true;
-        if (m_Exists && m_Type == FileType::Directory)
+        if (m_exists && m_type == FileType::Directory)
             return true;
-        if (m_Name[m_Name.size()-1] == '/')
+        if (m_name[m_name.size()-1] == '/')
             return true;
         
         return false;
@@ -153,34 +149,34 @@ private:
 
     void CheckFileType()
     {
-        m_Exists = !m_Name.empty() && (stat(m_Name.c_str(), &m_Stat) == 0);
-        if (!m_Exists)
+        m_exists = !m_name.empty() && (stat(m_name.c_str(), &m_stat) == 0);
+        if (!m_exists)
             return;
 
-        if (S_ISREG(m_Stat.st_mode))
-            m_Type = FileType::Regular;
-        else if (S_ISDIR(m_Stat.st_mode))
-            m_Type = FileType::Directory;
-        else if (S_ISCHR(m_Stat.st_mode))
-            m_Type = FileType::CharacterSpecial;
-        else if (S_ISBLK(m_Stat.st_mode))
-            m_Type = FileType::Block;
-        else if (S_ISFIFO(m_Stat.st_mode))
-            m_Type = FileType::Pipe;
-        else if (S_ISLNK(m_Stat.st_mode))
-            m_Type = FileType::Link;
-        else if (S_ISSOCK(m_Stat.st_mode))
-            m_Type = FileType::Socket;
+        if (S_ISREG(m_stat.st_mode))
+            m_type = FileType::Regular;
+        else if (S_ISDIR(m_stat.st_mode))
+            m_type = FileType::Directory;
+        else if (S_ISCHR(m_stat.st_mode))
+            m_type = FileType::CharacterSpecial;
+        else if (S_ISBLK(m_stat.st_mode))
+            m_type = FileType::Block;
+        else if (S_ISFIFO(m_stat.st_mode))
+            m_type = FileType::Pipe;
+        else if (S_ISLNK(m_stat.st_mode))
+            m_type = FileType::Link;
+        else if (S_ISSOCK(m_stat.st_mode))
+            m_type = FileType::Socket;
         else
-            m_Type = FileType::Other;
+            m_type = FileType::Other;
     }
 
 private:
-    struct stat m_Stat;
+    struct stat m_stat;
 
-    std::string m_Name;
-    bool m_Exists;
-    EmFileType m_Type;
+    std::string m_name;
+    bool m_exists;
+    EmFileType m_type;
 };
 
 }

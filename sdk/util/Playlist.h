@@ -411,7 +411,7 @@ private:
 
         int need = m_ItemQueue.size() - m_SeqShuffleQueue.size();
         if (need > 0) {
-            srandom(time(NULL));
+            srandom(time(nullptr));
             for (int i = 0; i < need; ++i) {
                 int inspos = random() % (m_SeqShuffleQueue.size()+1);
                 m_SeqShuffleQueue.insert(m_SeqShuffleQueue.begin()+inspos, m_SeqShuffleQueue.size());

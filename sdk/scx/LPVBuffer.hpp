@@ -26,7 +26,7 @@ public:
         m_FreeListSemVar(0),
         m_DataListSemVar(0),
         m_BufferCount(0),
-        m_BufferArray(NULL),
+        m_BufferArray(nullptr),
         m_FreeIndex(-1),
         m_DataIndex(-1)
     {
@@ -36,7 +36,7 @@ public:
     {
         m_FreeListSemVar.Clear();
         m_DataListSemVar.Clear();
-        if (m_BufferArray != NULL)
+        if (m_BufferArray != nullptr)
             delete[] m_BufferArray;
     }
 
@@ -55,7 +55,7 @@ public:
 
         delete[] m_BufferArray;
         m_BufferCount = 0;
-        m_BufferArray = NULL;
+        m_BufferArray = nullptr;
 
         m_FreeIndex = -1;
         m_DataIndex = -1;
@@ -120,7 +120,7 @@ public:
         return item;
     }
 
-    void RecycleFree(item_t* val = NULL)
+    void RecycleFree(item_t* val = nullptr)
     {
         m_DataListSemVar.Post();
     }
@@ -142,7 +142,7 @@ public:
         return item;
     }
 
-    void RecycleData(item_t* p = NULL)
+    void RecycleData(item_t* p = nullptr)
     {
         m_FreeListSemVar.Post();
     }

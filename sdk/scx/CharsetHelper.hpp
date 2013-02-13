@@ -35,7 +35,7 @@ static inline int MBWidth(const char* c, bool useUtf8 = true)
 
     if (useUtf8) {
         if (mbtowc(&wc, c, MB_CUR_MAX) < 0) {
-            mbtowc(NULL, NULL, 0);
+            mbtowc(nullptr, nullptr, 0);
             wc = bad_wchar;
         }
 
@@ -59,7 +59,7 @@ static inline int MBStrWidth(const std::string& str)
     for (size_t i = 0; i < str.size(); ) {
         int len = mblen(s+i, MB_CUR_MAX);
         if (len < 0) {
-            mblen(NULL, 0);
+            mblen(nullptr, 0);
             width += 1;
             i += 1;
         } else {
@@ -72,7 +72,7 @@ static inline int MBStrWidth(const std::string& str)
 
 static inline int MBStrLen(const std::string& str)
 {
-    return mbstowcs(NULL, str.c_str(), str.size());
+    return mbstowcs(nullptr, str.c_str(), str.size());
 }
 
 static inline std::string MBSubStr(const std::string& str, int n, int ignoreN = 0)
@@ -87,7 +87,7 @@ static inline std::string MBSubStr(const std::string& str, int n, int ignoreN = 
         for (int c = 0; c < nch[idx] && i < str.size(); ++c) {
             int len = mblen(s+i, MB_CUR_MAX);
             if (len < 0) {
-                mblen(NULL, 0);
+                mblen(nullptr, 0);
                 i += 1;
             } else {
                 i += len;
@@ -110,7 +110,7 @@ static inline std::string MBWidthStr(const std::string& str, int width)
     while (i < str.size() && hasWidth < width) {
         int len = mblen(s+i, MB_CUR_MAX);
         if (len < 0) {
-            mblen(NULL, 0);
+            mblen(nullptr, 0);
             i += 1;
             hasWidth += 1;
         } else {
@@ -125,7 +125,7 @@ static inline std::string MBWidthStr(const std::string& str, int width)
 // COPYRIGHT: http://stackoverflow.com/questions/1031645/how-to-detect-utf-8-in-plain-c
 static inline bool IsUtf8(const char * string)
 {
-    if (string == NULL)
+    if (string == nullptr)
         return false;
 
     const unsigned char * bytes = (const unsigned char *)string;

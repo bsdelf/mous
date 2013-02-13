@@ -17,9 +17,9 @@ public:
 
     static void Cleanup()
     {
-        if (sInstance != NULL) {
+        if (sInstance != nullptr) {
             delete sInstance;
-            sInstance = NULL;
+            sInstance = nullptr;
         }
     }
 
@@ -38,7 +38,7 @@ template<typename T>
 pthread_once_t Singleton<T>::control = PTHREAD_ONCE_INIT;
 
 template<typename T>
-T* Singleton<T>::sInstance = NULL;
+T* Singleton<T>::sInstance = nullptr;
 
 }
 #endif

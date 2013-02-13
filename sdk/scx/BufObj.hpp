@@ -15,7 +15,7 @@ public:
     typedef uint32_t stlsize_t;
 
 public:
-    explicit BufObj(void* _buf = NULL):
+    explicit BufObj(void* _buf = nullptr):
         buf((char*)_buf),
         off(0)
     {
@@ -60,7 +60,7 @@ public:
         if (len == (size_t)-1) {
             len = strlen(data);
         }
-        if (buf != NULL)
+        if (buf != nullptr)
             std::memcpy(buf+off, data, len);
         off += len;
         return *this;
@@ -68,7 +68,7 @@ public:
 
     BufObj& TakeChars(char* data, size_t len)
     {
-        if (buf != NULL)
+        if (buf != nullptr)
             std::memcpy(data, buf+off, len);
         off += len;
         return *this;
@@ -78,7 +78,7 @@ public:
     BufObj& PutString(const std::string& str)
     {
         PutRaw((stlsize_t)str.size());
-        if (buf != NULL)
+        if (buf != nullptr)
             std::memcpy(buf+off, str.data(), str.size());
         off += str.size();
         return *this;
@@ -88,7 +88,7 @@ public:
     {
         stlsize_t size = 0;
         TakeRaw(size);
-        if (buf != NULL)
+        if (buf != nullptr)
             str.assign(buf+off, size);
         off += size;
         return *this;
@@ -147,7 +147,7 @@ public:
     template<typename T>
     BufObj& PutRaw(T t)
     {
-        if (buf != NULL)
+        if (buf != nullptr)
             std::memcpy(buf+off, &t, sizeof(T));
         off += sizeof(T);
         return *this;
@@ -156,7 +156,7 @@ public:
     template<typename T>
     BufObj& TakeRaw(T& t)
     {
-        if (buf != NULL)
+        if (buf != nullptr)
             std::memcpy(&t, buf+off, sizeof(T));
         off += sizeof(T);
         return *this;
@@ -165,7 +165,7 @@ public:
     template<typename T>
     T& Fetch(bool moveNext = false)
     {
-        assert(buf != NULL);
+        assert(buf != nullptr);
         T& t = *(T*)(buf+off);
         if (moveNext)
             off += sizeof(T);

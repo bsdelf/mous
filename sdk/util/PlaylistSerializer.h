@@ -100,7 +100,7 @@ public:
 
     static bool Store(const Playlist<item_t>& list, std::vector<char>& outbuf)
     {
-        outbuf.resize(ToStream(list, NULL));
+        outbuf.resize(ToStream(list, nullptr));
         ToStream(list, &outbuf[0]);
         return true;
     }

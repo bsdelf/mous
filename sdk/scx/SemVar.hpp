@@ -11,55 +11,55 @@ class SemVar
 public:
     explicit SemVar(int value = 0)
     {
-        sem_init(&m_Sem, 0, value);
+        ::sem_init(&m_sem, 0, value);
     }
 
     SemVar(int pshared, int value)
     {
-        sem_init(&m_Sem, pshared, value);
+        ::sem_init(&m_sem, pshared, value);
     }
 
     ~SemVar()
     {
-        sem_destroy(&m_Sem);
+        ::sem_destroy(&m_sem);
     }
 
     void Post()
     {
-        sem_post(&m_Sem);
+        ::sem_post(&m_sem);
     }
 
     bool TryWait()
     {
-        return sem_trywait(&m_Sem) == 0;
+        return ::sem_trywait(&m_sem) == 0;
     }
 
     void Wait()
     {
-        sem_wait(&m_Sem);
+        ::sem_wait(&m_sem);
     }
 
     /*
     void TimeWait()
     {
-        //return sem_timewait(&m_Sem, timeout);
+        //return sem_timewait(&m_sem, timeout);
     }
     */
 
     int Value() const
     {
         int sval = 0;
-        sem_getvalue(&m_Sem, &sval);
+        ::sem_getvalue(&m_sem, &sval);
         return sval;
     }
 
     void Clear()
     {
-        while (sem_trywait(&m_Sem) == 0);
+        while (::sem_trywait(&m_sem) == 0);
     }
 
 private:
-    mutable sem_t m_Sem;
+    mutable sem_t m_sem;
 };
 
 }

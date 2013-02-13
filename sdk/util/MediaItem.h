@@ -20,7 +20,7 @@ struct MediaItem
 
     MediaItem():
         duration(-1),
-        userData(NULL)
+        userData(nullptr)
     {
 
     }
