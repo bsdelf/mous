@@ -14,34 +14,35 @@ using namespace Protocol;
 const size_t PAYLOADBUF_MAX_KEEP = 1024;
 const size_t SENDOUTBUF_MAX_KEEP = 256;
 
+namespace phs = std::placeholders;
+
 Client::Client():
     m_ConnectMaxRetry(25),
     m_ConnectRetryInterval(200)
 {
-    namespace phs = std::placeholders;
     m_PlaylistHandler.fnGetPayloadBuffer = 
-        m_PlayerHandler.fnGetPayloadBuffer = std::bind(&Client::GetPayloadBuffer, this, phs::_1, phs::_2);
+        m_PlayerHandler.fnGetPayloadBuffer = 
+        std::bind(&Client::GetPayloadBuffer, this, phs::_1, phs::_2);
+
     m_PlayerHandler.fnSendOut = 
-        m_PlaylistHandler.fnSendOut = std::bind(&Client::SendOut, this);
+        m_PlaylistHandler.fnSendOut = 
+        std::bind(&Client::SendOut, this);
 }
 
 Client::~Client()
 {
-    Stop();
-    m_Socket.Close();
 }
 
 bool Client::Run()
 {
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == NULL)
+    if (env == nullptr)
         return false;
 
     m_ConnectStopRetry = false;
 
-    const auto& f = std::bind(&Client::ThRecvLoop, this,
-                              env->serverIp, env->serverPort);
-    m_RecvThread = thread(f);
+    const auto& f = std::bind(&Client::ThRecvLoop, this, phs::_1, phs::_2);
+    m_RecvThread = thread(f, env->serverIp, env->serverPort);
 
     return true;
 }
@@ -50,7 +51,9 @@ void Client::Stop()
 {
     m_ConnectStopRetry = true;
     m_Socket.Shutdown();
-    m_RecvThread.join();
+    if (m_RecvThread.joinable())
+        m_RecvThread.join();
+    m_Socket.Close();
 }
 
 void Client::SetConnectMaxRetry(int max)
@@ -66,7 +69,7 @@ void Client::SetConnectRetryInterval(int ms)
 void Client::StopService()
 {
     char op = Op::App::StopService;
-    int payloadSize = (BufObj(NULL) << op).Offset();
+    int payloadSize = (BufObj(nullptr) << op).Offset();
 
     char* buf = GetPayloadBuffer(Group::App, payloadSize);
     BufObj(buf) << op;
@@ -105,9 +108,9 @@ void Client::ThRecvLoop(const string& ip, int port)
 
         if (retryCount < m_ConnectMaxRetry && !m_ConnectStopRetry) {
             m_Socket = TcpSocket();
-            usleep(m_ConnectRetryInterval*1000);
+            ::usleep(m_ConnectRetryInterval*1000);
         } else {
-            perror("Failed to connect");
+            ::perror("Failed to connect");
             return;
         }
     }
