@@ -89,33 +89,35 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
     ID3v2::AttachedPictureFrame* frame;
 
     const char* PIC_ID[] = { "APIC", "PIC" };
-    for (int i = 0; i < 2; ++i) {
-        frameList = idtag->frameListMap()[PIC_ID[i]];
-        if (!frameList.isEmpty()) {
-            ID3v2::FrameList::ConstIterator iter = frameList.begin();
-            for (; iter != frameList.end(); ++iter) {
-                frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
-                string mime = ToLower(frame->mimeType().to8Bit());
+    for (const char* ID: PIC_ID) {
+        if (!idtag->frameListMap().contains(ID))
+            continue;
 
-                //cout << "type: " << (int) frame->type() << endl;
-                //cout << "mime: " << mime << endl;
+        frameList = idtag->frameListMap()[ID];
+        if (frameList.isEmpty())
+            continue;
 
-                if (mime.find("jpeg") != string::npos) {
-                    format = CoverFormat::JPEG;
-                } else if (mime.find("png") != string::npos){
-                    format = CoverFormat::PNG;
-                }
+        ID3v2::FrameList::ConstIterator iter = frameList.begin();
+        for (; iter != frameList.end(); ++iter) {
+            frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
+            string mime = ToLower(frame->mimeType().to8Bit());
 
-                const ByteVector& v = frame->picture();
-                if (v.size() != 0) {
-                    buf.resize(v.size());
-                    memcpy(&buf[0], v.data(), v.size());
-                }
+            cout << "type: " << (int) frame->type() << endl;
+            cout << "mime: " << mime << endl;
 
-                return format;
+            if (mime.find("jpeg") != string::npos) {
+                format = CoverFormat::JPEG;
+            } else if (mime.find("png") != string::npos){
+                format = CoverFormat::PNG;
             }
-        } else {
-            //cout << PIC_ID[i] << " not found!" << endl;
+
+            const ByteVector& v = frame->picture();
+            if (v.size() != 0) {
+                buf.resize(v.size());
+                memcpy(&buf[0], v.data(), v.size());
+            }
+
+            return format;
         }
     }
 
