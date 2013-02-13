@@ -16,10 +16,10 @@ pid_t FetchPid()
 {
     pid_t pid = 0;
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (env != NULL) {
+    if (env != nullptr) {
         fstream stream;
         stream.open(env->pidFile.c_str(), ios::in);
-        if (stream.is_open()) {
+        if (stream) {
             stream >> pid;
         }
         stream.close();
@@ -30,7 +30,7 @@ pid_t FetchPid()
 void StorePid()
 {
     const AppEnv* config = GlobalAppEnv::Instance();
-    if (config != NULL) {
+    if (config != nullptr) {
         fstream stream;
         stream.open(config->pidFile.c_str(), ios::out);
         stream << getpid();
@@ -41,7 +41,7 @@ void StorePid()
 void ClearPid()
 {
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (env != NULL) {
+    if (env != nullptr) {
         unlink(env->pidFile.c_str());
     }
 }
