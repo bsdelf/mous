@@ -24,9 +24,10 @@ TagParserFactory::~TagParserFactory()
 void TagParserFactory::RegisterTagParserPlugin(const IPluginAgent* pAgent)
 {
     ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
+    const auto& suffixList = parser->FileSuffix();
     if (parser != nullptr) {
         pAgent->FreeObject(parser);
-        for (const string& suffix: parser->FileSuffix()) {
+        for (const string& suffix: suffixList) {
             auto iter = m_AgentMap.find(suffix);
             if (iter == m_AgentMap.end()) {
                 m_AgentMap[suffix] = pAgent;
@@ -45,9 +46,10 @@ void TagParserFactory::RegisterTagParserPlugin(std::vector<const IPluginAgent*>&
 void TagParserFactory::UnregisterPlugin(const IPluginAgent* pAgent)
 {
     ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
+    const auto& suffixList = parser->FileSuffix();
     if (parser != nullptr) {
         pAgent->FreeObject(parser);
-        for (const string& suffix: parser->FileSuffix()) {
+        for (const string& suffix: suffixList) {
             auto iter = m_AgentMap.find(suffix);
             if (iter != m_AgentMap.end() && pAgent == iter->second) {
                 m_AgentMap.erase(iter);
@@ -74,8 +76,8 @@ void TagParserFactory::UnregisterAll()
 ITagParser* TagParserFactory::CreateParser(const std::string& fileName) const
 {
     ITagParser* parser = nullptr;
-    const string& ext = scx::FileHelper::FileSuffix(fileName);
-    auto iter = m_AgentMap.find(ext);
+    const string& suffix = scx::FileHelper::FileSuffix(fileName);
+    auto iter = m_AgentMap.find(suffix);
     if (iter == m_AgentMap.end()) {
         iter = m_AgentMap.find("*");
     }
