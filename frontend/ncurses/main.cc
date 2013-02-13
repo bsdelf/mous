@@ -33,7 +33,7 @@ void StorePid()
     if (config != nullptr) {
         fstream stream;
         stream.open(config->pidFile.c_str(), ios::out);
-        stream << getpid();
+        stream << ::getpid();
         stream.close();
     }
 }
@@ -42,7 +42,7 @@ void ClearPid()
 {
     const AppEnv* env = GlobalAppEnv::Instance();
     if (env != nullptr) {
-        unlink(env->pidFile.c_str());
+        ::unlink(env->pidFile.c_str());
     }
 }
 
@@ -53,10 +53,10 @@ int main(int argc, char** argv)
 
     pid_t pid = FetchPid();
     if (pid == 0 || (::kill(pid, 0) != 0 && errno == ESRCH))
-        pid = fork();
+        pid = ::fork();
 
     if (pid == 0) {
-        daemon(1, 0);
+        ::daemon(1, 0);
         StorePid();
         Server server;
         int ret = server.Exec();
