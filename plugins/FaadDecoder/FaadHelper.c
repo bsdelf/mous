@@ -271,5 +271,5 @@ static int write_audio_float(audio_file *aufile, void *sample_buffer,
 
     if (data) free(data);
 
-    return samples*aufile->bits_per_sample/8;
+    return ret;
 }

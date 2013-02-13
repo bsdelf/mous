@@ -55,7 +55,7 @@ int cmd_info(int argc, char** argv)
             for (auto& item: media_list) {
                 // duration
                 if (item.hasRange) {
-                    if (item.msEnd == -1)
+                    if (item.msEnd == (uint64_t)-1)
                         item.msEnd = item.duration;
                     cout << "range:     " << ms2str(item.msBeg) << " - " << ms2str(item.msEnd) << endl;
                     cout << "duration:  " << ms2str(item.msEnd - item.msBeg) << endl;
