@@ -49,7 +49,7 @@ namespace ncurses {
 struct Window
 {
     Window():
-        win(NULL),
+        win(nullptr),
         boxed(true),
         shown(false),
         x(0),
@@ -79,21 +79,21 @@ struct Window
 
     void Cleanup()
     {
-        if (win != NULL) {
+        if (win != nullptr) {
             delwin(win);
-            win = NULL;
+            win = nullptr;
         }
     }
 
     void EnableKeypad(bool enable)
     {
-        if (win != NULL)
+        if (win != nullptr)
             keypad(win, enable ? TRUE : FALSE);
     }
 
     void Refresh()
     {
-        if (win != NULL)
+        if (win != nullptr)
             wrefresh(win);
     }
 
@@ -113,7 +113,7 @@ struct Window
 
     void Print(int x, int y, const std::string& _str, bool styled = false)
     {
-        if (win != NULL) {
+        if (win != nullptr) {
             if (!styled) {
                 mvwaddstr(win, y, x, _str.c_str());
             } else {
@@ -126,7 +126,7 @@ struct Window
 
     void CenterPrint(int y, const std::string& _str, bool styled = false)
     {
-        if (win != NULL) {
+        if (win != nullptr) {
             if (!styled) {
                 DoCenterPrint(y, w, _str);
             } else {
@@ -139,7 +139,7 @@ struct Window
 
     void Clear()
     {
-        if (win != NULL) {
+        if (win != nullptr) {
             werase(win);
             if (boxed)
                 box(win, 0, 0);
@@ -150,7 +150,7 @@ struct Window
     {
         x = _x;
         y = _y;
-        if (win != NULL)
+        if (win != nullptr)
             mvwin(win, y, x);
     }
 
@@ -158,7 +158,7 @@ struct Window
     {
         w = _w;
         h = _h;
-        if (win != NULL) {
+        if (win != nullptr) {
             wresize(win, h, w);
             mvwin(win, y, x);
         }
@@ -167,7 +167,7 @@ struct Window
     void Show(bool show)
     {
         if (show) {
-            if (win == NULL)
+            if (win == nullptr)
                 Init(x, y, w, h, boxed);
         } else {
             Cleanup();
@@ -185,25 +185,25 @@ struct Window
 
     void AttrOn(int attrs)
     {
-        if (win != NULL)
+        if (win != nullptr)
             wattron(win, attrs);
     }
 
     void AttrSet(int attrs)
     {
-        if (win != NULL)
+        if (win != nullptr)
             wattrset(win, attrs);
     }
 
     void AttrOff(int attrs)
     {
-        if (win != NULL)
+        if (win != nullptr)
             wattroff(win, attrs);
     }
 
     void ResetAttrColor()
     {
-        if (win != NULL) {
+        if (win != nullptr) {
             init_pair(0, ncurses::Color::White, ncurses::Color::Black);
             wattrset(win, ncurses::Attr::Normal | COLOR_PAIR(0));
         }
@@ -212,7 +212,7 @@ struct Window
     short ColorOn(int f, int b)
     {
         short colorId = f*8 + b + 1;
-        if (win != NULL) {
+        if (win != nullptr) {
             init_pair(colorId, f, b);
             wattron(win, COLOR_PAIR(colorId));
         }
@@ -221,7 +221,7 @@ struct Window
 
     void ColorOff(short colorId)
     {
-        if (win != NULL) {
+        if (win != nullptr) {
             wattroff(win, COLOR_PAIR(colorId));
             wattroff(win, COLOR_PAIR(0));
         }
@@ -229,7 +229,7 @@ struct Window
 
     int OpenStyle(const std::string& style)
     {
-        if (win == NULL || style.empty())
+        if (win == nullptr || style.empty())
             return 0;
 
         int n = 1;

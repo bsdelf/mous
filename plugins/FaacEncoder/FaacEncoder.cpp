@@ -10,19 +10,19 @@ FaacEncoder::FaacEncoder():
     m_EncodedSamples(0),
     m_FrameSize(0),
     m_DelaySamples(0),
-    m_EncHandle(NULL),
+    m_EncHandle(nullptr),
     m_SampleRate(0),
     m_Channels(0),
     m_InputSamples(0),
     m_MaxOutputBytes(0),
     m_BitsPerSample(0),
-    m_InputBuffer(NULL),
+    m_InputBuffer(nullptr),
     m_InputBufferSize(0),
     m_InputBufferUsed(0),
-    m_OutputBuffer(NULL),
+    m_OutputBuffer(nullptr),
     m_OutputBufferSize(0),
     m_OutputBufferUsed(0),
-    m_MediaTag(NULL)
+    m_MediaTag(nullptr)
 {
     m_OptQuality.desc = "Quantizer quality";
     m_OptQuality.min = 10;
@@ -80,7 +80,7 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
 
     // init faac & buffer
     m_EncHandle = faacEncOpen(m_SampleRate, m_Channels, &m_InputSamples, &m_MaxOutputBytes);
-    if (m_EncHandle == NULL)
+    if (m_EncHandle == nullptr)
         return ErrorCode::EncoderFailedToInit;
 
     m_InputBufferSize = m_InputSamples * (m_BitsPerSample/8);
@@ -121,7 +121,7 @@ EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
     m_Mp4Track = MP4AddAudioTrack(m_Mp4File, m_SampleRate, MP4_INVALID_DURATION, MP4_MPEG4_AUDIO_TYPE);
     MP4SetAudioProfileLevel(m_Mp4File, 0x0F);
 
-    unsigned char *ASC = NULL;
+    unsigned char *ASC = nullptr;
     unsigned long ASCLength = 0;
     faacEncGetDecoderSpecificInfo(m_EncHandle, &ASC, &ASCLength);
     MP4SetTrackESConfiguration(m_Mp4File, m_Mp4Track, ASC, ASCLength);
@@ -145,22 +145,22 @@ void FaacEncoder::CloseOutput()
         UpdateMediaTag();
 
         if (m_OptOptimize.userChoice && !m_FileName.empty())
-            MP4Optimize(m_FileName.c_str(), NULL);
+            MP4Optimize(m_FileName.c_str(), nullptr);
     }
 
-    if (m_EncHandle != NULL) {
+    if (m_EncHandle != nullptr) {
         faacEncClose(m_EncHandle);
-        m_EncHandle = NULL;
+        m_EncHandle = nullptr;
     }
 
-    if (m_OutputBuffer != NULL) {
+    if (m_OutputBuffer != nullptr) {
         delete[] m_OutputBuffer;
-        m_OutputBuffer = NULL;
+        m_OutputBuffer = nullptr;
     }
 
-    if (m_InputBuffer != NULL) {
+    if (m_InputBuffer != nullptr) {
         delete[] m_InputBuffer;
-        m_InputBuffer = NULL;
+        m_InputBuffer = nullptr;
     }
 
     m_FileName.clear();
@@ -342,7 +342,7 @@ void FaacEncoder::WriteToolVersion()
 
 void FaacEncoder::UpdateMediaTag()
 {
-    if (m_FileName.empty() || m_MediaTag == NULL)
+    if (m_FileName.empty() || m_MediaTag == nullptr)
         return;
 
     MP4FileHandle file = MP4Modify(m_FileName.c_str());

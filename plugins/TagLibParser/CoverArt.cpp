@@ -34,7 +34,7 @@ EmCoverFormat DumpMp4Cover(const string& path, vector<char>& buf)
     TagLib::MP4::File file(path.c_str(), false);
     MP4::Tag* mp4tag = file.tag();
 
-    if (mp4tag == NULL) {
+    if (mp4tag == nullptr) {
         //cout << "no mp4 tag found!" << endl;
         return format;
     }
@@ -80,7 +80,7 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
 {
     EmCoverFormat format = CoverFormat::None;
 
-    if (idtag == NULL) {
+    if (idtag == nullptr) {
         //cout << "no id3v2 tag found!" << endl;
         return format;
     } 
@@ -136,7 +136,7 @@ bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_
 {
     TagLib::MP4::File file(path.c_str(), false);
     MP4::Tag* mp4tag = file.tag();
-    if (mp4tag == NULL) {
+    if (mp4tag == nullptr) {
         //cout << "no mp4 tag found!" << endl;
         return false;
     }
@@ -176,7 +176,7 @@ bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_
 
 static bool StoreID3v2Cover(ID3v2::Tag* idtag, EmCoverFormat fmt, const char* buf, size_t len)
 {
-    if (idtag == NULL) {
+    if (idtag == nullptr) {
         //cout << "no id3v2 tag found!" << endl;
         return false;
     }
@@ -197,7 +197,7 @@ static bool StoreID3v2Cover(ID3v2::Tag* idtag, EmCoverFormat fmt, const char* bu
     }
     ByteVector imgData(buf, len);
 
-    ID3v2::AttachedPictureFrame* frame = NULL;
+    ID3v2::AttachedPictureFrame* frame = nullptr;
 
     // remove previous FrontCover
     const char* PIC_ID[] = { "APIC", "PIC" };

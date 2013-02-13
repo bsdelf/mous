@@ -2,11 +2,11 @@
 #include <scx/Conv.hpp>
 
 OggEncoder::OggEncoder():
-    m_OutputFile(NULL),
+    m_OutputFile(nullptr),
     m_Channels(0),
     m_SampleRate(0),
     m_BitsPerSample(0),
-    m_MediaTag(NULL)
+    m_MediaTag(nullptr)
 {
     m_Quality.desc = "Quality Level";
     m_Quality.min = -1;
@@ -44,7 +44,7 @@ const char* OggEncoder::FileSuffix() const
 EmErrorCode OggEncoder::OpenOutput(const std::string& path)
 {
     m_OutputFile = ::fopen(path.c_str(), "wb+");
-    if (m_OutputFile == NULL)
+    if (m_OutputFile == nullptr)
         return ErrorCode::EncoderFailedToOpen;
 
     int ret = 0;
@@ -63,9 +63,9 @@ EmErrorCode OggEncoder::OpenOutput(const std::string& path)
 
 void OggEncoder::CloseOutput()
 {
-    if (m_OutputFile != NULL) {
+    if (m_OutputFile != nullptr) {
         ::fclose(m_OutputFile);
-        m_OutputFile = NULL;
+        m_OutputFile = nullptr;
     }
 }
 

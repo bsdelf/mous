@@ -43,7 +43,7 @@ ServerContext::~ServerContext()
 bool ServerContext::Init()
 {
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == NULL)
+    if (env == nullptr)
         return false;
 
     if (!mgr->LoadPluginDir(env->pluginDir))
@@ -79,11 +79,11 @@ void ServerContext::Dump()
     typedef PlaylistSerializer<MediaItem> Serializer;
 
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == NULL)
+    if (env == nullptr)
         return;
 
     // save context
-    BufObj buf(NULL);
+    BufObj buf(nullptr);
     buf << (int)VERSION;
     buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
     buf.PutArray(selectedItem);
@@ -113,7 +113,7 @@ void ServerContext::Restore()
     typedef PlaylistSerializer<MediaItem> Serializer;
 
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == NULL)
+    if (env == nullptr)
         return;
 
     // load context
@@ -198,7 +198,7 @@ void ServerContext::PausePlayer()
 const MediaItem* ServerContext::ItemInPlaying() const
 {
     const playlist_t& list = playlists[usedPlaylist];
-    return list.HasNext(0) ? &list.NextItem(0, false) : NULL;
+    return list.HasNext(0) ? &list.NextItem(0, false) : nullptr;
 }
 
 bool ServerContext::PlayItem(const MediaItem& item)
@@ -219,8 +219,8 @@ bool ServerContext::PlayItem(const MediaItem& item)
 void ServerContext::SetPlayMode(EmPlaylistMode mode)
 {
     playMode = mode;
-    for (size_t i = 0; i < playlists.size(); ++i) {
-        playlists[i].SetMode(playMode);
+    for (auto& list: playlists) {
+        list.SetMode(playMode);
     }
 }
 

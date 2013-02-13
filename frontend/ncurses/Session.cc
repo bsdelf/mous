@@ -19,7 +19,7 @@ const size_t MEDIAITEMS_IN_CHUNK = 20;
 
 #define SEND_PACKET(group, stream)  \
 {\
-    int payloadSize = (BufObj(NULL) stream).Offset();   \
+    int payloadSize = (BufObj(nullptr) stream).Offset();   \
     char* buf = GetPayloadBuffer(group, payloadSize);   \
     BufObj(buf) stream;                                 \
 }\
@@ -48,7 +48,7 @@ Session::~Session()
 
     lock_guard<mutex> locker(m_Context->mtx);
     m_Context->sigPlayNextItem.DisconnectObject(this);
-    m_Context = NULL;
+    m_Context = nullptr;
 }
 
 bool Session::Run(const TcpSocket& socket, int notifyFd)
@@ -280,7 +280,7 @@ void Session::PlayerSync(BufObj& buf)
         case BINARY_MASK(0, 1):
         {
             const MediaItem* item = m_Context->ItemInPlaying();
-            if (item != NULL)
+            if (item != nullptr)
                 SendMediaItemInfo(*item);
         }
         case BINARY_MASK(1, 1):
@@ -398,7 +398,7 @@ void Session::PlaylistPlay(BufObj& buf)
     bool ok = m_Context->PlayAt(iList, iItem);
     if (ok) {
         const MediaItem* item = m_Context->ItemInPlaying();
-        if (item != NULL)
+        if (item != nullptr)
             SendMediaItemInfo(*item);
     } 
 
@@ -422,8 +422,8 @@ void Session::PlaylistAppend(BufObj& buf)
     if (list.empty())
         return;
 
-    for (size_t i = 0; i < list.size(); ++i) {
-        MediaTag& tag = list[i].tag;
+    for (auto& item: list) {
+        MediaTag& tag = item.tag;
         TryConvertToUtf8(tag.title);
         TryConvertToUtf8(tag.artist);
         TryConvertToUtf8(tag.album);
@@ -572,7 +572,7 @@ void Session::SendMediaItemsByChunk(char index, const deque<MediaItem>& list)
     for (size_t off = 0, count = 0; off < list.size(); off += count) {
         count = std::min(list.size() - off, MEDIAITEMS_IN_CHUNK);
 
-        BufObj buf(NULL);
+        BufObj buf(nullptr);
         buf << (char)Op::Playlist::Append << index << (int32_t)count;
         for (size_t i = 0; i < count; ++i) {
             list[off+i] >> buf;
@@ -596,7 +596,7 @@ void Session::SendMediaItemInfo(const MediaItem& item)
     int32_t sampleRate = m_Context->player->SamleRate();
     uint64_t duration = m_Context->player->RangeDuration();
 
-    BufObj buf(NULL);
+    BufObj buf(nullptr);
     buf << op;
     item >> buf;
     buf << sampleRate << duration;

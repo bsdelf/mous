@@ -52,8 +52,7 @@ int cmd_info(int argc, char** argv)
         {
             deque<MediaItem> media_list;
             ctx.loader->LoadMedia(argv[i], media_list);
-            for (size_t mi = 0; mi < media_list.size(); ++mi) {
-                MediaItem& item = media_list[mi];
+            for (auto& item: media_list) {
                 // duration
                 if (item.hasRange) {
                     if (item.msEnd == -1)

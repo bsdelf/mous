@@ -19,7 +19,7 @@ Mpg123Decoder::Mpg123Decoder()
 
 Mpg123Decoder::~Mpg123Decoder()
 {
-    if (m_pHandle != NULL) {
+    if (m_pHandle != nullptr) {
         mpg123_close(m_pHandle);
         mpg123_delete(m_pHandle);
     }
@@ -35,7 +35,7 @@ vector<string> Mpg123Decoder::FileSuffix() const
 
 EmErrorCode Mpg123Decoder::Open(const std::string& url)
 {
-    if (m_pHandle == NULL)
+    if (m_pHandle == nullptr)
         return ErrorCode::DecoderFailedToInit;
 
     if (mpg123_open(m_pHandle, url.c_str()) != MPG123_OK)
@@ -68,7 +68,7 @@ EmErrorCode Mpg123Decoder::Open(const std::string& url)
 
 void Mpg123Decoder::Close()
 {
-    if (m_pHandle != NULL)
+    if (m_pHandle != nullptr)
         mpg123_close(m_pHandle);
 }
 

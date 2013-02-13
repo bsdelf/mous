@@ -38,7 +38,7 @@ ExplorerView::ExplorerView():
     m_HideDot(true)
 {
     const AppEnv* config = GlobalAppEnv::Instance();
-    if (config != NULL)
+    if (config != nullptr)
         m_UniPinYin.LoadMap(config->pyMapFile);
 
     m_BeginStack.push_back(0);
@@ -186,8 +186,8 @@ void ExplorerView::Resize(int w, int h)
 {
     // invalidate cache
     m_PathCache.clear();
-    for (size_t i = 0; i < m_FileItems.size(); ++i) {
-        m_FileItems[i].cacheOk = false;
+    for (auto& item: m_FileItems) {
+        item.cacheOk = false;
     }
 
     d.Resize(w, h);
@@ -320,15 +320,15 @@ void ExplorerView::BuildFileItems()
     vector<string> files = Dir::ListDir(m_Path);
     m_FileItems.clear();
     m_FileItems.reserve(files.size());
-    for (size_t i = 0; i < files.size(); ++i) {
-        if (files[i] == "." || files[i] == "..")
+    for (const string& file: files) {
+        if (file == "." || file == "..")
             continue;
-        if (m_HideDot && files[i][0] == '.')
+        if (m_HideDot && file[0] == '.')
             continue;
 
-        FileInfo info(m_Path + "/" + files[i]);
+        FileInfo info(m_Path + "/" + file);
         FileItem item;
-        item.name = files[i];
+        item.name = file;
         item.isDir = info.Type() == FileType::Directory;
         item.size = info.Size();
         item.cacheOk = false;

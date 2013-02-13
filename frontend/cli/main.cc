@@ -42,7 +42,7 @@ static cmd_action_t cmd_actions[] = {
     {   "help",   cmd_help      }
 };
 
-static const char* cli_name = NULL;
+static const char* cli_name = nullptr;
 
 int cmd_help(int, char**)
 {
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     cli_name = argc > 0 ? argv[0] : "mous-cli";
 
     if (argc < 2) {
-        cmd_help(0, NULL);
+        cmd_help(0, nullptr);
         exit(-1);
     }
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv)
     ctx.tag_agents = ctx.mgr->PluginAgents(PluginType::TagParser);
     if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
         cout << "need more plugins!" << endl;
-        cmd_plugin(0, NULL);
+        cmd_plugin(0, nullptr);
         exit(-1);
     }
 

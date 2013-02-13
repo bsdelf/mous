@@ -7,7 +7,7 @@ using namespace Protocol;
 
 #define SEND_PACKET(stream)  \
 {\
-    int payloadSize = (BufObj(NULL) stream).Offset();   \
+    int payloadSize = (BufObj(nullptr) stream).Offset();   \
     char* buf = fnGetPayloadBuffer(                     \
             Group::Playlist, payloadSize);              \
     BufObj(buf) stream;                                 \

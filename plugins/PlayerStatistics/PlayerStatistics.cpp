@@ -23,7 +23,7 @@ void PlayerStatistics::SetPlayer(const IPlayer* player)
 void PlayerStatistics::UnsetPlayer()
 {
     //m_Player->SigStartPlay()->DisconnectReceiver(this);
-    m_Player = NULL;
+    m_Player = nullptr;
 }
 
 void PlayerStatistics::SlotStartPlay()

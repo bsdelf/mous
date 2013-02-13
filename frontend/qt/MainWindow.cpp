@@ -25,8 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_TimerUpdateUi(new QTimer),
     m_UpdateInterval(500),
-    m_UsedPlaylistView(NULL),
-    m_UsedMediaItem(NULL),
+    m_UsedPlaylistView(nullptr),
+    m_UsedMediaItem(nullptr),
     m_SliderPlayingPreempted(false)
 {
     ui->setupUi(this);    
@@ -51,7 +51,7 @@ MainWindow::~MainWindow()
     if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
     }
-    if (m_TimerUpdateUi != NULL) {
+    if (m_TimerUpdateUi != nullptr) {
         if (m_TimerUpdateUi->isActive())
             m_TimerUpdateUi->stop();
         delete m_TimerUpdateUi;
@@ -131,8 +131,8 @@ void MainWindow::InitMousCore()
 void MainWindow::ClearMousCore()
 {
     m_Player->SigFinished()->DisconnectObject(this);
-    m_FrmTagEditor.SetPlayer(NULL);
-    m_FrmTagEditor.SetTagParserFactory(NULL);
+    m_FrmTagEditor.SetPlayer(nullptr);
+    m_FrmTagEditor.SetTagParserFactory(nullptr);
 
     m_Player->UnregisterAll();
     m_MediaLoader->UnregisterAll();
@@ -233,9 +233,9 @@ void MainWindow::SlotUiPlayerFinished()
 {
     qDebug() << "SlotUiPlayerFinished()";
 
-    if (m_UsedPlaylistView != NULL) {
+    if (m_UsedPlaylistView != nullptr) {
         const MediaItem* item = m_UsedPlaylistView->NextItem();
-        if (item != NULL) {
+        if (item != nullptr) {
             SlotPlayMediaItem(m_UsedPlaylistView, *item);
         }
     }
@@ -282,7 +282,7 @@ void MainWindow::SlotBtnPlay()
 
     switch (m_Player->Status()) {
     case PlayerStatus::Closed:
-        if (m_UsedMediaItem != NULL) {
+        if (m_UsedMediaItem != nullptr) {
             if (m_Player->Open(m_UsedMediaItem->url) == ErrorCode::Ok)
                 SlotBtnPlay();
         }
@@ -313,21 +313,21 @@ void MainWindow::SlotBtnPlay()
 
 void MainWindow::SlotBtnPrev()
 {
-    if (m_UsedPlaylistView == NULL)
+    if (m_UsedPlaylistView == nullptr)
         return;
 
     const mous::MediaItem* item = m_UsedPlaylistView->PrevItem();
-    if (item != NULL)
+    if (item != nullptr)
         SlotPlayMediaItem(m_UsedPlaylistView, *item);
 }
 
 void MainWindow::SlotBtnNext()
 {
-    if (m_UsedPlaylistView == NULL)
+    if (m_UsedPlaylistView == nullptr)
         return;
 
     const mous::MediaItem* item = m_UsedPlaylistView->NextItem();
-    if (item != NULL)
+    if (item != nullptr)
         SlotPlayMediaItem(m_UsedPlaylistView, *item);
 }
 
@@ -449,7 +449,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 
     int encoderIndex = dlgEncoders.GetSelectedIndex();
     IConvTask* newTask = m_ConvFactory->CreateTask(item, encoderNames[encoderIndex]);
-    if (newTask == NULL)
+    if (newTask == nullptr)
         return;
 
     //==== show options
@@ -482,6 +482,6 @@ void MainWindow::SlotConvertMediaItems(const QList<MediaItem>& items)
 
 void MainWindow::SlotTagUpdated(const MediaItem& item)
 {
-    if (m_UsedPlaylistView != NULL)
+    if (m_UsedPlaylistView != nullptr)
         m_UsedPlaylistView->OnMediaItemUpdated(item);
 }

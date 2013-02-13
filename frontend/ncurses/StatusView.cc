@@ -31,7 +31,7 @@ inline static string FormatBitRate(int rate)
 }
 
 StatusView::StatusView():
-    m_PlayerHandler(NULL),
+    m_PlayerHandler(nullptr),
     m_WaitReply(false),
     m_NeedRefresh(0),
     m_Volume(0)
@@ -264,7 +264,7 @@ int StatusView::MinHeight() const
 
 void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
 {
-    if (m_PlayerHandler != NULL) {
+    if (m_PlayerHandler != nullptr) {
         m_PlayerHandler->SigPause().DisconnectObject(this);
         m_PlayerHandler->SigSeek().DisconnectObject(this);
         m_PlayerHandler->SigVolume().DisconnectObject(this);
@@ -273,7 +273,7 @@ void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
         m_PlayerHandler->SigStatus().DisconnectObject(this);
     }
 
-    if (handler != NULL) {
+    if (handler != nullptr) {
         handler->SigPause().Connect(&StatusView::SlotPause, this);
         handler->SigSeek().Connect(&StatusView::SlotSeek, this);
         handler->SigVolume().Connect(&StatusView::SlotVolume, this);

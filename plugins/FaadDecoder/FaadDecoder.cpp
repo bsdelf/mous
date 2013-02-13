@@ -4,9 +4,9 @@
 using namespace std;
 
 FaadDecoder::FaadDecoder():
-    m_File(NULL),
-    m_Infile(NULL),
-    m_NeAACDecHandle(NULL)
+    m_File(nullptr),
+    m_Infile(nullptr),
+    m_NeAACDecHandle(nullptr)
 {
 
 }
@@ -32,7 +32,7 @@ EmErrorCode FaadDecoder::Open(const string& url)
     m_IsMp4File = false;
 
     FILE* file = fopen(url.c_str(), "rb");
-    if (file == NULL)
+    if (file == nullptr)
         return ErrorCode::DecoderFailedToOpen;
 
     unsigned char header[8];
@@ -60,7 +60,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     m_UseAacLength = 1;
 
     m_File = fopen(url.c_str(), "rb");
-    if (m_File == NULL)
+    if (m_File == nullptr)
         return ErrorCode::DecoderFailedToOpen;
 
     m_Mp4Callback.read = &ReadCallback;
@@ -74,7 +74,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     NeAACDecSetConfiguration(m_NeAACDecHandle, config);
 
     m_Infile = mp4ff_open_read(&m_Mp4Callback);
-    if (m_Infile == NULL)
+    if (m_Infile == nullptr)
         return ErrorCode::DecoderFailedToOpen;
 
     m_Track = GetAACTrack(m_Infile);
@@ -83,7 +83,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
         return ErrorCode::DecoderFailedToInit;
     }
 
-    unsigned char* confBuf = NULL;
+    unsigned char* confBuf = nullptr;
     unsigned int confBufSize = 0;
     mp4ff_get_decoder_config(m_Infile, m_Track, &confBuf , &confBufSize);
 
@@ -101,7 +101,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     m_FrameSize = 1024;
     m_UseAacLength = 0;
 
-    if (confBuf != NULL) {
+    if (confBuf != nullptr) {
         if (NeAACDecAudioSpecificConfig(confBuf, confBufSize, &mp4Asc) >= 0) {
             if (mp4Asc.frameLengthFlag == 1)
                 m_FrameSize = 960;
@@ -130,19 +130,19 @@ EmErrorCode FaadDecoder::OpenAac(const string& url)
 
 void FaadDecoder::Close()
 {
-    if (m_NeAACDecHandle != NULL) {
+    if (m_NeAACDecHandle != nullptr) {
         NeAACDecClose(m_NeAACDecHandle);
-        m_NeAACDecHandle = NULL;
+        m_NeAACDecHandle = nullptr;
     }
 
-    if (m_Infile != NULL) {
+    if (m_Infile != nullptr) {
         mp4ff_close(m_Infile);
-        m_Infile = NULL;
+        m_Infile = nullptr;
     }
 
-    if (m_File != NULL) {
+    if (m_File != nullptr) {
         fclose(m_File);
-        m_File = NULL;
+        m_File = nullptr;
     }
 }
 
@@ -159,7 +159,7 @@ EmErrorCode FaadDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCo
 
 EmErrorCode FaadDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& unitCount)
 {
-    unsigned char* buffer = NULL;
+    unsigned char* buffer = nullptr;
     unsigned int bufferSize = 0;
 
     m_BitRate = mp4ff_get_avg_bitrate(m_Infile, m_Track);
@@ -174,7 +174,7 @@ EmErrorCode FaadDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& uni
 
     NeAACDecFrameInfo frameInfo;
     void* sampleBuf = NeAACDecDecode(m_NeAACDecHandle, &frameInfo, buffer, bufferSize);
-    if (buffer != NULL)
+    if (buffer != nullptr)
         free(buffer);
 
     unsigned int sampleCount;
@@ -210,7 +210,7 @@ EmErrorCode FaadDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& uni
         if ((frameInfo.error == 0) && (sampleCount > 0)) {
             audio_file aufile = {
                 FAAD_FMT_16BIT,
-                NULL,
+                nullptr,
                 0, 
                 0,
                 16, // bits/sample
@@ -293,7 +293,7 @@ int FaadDecoder::GetAACTrack(mp4ff_t* infile)
     int numTracks = mp4ff_total_tracks(infile);
 
     for (i = 0; i < numTracks; i++) {
-        unsigned char *buff = NULL;
+        unsigned char *buff = nullptr;
         unsigned int buff_size = 0;
         mp4AudioSpecificConfig mp4ASC;
 

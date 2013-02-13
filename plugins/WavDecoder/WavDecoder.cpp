@@ -7,7 +7,7 @@ WavDecoder::WavDecoder():
     m_RawDataLength(0),
     m_SampleLength(0),
     m_BlockLength(0),
-    m_BlockBuffer(NULL),
+    m_BlockBuffer(nullptr),
     m_BlockIndex(0),
     m_TotalBlocks(0)
 {
@@ -64,9 +64,9 @@ void WavDecoder::Close()
 
     memset(&m_WavHeader, 0, sizeof(WavHeader));
 
-    if (m_BlockBuffer != NULL) {
+    if (m_BlockBuffer != nullptr) {
         delete[] m_BlockBuffer;
-        m_BlockBuffer = NULL;
+        m_BlockBuffer = nullptr;
     }
 }
 

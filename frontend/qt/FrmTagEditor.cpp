@@ -9,10 +9,10 @@ using namespace std;
 FrmTagEditor::FrmTagEditor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FrmTagEditor),
-    m_Player(NULL),
-    m_ParserFactory(NULL),
-    m_CurrentParser(NULL),
-    m_LabelImage(NULL),
+    m_Player(nullptr),
+    m_ParserFactory(nullptr),
+    m_CurrentParser(nullptr),
+    m_LabelImage(nullptr),
     m_OldImagePath(QDir::homePath()),
     m_SemLoadFinished(1)
 {
@@ -93,7 +93,7 @@ void FrmTagEditor::SetPlayer(IPlayer *player)
 
 void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *factory)
 {
-    if (m_ParserFactory == NULL && m_ParserFactory != NULL && m_CurrentParser != NULL) {
+    if (m_ParserFactory == nullptr && m_ParserFactory != nullptr && m_CurrentParser != nullptr) {
         m_CurrentParser->Close();
         m_ParserFactory->FreeParser(m_CurrentParser);
     }
@@ -116,14 +116,14 @@ void FrmTagEditor::LoadMediaItem(const mous::MediaItem& item)
 
 void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
 {
-    if (m_ParserFactory == NULL)
+    if (m_ParserFactory == nullptr)
         return;
 
-    if (m_CurrentParser != NULL) {
+    if (m_CurrentParser != nullptr) {
         m_CurrentParser->Close();
         m_ParserFactory->FreeParser(m_CurrentParser);
     }
-    if ((m_CurrentParser = m_ParserFactory->CreateParser(fileName)) == NULL) {
+    if ((m_CurrentParser = m_ParserFactory->CreateParser(fileName)) == nullptr) {
         return;
     }
     m_CurrentParser->Open(fileName);
@@ -162,7 +162,7 @@ void FrmTagEditor::ShowBottomBtns(bool show)
 
 void FrmTagEditor::SlotBtnSave()
 {
-    if (m_CurrentParser == NULL)
+    if (m_CurrentParser == nullptr)
         return;
 
     MediaItem tmpItem = m_CurrentItem;
@@ -297,7 +297,7 @@ void FrmTagEditor::SlotSaveImageAs()
 
 void FrmTagEditor::SlotChangeCoverArt()
 {
-    if (m_CurrentParser == NULL)
+    if (m_CurrentParser == nullptr)
         return;
 
     QString fileName =
@@ -344,7 +344,7 @@ void FrmTagEditor::SlotChangeCoverArt()
 
 void FrmTagEditor::UpdateTag()
 {
-    if (m_CurrentParser == NULL)
+    if (m_CurrentParser == nullptr)
         return;
 
     QList<QTableWidgetItem*> valList;
@@ -364,7 +364,7 @@ void FrmTagEditor::UpdateTag()
 
 void FrmTagEditor::UpdateCoverArt()
 {
-    if (m_CurrentImage.isNull() || m_LabelImage == NULL) {
+    if (m_CurrentImage.isNull() || m_LabelImage == nullptr) {
         m_LabelImage->setPixmap(QPixmap());
     } else {
         QSize size = m_CurrentImage.size();

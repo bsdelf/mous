@@ -17,7 +17,7 @@ PlaylistView::PlaylistView():
     m_ItemSelected(0),
     m_Title(STR_TITLE),
     m_WaitReply(false),
-    m_PlaylistHandler(NULL)
+    m_PlaylistHandler(nullptr)
 {
 }
 
@@ -298,7 +298,7 @@ void PlaylistView::SetIndex(int index)
 
 void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
 {
-    if (m_PlaylistHandler != NULL) {
+    if (m_PlaylistHandler != nullptr) {
         m_PlaylistHandler->SigSelect().DisconnectObject(this);
         m_PlaylistHandler->SigPlay().DisconnectObject(this);
         m_PlaylistHandler->SigAppend().DisconnectObject(this);
@@ -307,7 +307,7 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
         m_PlaylistHandler->SigClear().DisconnectObject(this);
     }
 
-    if (handler != NULL) {
+    if (handler != nullptr) {
         handler->SigSelect().Connect(&PlaylistView::SlotSelect, this);
         handler->SigPlay().Connect(&PlaylistView::SlotPlay, this);
         handler->SigAppend().Connect(&PlaylistView::SlotAppend, this);
@@ -347,7 +347,7 @@ void PlaylistView::ScrollDown()
 
 void PlaylistView::ReqSelect()
 {
-    if (m_PlaylistHandler != NULL) {
+    if (m_PlaylistHandler != nullptr) {
         m_PlaylistHandler->Select(m_Index, m_ItemSelected);
     }
 }
@@ -357,7 +357,7 @@ void PlaylistView::ReqPlay(int pos)
     if (m_WaitReply)
         return;
 
-    if (m_PlaylistHandler != NULL) {
+    if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Play(m_Index, pos);
     }
@@ -368,7 +368,7 @@ void PlaylistView::ReqRemove(int pos)
     if (m_WaitReply)
         return;
 
-    if (m_PlaylistHandler != NULL) {
+    if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Remove(m_Index, pos);
     }
@@ -379,7 +379,7 @@ void PlaylistView::ReqMove(int pos, char direct)
     if (m_WaitReply)
         return;
 
-    if (m_PlaylistHandler != NULL) {
+    if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Move(m_Index, pos, direct);
     }
@@ -390,7 +390,7 @@ void PlaylistView::ReqClear()
     if (m_WaitReply)
         return;
 
-    if (m_PlaylistHandler != NULL) {
+    if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Clear(m_Index);
     }
@@ -486,8 +486,8 @@ void PlaylistView::SlotClear(int i)
     if (i != m_Index)
         return;
 
-    for (size_t i = 0; i < m_List.size(); ++i) {
-        delete m_List[i];
+    for (auto entry: m_List) {
+        delete entry;
     }
     m_List.clear();
 

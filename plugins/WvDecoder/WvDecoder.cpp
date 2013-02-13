@@ -4,7 +4,7 @@
 static void format_samples(int bps, unsigned char *dst, int32_t *src, uint32_t samcnt);
 
 WvDecoder::WvDecoder():
-    m_Ctx(NULL)
+    m_Ctx(nullptr)
 {
 }
 
@@ -21,8 +21,8 @@ vector<string> WvDecoder::FileSuffix() const
 
 EmErrorCode WvDecoder::Open(const std::string& url)
 {
-    m_Ctx = WavpackOpenFileInput(url.c_str(), NULL, 0, 0);
-    if (m_Ctx == NULL)
+    m_Ctx = WavpackOpenFileInput(url.c_str(), nullptr, 0, 0);
+    if (m_Ctx == nullptr)
         return ErrorCode::DecoderFailedToOpen;
 
     if (WavpackGetNumSamples(m_Ctx) == (uint32_t) -1)

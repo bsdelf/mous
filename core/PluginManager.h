@@ -32,8 +32,6 @@ public:
 private:
     std::map<std::string, IPluginAgent*> m_PluginMap;
     typedef std::pair<std::string, IPluginAgent*> PluginMapPair;
-    typedef std::map<std::string, IPluginAgent*>::iterator PluginMapIter;
-    typedef std::map<std::string, IPluginAgent*>::const_iterator PluginMapConstIter;
 };
 
 }

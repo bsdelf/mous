@@ -31,7 +31,7 @@ int Server::Exec()
         return 1;
 
     const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == NULL)
+    if (env == nullptr)
         return 2;
 
     m_Context->Restore();
@@ -55,7 +55,7 @@ int Server::Exec()
     for (bool stopService = false; !stopService; ) {
         FD_SET(m_Socket.Fd(), &rset);
         FD_SET(m_PipeFd[0], &rset);
-        if (select(maxfd, &rset, NULL, NULL, NULL) <= 0)
+        if (select(maxfd, &rset, nullptr, nullptr, nullptr) <= 0)
             break;
 
         // open session

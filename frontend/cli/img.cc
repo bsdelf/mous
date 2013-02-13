@@ -19,7 +19,7 @@ int cmd_img(int argc, char** argv)
         }
 
         ITagParser* parser = ctx.parser_factory->CreateParser(argv[i]);
-        if (parser == NULL) {
+        if (parser == nullptr) {
             cout << "no parser!" << endl;
             continue;
         }

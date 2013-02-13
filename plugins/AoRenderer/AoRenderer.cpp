@@ -4,7 +4,7 @@
 
 AoRenderer::AoRenderer():
     m_Driver(-1),
-    m_Device(NULL)
+    m_Device(nullptr)
 {
     ao_initialize();
 
@@ -39,15 +39,15 @@ EmErrorCode AoRenderer::Open()
 {
     Close();
 
-    m_Device = ao_open_live(m_Driver, &m_Format, NULL);
-    return m_Device != NULL ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
+    m_Device = ao_open_live(m_Driver, &m_Format, nullptr);
+    return m_Device != nullptr ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
 }
 
 void AoRenderer::Close()
 {
-    if (m_Device != NULL) {
+    if (m_Device != nullptr) {
         ao_close(m_Device);
-        m_Device = NULL;
+        m_Device = nullptr;
     }
 }
 

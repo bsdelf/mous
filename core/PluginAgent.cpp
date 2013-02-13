@@ -12,15 +12,15 @@ IPluginAgent* IPluginAgent::Create()
 
 void IPluginAgent::Free(IPluginAgent* ptr)
 {
-    if (ptr != NULL)
+    if (ptr != nullptr)
         delete ptr;
 }
 
 PluginAgent::PluginAgent():
-    m_Handle(NULL),
-    m_FnGetInfo(NULL),
-    m_FnCreate(NULL),
-    m_FnFree(NULL),
+    m_Handle(nullptr),
+    m_FnGetInfo(nullptr),
+    m_FnCreate(nullptr),
+    m_FnFree(nullptr),
     m_Type(PluginType::None)
 {
 
@@ -34,25 +34,25 @@ PluginAgent::~PluginAgent()
 EmErrorCode PluginAgent::Open(const std::string& path)
 {
     m_Handle = dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
-    if (m_Handle == NULL) {
+    if (m_Handle == nullptr) {
         cout << dlerror() << endl;
         return ErrorCode::PluginFailedToOpen;
     }
 
     m_FnPluginType = (FnPluginType)dlsym(m_Handle, StrGetPluginType);
-    if (m_FnPluginType == NULL) 
+    if (m_FnPluginType == nullptr) 
         goto LabelGotoFailed;
 
     m_FnGetInfo = (FnPluginInfo)dlsym(m_Handle, StrGetPluginInfo);
-    if (m_FnGetInfo == NULL) 
+    if (m_FnGetInfo == nullptr) 
         goto LabelGotoFailed;
 
     m_FnCreate = (FnCreateObject)dlsym(m_Handle, StrCreateObject);
-    if (m_FnCreate == NULL) 
+    if (m_FnCreate == nullptr) 
         goto LabelGotoFailed;
 
     m_FnFree = (FnFreeObject)dlsym(m_Handle, StrFreeObject);
-    if (m_FnCreate == NULL)
+    if (m_FnCreate == nullptr)
         goto LabelGotoFailed;
 
     m_Type = m_FnPluginType();
@@ -67,13 +67,13 @@ LabelGotoFailed:
 
 void PluginAgent::Close()
 {
-    m_FnGetInfo = NULL;
-    m_FnCreate = NULL;
-    m_FnFree = NULL;
+    m_FnGetInfo = nullptr;
+    m_FnCreate = nullptr;
+    m_FnFree = nullptr;
 
-    if (m_Handle != NULL) {
+    if (m_Handle != nullptr) {
         dlclose(m_Handle);
-        m_Handle = NULL;
+        m_Handle = nullptr;
     }
 }
 
@@ -84,7 +84,7 @@ EmPluginType PluginAgent::Type() const
 
 const PluginInfo* PluginAgent::Info() const
 {
-    return (m_FnGetInfo != NULL) ? m_FnGetInfo() : NULL;
+    return (m_FnGetInfo != nullptr) ? m_FnGetInfo() : nullptr;
 }
 
 void* PluginAgent::CreateObject() const

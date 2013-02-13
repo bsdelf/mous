@@ -25,9 +25,9 @@ EmErrorCode FlacDecoder::Open(const string& url)
             m_pDecoder,
             url.c_str(),
             &WriteCallback,
-            NULL,
+            nullptr,
             &ErrorCallback,
-            NULL);
+            nullptr);
 
     if (!FLAC__stream_decoder_process_until_end_of_metadata(m_pDecoder))
         return ErrorCode::DecoderFailedToOpen;
@@ -48,7 +48,7 @@ EmErrorCode FlacDecoder::Open(const string& url)
 
 void FlacDecoder::Close()
 {
-    if (m_pDecoder != NULL)
+    if (m_pDecoder != nullptr)
         FLAC__stream_decoder_finish(m_pDecoder);
 }
 
@@ -123,7 +123,7 @@ uint64_t FlacDecoder::Duration() const
     return m_Duration;
 }
 
-char* FlacDecoder::gBuf = NULL;
+char* FlacDecoder::gBuf = nullptr;
 int32_t FlacDecoder::gBufLen = 0;
 int32_t FlacDecoder::gSamplesRead = 0;
 
@@ -136,7 +136,7 @@ FLAC__StreamDecoderWriteStatus FlacDecoder::WriteCallback(
     const size_t& samples = frame->header.blocksize;
     const size_t& channels = frame->header.channels;
 
-    if (gBuf != NULL) {
+    if (gBuf != nullptr) {
 
         for (size_t i = 0, sample = 0; sample < samples; ++sample) {
             for (size_t channel = 0; channel < channels; ++channel, i+=2) {

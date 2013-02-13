@@ -1,16 +1,16 @@
 #include "MacDecoder.h"
 
 MacDecoder::MacDecoder():
-    m_pDecompress(NULL)
+    m_pDecompress(nullptr)
 {
 
 }
 
 MacDecoder::~MacDecoder()
 {
-    if (m_pDecompress != NULL) {
+    if (m_pDecompress != nullptr) {
         delete m_pDecompress;
-        m_pDecompress = NULL;
+        m_pDecompress = nullptr;
     }
 }
 
@@ -29,7 +29,7 @@ EmErrorCode MacDecoder::Open(const string& url)
     m_pDecompress = CreateIAPEDecompress(pFileName, &err);
     delete[] pFileName;
 
-    if (m_pDecompress == NULL || err != ERROR_SUCCESS)
+    if (m_pDecompress == nullptr || err != ERROR_SUCCESS)
         return ErrorCode::DecoderFailedToOpen;
 
     m_Channels = m_pDecompress->GetInfo(APE_INFO_CHANNELS);
@@ -50,9 +50,9 @@ EmErrorCode MacDecoder::Open(const string& url)
 
 void MacDecoder::Close()
 {
-    if (m_pDecompress != NULL) {
+    if (m_pDecompress != nullptr) {
         delete m_pDecompress; 
-        m_pDecompress = NULL;
+        m_pDecompress = nullptr;
     }
 }
 

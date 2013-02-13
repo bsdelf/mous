@@ -1,6 +1,6 @@
 #include "ConvTask.h"
-//#include <iostream>
-//using namespace mous;
+
+#include <vector>
 
 IConvTask* IConvTask::Create(const MediaItem& item, 
                              const IPluginAgent* decAgent, 
@@ -11,7 +11,7 @@ IConvTask* IConvTask::Create(const MediaItem& item,
 
 void IConvTask::Free(IConvTask* task)
 {
-    if (task != NULL)
+    if (task != nullptr)
         delete task;
 }
 
@@ -39,19 +39,19 @@ ConvTask::~ConvTask()
 
 std::vector<const BaseOption*> ConvTask::DecoderOptions() const
 {
-    return m_Decoder != NULL ?
+    return m_Decoder != nullptr ?
         m_Decoder->Options() : std::vector<const BaseOption*>();
 }
 
 std::vector<const BaseOption*> ConvTask::EncoderOptions() const
 {
-    return m_Encoder != NULL ?
+    return m_Encoder != nullptr ?
         m_Encoder->Options() : std::vector<const BaseOption*>();
 }
 
 const char* ConvTask::EncoderFileSuffix() const
 {
-    return m_Encoder != NULL ? m_Encoder->FileSuffix() : NULL;
+    return m_Encoder != nullptr ? m_Encoder->FileSuffix() : nullptr;
 }
 
 void ConvTask::Run(const string& output)
@@ -104,7 +104,7 @@ void ConvTask::DoConvert(const string& output)
         return;
     }
 
-    char* unitBuffer = new char[m_Decoder->MaxBytesPerUnit()];
+    vector<char> unitBuffer(m_Decoder->MaxBytesPerUnit());
     uint32_t unitBufferUsed = 0;
     uint32_t unitCount = 0;
 
@@ -127,8 +127,8 @@ void ConvTask::DoConvert(const string& output)
 
     //cout << unitBeg << "-" << unitEnd << endl;
     while (unitOff < unitEnd && !m_Canceled) {
-        m_Decoder->DecodeUnit(unitBuffer, unitBufferUsed, unitCount);
-        m_Encoder->Encode(unitBuffer, unitBufferUsed);
+        m_Decoder->DecodeUnit(&unitBuffer[0], unitBufferUsed, unitCount);
+        m_Encoder->Encode(&unitBuffer[0], unitBufferUsed);
         unitOff += unitCount;
         m_Progress = (double)(unitOff-unitBeg) / (unitEnd-unitBeg);
     }
@@ -137,8 +137,6 @@ void ConvTask::DoConvert(const string& output)
 
     m_Encoder->CloseOutput();
     m_Decoder->Close();
-
-    delete[] unitBuffer;
 
     m_Finished = true;
 }

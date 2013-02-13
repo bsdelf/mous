@@ -14,7 +14,7 @@ IPluginManager* IPluginManager::Create()
 
 void IPluginManager::Free(IPluginManager* ptr)
 {
-    if (ptr != NULL)
+    if (ptr != nullptr)
         delete ptr;
 }
 
@@ -59,7 +59,7 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
 
 void PluginManager::UnloadPlugin(const string& path)
 {
-    PluginMapIter iter = m_PluginMap.find(path);
+    auto iter = m_PluginMap.find(path);
     if (iter != m_PluginMap.end()) {
         IPluginAgent* pAgent = iter->second;
         pAgent->Close();
@@ -70,9 +70,8 @@ void PluginManager::UnloadPlugin(const string& path)
 
 void PluginManager::UnloadAll()
 {
-    for (PluginMapIter iter = m_PluginMap.begin();
-            iter != m_PluginMap.end(); ++iter) {
-        IPluginAgent* pAgent = iter->second;
+    for (auto entry: m_PluginMap) {
+        IPluginAgent* pAgent = entry.second;
         pAgent->Close();
         IPluginAgent::Free(pAgent);
     }
@@ -83,9 +82,8 @@ vector<const IPluginAgent*> PluginManager::PluginAgents(EmPluginType type) const
 {
     vector<const IPluginAgent*> list;
     list.reserve(m_PluginMap.size());
-    for (PluginMapConstIter iter = m_PluginMap.begin();
-            iter != m_PluginMap.end(); ++iter) {
-        IPluginAgent* pAgent = iter->second;
+    for (auto entry: m_PluginMap) {
+        IPluginAgent* pAgent = entry.second;
         if (pAgent->Type() == type) {
             list.push_back(pAgent);
         }
@@ -97,16 +95,15 @@ vector<string> PluginManager::PluginPaths() const
 {
     vector<string> list;
     list.reserve(m_PluginMap.size());
-    for (PluginMapConstIter iter = m_PluginMap.begin();
-            iter != m_PluginMap.end(); ++iter) {
-        list.push_back(iter->first);
+    for (auto entry: m_PluginMap) {
+        list.push_back(entry.first);
     }
     return list;
 }
 
 const PluginInfo* PluginManager::QueryPluginInfo(const std::string& path) const
 {
-    PluginMapConstIter iter = m_PluginMap.find(path);
+    auto iter = m_PluginMap.find(path);
     return (iter != m_PluginMap.end()) ?
-        iter->second->Info() : NULL;
+        iter->second->Info() : nullptr;
 }

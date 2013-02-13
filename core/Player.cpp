@@ -24,7 +24,7 @@ IPlayer* IPlayer::Create()
 
 void IPlayer::Free(IPlayer* player)
 {
-    if (player != NULL)
+    if (player != nullptr)
         delete player;
 }
 
@@ -33,16 +33,16 @@ Player::Player():
     m_StopDecoder(false),
     m_SuspendDecoder(true),
     m_PauseDecoder(false),
-    m_Decoder(NULL),
+    m_Decoder(nullptr),
     m_StopRenderer(false),
     m_SuspendRenderer(true),
-    m_Renderer(NULL),
+    m_Renderer(nullptr),
     m_UnitBeg(0),
     m_UnitEnd(0),
     m_DecoderIndex(0),
     m_RendererIndex(0),
     m_UnitPerMs(0),
-    m_RendererPlugin(NULL)
+    m_RendererPlugin(nullptr)
 {
     m_UnitBuffers.AllocBuffer(5);
 
@@ -83,8 +83,8 @@ void Player::RegisterDecoderPlugin(const IPluginAgent* pAgent)
 
 void Player::RegisterDecoderPlugin(vector<const IPluginAgent*>& agents)
 {
-    for (size_t i = 0; i < agents.size(); ++i) {
-        RegisterDecoderPlugin(agents[i]);
+    for (const auto agent: agents) {
+        RegisterDecoderPlugin(agent);
     }
 }
 
@@ -112,8 +112,8 @@ void Player::UnregisterPlugin(const IPluginAgent* pAgent)
 
 void Player::UnregisterPlugin(vector<const IPluginAgent*>& agents)
 {
-    for (size_t i = 0; i < agents.size(); ++i) {
-        UnregisterPlugin(agents[i]);
+    for (const auto agent: agents) {
+        UnregisterPlugin(agent);
     }
 }
 
@@ -125,9 +125,9 @@ void Player::AddDecoderPlugin(const IPluginAgent* pAgent)
 
     // try add
     bool usedAtLeastOnce = false;
-    for (size_t i = 0; i < list.size(); ++i) {
-        const string& suffix = ToLower(list[i]);
-        DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
+    for (const string& item: list) {
+        const string& suffix = ToLower(item);
+        auto iter = m_DecoderPluginMap.find(suffix);
         if (iter == m_DecoderPluginMap.end()) {
             DecoderPluginNode node = { pAgent, pDecoder };
             m_DecoderPluginMap.insert(DecoderPluginMapPair(suffix, node));
@@ -150,9 +150,9 @@ void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
 
     // find plugin
     bool freedOnce = false;
-    for (size_t i = 0; i < list.size(); ++i) {
-        const string& suffix = ToLower(list[i]);
-        DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
+    for (const string& item: list) {
+        const string& suffix = ToLower(item);
+        auto iter = m_DecoderPluginMap.find(suffix);
         if (iter != m_DecoderPluginMap.end()) {
             const DecoderPluginNode& node = iter->second;
             if (node.agent == pAgent) {
@@ -171,7 +171,7 @@ void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
 
 void Player::SetRendererPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent == NULL || m_RendererPlugin != NULL)
+    if (pAgent == nullptr || m_RendererPlugin != nullptr)
         return;
 
     m_RendererPlugin = pAgent;
@@ -181,19 +181,19 @@ void Player::SetRendererPlugin(const IPluginAgent* pAgent)
 
 void Player::UnsetRendererPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent != m_RendererPlugin || m_RendererPlugin == NULL)
+    if (pAgent != m_RendererPlugin || m_RendererPlugin == nullptr)
         return;
 
     m_Renderer->Close();
     m_RendererPlugin->FreeObject(m_Renderer);
-    m_Renderer = NULL;
-    m_RendererPlugin = NULL;
+    m_Renderer = nullptr;
+    m_RendererPlugin = nullptr;
 }
 
 void Player::UnregisterAll()
 {
     while (!m_DecoderPluginMap.empty()) {
-        DecoderPluginMapIter iter = m_DecoderPluginMap.begin();
+        auto iter = m_DecoderPluginMap.begin();
         RemoveDecoderPlugin(iter->second.agent);
     }
 
@@ -213,12 +213,12 @@ void Player::SetBufferCount(int count)
 
 int Player::Volume() const
 {
-    return m_Renderer != NULL ? m_Renderer->VolumeLevel() : -1;
+    return m_Renderer != nullptr ? m_Renderer->VolumeLevel() : -1;
 }
 
 void Player::SetVolume(int level)
 {
-    if (m_Renderer != NULL)
+    if (m_Renderer != nullptr)
         m_Renderer->SetVolumeLevel(level);
 }
 
@@ -226,14 +226,14 @@ EmErrorCode Player::Open(const string& path)
 {
     string suffix = ToLower(FileHelper::FileSuffix(path));
     //cout << "Suffix:" << suffix << endl;
-    DecoderPluginMapIter iter = m_DecoderPluginMap.find(suffix);
+    auto iter = m_DecoderPluginMap.find(suffix);
     if (iter != m_DecoderPluginMap.end()) {
         m_Decoder = iter->second.decoder;
     } else {
         return ErrorCode::PlayerNoDecoder;
     }
 
-    if (m_Renderer == NULL)
+    if (m_Renderer == nullptr)
         return ErrorCode::PlayerNoRenderer;
 
     EmErrorCode err = m_Decoder->Open(path);
@@ -249,7 +249,7 @@ EmErrorCode Player::Open(const string& path)
         UnitBuffer* buf = m_UnitBuffers.RawItemAt(i);
         buf->used = 0;
         if (buf->max < maxBytesPerUnit) {
-            if (buf->data != NULL) {
+            if (buf->data != nullptr) {
                 delete[] buf->data;
                 //cout << "free unit buf:" << buf->max << endl;
             }
@@ -290,7 +290,7 @@ void Player::Close()
     Pause();
 
     m_Decoder->Close();
-    m_Decoder = NULL;
+    m_Decoder = nullptr;
     m_DecodeFile.clear();
 
     m_Status = PlayerStatus::Closed;
@@ -485,12 +485,12 @@ void Player::ResumeDecoder()
 
 int32_t Player::BitRate() const
 {
-    return (m_Decoder != NULL) ? m_Decoder->BitRate() : -1;
+    return (m_Decoder != nullptr) ? m_Decoder->BitRate() : -1;
 }
 
 int32_t Player::SamleRate() const
 {
-    return (m_Decoder != NULL) ? m_Decoder->SampleRate() : -1;
+    return (m_Decoder != nullptr) ? m_Decoder->SampleRate() : -1;
 }
 
 uint64_t Player::Duration() const
@@ -525,7 +525,7 @@ uint64_t Player::CurrentMs() const
 
 EmAudioMode Player::AudioMode() const
 {
-    return (m_Decoder != NULL) ? m_Decoder->AudioMode() : AudioMode::None;
+    return (m_Decoder != nullptr) ? m_Decoder->AudioMode() : AudioMode::None;
 }
 
 std::vector<PluginOption> Player::DecoderPluginOption() const
@@ -533,10 +533,8 @@ std::vector<PluginOption> Player::DecoderPluginOption() const
     std::vector<PluginOption> list;
     PluginOption optionItem;
 
-    DecoderPluginMapConstIter iter = m_DecoderPluginMap.begin();
-    DecoderPluginMapConstIter end = m_DecoderPluginMap.end();
-    for (; iter != end; ++iter) {
-        const DecoderPluginNode& node = iter->second;
+    for (auto entry: m_DecoderPluginMap) {
+        const DecoderPluginNode& node = entry.second;
         const vector<const BaseOption*>& opt = node.decoder->Options();
         if (!opt.empty()) {
             optionItem.pluginType = node.agent->Type();
@@ -551,13 +549,13 @@ std::vector<PluginOption> Player::DecoderPluginOption() const
 PluginOption Player::RendererPluginOption() const
 {
     PluginOption option;
-    if (m_RendererPlugin != NULL) {
+    if (m_RendererPlugin != nullptr) {
         option.pluginType = m_RendererPlugin->Type();
         option.pluginInfo = m_RendererPlugin->Info();
         option.options = m_Renderer->Options();
     } else {
         option.pluginType = PluginType::None; 
-        option.pluginInfo = NULL;
+        option.pluginInfo = nullptr;
         option.options.clear();
     }
     return option;
@@ -580,7 +578,7 @@ void Player::ThDecoder()
 
         m_SemDecoderBegin.Post();
 
-        for (UnitBuffer* buf = NULL; ; ) {
+        for (UnitBuffer* buf = nullptr; ; ) {
             if (m_PauseDecoder)
                 break;
 
@@ -588,8 +586,8 @@ void Player::ThDecoder()
             if (m_SuspendDecoder)
                 break;
 
-            assert(buf != NULL);
-            assert(buf->data != NULL);
+            assert(buf != nullptr);
+            assert(buf->data != nullptr);
 
             m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
             m_DecoderIndex += buf->unitCount;
@@ -617,17 +615,17 @@ void Player::ThRenderer()
 
         m_SemRendererBegin.Post();
 
-        for (UnitBuffer* buf = NULL; ; ) {
+        for (UnitBuffer* buf = nullptr; ; ) {
             buf = m_UnitBuffers.TakeData();
             if (m_SuspendRenderer)
                 break;
 
-            assert(buf != NULL);
-            assert(buf->data != NULL);
+            assert(buf != nullptr);
+            assert(buf->data != nullptr);
 
             // avoid busy write
             if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok)
-                usleep(10*1000);
+                ::usleep(10*1000);
             m_RendererIndex += buf->unitCount;
             m_UnitBuffers.RecycleData();
 

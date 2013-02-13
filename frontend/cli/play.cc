@@ -17,12 +17,12 @@ using namespace mous;
 static bool QUIT = false;
 static mutex PLAYER_MUTEX;
 
-static IPlayer* PLAYER = NULL;
-static Playlist<MediaItem>* PLAYLIST = NULL;
+static IPlayer* PLAYER = nullptr;
+static Playlist<MediaItem>* PLAYLIST = nullptr;
 
 void on_finished()
 {
-    if (PLAYLIST == NULL)
+    if (PLAYLIST == nullptr)
         return;
 
     if (PLAYLIST->HasNext(1)) {
@@ -46,7 +46,7 @@ void on_finished()
 
 void do_playing()
 {
-    while (PLAYER != NULL && !QUIT) {
+    while (PLAYER != nullptr && !QUIT) {
         PLAYER_MUTEX.lock();
         uint64_t ms = PLAYER->OffsetMs();
         int32_t rate = PLAYER->BitRate();

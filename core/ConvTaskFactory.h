@@ -38,13 +38,9 @@ private:
 private:
     map<string, vector<const IPluginAgent*>*> m_DecAgentMap;
     typedef pair<string, vector<const IPluginAgent*>*> DecAgentMapPair;
-    typedef map<string, vector<const IPluginAgent*>*>::iterator DecAgentMapIter;
-    typedef map<string, vector<const IPluginAgent*>*>::const_iterator DecAgentMapConstIter;
 
     map<string, const IPluginAgent*> m_EncAgentMap;
     typedef pair<string, const IPluginAgent*> EncAgentMapPair;
-    typedef map<string, const IPluginAgent*>::iterator EncAgentMapIter;
-    typedef map<string, const IPluginAgent*>::const_iterator EncAgentMapConstIter;
 
 };
 

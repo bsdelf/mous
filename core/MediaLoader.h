@@ -42,17 +42,12 @@ private:
 private:
     std::map<const IPluginAgent*, void*> m_AgentMap;
     typedef std::pair<const IPluginAgent*, void*> AgentMapPair;
-    typedef std::map<const IPluginAgent*, void*>::iterator AgentMapIter;
 
     std::map<std::string, IMediaPack*> m_MediaPackMap;
     typedef std::pair<std::string, IMediaPack*> MediaPackMapPair;
-    typedef std::map<std::string, IMediaPack*>::iterator MediaPackMapIter;
-    typedef std::map<std::string, IMediaPack*>::const_iterator MediaPackMapConstIter;
 
     std::map<std::string, ITagParser*> m_TagParserMap;
     typedef std::pair<std::string, ITagParser*> TagParserMapPair;
-    typedef std::map<std::string, ITagParser*>::iterator TagParserMapIter;
-    typedef std::map<std::string, ITagParser*>::const_iterator TagParserMapConstIter;
 };
 
 }

@@ -2,12 +2,12 @@
 #include <scx/Conv.hpp>
 
 LameEncoder::LameEncoder():
-    m_gfp(NULL),
-    m_OutputFile(NULL),
+    m_gfp(nullptr),
+    m_OutputFile(nullptr),
     m_BitsPerSample(0),
-    m_EncodeBuffer(NULL),
+    m_EncodeBuffer(nullptr),
     m_EncodeBufferSize(0),
-    m_MediaTag(NULL)
+    m_MediaTag(nullptr)
 {
     m_Quality.desc = "Quality\n0=best(very slow), 9 worst";
     m_Quality.min = 0;
@@ -41,7 +41,7 @@ EmErrorCode LameEncoder::OpenOutput(const std::string& path)
 {
     m_OutputFile = ::fopen(path.c_str(), "wb+");
 
-    if (m_OutputFile == NULL)
+    if (m_OutputFile == nullptr)
         return ErrorCode::EncoderFailedToOpen;
 
     // init lame
@@ -53,7 +53,7 @@ EmErrorCode LameEncoder::OpenOutput(const std::string& path)
     ::lame_set_findReplayGain(m_gfp, m_ReplayGain.userChoice ? 1 : 0);
     ::lame_set_asm_optimizations(m_gfp, MMX, 1);
     ::lame_set_asm_optimizations(m_gfp, SSE, 1);
-    if (m_MediaTag != NULL) {
+    if (m_MediaTag != nullptr) {
         lame_set_write_id3tag_automatic(m_gfp, 1);
         id3tag_init(m_gfp);
         id3tag_v2_only(m_gfp);
@@ -74,19 +74,19 @@ EmErrorCode LameEncoder::OpenOutput(const std::string& path)
 
 void LameEncoder::CloseOutput()
 {
-    if (m_OutputFile != NULL) {
+    if (m_OutputFile != nullptr) {
         ::fclose(m_OutputFile);
-        m_OutputFile = NULL;
+        m_OutputFile = nullptr;
     }
 
-    if (m_gfp != NULL) {
+    if (m_gfp != nullptr) {
         ::lame_close(m_gfp);
-        m_gfp = NULL;
+        m_gfp = nullptr;
     }
 
-    if (m_EncodeBuffer != NULL) {
+    if (m_EncodeBuffer != nullptr) {
         delete[] m_EncodeBuffer;
-        m_EncodeBuffer = NULL;
+        m_EncodeBuffer = nullptr;
         m_EncodeBufferSize = 0;
     }
 }
@@ -98,7 +98,7 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
         len / ::lame_get_num_channels(m_gfp) / (m_BitsPerSample / 8); 
     int minBufferSize = 1.25 * samplesPerChannel + 7200;
     if (m_EncodeBufferSize < minBufferSize) {
-        if (m_EncodeBuffer != NULL)
+        if (m_EncodeBuffer != nullptr)
             delete[] m_EncodeBuffer;
         m_EncodeBuffer = new unsigned char[minBufferSize];
         m_EncodeBufferSize = minBufferSize;

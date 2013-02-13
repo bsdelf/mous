@@ -21,7 +21,7 @@ public:
                 y = option->rect.y();
             } else {
                 const QAbstractItemView* view = qobject_cast<const QAbstractItemView*>(widget);
-                if (view == NULL)
+                if (view == nullptr)
                     return;
                 int rows = view->model()->rowCount();
                 QModelIndex last = view->model()->index(rows-1, 0);

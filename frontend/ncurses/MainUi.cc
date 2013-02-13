@@ -51,25 +51,18 @@ struct LayerInfo
     set<IView*> views;
     stack<IView*> focused;
 
-    typedef set<IView*> ShownSet;
-    typedef set<IView*>::iterator ShownSetIter;
-
     void RefreshViews(bool forced)
     {
-        ShownSetIter iter = views.begin();
-        ShownSetIter end = views.end();
-        for (; iter != end; ++iter) {
-            if (forced || (*iter)->NeedRefresh())
-                (*iter)->Refresh();
+        for (auto view: views) {
+            if (forced || view->NeedRefresh())
+                view->Refresh();
         }
     }
 
     void ShowViews(bool show)
     {
-        ShownSetIter iter = views.begin();
-        ShownSetIter end = views.end();
-        for (; iter != end; ++iter) {
-            (*iter)->Show(show);
+        for (auto view: views) {
+            view->Show(show);
         }
     }
 };

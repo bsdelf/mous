@@ -6,7 +6,7 @@
 
 AlsaRenderer::AlsaRenderer():
     m_DeviceName("default"),
-    m_PcmHandle(NULL),
+    m_PcmHandle(nullptr),
     m_Dir(0),
     m_Resample(1),
     m_FrameLength(0),
@@ -30,10 +30,10 @@ EmErrorCode AlsaRenderer::Open()
 
 void AlsaRenderer::Close()
 {
-    if (m_PcmHandle != NULL) {
+    if (m_PcmHandle != nullptr) {
         snd_pcm_drain(m_PcmHandle);
         snd_pcm_close(m_PcmHandle);
-        m_PcmHandle = NULL;
+        m_PcmHandle = nullptr;
     }
 }
 

@@ -30,7 +30,7 @@ void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& list,
     const std::map<std::string, IMediaPack*>* pMap) const
 {
     FILE* file = fopen(path.c_str(), "r");
-    if (file == NULL)
+    if (file == nullptr)
         return;
     Cd* cd = cue_parse_file(file);
     fclose(file);
@@ -56,24 +56,24 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const
     string genre;
     int year = -1;
 
-    char* data = NULL;
+    char* data = nullptr;
     Cdtext* cdt = cd_get_cdtext(cd);
     Rem* rem = cd_get_rem(cd);
 
     data = cdtext_get(PTI_TITLE, cdt);
-    if (data != NULL) {
+    if (data != nullptr) {
         album = data;
         delete data;
     }
 
     data = cdtext_get(PTI_PERFORMER, cdt);
-    if (data != NULL) {
+    if (data != nullptr) {
         artist = data;
         delete data;
     }
 
     data = cdtext_get(PTI_GENRE, cdt);
-    if (data != NULL) {
+    if (data != nullptr) {
         genre = data;
         delete data;
     }
@@ -82,7 +82,7 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const
     //rem_free(rem);
 
     data = rem_get(REM_DATE, rem);
-    if (data != NULL) {
+    if (data != nullptr) {
         year = StrToNum<int>(data);
         delete data;
     }
@@ -111,13 +111,13 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const
         item.tag.year = year;
 
         data = cdtext_get(PTI_TITLE, text);
-        if (data != NULL) {
+        if (data != nullptr) {
             item.tag.title = data;
             delete data;
         }
 
         data = cdtext_get(PTI_PERFORMER, text);
-        if (data != NULL) {
+        if (data != nullptr) {
             item.tag.artist = data;
             delete data;
         } else {
@@ -125,7 +125,7 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& list) const
         }
 
         data = cdtext_get(PTI_GENRE, text);
-        if (data != NULL) {
+        if (data != nullptr) {
             item.tag.genre = data;
             delete data;
         } else {

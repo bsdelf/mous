@@ -7,7 +7,7 @@ class BgWindow
 {
 public:
     BgWindow():
-        m_Wnd(NULL)
+        m_Wnd(nullptr)
     {
     }
 
@@ -44,9 +44,9 @@ public:
 private:
     void Cleanup()
     {
-        if (m_Wnd != NULL) {
+        if (m_Wnd != nullptr) {
             delwin(m_Wnd);
-            m_Wnd = NULL;
+            m_Wnd = nullptr;
         }
     }
 

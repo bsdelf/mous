@@ -26,8 +26,8 @@ typedef PlaylistActionHistory<MediaItem> ActionHistory;
 
 SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
-    m_MediaLoader(NULL),
-    m_Clipboard(NULL),
+    m_MediaLoader(nullptr),
+    m_Clipboard(nullptr),
     m_PlayModeGroup(this),
     m_ShortcutCopy(qobject_cast<QWidget*>(this)),
     m_ShortcutCut(qobject_cast<QWidget*>(this)),
@@ -42,8 +42,8 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
     QList<QAction*> actionList;
-    QAction* action = NULL;
-    QMenu* menu = NULL;
+    QAction* action = nullptr;
+    QMenu* menu = nullptr;
 
     // Action append
     action = new QAction(tr("Append"), this);
@@ -201,7 +201,7 @@ SimplePlaylistView::~SimplePlaylistView()
     while (!actionList.isEmpty()) {
         QAction* action = actionList.takeFirst();
         removeAction(action);
-        if (action->menu() != NULL)
+        if (action->menu() != nullptr)
             delete action->menu();
         delete action;
     }
@@ -230,13 +230,13 @@ void SimplePlaylistView::SetClipboard(PlaylistClipboard<mous::MediaItem>* clipbo
 const MediaItem* SimplePlaylistView::NextItem() const
 {
     QMutexLocker locker(&m_PlaylistMutex);
-    return m_Playlist.HasNext(1) ? &m_Playlist.NextItem(1, true) : NULL;
+    return m_Playlist.HasNext(1) ? &m_Playlist.NextItem(1, true) : nullptr;
 }
 
 const MediaItem* SimplePlaylistView::PrevItem() const
 {
     QMutexLocker locker(&m_PlaylistMutex);
-    return m_Playlist.HasNext(-1) ? &m_Playlist.NextItem(-1, true) : NULL;
+    return m_Playlist.HasNext(-1) ? &m_Playlist.NextItem(-1, true) : nullptr;
 }
 
 int SimplePlaylistView::ItemCount() const
@@ -544,7 +544,7 @@ void SimplePlaylistView::SlotShortcutCopy()
 
     qDebug() << "copy";
 
-    if (m_Clipboard == NULL)
+    if (m_Clipboard == nullptr)
         return;
 
     QList<int> selectedRows = PickSelectedRows();
@@ -574,7 +574,7 @@ void SimplePlaylistView::SlotShortcutPaste()
 
     qDebug() << "paste";
 
-    if (m_Clipboard == NULL || m_Clipboard->Empty())
+    if (m_Clipboard == nullptr || m_Clipboard->Empty())
         return;
 
     deque<MediaItem> content = m_Clipboard->Content();

@@ -1,6 +1,7 @@
-#include <core/ITagParserFactory.h>
 #include <map>
 using namespace std;
+
+#include <core/ITagParserFactory.h>
 using namespace mous;
 
 class TagParserFactory: public ITagParserFactory
@@ -21,9 +22,5 @@ public:
 
 private:
     map<string, const IPluginAgent*> m_AgentMap;
-    typedef map<string, const IPluginAgent*>::iterator AgentMapIter;
-    typedef map<string, const IPluginAgent*>::const_iterator AgentMapConstIter;
-
     mutable map<ITagParser*, const IPluginAgent*> m_ParserParentMap;
-    typedef map<ITagParser*, const IPluginAgent*>::iterator ParserParentMapIter;
 };

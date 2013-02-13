@@ -172,7 +172,7 @@ void DlgConvertOption::BuildWidgetAndOption(QBoxLayout* layout, const mous::Base
 void DlgConvertOption::SlotGroupChanged(int index)
 {
     QObject* combox = sender();
-    assert(combox != NULL);
+    assert(combox != nullptr);
 
     QStackedWidget* stack = m_ComboxWidgetHash[combox].first;
     const GroupedOption* opt = m_ComboxWidgetHash[combox].second;
@@ -185,10 +185,10 @@ void DlgConvertOption::SlotGroupChanged(int index)
 void DlgConvertOption::SlotIntValChanged(int val)
 {
     QObject* widget = sender();
-    assert(widget != NULL);
+    assert(widget != nullptr);
 
     const BaseOption* baseOpt = m_WidgetOptionHash[widget];
-    if (baseOpt == NULL)
+    if (baseOpt == nullptr)
         return;
 
     qDebug() << mous::ToString(baseOpt->type) << val;

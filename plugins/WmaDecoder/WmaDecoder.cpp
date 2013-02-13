@@ -3,8 +3,8 @@
 #include <iostream>
 
 WmaDecoder::WmaDecoder():
-    m_CodecCtx(NULL),
-    m_FormatCtx(NULL)
+    m_CodecCtx(nullptr),
+    m_FormatCtx(nullptr)
 {
     avcodec_init();
     avcodec_register_all();
@@ -24,8 +24,8 @@ vector<string> WmaDecoder::FileSuffix() const
 
 EmErrorCode WmaDecoder::Open(const std::string& url)
 {
-    m_FormatCtx = NULL;
-    int err = av_open_input_file(&m_FormatCtx, url.c_str(), NULL, 0, NULL);
+    m_FormatCtx = nullptr;
+    int err = av_open_input_file(&m_FormatCtx, url.c_str(), nullptr, 0, nullptr);
     if (err < 0)
         return ErrorCode::DecoderFailedToOpen;
 
@@ -39,7 +39,7 @@ EmErrorCode WmaDecoder::Open(const std::string& url)
     AVCodec* codec = avcodec_find_decoder(m_CodecCtx->codec_id);
     
     // open it
-    if (codec == NULL || avcodec_open(m_CodecCtx, codec))
+    if (codec == nullptr || avcodec_open(m_CodecCtx, codec))
         return ErrorCode::DecoderFailedToInit;
 
     // read info
@@ -56,13 +56,13 @@ EmErrorCode WmaDecoder::Open(const std::string& url)
 
 void WmaDecoder::Close()
 {
-    if (m_CodecCtx != NULL) {
+    if (m_CodecCtx != nullptr) {
         avcodec_close(m_CodecCtx);
-        m_CodecCtx = NULL;
+        m_CodecCtx = nullptr;
     }
-    if (m_FormatCtx != NULL) {
+    if (m_FormatCtx != nullptr) {
         av_close_input_file(m_FormatCtx);
-        m_FormatCtx = NULL;
+        m_FormatCtx = nullptr;
     }
 }
 
@@ -102,7 +102,7 @@ EmErrorCode WmaDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
             inbuf += len;
             data += outsize;
             used += outsize;
-            if (packet.data != NULL)
+            if (packet.data != nullptr)
                 av_free_packet(&packet);
         }
         return ErrorCode::Ok;

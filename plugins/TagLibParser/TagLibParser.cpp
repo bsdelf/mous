@@ -27,9 +27,9 @@ static string StringToStdString(const String& str)
 }
 
 TagLibParser::TagLibParser():
-    m_pFileRef(NULL),
-    m_pTag(NULL),
-    m_pProp(NULL)
+    m_pFileRef(nullptr),
+    m_pTag(nullptr),
+    m_pProp(nullptr)
 {
     m_DumpHandlers["mp3"] = &DumpMp3Cover;
     m_DumpHandlers["m4a"] = &DumpMp4Cover;
@@ -57,7 +57,7 @@ EmErrorCode TagLibParser::Open(const string& path)
     m_FileName = path;
 
     m_pFileRef = new FileRef(path.c_str(), true);//AudioProperties::);
-    if (!m_pFileRef->isNull() && m_pFileRef->tag() != NULL) {
+    if (!m_pFileRef->isNull() && m_pFileRef->tag() != nullptr) {
         m_pTag = m_pFileRef->tag();
         m_pProp = m_pFileRef->audioProperties();
     }
@@ -66,11 +66,11 @@ EmErrorCode TagLibParser::Open(const string& path)
 
 void TagLibParser::Close()
 {
-    if (m_pFileRef != NULL) {
+    if (m_pFileRef != nullptr) {
         delete m_pFileRef;
-        m_pFileRef = NULL;
-        m_pTag = NULL;
-        m_pProp = NULL;
+        m_pFileRef = nullptr;
+        m_pTag = nullptr;
+        m_pProp = nullptr;
     }
 
     m_FileName.clear();
@@ -78,12 +78,12 @@ void TagLibParser::Close()
 
 bool TagLibParser::HasTag() const
 {
-    return (m_pTag != NULL) ? !m_pTag->isEmpty() : false;
+    return (m_pTag != nullptr) ? !m_pTag->isEmpty() : false;
 }
 
 string TagLibParser::Title() const
 {
-    if (m_pTag != NULL) {
+    if (m_pTag != nullptr) {
         return StringToStdString(m_pTag->title());
     } else {
         return "";
@@ -92,7 +92,7 @@ string TagLibParser::Title() const
 
 string TagLibParser::Artist() const
 {
-    if (m_pTag != NULL) {
+    if (m_pTag != nullptr) {
         return StringToStdString(m_pTag->artist());
     } else {
         return "";
@@ -101,7 +101,7 @@ string TagLibParser::Artist() const
 
 string TagLibParser::Album() const
 {
-    if (m_pTag != NULL) {
+    if (m_pTag != nullptr) {
         return StringToStdString(m_pTag->album());
     } else {
         return "";
@@ -110,7 +110,7 @@ string TagLibParser::Album() const
 
 string TagLibParser::Comment() const
 {
-    if (m_pTag != NULL) {
+    if (m_pTag != nullptr) {
         return StringToStdString(m_pTag->comment());
     } else {
         return "";
@@ -119,7 +119,7 @@ string TagLibParser::Comment() const
 
 string TagLibParser::Genre() const
 {
-    if (m_pTag != NULL) {
+    if (m_pTag != nullptr) {
         return StringToStdString(m_pTag->genre());
     } else {
         return "";
@@ -128,7 +128,7 @@ string TagLibParser::Genre() const
 
 int32_t TagLibParser::Year() const
 {
-    if (m_pTag != NULL) {
+    if (m_pTag != nullptr) {
         return m_pTag->year();
     } else {
         return -1;
@@ -137,7 +137,7 @@ int32_t TagLibParser::Year() const
 
 int32_t TagLibParser::Track() const
 {
-    if (m_pTag != NULL) {
+    if (m_pTag != nullptr) {
         return m_pTag->track();
     } else {
         return -1;
@@ -146,12 +146,12 @@ int32_t TagLibParser::Track() const
 
 bool TagLibParser::HasAudioProperty() const
 {
-    return (m_pProp != NULL) ? true : false;
+    return (m_pProp != nullptr) ? true : false;
 }
 
 int32_t TagLibParser::Duration() const
 {
-    if (m_pProp != NULL) {
+    if (m_pProp != nullptr) {
         return m_pProp->length()*1000;
     } else {
         return 0;
@@ -160,7 +160,7 @@ int32_t TagLibParser::Duration() const
 
 int32_t TagLibParser::BitRate() const
 {
-    if (m_pProp != NULL) {
+    if (m_pProp != nullptr) {
         return m_pProp->bitrate();
     } else {
         return 0;
@@ -174,48 +174,48 @@ bool TagLibParser::CanEdit() const
 
 bool TagLibParser::Save()
 {
-    return m_pFileRef != NULL ? m_pFileRef->save() : false;
+    return m_pFileRef != nullptr ? m_pFileRef->save() : false;
 }
 
 void TagLibParser::SetTitle(const string& title)
 {
-    if (m_pTag != NULL)
+    if (m_pTag != nullptr)
         m_pTag->setTitle(title.c_str());
 }
 
 void TagLibParser::SetArtist(const string& artist)
 {
-    if (m_pTag != NULL)
+    if (m_pTag != nullptr)
         m_pTag->setArtist(artist.c_str());
 }
 
 void TagLibParser::SetAlbum(const string& album)
 {
-    if (m_pTag != NULL)
+    if (m_pTag != nullptr)
         m_pTag->setAlbum(album.c_str());
 }
 
 void TagLibParser::SetComment(const string& comment)
 {
-    if (m_pTag != NULL)
+    if (m_pTag != nullptr)
         m_pTag->setComment(comment.c_str());
 }
 
 void TagLibParser::SetGenre(const string& genre)
 {
-    if (m_pTag != NULL)
+    if (m_pTag != nullptr)
         m_pTag->setGenre(genre.c_str());
 }
 
 void TagLibParser::SetYear(int32_t year)
 {
-    if (m_pTag != NULL)
+    if (m_pTag != nullptr)
         m_pTag->setYear(year);
 }
 
 void TagLibParser::SetTrack(int32_t track)
 {
-    if (m_pTag != NULL)
+    if (m_pTag != nullptr)
         m_pTag->setTrack(track);
 }
 
