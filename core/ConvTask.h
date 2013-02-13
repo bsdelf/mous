@@ -35,7 +35,7 @@ private:
     MediaItem m_Item;
     const IPluginAgent* m_DecAgent;
     const IPluginAgent* m_EncAgent;
-    std::thread::thread m_WorkThread;
+    std::thread m_WorkThread;
 
     IDecoder* m_Decoder;
     IEncoder* m_Encoder;

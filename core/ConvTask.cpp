@@ -60,7 +60,7 @@ void ConvTask::Run(const string& output)
     m_Finished = false;
     m_Canceled = false;
     const auto& f = std::bind(&ConvTask::DoConvert, this, output);
-    m_WorkThread = std::thread::thread(f);
+    m_WorkThread = std::thread(f);
 }
 
 void ConvTask::Cancel()

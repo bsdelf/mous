@@ -143,7 +143,7 @@ private:
     bool m_SuspendDecoder;
     bool m_PauseDecoder;
     IDecoder* m_Decoder;
-    thread m_ThreadForDecoder;
+    std::thread m_ThreadForDecoder;
     Semaphore m_SemWakeDecoder;
     Semaphore m_SemDecoderBegin;
     Semaphore m_SemDecoderEnd;
@@ -151,7 +151,7 @@ private:
     bool m_StopRenderer;
     bool m_SuspendRenderer;
     IRenderer* m_Renderer;
-    thread m_ThreadForRenderer;
+    std::thread m_ThreadForRenderer;
     Semaphore m_SemWakeRenderer;
     Semaphore m_SemRendererBegin;
     Semaphore m_SemRendererEnd;
