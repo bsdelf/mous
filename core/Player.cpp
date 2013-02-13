@@ -64,7 +64,7 @@ Player::~Player()
 
     if (m_ThreadForDecoder.joinable())
         m_ThreadForDecoder.join();
-    if (m_ThreadForDecoder.joinable())
+    if (m_ThreadForRenderer.joinable())
         m_ThreadForRenderer.join();
 
     m_UnitBuffers.ClearBuffer();
