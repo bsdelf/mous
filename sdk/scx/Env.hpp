@@ -8,37 +8,41 @@
 
 namespace scx {
 
-namespace Env {
-
-const char* const Home = "HOME";
-const char* const Path = "PATH";
-const char* const Lang = "LANG";
-const char* const PWD = "PWD";
-const char* const LogName = "LOGNAME";
-const char* const Term = "TERM";
-const char* const Shell = "SHELL";
-const char* const TmpDir = "TMPDIR";
-
-static inline std::string Env(const std::string& name)
+struct Env
 {
-    char* p = getenv(name.c_str());
-    return p != nullptr ? std::string(p) : "";
-}
+    constexpr static const char* const Home = "HOME";
+    constexpr static const char* const Path = "PATH";
+    constexpr static const char* const Lang = "LANG";
+    constexpr static const char* const PWD = "PWD";
+    constexpr static const char* const LogName = "LOGNAME";
+    constexpr static const char* const Term = "TERM";
+    constexpr static const char* const Shell = "SHELL";
+    constexpr static const char* const TmpDir = "TMPDIR";
 
-static inline bool SetEnv(const std::string& name, std::string& value, bool overwrite = true)
-{
-    return setenv(name.c_str(), value.c_str(), overwrite ? 1 : 0) == 0;
-}
+    static std::string Get(const std::string& name)
+    {
+        const char* p = ::getenv(name.c_str());
+        return p != nullptr ? std::string(p) : "";
+    }
 
-static inline bool PutEnv(const std::string& namevalue)
-{
-    size_t len = namevalue.size();
-    char* buf = new char[len+1];
-    buf[len] = '\0';
-    memcpy(buf, namevalue.data(), len);
-    return putenv(buf) == 0;
-}
+    static bool Set(const std::string& name, std::string& value, bool overwrite = true)
+    {
+        return ::setenv(name.c_str(), value.c_str(), overwrite ? 1 : 0) == 0;
+    }
 
+    static bool Put(const std::string& namevalue)
+    {
+        size_t len = namevalue.size();
+        char* buf = new char[len+1];
+        buf[len] = '\0';
+        ::memcpy(buf, namevalue.data(), len);
+        return ::putenv(buf) == 0;
+    }
+
+    static bool Unset(const std::string& name)
+    {
+        return ::unsetenv(name.c_str()) == 0;
+    }
 };
 
 }

@@ -100,12 +100,12 @@ void ClientPlayerHandler::StartSync()
 {
     m_Status.playing = false;
     m_SyncSchedule.Start();
-    m_SyncSchedule.Schedule(std::bind(&ClientPlayerHandler::OnSyncTask, this), 200);
+    m_SyncSchedule.Add(std::bind(&ClientPlayerHandler::OnSyncTask, this), 200);
 }
 
 void ClientPlayerHandler::StopSync()
 {
-    m_SyncSchedule.Stop(true);
+    m_SyncSchedule.Stop();
 }
 
 void ClientPlayerHandler::QueryVolume()

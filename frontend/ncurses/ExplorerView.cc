@@ -44,7 +44,7 @@ ExplorerView::ExplorerView():
     m_BeginStack.push_back(0);
     m_SelectionStack.push_back(0);
 
-    m_Path = Env::Env(Env::Home);
+    m_Path = Env::Get(Env::Home);
     BuildFileItems();
 }
 

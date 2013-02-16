@@ -1,14 +1,16 @@
 #ifndef SCX_TASKSCHEDULE_HPP
 #define SCX_TASKSCHEDULE_HPP
 
-#include <pthread.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <time.h>
 
 #include <deque>
 #include <algorithm>
+#include <atomic>
 #include <mutex>
+#include <condition_variable>
+#include <thread>
 #include <functional>
 
 #ifdef __MACH__
@@ -23,101 +25,122 @@ class TaskSchedule
 private:
     struct Task
     {
-        explicit Task(const std::function<void (void)>& _invoke):
-            canceled(false),
-            invoke(_invoke)
+        Task() = default;
+
+        explicit Task(const std::function<void (void)>& c):
+            callback(c)
         { }
 
-        std::mutex mtx;
-        bool canceled;
+        volatile bool canceled = false;
+        volatile bool oneshot = true;
+        const std::function<void (void)> callback;
 
-        std::function<void (void)> invoke;
-        bool oneshot;
-        struct timeval intval;
-        struct timeval attime;
+        struct timeval interval = { 0, 0 };
+        struct timeval attime = { 0, 0 };
+
+        static bool IsEarlier(const Task* a, const Task* b)
+        {
+            return timercmp(&a->attime, &b->attime, <);
+        }
+
+        static bool NotLater(const Task* a, const Task* b)
+        {
+            return timercmp(&a->attime, &b->attime, <=);
+        }
     };
 
     typedef std::deque<Task*> TaskList;
 
-    struct TaskCmp
-    {
-        bool operator()(const Task* a, const Task* b) const
-        {
-            return timercmp(&a->attime, &b->attime, <);
-        }
-    };
-
 public:
-    TaskSchedule():
-        m_Work(false)
-    { }
+    TaskSchedule() = default;
+    TaskSchedule(const TaskSchedule&) = delete;
+    TaskSchedule& operator=(const TaskSchedule&) = delete;
 
     ~TaskSchedule()
     {
-        Stop(true);
+        Stop();
+        Clear();
     }
 
-    // be careful with storm
-    bool Start(bool reset = true)
+    void Start()
     {
-        if (reset) {
-            m_Pending.insert(m_Pending.begin(), m_TaskList.begin(), m_TaskList.end());
-            m_TaskList.clear();
-        }
-            
-        m_Work = true;
-        return pthread_create(
-                &m_ThreadId, nullptr, 
-                &TaskSchedule::OnThread, static_cast<void*>(this)) == 0;
+        // avoid callback storm
+        m_pendings.insert(m_pendings.begin(), m_tasks.begin(), m_tasks.end());
+        m_tasks.clear();
+
+        m_work = true;
+        m_cancel = false;
+        m_thread = std::thread(std::bind(&TaskSchedule::Loop, this));
     }
 
-    // synchronized stop
-    void Stop(bool clear = false)
+    void Stop()
     {
-        m_Work = false;
-        pthread_join(m_ThreadId, nullptr);
-
-        if (clear) {
-            for (size_t i = 0; i < m_TaskList.size(); ++i) {
-                delete m_TaskList[i];
-            }
-            m_TaskList.clear();
-
-            for (size_t i = 0; i < m_Pending.size(); ++i) {
-                delete m_Pending[i];
-            }
-            m_Pending.clear();
-        }
+        m_work = false;
+        if (m_thread.joinable())
+            m_thread.join();
     }
 
-    long Schedule(const std::function<void (void)>& fn, int ms, bool oneshot = false)
+    bool IsRunning() const
+    {
+        return m_work;
+    }
+
+    long Add(const std::function<void (void)>& fn, int ms, bool oneshot = false)
     {
         Task* task = new Task(fn);
         task->oneshot = oneshot;
-        task->intval.tv_sec = ms / 1000L;
-        task->intval.tv_usec = ms % 1000L * 1000L;
-        task->attime.tv_sec = 0;
-        task->attime.tv_usec = 0;
+        task->interval.tv_sec = ms / 1000L;
+        task->interval.tv_usec = ms % 1000L * 1000L;
 
-        std::unique_lock<std::mutex> locker(m_PendingMutex);
-        m_Pending.push_back(task);
-        locker.unlock();
+        ++m_count;
+
+        m_pmutex.lock();
+        m_pendings.push_back(task);
+        m_pmutex.unlock();
 
         return reinterpret_cast<long>(task);
     }
 
+    /* async cancel(destroy) task */
     void Cancel(long key)
     {
         Task* task = reinterpret_cast<Task*>(key);
         if (task != nullptr) {
-            std::lock_guard<std::mutex> locker(task->mtx);
             task->canceled = true;
         }
     }
 
-    size_t Count() const
+    /* async cancel(destroy) tasks */
+    void Cancel()
     {
-        return m_TaskList.size();
+        m_cancel = true;
+    }
+
+    /* wait for all tasks be destroyed */
+    void Wait()
+    {
+        std::unique_lock<std::mutex> locker(m_emutex);
+        while (!m_tasks.empty() || !m_pendings.empty())
+            m_econd.wait(locker);
+    }
+
+    /* destroy all tasks immediately */
+    void Clear()
+    {
+        bool work = IsRunning();
+        Stop();
+        for (Task* task: m_tasks)
+            delete task;
+        for (Task* task: m_pendings)
+            delete task;
+        if (work)
+            Start();
+    }
+
+    /* count of tasks still alive(not destroyed yet) */
+    int Count() const
+    {
+        return m_count;
     }
 
 private:
@@ -133,86 +156,83 @@ private:
 		ts.tv_sec = mts.tv_sec;
 		ts.tv_nsec = mts.tv_nsec;
 #else
-        clock_gettime(CLOCK_MONOTONIC, &ts);
+        ::clock_gettime(CLOCK_MONOTONIC, &ts);
 #endif
         struct timeval tv = { ts.tv_sec, ts.tv_nsec / 1000L };
         return tv;
     }
 
-    void inline UpdateTask(Task* task)
+    void inline RefreshTask(Task* task)
     {
         struct timeval tv = CurrentTimeVal();
-        timeradd(&tv, &task->intval, &task->attime);
+        timeradd(&tv, &task->interval, &task->attime);
     }
 
     void inline InsertTask(Task* task)
     {
-        TaskList::iterator pos = std::lower_bound(
-                m_TaskList.begin(), m_TaskList.end(), task, TaskCmp());
-        m_TaskList.insert(pos, task);
+        auto pos = std::lower_bound(
+            m_tasks.begin(), m_tasks.end(), task, Task::IsEarlier);
+        m_tasks.insert(pos, task);
     }
 
-    void DoOnThread()
+    void Loop()
     {
-        while (m_Work) {
+        Task dummy;
+        while (m_work) {
             struct timeval tv = { 0L, 2L };
-            if (select(0, nullptr, nullptr, nullptr, &tv) == 0) {
-                struct timeval tv = CurrentTimeVal();
+            if (::select(0, nullptr, nullptr, nullptr, &tv) == 0) {
+                // pick up expired tasks
+                dummy.attime = CurrentTimeVal();
+                auto end = std::lower_bound(
+                    m_tasks.begin(), m_tasks.end(), &dummy, Task::NotLater);
+                TaskList expired(m_tasks.begin(), end);
+                m_tasks.erase(m_tasks.begin(), end);
 
-                size_t n = 0;
-                for (n = 0; n < m_TaskList.size(); ++n) {
-                    Task* task = m_TaskList[n];
-                    if (timercmp(&task->attime, &tv, >))
-                        break;
-                }
+                for (Task* task: expired) {
+                    if (!m_work)
+                        return;
 
-                if (n > 0) {
-                    TaskList todoList(m_TaskList.begin(), m_TaskList.begin() + n);
-                    m_TaskList.erase(m_TaskList.begin(), m_TaskList.begin() + n);
-                    for (size_t i = 0; i < n && m_Work; ++i) {
-                        Task* task = todoList[i];
+                    if (!task->canceled && !m_cancel)
+                        task->callback();
 
-                        std::lock_guard<std::mutex> locker(task->mtx);
-
-                        if (!task->canceled)
-                            task->invoke();
-
-                        if (task->oneshot || task->canceled) {
-                            delete task;
-                        } else {
-                            UpdateTask(task);
-                            InsertTask(task);
-                        }
+                    if (task->oneshot || task->canceled || m_cancel) {
+                        delete task;
+                        --m_count;
+                        std::lock_guard<std::mutex> elocker(m_emutex);
+                        if (m_tasks.empty() && m_pendings.empty())
+                            m_econd.notify_all();
+                    } else {
+                        RefreshTask(task);
+                        InsertTask(task);
                     }
                 }
             } else {
+                // fatal error occurs
                 break;
             }
 
-            std::lock_guard<std::mutex> locker(m_PendingMutex);
-
-            if (!m_Pending.empty()) {
-                Task* task = m_Pending.front();
-                UpdateTask(task);
+            // take all pendings
+            std::lock_guard<std::mutex> plocker(m_pmutex);
+            for (Task* task: m_pendings) {
+                RefreshTask(task);
                 InsertTask(task);
-                m_Pending.pop_front();
             }
+            m_pendings.clear();
         }
     }
 
-    static void* OnThread(void* pThis)
-    {
-        TaskSchedule* ule = static_cast<TaskSchedule*>(pThis);
-        ule->DoOnThread();
-        return nullptr;
-    }
-
 private:
-    bool m_Work;
-    pthread_t m_ThreadId;
-    TaskList m_TaskList;
-    TaskList m_Pending;
-    mutable std::mutex m_PendingMutex;
+    volatile bool m_work = false;
+    volatile bool m_cancel = false;
+
+    std::thread m_thread;
+    std::atomic_int m_count;
+    TaskList m_tasks;
+    TaskList m_pendings;
+    std::mutex m_pmutex;
+
+    std::mutex m_emutex;
+    std::condition_variable m_econd;
 };
 
 }
