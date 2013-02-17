@@ -28,7 +28,7 @@ EmErrorCode OssRenderer::Open()
 {
     if (m_PrevPath != m_OptDevicePath.userVal)
         m_PrevPath = m_OptDevicePath.userVal;
-    m_Fd = open(m_PrevPath.c_str(), O_WRONLY);
+    m_Fd = ::open(m_PrevPath.c_str(), O_WRONLY);
     m_IsOpened = (m_Fd < 0) ? false : true;
     return (m_Fd >= 0 && m_IsOpened) ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
 }
@@ -38,8 +38,8 @@ void OssRenderer::Close()
     if (!m_IsOpened || m_Fd < 0)
         return;
 
-    ioctl(m_Fd, SNDCTL_DSP_SYNC);
-    close(m_Fd);
+    ::ioctl(m_Fd, SNDCTL_DSP_SYNC);
+    ::close(m_Fd);
 
     m_Fd = -1;
     m_IsOpened = false;
@@ -64,27 +64,27 @@ EmErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& 
     int _sampleRate = sampleRate;
     int _bitsPerSample = bitsPerSample;
 
-    err = ioctl(m_Fd, SNDCTL_DSP_CHANNELS, &_channels);
+    err = ::ioctl(m_Fd, SNDCTL_DSP_CHANNELS, &_channels);
     errno = 0;
     if (err == -1 || _channels != channels) {
         channels = _channels;
-        cout << strerror(errno) << endl;
+        cout << ::strerror(errno) << endl;
         return ErrorCode::RendererBadChannels;
     }
 
     errno = 0;
-    err = ioctl(m_Fd, SNDCTL_DSP_SPEED, &_sampleRate);
+    err = ::ioctl(m_Fd, SNDCTL_DSP_SPEED, &_sampleRate);
     if (err == -1 || _sampleRate != sampleRate) {
         sampleRate = _sampleRate;
-        cout << strerror(errno) << endl;
+        cout << ::strerror(errno) << endl;
         return ErrorCode::RendererBadSampleRate;
     }
 
     errno = 0;
-    err = ioctl(m_Fd, SNDCTL_DSP_SETFMT, &_bitsPerSample);
+    err = ::ioctl(m_Fd, SNDCTL_DSP_SETFMT, &_bitsPerSample);
     if (err == -1 || _bitsPerSample != bitsPerSample) {
         bitsPerSample = _bitsPerSample;
-        cout << strerror(errno) << endl;
+        cout << ::strerror(errno) << endl;
         return ErrorCode::RendererBadBitsPerSample;
     }
 
@@ -98,7 +98,7 @@ EmErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& 
 EmErrorCode OssRenderer::Write(const char* buf, uint32_t len)
 {
     for (int off = 0, nw = 0, left = len; left > 0; left -= nw, off += nw) {
-        nw = write(m_Fd, buf+off, left);
+        nw = ::write(m_Fd, buf+off, left);
         if (nw < 0)
             return ErrorCode::RendererFailedToWrite;
     }
@@ -115,16 +115,17 @@ EmErrorCode OssRenderer::Write(const char* buf, uint32_t len)
 
 int OssRenderer::VolumeLevel() const
 {
-    int level = 0;
-    ioctl(m_Fd, SNDCTL_DSP_GETPLAYVOL, &level);
-    level = ((level >> 8) + (level & 0xff)) / 2;
-    return level;
+    // all=right|left 16bits
+    int all = 0;
+    ::ioctl(m_Fd, SNDCTL_DSP_GETPLAYVOL, &all);
+    int avg = ((all >> 8) + (all & 0xff)) / 2;
+    return avg;
 }
 
-void OssRenderer::SetVolumeLevel(int level)
+void OssRenderer::SetVolumeLevel(int avg)
 {
-    int all = (level) | (level << 8);
-    ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
+    int all = (avg) | (avg << 8);
+    ::ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
 }
 
 std::vector<const BaseOption*> OssRenderer::Options() const
