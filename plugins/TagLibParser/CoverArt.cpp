@@ -85,21 +85,14 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
         return format;
     } 
 
-    ID3v2::FrameList frameList;
-    ID3v2::AttachedPictureFrame* frame;
-
     const char* PIC_ID[] = { "APIC", "PIC" };
     for (const char* ID: PIC_ID) {
-        if (!idtag->frameListMap().contains(ID))
-            continue;
-
-        frameList = idtag->frameListMap()[ID];
+        ID3v2::FrameList frameList = idtag->frameList(ID);
         if (frameList.isEmpty())
             continue;
 
-        ID3v2::FrameList::ConstIterator iter = frameList.begin();
-        for (; iter != frameList.end(); ++iter) {
-            frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
+        for (auto iter = frameList.begin(); iter != frameList.end(); ++iter) {
+            auto frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
             string mime = ToLower(frame->mimeType().to8Bit());
 
             cout << "type: " << (int) frame->type() << endl;
