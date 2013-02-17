@@ -142,6 +142,29 @@ void Client::ThRecvLoop(const string& ip, int port)
             break;
 
         switch (header.group) {
+            case Group::App:
+            {
+                if (size < (int)sizeof(char))
+                    return;
+
+                char op = Op::App::None;
+                BufObj bufObj(buf);
+                bufObj >> op;
+                switch (op) {
+                    case Op::App::Suffixes:
+                        {
+                            vector<string> list;
+                            bufObj >> list;
+                            m_SigSuffixes(list);
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+                break;
+
             case Group::Player:
                 m_PlayerHandler.Handle(buf, size);
                 break;

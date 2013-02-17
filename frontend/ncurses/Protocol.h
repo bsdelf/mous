@@ -84,6 +84,9 @@ enum e
     // C:op(char)
     StopService,
 
+    // S:op(char) count(int32_t) string(BufObj's string)..*
+    Suffixes,
+
     Top
 };
 }

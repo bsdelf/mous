@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <set>
 
 #include <scx/Signal.hpp>
 #include <scx/UniPinYin.hpp>
@@ -36,6 +37,8 @@ public:
     scx::Signal<void (const std::string&)> SigTmpOpen;
     scx::Signal<void (const std::string&)> SigUserOpen;
 
+    void SetSuffixes(const std::vector<std::string>&);
+
 private:
     void BuildFileItems();
     void CdUp();
@@ -60,10 +63,12 @@ private:
     std::string m_Path;
     std::string m_PathCache;
     bool m_HideDot;
+    bool m_HideUnknown;
     std::deque<int> m_BeginStack;
     std::deque<int> m_SelectionStack;
     std::vector<FileItem> m_FileItems;
     scx::UniPinYin m_UniPinYin;
+    std::set<std::string> m_Suffixes;
 };
 
 #endif

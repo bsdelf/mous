@@ -75,6 +75,8 @@ void Session::ThRecvLoop()
     char* buf;
     int len;
 
+    NotifySupportedSuffixes();
+
     while (!m_GotReqStopService) {
         if (!m_Socket.RecvN(&headerBuf[0], headerBuf.size()))
             break;
@@ -113,6 +115,15 @@ void Session::ThRecvLoop()
         write(m_NotifyFd, "q", 1);
         write(m_NotifyFd, &ptr, sizeof(ptr));
     }
+}
+
+void Session::NotifySupportedSuffixes()
+{
+    lock_guard<mutex> locker(m_Context->mtx);
+    const auto& s1 = m_Context->player->SupportedSuffixes();
+    auto s2 = m_Context->loader->SupportedSuffixes();
+    s2.insert(s2.begin(), s1.begin(), s1.end());
+    SEND_PACKET((char)Protocol::Group::App, << (char)Op::App::Suffixes << s2);
 }
 
 void Session::HandleApp(char* buf, int len)

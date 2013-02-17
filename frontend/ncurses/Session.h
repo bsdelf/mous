@@ -31,6 +31,8 @@ private:
     void HandlePlayer(char*, int);
     void HandlePlaylist(char*, int);
 
+    void NotifySupportedSuffixes();
+
     void PlayerPause(BufObj&);
     void PlayerSeek(BufObj&);
     void PlayerVolume(BufObj&);

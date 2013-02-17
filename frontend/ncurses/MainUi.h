@@ -2,6 +2,7 @@
 #define MAINUI_H
 
 #include <string>
+#include <vector>
 #include <deque>
 using namespace std;
 
@@ -24,6 +25,7 @@ public:
 private:
     void SlotTryConnect();
     void SlotConnected();
+    void SlotGotSuffixes(const std::vector<std::string>&);
     void SlotSwitchPlaylist(bool);
     void SlotTmpOpen(const std::string&);
     void SlotReqUserOpen(const std::string&);

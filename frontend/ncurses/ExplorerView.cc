@@ -1,16 +1,18 @@
 #include "ExplorerView.h"
 
 #include <algorithm>
-using namespace std;
+#include <utility>
 
 #include <scx/Conv.hpp>
 #include <scx/CharsetHelper.hpp>
 #include <scx/Env.hpp>
 #include <scx/FileInfo.hpp>
 #include <scx/Dir.hpp>
-using namespace scx;
 
 #include "AppEnv.h"
+
+using namespace std;
+using namespace scx;
 
 const string STR_TITLE = "[ Explorer ]";
 
@@ -35,14 +37,15 @@ private:
 
 ExplorerView::ExplorerView():
     m_Focused(false),
-    m_HideDot(true)
+    m_HideDot(true),
+    m_HideUnknown(false)
 {
     const AppEnv* config = GlobalAppEnv::Instance();
     if (config != nullptr)
         m_UniPinYin.LoadMap(config->pyMapFile);
 
-    m_BeginStack.push_back(0);
-    m_SelectionStack.push_back(0);
+    m_BeginStack = { 0 };
+    m_SelectionStack = { 0 };
 
     m_Path = Env::Get(Env::Home);
     BuildFileItems();
@@ -279,11 +282,16 @@ bool ExplorerView::InjectKey(int key)
             break;
 
         case '.':
-            m_BeginStack.resize(1);
-            m_BeginStack.back() = 0;
-            m_SelectionStack.resize(1);
-            m_SelectionStack.back() = 0;
+            m_BeginStack = { 0 };
+            m_SelectionStack = { 0 };
             m_HideDot = !m_HideDot;
+            BuildFileItems();
+            break;
+
+        case 'e':
+            m_BeginStack = { 0 };
+            m_SelectionStack = { 0 };
+            m_HideUnknown = !m_HideUnknown;
             BuildFileItems();
             break;
 
@@ -315,11 +323,23 @@ bool ExplorerView::HasFocus() const
     return m_Focused;
 }
 
+void ExplorerView::SetSuffixes(const std::vector<std::string>& list)
+{
+    for (const string& ext: list)
+        m_Suffixes.insert(ext);
+}
+
 void ExplorerView::BuildFileItems()
 {
-    vector<string> files = Dir::ListDir(m_Path);
     m_FileItems.clear();
-    m_FileItems.reserve(files.size());
+
+    const vector<string>& files = Dir::ListDir(m_Path);
+
+    std::vector<FileItem>& dirItems = m_FileItems;
+    dirItems.reserve(files.size());
+    std::vector<FileItem> otherItems;
+    otherItems.reserve(files.size());
+
     for (const string& file: files) {
         if (file == "." || file == "..")
             continue;
@@ -327,15 +347,28 @@ void ExplorerView::BuildFileItems()
             continue;
 
         FileInfo info(m_Path + "/" + file);
+
+        if (m_HideUnknown && info.Type() != FileType::Directory) {
+            if (m_Suffixes.find(info.Suffix()) == m_Suffixes.end())
+                continue;
+        }
+
         FileItem item;
         item.name = file;
         item.isDir = info.Type() == FileType::Directory;
         item.size = info.Size();
         item.cacheOk = false;
-        m_FileItems.push_back(item);
+
+        if (item.isDir)
+            dirItems.push_back(std::move(item));
+        else
+            otherItems.push_back(std::move(item));
     }
 
-    std::sort(m_FileItems.begin(), m_FileItems.end(), FileItemCmp(m_UniPinYin));
+    std::sort(dirItems.begin(), dirItems.end(), FileItemCmp(m_UniPinYin));
+    std::sort(otherItems.begin(), otherItems.end(), FileItemCmp(m_UniPinYin));
+
+    m_FileItems.insert(m_FileItems.end(), otherItems.begin(), otherItems.end());
 }
 
 void ExplorerView::CdUp()

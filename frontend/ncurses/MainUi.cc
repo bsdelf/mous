@@ -94,6 +94,7 @@ struct PrivateMainUi
     {
         client.SigTryConnect().Connect(&MainUi::SlotTryConnect, parent);
         client.SigConnected().Connect(&MainUi::SlotConnected, parent);
+        client.SigSuffixes().Connect(&MainUi::SlotGotSuffixes, parent);
         client.PlaylistHandler().SigSwitch().Connect(&MainUi::SwitchPlaylist, parent);
 
         statusView.SetPlayerHandler(&client.PlayerHandler());
@@ -170,6 +171,11 @@ void MainUi::SlotConnected()
 
     for (int i = 0; i < PLAYLIST_COUNT; ++i)
         d->client.PlaylistHandler().Sync(i);
+}
+
+void MainUi::SlotGotSuffixes(const std::vector<std::string>& list)
+{
+    d->explorerView.SetSuffixes(list);
 }
 
 void MainUi::SlotSwitchPlaylist(bool toNext)

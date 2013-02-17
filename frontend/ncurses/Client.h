@@ -36,6 +36,11 @@ public:
     Signal<void ()>& SigTryConnect();
     Signal<void ()>& SigConnected();
 
+    Signal<void (const std::vector<std::string>&)>& SigSuffixes()
+    {
+        return m_SigSuffixes;
+    }
+
 private:
     void ThRecvLoop(const string&, int);
 
@@ -58,6 +63,7 @@ private:
 
     Signal<void ()> m_SigTryConnect;
     Signal<void ()> m_SigConnected;
+    Signal<void (const std::vector<std::string>&)> m_SigSuffixes;
 };
 
 #endif

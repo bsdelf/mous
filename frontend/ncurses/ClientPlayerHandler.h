@@ -1,6 +1,8 @@
 #ifndef CLIENTPLAYERHANDLER_H
 #define CLIENTPLAYERHANDLER_H
 
+#include <string>
+#include <vector>
 #include <functional>
 #include <mutex>
 
