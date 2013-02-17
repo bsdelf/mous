@@ -39,16 +39,16 @@ endif()
 #==== Compiler ====#
 option(UseCompileClang "Use Clang C compiler" off)
 option(UseCompileGCC48 "Use GCC48 compiler" off)
-
-if(UseCompileClang)
+if(UseCompileClang AND (NOT UseCompileGCC48))
     set(CMAKE_C_COMPILER "clang")
     set(CMAKE_CXX_COMPILER "clang++")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif()
-
-if(UseCompileGCC48)
+elseif(UseCompileGCC48 AND (NOT UseCompileClang))
     set(CMAKE_C_COMPILER "gcc48")
     set(CMAKE_CXX_COMPILER "g++48")
+else()
+    message(SEND_ERROR "Use clang or gcc?!!!!")
+    return()
 endif()
 
 set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Install path prefix")
