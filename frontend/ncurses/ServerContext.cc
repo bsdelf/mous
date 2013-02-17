@@ -86,14 +86,14 @@ void ServerContext::Dump()
     BufObj buf(nullptr);
     buf << (int)VERSION;
     buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
-    buf.PutArray(selectedItem);
+    buf << selectedItem;
 
     vector<char> outbuf(buf.Offset());
 
     buf.SetBuffer(&outbuf[0]);
     buf << (int)VERSION;
     buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
-    buf.PutArray(selectedItem);
+    buf << selectedItem;
 
     fstream outfile;
     outfile.open(env->contextFile.c_str(), ios::binary | ios::out);
