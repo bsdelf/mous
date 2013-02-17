@@ -31,7 +31,7 @@ void DumpMP4(const string& filename)
     TagLib::MP4::File file(filename.c_str());
     MP4::Tag* mp4tag = file.tag();
 
-    if (mp4tag == NULL) {
+    if (mp4tag == nullptr) {
         cout << "no mp4 tag found!" << endl;
         return;
     }
@@ -59,22 +59,19 @@ void DumpMP4(const string& filename)
 
 void DumpID3v2(ID3v2::Tag* mp3Tag)
 {
-    if (mp3Tag == NULL){
+    if (mp3Tag == nullptr){
         cout << "no id3v2 tag found!" << endl;
         return;
     } 
 
-    ID3v2::FrameList frameList;
-    ID3v2::AttachedPictureFrame* frame;
-
     const char* picId[] = { "APIC", "PIC" };
     char count = '0';
-    for (int i = 0; i < 2; ++i) {
-        frameList = mp3Tag->frameListMap()[picId[i]];
+    for (auto id: picId) {
+        const auto& frameList = mp3Tag->frameList(id);
         if (!frameList.isEmpty()) {
             ID3v2::FrameList::ConstIterator iter = frameList.begin();
             for (; iter != frameList.end(); ++iter) {
-                frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
+                auto frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
                 cout << "type: " << (int) frame->type() << endl;
                 cout << "mime: " << frame->mimeType().toCString() << endl;
 
@@ -85,7 +82,7 @@ void DumpID3v2(ID3v2::Tag* mp3Tag)
                 imgFile.close();
             }
         } else {
-            cout << picId[i] << " not found!" << endl;
+            cout << id << " not found!" << endl;
         }
     }
 }
@@ -104,12 +101,12 @@ void DumpFlac(const string& filename)
     if (picList.isEmpty()) {
         cout << "no flac pic found!" << endl;
         ID3v2::Tag* tag = file.ID3v2Tag();
-        if (tag != NULL) {
+        if (tag != nullptr) {
             DumpID3v2(tag);
         } else {
             cout << "no id3v2 found!" << endl;
             Ogg::XiphComment* com = file.xiphComment();
-            if (com == NULL) {
+            if (com == nullptr) {
                 cout << "no xiph found!" << endl;
                 return;
             }

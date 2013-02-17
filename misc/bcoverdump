@@ -1,1 +1,1 @@
-g++ -o coverdump -O2 coverdump.cpp -ltag -I /usr/local/include/ -L /usr/local/lib
+clang++ -std=c++11 -stdlib=libc++ -g -o coverdump -O2 coverdump.cpp -ltag -I /usr/local/include/ -L /usr/local/lib
