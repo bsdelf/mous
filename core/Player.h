@@ -8,12 +8,7 @@
 #include <core/IPlayer.h>
 #include <scx/LPVBuffer.hpp>
 #include <scx/Signal.hpp>
-
-#ifndef __MACH__
 #include <scx/SemVar.hpp>
-#else
-#include <scx/SoftSemVar.hpp>
-#endif
 
 using namespace std;
 
@@ -25,13 +20,6 @@ class IRenderer;
 
 class Player: public IPlayer
 {
-
-#ifndef __MACH__
-    typedef scx::SemVar Semaphore;
-#else
-    typedef scx::SoftSemVar Semaphore;
-#endif
-
 public:
     Player();
     ~Player();
@@ -144,17 +132,17 @@ private:
     bool m_PauseDecoder;
     IDecoder* m_Decoder;
     std::thread m_ThreadForDecoder;
-    Semaphore m_SemWakeDecoder;
-    Semaphore m_SemDecoderBegin;
-    Semaphore m_SemDecoderEnd;
+    scx::SemVar m_SemWakeDecoder;
+    scx::SemVar m_SemDecoderBegin;
+    scx::SemVar m_SemDecoderEnd;
 
     bool m_StopRenderer;
     bool m_SuspendRenderer;
     IRenderer* m_Renderer;
     std::thread m_ThreadForRenderer;
-    Semaphore m_SemWakeRenderer;
-    Semaphore m_SemRendererBegin;
-    Semaphore m_SemRendererEnd;
+    scx::SemVar m_SemWakeRenderer;
+    scx::SemVar m_SemRendererBegin;
+    scx::SemVar m_SemRendererEnd;
 
     scx::LPVBuffer<UnitBuffer> m_UnitBuffers;
 

@@ -30,6 +30,10 @@ elseif(APPLE)
     set(IS_APPLE true)
 endif()
 
+if(NOT IS_APPLE)
+    add_definitions(-DUSE_POSIX_SEMAPHORE)
+endif()
+
 #==== amd64/x86 ====#
 set(Bitness 32)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
