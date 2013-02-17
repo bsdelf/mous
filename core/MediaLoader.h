@@ -28,6 +28,7 @@ public:
     void UnregisterPlugin(vector<const IPluginAgent*>& agents);
     void UnregisterAll();
 
+    std::vector<std::string> SupportedSuffixes() const;
     EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const;
 
 private:

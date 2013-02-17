@@ -163,6 +163,15 @@ void MediaLoader::RemoveTagParser(const IPluginAgent* pAgent)
     }
 }
 
+vector<string> MediaLoader::SupportedSuffixes() const
+{
+    vector<string> list;
+    list.reserve(m_MediaPackMap.size());
+    for (const auto& entry: m_MediaPackMap)
+        list.push_back(entry.first);
+    return list;
+}
+
 EmErrorCode MediaLoader::LoadMedia(const string& path, deque<MediaItem>& list) const
 {
     list.clear();
