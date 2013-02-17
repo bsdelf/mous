@@ -36,6 +36,8 @@ public:
     void UnregisterPlugin(vector<const IPluginAgent*>& agents);
     void UnregisterAll();
 
+    std::vector<std::string> SupportedSuffixes() const;
+
     int BufferCount() const;
     void SetBufferCount(int count);
 

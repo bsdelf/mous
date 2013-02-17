@@ -202,6 +202,15 @@ void Player::UnregisterAll()
     UnsetRendererPlugin(m_RendererPlugin);
 }
 
+vector<string> Player::SupportedSuffixes() const
+{
+    vector<string> list;
+    list.reserve(m_DecoderPluginMap.size());
+    for (const auto& entry: m_DecoderPluginMap)
+        list.push_back(entry.first);
+    return list;
+}
+
 int Player::BufferCount() const
 {
     return m_UnitBuffers.BufferCount();

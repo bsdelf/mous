@@ -49,6 +49,8 @@ public:
     virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
+    virtual std::vector<std::string> SupportedSuffixes() const = 0;
+
     virtual int BufferCount() const = 0;
     virtual void SetBufferCount(int count) = 0;
 
