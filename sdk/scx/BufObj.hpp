@@ -6,6 +6,11 @@
 #include <cassert>
 #include <cstring>
 #include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <list>
+#include <type_traits>
 
 namespace scx {
 
@@ -13,6 +18,36 @@ class BufObj
 {
 public:
     typedef uint32_t stlsize_t;
+
+private:
+    template<typename T>
+    struct IsArray {
+        enum { value = false };
+    };
+    template<typename T, typename A>
+    struct IsArray<std::vector<T, A>> {
+        enum { value = true };
+    };
+    /*
+    template<typename T, typename A>
+    struct IsArray<std::deque<T, A>> {
+        enum { value = true };
+    };
+    template<typename T, typename A>
+    struct IsArray<std::queue<T, A>> {
+        enum { value = true };
+    };
+    template<typename T, typename A>
+    struct IsArray<std::list<T, A>> {
+        enum { value = true };
+    };
+    */
+    /*
+    template<typename T>
+    struct IsArray {
+        enum { value = false };
+    }
+    */
 
 public:
     explicit BufObj(void* _buf = nullptr):
@@ -42,6 +77,7 @@ public:
         return off;
     }
 
+    /* POD */
     template<typename T>
     BufObj& operator<<(T t)
     {
@@ -54,7 +90,78 @@ public:
         return TakeRaw(t);
     }
 
-    // For chars
+    /* string */
+    template<typename V=void>
+    BufObj& operator<<(const char* data)
+    {
+        return PutChars(data);
+    }
+
+    template<typename V=void>
+    BufObj& operator<<(const std::string str)
+    {
+        return PutString(str);
+    }
+
+    template<typename V=void>
+    BufObj& operator>>(std::string& str)
+    {
+        return TakeString(str);
+    }
+
+    /* vector<POD> */
+    template<typename T, typename A>
+    BufObj& operator<<(const std::vector<T, A>& t)
+    {
+        return PutArray(t);
+    }
+
+    template<typename T, typename A>
+    BufObj& operator>>(std::vector<T, A>& t)
+    {
+        return TakeArray(t);
+    }
+
+    /* deque<POD> */
+    template<typename T, typename A>
+    BufObj& operator<<(const std::deque<T, A>& t)
+    {
+        return PutArray(t);
+    }
+
+    template<typename T, typename A>
+    BufObj& operator>>(std::deque<T, A>& t)
+    {
+        return TakeArray(t);
+    }
+    
+    /* queue<POD> */
+    template<typename T, typename A>
+    BufObj& operator<<(const std::queue<T, A>& t)
+    {
+        return PutList(t);
+    }
+
+    template<typename T, typename A>
+    BufObj& operator>>(std::queue<T, A>& t)
+    {
+        return TakeList(t);
+    }
+
+    /* list<POD> */
+    template<typename T, typename A>
+    BufObj& operator<<(const std::list<T, A>& t)
+    {
+        return PutList(t);
+    }
+
+    template<typename T, typename A>
+    BufObj& operator>>(std::list<T, A>& t)
+    {
+        return TakeList(t);
+    }
+
+    /* chars */
     BufObj& PutChars(const char* data, size_t len = (size_t)-1)
     {
         if (len == (size_t)-1) {
@@ -74,7 +181,7 @@ public:
         return *this;
     }
 
-    // For string
+    /* string */
     BufObj& PutString(const std::string& str)
     {
         PutRaw((stlsize_t)str.size());
@@ -94,7 +201,7 @@ public:
         return *this;
     }
 
-    // For vector, deque
+    /* vector, deque */
     template<typename T>
     BufObj& PutArray(const T& t)
     {
@@ -117,7 +224,7 @@ public:
         return *this;
     }
 
-    // For list
+    /* list, queue */
     template<typename T>
     BufObj& PutList(const T& t)
     {
@@ -142,8 +249,7 @@ public:
         return *this;
     }
 
-    // For raw & continues in memory & fixed size data,
-    // which means its size can be measured by sizeof().
+    /* POD */
     template<typename T>
     BufObj& PutRaw(T t)
     {
@@ -178,6 +284,7 @@ private:
 };
 
 
+/*
 template<>
 inline BufObj& BufObj::operator<<(const char* data)
 {
@@ -195,7 +302,7 @@ inline BufObj& BufObj::operator>>(std::string& str)
 {
     return TakeString(str);
 }
-
+*/
 
 }
 
