@@ -41,6 +41,7 @@ const char* const STR_ARRAY[] =
     "",
 //"ENTER  open item in temporary playlist",
     "a          add file to playlist",
+    "e          show/hide unsupported files",
     ".          show/hide files whose names begin with a dot",
     "",
 
