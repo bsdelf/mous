@@ -2,12 +2,12 @@
 #define PROTOCOL_H
 
 #include <inttypes.h>
-
-#include <string>
-#include <cstdlib>
-using namespace std;
+#include <string.h>
+#include <stdlib.h>
 
 #include <scx/BufObj.hpp>
+
+using namespace std;
 using namespace scx;
 
 //#pragma pack(push, 1)
@@ -57,7 +57,7 @@ struct Header
 
     bool Read(char* buf)
     {
-        if (std::memcmp(STR_MAGIC, buf, 4) == 0) {
+        if (::memcmp(STR_MAGIC, buf, 4) == 0) {
             BufObj(buf+4) >> group >> payloadSize;
             return IsVaildEm(Group, group);
         } else {
