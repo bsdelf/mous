@@ -8,31 +8,26 @@
 #include <scx/Env.hpp>
 #include <scx/FileInfo.hpp>
 #include <scx/Dir.hpp>
+#include <scx/PinYinCompare.hpp>
 
 #include "AppEnv.h"
 
 using namespace std;
 using namespace scx;
 
-const string STR_TITLE = "[ Explorer ]";
-
-const char* const SIZE_HINT = "BKMG";
+constexpr const char* const STR_TITLE = "[ Explorer ]";
+constexpr const char* const SIZE_HINT = "BKMG";
 
 class FileItemCmp
 {
 public:
-    explicit FileItemCmp(const UniPinYin& _py):
-        py(_py)
-    {
-    }
-
     bool operator()(const ExplorerView::FileItem& a, const ExplorerView::FileItem& b) const
     {
-        return py.Utf8StrCmp(a.name, b.name);
+        return pyc.CmpUtf8(a.name, b.name);
     }
 
 private:
-    const UniPinYin& py;
+    PinYinCompare pyc;
 };
 
 ExplorerView::ExplorerView():
@@ -40,14 +35,12 @@ ExplorerView::ExplorerView():
     m_HideDot(true),
     m_HideUnknown(false)
 {
-    const AppEnv* config = GlobalAppEnv::Instance();
-    if (config != nullptr)
-        m_UniPinYin.LoadMap(config->pyMapFile);
+    //const AppEnv* config = GlobalAppEnv::Instance();
 
     m_BeginStack = { 0 };
     m_SelectionStack = { 0 };
-
     m_Path = Env::Get(Env::Home);
+
     BuildFileItems();
 }
 
@@ -295,6 +288,12 @@ bool ExplorerView::InjectKey(int key)
             BuildFileItems();
             break;
 
+        case 'r':
+            m_BeginStack = { 0 };
+            m_SelectionStack = { 0 };
+            BuildFileItems();
+            break;
+
         default:
             return false;
     }
@@ -348,7 +347,7 @@ void ExplorerView::BuildFileItems()
 
         FileInfo info(m_Path + "/" + file);
 
-        if (m_HideUnknown && info.Type() != FileType::Directory) {
+        if (m_HideUnknown && (info.Type() != FileType::Directory)) {
             if (m_Suffixes.find(info.Suffix()) == m_Suffixes.end())
                 continue;
         }
@@ -365,8 +364,8 @@ void ExplorerView::BuildFileItems()
             otherItems.push_back(std::move(item));
     }
 
-    std::sort(dirItems.begin(), dirItems.end(), FileItemCmp(m_UniPinYin));
-    std::sort(otherItems.begin(), otherItems.end(), FileItemCmp(m_UniPinYin));
+    std::sort(dirItems.begin(), dirItems.end(), FileItemCmp());
+    std::sort(otherItems.begin(), otherItems.end(), FileItemCmp());
 
     m_FileItems.insert(m_FileItems.end(), otherItems.begin(), otherItems.end());
 }

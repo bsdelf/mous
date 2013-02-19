@@ -9,7 +9,6 @@
 #include <set>
 
 #include <scx/Signal.hpp>
-#include <scx/UniPinYin.hpp>
 
 class FileItemCmp;
 
@@ -67,7 +66,6 @@ private:
     std::deque<int> m_BeginStack;
     std::deque<int> m_SelectionStack;
     std::vector<FileItem> m_FileItems;
-    scx::UniPinYin m_UniPinYin;
     std::set<std::string> m_Suffixes;
 };
 
