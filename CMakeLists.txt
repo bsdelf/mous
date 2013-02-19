@@ -352,8 +352,8 @@ install(
     CODE "file(INSTALL \${PLUGIN_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/mous)"
 )
 
-file(GLOB RESOURCE_FILES "${MOUS_SOURCE_DIR}/resource/*")
-install(DIRECTORY ${RESOURCE_FILES} DESTINATION share/mous)
+#file(GLOB RESOURCE_FILES "${MOUS_SOURCE_DIR}/resource/*")
+#install(DIRECTORY ${RESOURCE_FILES} DESTINATION share/mous)
 
 #==== Messages ====#
 message("CMake:		" ${CMAKE_VERSION})

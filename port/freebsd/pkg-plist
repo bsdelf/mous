@@ -65,7 +65,6 @@ lib/libMousCore.so
 %%WAVDECODER%%lib/mous/libWavDecoder.so
 %%WAVENCODER%%lib/mous/libWavEncoder.so
 %%WMA%%lib/mous/libWmaDecoder.so
-share/mous/pinyin/unipy.map
 %%QT4%%share/mous/qt/mous-qt_zh_CN.qm
 @dirrm lib/mous
 @dirrm share/mous/pinyin
