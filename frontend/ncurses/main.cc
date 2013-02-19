@@ -4,13 +4,14 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include <iostream>
+#include <locale>
 #include <fstream>
-using namespace std;
 
 #include "AppEnv.h"
 #include "Server.h"
 #include "MainUi.h"
+
+using namespace std;
 
 pid_t FetchPid()
 {

@@ -1,18 +1,13 @@
 #include "MainUi.h"
 
-#include <locale.h>
 //#include <ncurses.h>
 
-#include <iostream>
 #include <set>
 #include <stack>
 #include <mutex>
 
 #include <scx/Conv.hpp>
-using namespace scx;
-
 #include <util/MediaItem.h>
-using namespace mous;
 
 #include "Client.h"
 #include "BgWindow.h"
@@ -21,6 +16,9 @@ using namespace mous;
 #include "PlaylistView.h"
 #include "StatusView.h"
 #include "HelpView.h"
+
+using namespace scx;
+using namespace mous;
 
 namespace View {
 enum Type
