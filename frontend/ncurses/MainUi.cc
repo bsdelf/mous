@@ -106,7 +106,7 @@ struct PrivateMainUi
         layer.views.insert(&playlist);
         layer.views.insert(&statusView);
         layer.focused.push(&playlist);
-        layerStack.push(layer);
+        layerStack.push(std::move(layer));
 
         explorerView.SigTmpOpen.Connect(&MainUi::SlotTmpOpen, parent);
         explorerView.SigUserOpen.Connect(&MainUi::SlotReqUserOpen, parent);
@@ -209,7 +209,6 @@ void MainUi::StopClient()
 
 void MainUi::BeginNcurses()
 {  
-    setlocale(LC_ALL,"");
     initscr();
     start_color();
     cbreak();
