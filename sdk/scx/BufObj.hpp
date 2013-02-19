@@ -2,15 +2,19 @@
 #define SCX_BUFOBJ_HPP
 
 #include <inttypes.h>
+#include <string.h>
+#include <assert.h>
 
-#include <cassert>
-#include <cstring>
 #include <string>
 #include <vector>
 #include <deque>
-#include <queue>
 #include <list>
-#include <type_traits>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <utility>
+#include <algorithm>
 
 namespace scx {
 
@@ -19,52 +23,33 @@ class BufObj
 public:
     typedef uint32_t stlsize_t;
 
-private:
-    template<typename T>
-    struct IsArray {
-        enum { value = false };
-    };
-    template<typename T, typename A>
-    struct IsArray<std::vector<T, A>> {
-        enum { value = true };
-    };
-    /*
-    template<typename T, typename A>
-    struct IsArray<std::deque<T, A>> {
-        enum { value = true };
-    };
-    template<typename T, typename A>
-    struct IsArray<std::queue<T, A>> {
-        enum { value = true };
-    };
-    template<typename T, typename A>
-    struct IsArray<std::list<T, A>> {
-        enum { value = true };
-    };
-    */
-    /*
-    template<typename T>
-    struct IsArray {
-        enum { value = false };
+public:
+    static bool IsBigEndian()
+    {
+        union {
+            uint32_t i;
+            char c[4];
+        } big = { 0x01020304 };
+        return (big.c[0] == 0x01);
     }
-    */
 
 public:
-    explicit BufObj(void* _buf = nullptr):
-        buf((char*)_buf),
-        off(0)
+    BufObj() = default;
+
+    explicit BufObj(void* b):
+        buf(static_cast<char*>(b))
     {
     }
 
-    void SetBuffer(void* _buf)
+    void SetBuffer(void* b)
     {
-        buf = (char*)_buf;
+        buf = static_cast<char*>(b);
         off = 0;
     }
 
     void* Buffer()
     {
-        return (void*)buf;
+        return static_cast<void*>(buf);
     }
 
     void ResetOffset()
@@ -91,20 +76,17 @@ public:
     }
 
     /* string */
-    template<typename V=void>
-    BufObj& operator<<(const char* data)
-    {
-        return PutChars(data);
-    }
-
-    template<typename V=void>
-    BufObj& operator<<(const std::string str)
+    inline BufObj& operator<<(const char* str)
     {
         return PutString(str);
     }
 
-    template<typename V=void>
-    BufObj& operator>>(std::string& str)
+    inline BufObj& operator<<(const std::string& str)
+    {
+        return PutString(str);
+    }
+
+    inline BufObj& operator>>(std::string& str)
     {
         return TakeString(str);
     }
@@ -134,19 +116,6 @@ public:
     {
         return TakeArray(t);
     }
-    
-    /* queue<POD> */
-    template<typename T, typename A>
-    BufObj& operator<<(const std::queue<T, A>& t)
-    {
-        return PutList(t);
-    }
-
-    template<typename T, typename A>
-    BufObj& operator>>(std::queue<T, A>& t)
-    {
-        return TakeList(t);
-    }
 
     /* list<POD> */
     template<typename T, typename A>
@@ -161,14 +130,109 @@ public:
         return TakeList(t);
     }
 
-    /* chars */
+    /* queue<POD> */
+    template<typename T, typename A>
+    BufObj& operator<<(std::queue<T, A> l)
+    {
+        stlsize_t size = l.size();
+        PutRaw(size);
+        while (!l.empty()) {
+            (*this) << l.front();
+            l.pop();
+        }
+        return *this;
+    }
+
+    template<typename T, typename A>
+    BufObj& operator>>(std::queue<T, A>& q)
+    {
+        std::deque<T> t;
+        (*this) >> t;
+        q = std::queue<T, A>(std::move(t));
+        return *this;
+    }
+
+    /* stack<POD> */
+    template<typename T, typename A>
+    BufObj& operator<<(std::stack<T, A> l)
+    {
+        std::vector<T> t;
+        t.reserve(l.size());
+        while (!l.empty()) {
+            t.push_back(l.top());
+            l.pop();
+        }
+        std::reverse(t.begin(), t.end());
+        (*this) << t;
+        return *this;
+    }
+
+    template<typename T, typename A>
+    BufObj& operator>>(std::stack<T, A>& s)
+    {
+        std::deque<T> t;
+        (*this) >> t;
+        s = std::stack<T, A>(std::move(t));
+        return *this;
+    }
+
+    /* set */
+    template<typename K, typename C, typename A>
+    BufObj& operator<<(const std::set<K, C, A>& s)
+    {
+        return PutList(s);
+    }
+
+    template<typename K, typename C, typename A>
+    BufObj& operator>>(std::set<K, C, A>& s)
+    {
+        stlsize_t size;
+        TakeRaw(size);
+        for (stlsize_t i = 0; i < size; ++i) {
+            K k;
+            (*this) >> k;
+            s.insert(std::move(k));
+        }
+        return *this;
+    }
+
+    /* map */
+    template<typename K, typename T, typename C, typename A>
+    BufObj& operator<<(const std::map<K, T, C, A>& m)
+    {
+        stlsize_t size = m.size();
+        PutRaw(size);
+        for (const auto& e: m) {
+            (*this) << e.first;
+            (*this) << e.second;
+        }
+        return *this;
+    }
+
+    template<typename K, typename T, typename C, typename A>
+    BufObj& operator>>(std::map<K, T, C, A>& m)
+    {
+        stlsize_t size;
+        TakeRaw(size);
+        for (stlsize_t i = 0; i < size; ++i) {
+            K k; T t;
+            (*this) >> k;
+            (*this) >> t;
+            m[std::move(k)] = std::move(t);
+        }
+        return *this;
+    }
+
+    /*==== specific routines ====*/
+
+    /* string */
     BufObj& PutChars(const char* data, size_t len = (size_t)-1)
     {
         if (len == (size_t)-1) {
             len = strlen(data);
         }
         if (buf != nullptr)
-            std::memcpy(buf+off, data, len);
+            ::memcpy(buf+off, data, len);
         off += len;
         return *this;
     }
@@ -176,18 +240,18 @@ public:
     BufObj& TakeChars(char* data, size_t len)
     {
         if (buf != nullptr)
-            std::memcpy(data, buf+off, len);
+            ::memcpy(data, buf+off, len);
         off += len;
         return *this;
     }
 
-    /* string */
     BufObj& PutString(const std::string& str)
     {
-        PutRaw((stlsize_t)str.size());
+        stlsize_t size = str.size();
+        PutRaw(size);
         if (buf != nullptr)
-            std::memcpy(buf+off, str.data(), str.size());
-        off += str.size();
+            ::memcpy(buf+off, str.data(), size);
+        off += size;
         return *this;
     }
 
@@ -202,49 +266,48 @@ public:
     }
 
     /* vector, deque */
-    template<typename T>
-    BufObj& PutArray(const T& t)
+    template<typename A>
+    BufObj& PutArray(const A& a)
     {
-        PutRaw((stlsize_t)t.size());
-        for (size_t i = 0; i < t.size(); ++i) {
-            (*this) << t[i];
+        stlsize_t size = a.size();
+        PutRaw(size);
+        for (stlsize_t i = 0; i < size; ++i) {
+            (*this) << a[i];
         }
         return *this;
     }
 
-    template<typename T>
-    BufObj& TakeArray(T& t)
+    template<typename A>
+    BufObj& TakeArray(A& a)
     {
         stlsize_t size = 0;
         TakeRaw(size);
-        t.resize(size);
-        for (size_t i = 0; i < size; ++i) {
-            (*this) >> t[i];
+        a.resize(size);
+        for (stlsize_t i = 0; i < size; ++i) {
+            (*this) >> a[i];
         }
         return *this;
     }
 
-    /* list, queue */
-    template<typename T>
-    BufObj& PutList(const T& t)
+    /* list */
+    template<typename L>
+    BufObj& PutList(const L& l)
     {
-        typedef typename T::const_iterator iter_t;
-        PutRaw((stlsize_t)t.size());
-        for (iter_t iter = t.begin(); iter != t.end(); ++iter) {
-            (*this) << *iter;
+        PutRaw((stlsize_t)l.size());
+        for (const auto& e: l) {
+            (*this) << e;
         }
         return *this;
     }
 
-    template<typename T>
-    BufObj& TakeList(T& t)
+    template<typename L>
+    BufObj& TakeList(L& l)
     {
-        typedef typename T::iterator iter_t;
         stlsize_t size = 0;
         TakeRaw(size);
-        t.resize(size);
-        for (iter_t iter = t.begin(); iter != t.end(); ++iter) {
-            (*this) >> *iter;
+        l.resize(size);
+        for (auto& e: l) {
+            (*this) >> e;
         }
         return *this;
     }
@@ -254,7 +317,7 @@ public:
     BufObj& PutRaw(T t)
     {
         if (buf != nullptr)
-            std::memcpy(buf+off, &t, sizeof(T));
+            ::memcpy(buf+off, &t, sizeof(T));
         off += sizeof(T);
         return *this;
     }
@@ -263,46 +326,27 @@ public:
     BufObj& TakeRaw(T& t)
     {
         if (buf != nullptr)
-            std::memcpy(&t, buf+off, sizeof(T));
+            ::memcpy(&t, buf+off, sizeof(T));
+        else
+            ::memset(&t, 0, sizeof(T));
         off += sizeof(T);
         return *this;
     }
 
     template<typename T>
-    T& Fetch(bool moveNext = false)
+    const T& Fetch(bool moveNext = false)
     {
         assert(buf != nullptr);
-        T& t = *(T*)(buf+off);
+        const T& t = *(T*)(buf+off);
         if (moveNext)
             off += sizeof(T);
         return t;
     }
 
 private:
-    char* buf;
-    uint32_t off;
+    char* buf = nullptr;
+    uint32_t off = 0;
 };
-
-
-/*
-template<>
-inline BufObj& BufObj::operator<<(const char* data)
-{
-    return PutChars(data);
-}
-
-template<>
-inline BufObj& BufObj::operator<<(const std::string str)
-{
-    return PutString(str);
-}
-
-template<>
-inline BufObj& BufObj::operator>>(std::string& str)
-{
-    return TakeString(str);
-}
-*/
 
 }
 
