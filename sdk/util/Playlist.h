@@ -153,7 +153,7 @@ public:
     }
 
     /* try to set index */
-    bool JumpTo(int index) const
+    bool JumpTo(int index)
     {
         if (index >= 0 && (size_t)index < m_ItemQueue.size()) {
             using namespace PlaylistMode;
@@ -441,9 +441,8 @@ private:
     EmPlaylistMode m_Mode;
 
     std::deque<item_t> m_ItemQueue;
-    typedef typename std::deque<item_t>::iterator ItemQueueIter;
 
-    mutable int m_SeqIndex;
+    int m_SeqIndex;
     std::deque<int> m_SeqShuffleQueue;
 
 };
