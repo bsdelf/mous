@@ -8,7 +8,7 @@
 #include <ctime>
 #include <cassert>
 #include <algorithm>
-#include <iostream>
+//#include <iostream>
 
 #define MOUS_HAS(container, var) \
     (container.find(var) != container.end())
@@ -201,7 +201,8 @@ public:
         }
     }
 
-    void Assign(const std::deque<item_t>& items)
+    template<class Array>
+    void Assign(const Array& items)
     {
         m_ItemQueue.assign(items.begin(), items.end());
         AdjustSeqPosition();
@@ -215,7 +216,8 @@ public:
         AdjustShuffleRange();
     }
 
-    void Move(std::vector<int> oldPos, int newPos)
+    template<class Array>
+    void Move(Array oldPos, int newPos)
     {
         if (m_ItemQueue.size() < 2)
             return;
@@ -266,9 +268,10 @@ public:
             MOUS_FIND(m_SeqShuffleQueue, seqIndex) - m_SeqShuffleQueue.begin() : seqIndex;
     }
 
-    void Insert(int index, const std::deque<item_t>& items)
+    template<class Array>
+    void Insert(int index, const Array& array)
     {
-        m_ItemQueue.insert(m_ItemQueue.begin()+index, items.begin(), items.end());
+        m_ItemQueue.insert(m_ItemQueue.begin()+index, array.begin(), array.end());
         AdjustSeqPosition();
         AdjustShuffleRange();
     }
@@ -280,9 +283,10 @@ public:
         AdjustShuffleRange();
     }
 
-    void Append(const std::deque<item_t>& items)
+    template<class Array>
+    void Append(const Array& array)
     {
-        m_ItemQueue.insert(m_ItemQueue.end(), items.begin(), items.end());
+        m_ItemQueue.insert(m_ItemQueue.end(), array.begin(), array.end());
         AdjustSeqPosition();
         AdjustShuffleRange();
     }
@@ -307,10 +311,11 @@ public:
         AdjustShuffleRange();
     }
 
-    void Remove(const std::vector<int>& indexes)
+    template<class Array>
+    void Remove(const Array& array)
     {
-        for (int i = indexes.size()-1; i >= 0; --i) {
-            m_ItemQueue.erase(m_ItemQueue.begin() + indexes[i]);
+        for (int i = array.size()-1; i >= 0; --i) {
+            m_ItemQueue.erase(m_ItemQueue.begin() + array[i]);
         }
         AdjustSeqPosition();
         AdjustShuffleRange();
