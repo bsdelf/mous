@@ -86,23 +86,20 @@ public:
         fstream outfile;
         vector<char> buffer;
 
-        if (Store(list, buffer)) {
-            outfile.open(file.c_str(), ios::binary | ios::out);
-            if (outfile.is_open()
-                    && (outfile.write(&buffer[0], buffer.size()).tellp() == (streampos)buffer.size())) {
-                ret = true;
-            }
-            outfile.close();
+        Store(list, buffer);
+        outfile.open(file.c_str(), ios::binary | ios::out);
+        if (outfile && (outfile.write(&buffer[0], buffer.size()).tellp() == (streampos)buffer.size())) {
+            ret = true;
         }
+        outfile.close();
 
         return ret;
     }
 
-    static bool Store(const Playlist<item_t>& list, std::vector<char>& outbuf)
+    static void Store(const Playlist<item_t>& list, std::vector<char>& outbuf)
     {
         outbuf.resize(ToStream(list, nullptr));
         ToStream(list, &outbuf[0]);
-        return true;
     }
 
 private:
