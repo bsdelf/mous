@@ -39,7 +39,7 @@ int cmd_img(int argc, char** argv)
                 cin >> ch;
                 if (ch == 'y') {
                     ofstream outfile(file);
-                    outfile.write(&buf[0], buf.size());
+                    outfile.write(buf.data(), buf.size());
                     outfile.close();
                 }
             }

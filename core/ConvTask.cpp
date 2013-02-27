@@ -128,8 +128,8 @@ void ConvTask::DoConvert(const string& output)
 
     //cout << unitBeg << "-" << unitEnd << endl;
     while (unitOff < unitEnd && !m_Canceled) {
-        m_Decoder->DecodeUnit(&unitBuffer[0], unitBufferUsed, unitCount);
-        m_Encoder->Encode(&unitBuffer[0], unitBufferUsed);
+        m_Decoder->DecodeUnit(unitBuffer.data(), unitBufferUsed, unitCount);
+        m_Encoder->Encode(unitBuffer.data(), unitBufferUsed);
         unitOff += unitCount;
         m_Progress = (double)(unitOff-unitBeg) / (unitEnd-unitBeg);
     }

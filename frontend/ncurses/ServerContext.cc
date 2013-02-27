@@ -90,21 +90,21 @@ void ServerContext::Dump()
 
     vector<char> outbuf(buf.Offset());
 
-    buf.SetBuffer(&outbuf[0]);
+    buf.SetBuffer(outbuf.data());
     buf << (int)VERSION;
     buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
     buf << selectedItem;
 
     fstream outfile;
     outfile.open(env->contextFile.c_str(), ios::binary | ios::out);
-    outfile.write(&outbuf[0], outbuf.size());
+    outfile.write(outbuf.data(), outbuf.size());
     outfile.close();
     
     // save playlists
     vector<char> nameBuf(env->playlistFile.size() + 2);
     for (size_t i = 0; i < playlists.size(); ++i) {
-        snprintf(&nameBuf[0], nameBuf.size(), env->playlistFile.c_str(), i);
-        Serializer::Store(playlists[i], &nameBuf[0]);
+        snprintf(nameBuf.data(), nameBuf.size(), env->playlistFile.c_str(), i);
+        Serializer::Store(playlists[i], nameBuf.data());
     }
 }
 
@@ -143,8 +143,8 @@ void ServerContext::Restore()
     // load playlists
     vector<char> nameBuf(env->playlistFile.size() + 2);
     for (size_t i = 0; i < playlists.size(); ++i) {
-        snprintf(&nameBuf[0], nameBuf.size(), env->playlistFile.c_str(), i);
-        Serializer::Load(playlists[i], &nameBuf[0]);
+        snprintf(nameBuf.data(), nameBuf.size(), env->playlistFile.c_str(), i);
+        Serializer::Load(playlists[i], nameBuf.data());
     }
 }
 

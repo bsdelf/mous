@@ -88,7 +88,7 @@ public:
 
         Store(list, buffer);
         outfile.open(file.c_str(), ios::binary | ios::out);
-        if (outfile && (outfile.write(&buffer[0], buffer.size()).tellp() == (streampos)buffer.size())) {
+        if (outfile && (outfile.write(buffer.data(), buffer.size()).tellp() == (streampos)buffer.size())) {
             ret = true;
         }
         outfile.close();
@@ -99,7 +99,7 @@ public:
     static void Store(const Playlist<item_t>& list, std::vector<char>& outbuf)
     {
         outbuf.resize(ToStream(list, nullptr));
-        ToStream(list, &outbuf[0]);
+        ToStream(list, outbuf.data());
     }
 
 private:

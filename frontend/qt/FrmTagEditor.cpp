@@ -140,7 +140,7 @@ void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
     }
 
     if (!m_CurrentImgData.empty()) {
-        const uchar* data = (const uchar*)&m_CurrentImgData[0];
+        const uchar* data = (const uchar*)m_CurrentImgData.data();
         const uint size = m_CurrentImgData.size();
         if (m_CurrentImage.loadFromData(data, size)) {
             UpdateCoverArt();
@@ -290,7 +290,7 @@ void FrmTagEditor::SlotSaveImageAs()
     QFile outfile(fileName);
     outfile.open(QIODevice::WriteOnly);
     if (outfile.isOpen()) {
-        outfile.write(&m_CurrentImgData[0], m_CurrentImgData.size());
+        outfile.write(m_CurrentImgData.data(), m_CurrentImgData.size());
     }
     outfile.close();
 }
@@ -334,7 +334,7 @@ void FrmTagEditor::SlotChangeCoverArt()
     if (storeOk) {
         m_CurrentImgFmt = fmt;
         m_CurrentImgData.resize(size);
-        memcpy(&m_CurrentImgData[0], data, size);
+        memcpy(m_CurrentImgData.data(), data, size);
         if (m_CurrentImage.loadFromData((uchar*)data, size)) {
             UpdateCoverArt();
             ui->scrollAreaCover->show();

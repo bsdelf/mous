@@ -124,9 +124,9 @@ void Client::ThRecvLoop(const string& ip, int port)
     int size;
 
     while (true) {
-        if (!m_Socket.RecvN(&headerBuf[0], headerBuf.size()))
+        if (!m_Socket.RecvN(headerBuf.data(), headerBuf.size()))
             break;
-        if (!header.Read(&headerBuf[0]))
+        if (!header.Read(headerBuf.data()))
             continue;
         if (header.payloadSize <= 0)
             continue;
@@ -136,7 +136,7 @@ void Client::ThRecvLoop(const string& ip, int port)
         else
             vector<char>(header.payloadSize).swap(payloadBuf);
 
-        buf = &payloadBuf[0];
+        buf = payloadBuf.data();
         size = payloadBuf.size();
         if (!m_Socket.RecvN(buf, size))
             break;
@@ -191,14 +191,14 @@ char* Client::GetPayloadBuffer(char group, int payloadSize)
     else
         vector<char>(totalSize).swap(m_SendOutBuf);
 
-    char* buf = &m_SendOutBuf[0];
+    char* buf = m_SendOutBuf.data();
     header.Write(buf);
     return buf + Header::Size();
 }
 
 void Client::SendOut()
 {
-    m_Socket.SendN(&m_SendOutBuf[0], m_SendOutBuf.size());
+    m_Socket.SendN(m_SendOutBuf.data(), m_SendOutBuf.size());
 
     m_SendOutBufMutex.unlock();
 }

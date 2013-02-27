@@ -78,9 +78,9 @@ void Session::ThRecvLoop()
     NotifySupportedSuffixes();
 
     while (!m_GotReqStopService) {
-        if (!m_Socket.RecvN(&headerBuf[0], headerBuf.size()))
+        if (!m_Socket.RecvN(headerBuf.data(), headerBuf.size()))
             break;
-        if (!header.Read(&headerBuf[0]))
+        if (!header.Read(headerBuf.data()))
             break;
         if (header.payloadSize <= 0)
             continue;
@@ -90,7 +90,7 @@ void Session::ThRecvLoop()
         else
             vector<char>(header.payloadSize).swap(payloadBuf);
 
-        buf = &payloadBuf[0];
+        buf = payloadBuf.data();
         len = header.payloadSize;
         if (!m_Socket.RecvN(buf, len))
             break;
@@ -545,14 +545,14 @@ char* Session::GetPayloadBuffer(char group, int payloadSize)
     else
         vector<char>(totalSize).swap(m_SendOutBuf);
 
-    char* buf = &m_SendOutBuf[0];
+    char* buf = m_SendOutBuf.data();
     header.Write(buf);
     return buf + Header::Size();
 }
 
 void Session::SendOut()
 {
-    m_Socket.SendN(&m_SendOutBuf[0], m_SendOutBuf.size());
+    m_Socket.SendN(m_SendOutBuf.data(), m_SendOutBuf.size());
 }
 
 void Session::TryConvertToUtf8(string& str) const

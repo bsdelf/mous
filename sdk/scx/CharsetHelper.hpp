@@ -19,8 +19,8 @@ static inline std::string WStringToMBStr(const std::wstring& str)
     using namespace std;
     const size_t buflen = (str.size()+2) * MB_LEN_MAX;
     vector<char> buf(buflen);
-    size_t ret = wcstombs(&buf[0], str.c_str(), buflen);
-    return (ret != (size_t)-1) ? string(&buf[0], ret) : string("");
+    size_t ret = wcstombs(buf.data(), str.c_str(), buflen);
+    return (ret != (size_t)-1) ? string(buf.data(), ret) : string("");
 }
 
 /*
