@@ -53,6 +53,7 @@ void ExplorerView::Refresh()
     using namespace CharsetHelper;
     using namespace ncurses;
 
+    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
     d.Clear();
 
     if (m_Focused)

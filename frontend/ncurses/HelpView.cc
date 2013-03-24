@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-const char* const STR_ARRAY[] = 
+static const char* const STR_ARRAY[] = 
 {
     "",
 
@@ -98,12 +98,14 @@ HelpView::~HelpView()
 
 void HelpView::Refresh()
 {
+    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
     d.Clear();
 
     d.CenterPrint(0, "^b[ Help ]", true);
     int lcount = std::min(d.h-2, m_LineCount-m_LineBegin);
     for (int l = 0; l < lcount; ++l) {
         int index = m_LineBegin + l;
+        d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
         d.Print(8, l+1, STR_ARRAY[index], true);
     }
 

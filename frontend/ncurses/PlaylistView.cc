@@ -32,6 +32,7 @@ void PlaylistView::Refresh()
 
     lock_guard<mutex> locker(m_NeedRefreshMutex);
 
+    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
     d.Clear();
 
     // title

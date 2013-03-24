@@ -49,6 +49,7 @@ void StatusView::Refresh()
 
     std::lock_guard<std::mutex> locker(m_RefreshMutex);
 
+    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
     d.Clear();
 
     const int w = d.w - 3;

@@ -35,7 +35,7 @@ namespace ncurses {
         const int Magenta = COLOR_MAGENTA;
         const int Cyan = COLOR_CYAN;
         const int White = COLOR_WHITE;
-    };
+    }
 
     namespace Attr {
         const int Normal = A_NORMAL;
