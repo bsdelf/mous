@@ -67,7 +67,7 @@ struct LayerInfo
 
 struct PrivateMainUi
 {
-    MainUi* parent;
+    MainUi* parent = nullptr;
     Client client;
 
     BgWindow bgWindow;
@@ -77,18 +77,15 @@ struct PrivateMainUi
     HelpView helpView;
     StatusView statusView;
 
-    int iPlaylist;
+    int iPlaylist = 1;
     stack<LayerInfo> layerStack;
 
     mutex needSwitchPlaylistMutex;
-    int needSwitchPlaylist;
-    int switchPlaylistTo;
+    int needSwitchPlaylist = 0;
+    int switchPlaylistTo = -1;
 
-    PrivateMainUi(MainUi* p):
-        parent(p),
-        iPlaylist(1),
-        needSwitchPlaylist(0),
-        switchPlaylistTo(-1)
+    explicit PrivateMainUi(MainUi* p):
+        parent(p)
     {
         client.SigTryConnect().Connect(&MainUi::SlotTryConnect, parent);
         client.SigConnected().Connect(&MainUi::SlotConnected, parent);
@@ -452,4 +449,3 @@ void MainUi::SwitchPlaylist(int n)
     ClientPlaylistHandler& handle = d->client.PlaylistHandler();
     handle.Switch(n);
 }
-

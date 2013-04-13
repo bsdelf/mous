@@ -85,10 +85,9 @@ void Session::ThRecvLoop()
         if (header.payloadSize <= 0)
             continue;
 
-        if (payloadBuf.size() <= PAYLOADBUF_MAX_KEEP || (size_t)header.payloadSize > PAYLOADBUF_MAX_KEEP)
-            payloadBuf.resize(header.payloadSize);
-        else
-            vector<char>(header.payloadSize).swap(payloadBuf);
+        payloadBuf.resize(header.payloadSize);
+        if (payloadBuf.size() > PAYLOADBUF_MAX_KEEP && (size_t)header.payloadSize <= PAYLOADBUF_MAX_KEEP)
+            payloadBuf.shrink_to_fit();
 
         buf = payloadBuf.data();
         len = header.payloadSize;
@@ -540,10 +539,9 @@ char* Session::GetPayloadBuffer(char group, int payloadSize)
     Header header(group, payloadSize);
     size_t totalSize = header.TotalSize();
 
-    if (m_SendOutBuf.size() <= SENDOUTBUF_MAX_KEEP || totalSize > SENDOUTBUF_MAX_KEEP)
-        m_SendOutBuf.resize(totalSize);
-    else
-        vector<char>(totalSize).swap(m_SendOutBuf);
+    m_SendOutBuf.resize(totalSize);
+    if (m_SendOutBuf.size() > SENDOUTBUF_MAX_KEEP && totalSize <= SENDOUTBUF_MAX_KEEP)
+        m_SendOutBuf.shrink_to_fit();
 
     char* buf = m_SendOutBuf.data();
     header.Write(buf);

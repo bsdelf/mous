@@ -48,14 +48,7 @@ namespace ncurses {
 
 struct Window
 {
-    Window():
-        win(nullptr),
-        boxed(true),
-        shown(false),
-        x(0),
-        y(0),
-        w(0),
-        h(0)
+    Window()
     {
     }
 
@@ -175,13 +168,13 @@ struct Window
         shown = show;
     }
 
-    WINDOW* win;
-    bool boxed;
-    bool shown;
-    int x;
-    int y;
-    int w;
-    int h;
+    WINDOW* win = nullptr;
+    bool boxed = true;
+    bool shown = false;
+    int x = 0;
+    int y = 0;
+    int w = 0;
+    int h = 0;
 
     void AttrOn(int attrs)
     {

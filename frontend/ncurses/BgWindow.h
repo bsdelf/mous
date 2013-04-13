@@ -6,8 +6,7 @@
 class BgWindow
 {
 public:
-    BgWindow():
-        m_Wnd(nullptr)
+    BgWindow()
     {
     }
 
@@ -51,7 +50,7 @@ private:
     }
 
 private:
-    WINDOW* m_Wnd;
+    WINDOW* m_Wnd = nullptr;
 };
 
 #endif

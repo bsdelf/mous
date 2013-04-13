@@ -64,18 +64,18 @@ public:
 private:
     Window d;
 
-    int m_NeedRefresh;
+    int m_NeedRefresh = 0;
     mutable mutex m_NeedRefreshMutex;
 
-    bool m_Focused;
-    int m_Index;
-    int m_ItemBegin;
-    int m_ItemSelected;
-    std::string m_Title;
+    bool m_Focused = false;
+    int m_Index = -1;
+    int m_ItemBegin = 0;
+    int m_ItemSelected = 0;
+    std::string m_Title = "Playlist";
     deque<MediaItem*> m_List;
-    bool m_WaitReply;
+    bool m_WaitReply = false;
 
-    ClientPlaylistHandler* m_PlaylistHandler;
+    ClientPlaylistHandler* m_PlaylistHandler = nullptr;
 };
 
 #endif

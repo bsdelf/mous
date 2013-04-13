@@ -30,11 +30,7 @@ inline static string FormatBitRate(int rate)
     return string(buf, 4);
 }
 
-StatusView::StatusView():
-    m_PlayerHandler(nullptr),
-    m_WaitReply(false),
-    m_NeedRefresh(0),
-    m_Volume(0)
+StatusView::StatusView()
 {
 }
 

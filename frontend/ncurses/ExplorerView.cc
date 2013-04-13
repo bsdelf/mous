@@ -30,10 +30,7 @@ private:
     PinYinCompare pyc;
 };
 
-ExplorerView::ExplorerView():
-    m_Focused(false),
-    m_HideDot(true),
-    m_HideUnknown(false)
+ExplorerView::ExplorerView()
 {
     //const AppEnv* config = GlobalAppEnv::Instance();
 

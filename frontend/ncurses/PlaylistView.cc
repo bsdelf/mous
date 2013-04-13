@@ -7,17 +7,7 @@
 #include <scx/CharsetHelper.hpp>
 using namespace scx;
 
-const string STR_TITLE = "Playlist";
-
-PlaylistView::PlaylistView():
-    m_NeedRefresh(0),
-    m_Focused(false),
-    m_Index(-1),
-    m_ItemBegin(0),
-    m_ItemSelected(0),
-    m_Title(STR_TITLE),
-    m_WaitReply(false),
-    m_PlaylistHandler(nullptr)
+PlaylistView::PlaylistView()
 {
 }
 
@@ -293,7 +283,7 @@ void PlaylistView::SetIndex(int index)
     m_Index = index;
 
     stringstream str;
-    str << "[ " << STR_TITLE << " " << index << " ]";
+    str << "[ " << m_Title << " " << index << " ]";
     m_Title = str.str();
 }
 

@@ -58,11 +58,11 @@ private:
 
 private:
     Window d;
-    bool m_Focused;
+    bool m_Focused = false;
     std::string m_Path;
     std::string m_PathCache;
-    bool m_HideDot;
-    bool m_HideUnknown;
+    bool m_HideDot = true;
+    bool m_HideUnknown = false;
     std::deque<int> m_BeginStack;
     std::deque<int> m_SelectionStack;
     std::vector<FileItem> m_FileItems;
