@@ -30,13 +30,12 @@ PluginManager::~PluginManager()
 
 size_t PluginManager::LoadPluginDir(const string& dir)
 {
-    vector<string> files = Dir::ListDir(dir);
+    const auto& files = Dir::ListDir(dir);
 
     for (size_t i = 0; i < files.size(); ++i) {
         if (files[i].substr(0, 3) == "lib") {
             string full = dir + "/" + files[i];
-            FileInfo info(full);
-            if (info.Type() == FileType::Regular)
+            if (FileInfo(full).Type() == FileType::Regular)
                 LoadPlugin(full);
         }
     }
@@ -49,7 +48,7 @@ EmErrorCode PluginManager::LoadPlugin(const string& path)
     IPluginAgent* pAgent = IPluginAgent::Create();
     EmErrorCode ret = pAgent->Open(path);
     if (ret == ErrorCode::Ok) {
-        m_PluginMap.insert(PluginMapPair(path, pAgent));
+        m_PluginMap[path] = pAgent;
     } else {
         IPluginAgent::Free(pAgent);
     }
