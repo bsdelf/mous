@@ -50,10 +50,21 @@ void PlaylistView::Refresh()
     const int wField3 = (wText - wTime) - (wField1 + wField2);
 
     if (!m_List.empty()) {
-            int lcount = std::min(hText, (int)m_List.size()-m_ItemBegin);
+        int lcount = std::min(hText, (int)m_List.size()-m_ItemBegin);
+        if (m_ItemSelected >= m_ItemBegin + lcount) {
+            // use the same algorithm in ScrollDown()
+            m_ItemBegin = 0;
+            for (int i = 0; i < m_ItemSelected; ++i) {
+                if (m_ItemSelected > (d.h-2) / 2
+                    && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
+                    ++m_ItemBegin;
+                }
+            }
+            lcount = std::min(hText, (int)m_List.size()-m_ItemBegin);
+        }
         for (int l = 0; l < lcount; ++l) {
             int index = m_ItemBegin + l;
-            MediaItem& item = *m_List[index];
+            auto& item = *m_List[index];
 
             int fieldAttr = Attr::Bold;
             int fieldColorF = Color::Green;
