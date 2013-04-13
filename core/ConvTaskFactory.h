@@ -1,7 +1,7 @@
 #ifndef MOUS_CONVTASKFACTORY_H
 #define MOUS_CONVTASKFACTORY_H
 
-#include <map>
+#include <unordered_map>
 #include <util/MediaItem.h>
 #include <core/IConvTaskFactory.h>
 #include <core/IConvTask.h>
@@ -36,10 +36,10 @@ private:
     void RemoveEncAgent(const IPluginAgent* pAgent);
 
 private:
-    map<string, vector<const IPluginAgent*>*> m_DecAgentMap;
+    unordered_map<string, vector<const IPluginAgent*>*> m_DecAgentMap;
     typedef pair<string, vector<const IPluginAgent*>*> DecAgentMapPair;
 
-    map<string, const IPluginAgent*> m_EncAgentMap;
+    unordered_map<string, const IPluginAgent*> m_EncAgentMap;
     typedef pair<string, const IPluginAgent*> EncAgentMapPair;
 
 };

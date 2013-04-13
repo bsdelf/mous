@@ -1,4 +1,4 @@
-#include <map>
+#include <unordered_map>
 using namespace std;
 
 #include <core/ITagParserFactory.h>
@@ -21,6 +21,6 @@ public:
     virtual void FreeParser(ITagParser* parser) const;
 
 private:
-    map<string, const IPluginAgent*> m_AgentMap;
-    mutable map<ITagParser*, const IPluginAgent*> m_ParserParentMap;
+    unordered_map<string, const IPluginAgent*> m_AgentMap;
+    mutable unordered_map<ITagParser*, const IPluginAgent*> m_ParserParentMap;
 };

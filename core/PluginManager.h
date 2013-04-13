@@ -1,7 +1,7 @@
 #ifndef MOUS_PLUGINMANAGER_H
 #define MOUS_PLUGINMANAGER_H
 
-#include <map>
+#include <unordered_map>
 #include <core/IPluginManager.h>
 
 struct stat;
@@ -30,7 +30,7 @@ public:
     const PluginInfo* QueryPluginInfo(const std::string& path) const;
 
 private:
-    std::map<std::string, IPluginAgent*> m_PluginMap;
+    std::unordered_map<std::string, IPluginAgent*> m_PluginMap;
     typedef std::pair<std::string, IPluginAgent*> PluginMapPair;
 };
 

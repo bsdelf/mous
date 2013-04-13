@@ -1,7 +1,7 @@
 #ifndef MOUS_MEDIALOADER_H
 #define MOUS_MEDIALOADER_H
 
-#include <map>
+#include <unordered_map>
 #include <core/IMediaLoader.h>
 using namespace std;
 
@@ -41,13 +41,13 @@ private:
     EmErrorCode TryParseTag(std::deque<MediaItem>& list) const;
 
 private:
-    std::map<const IPluginAgent*, void*> m_AgentMap;
+    std::unordered_map<const IPluginAgent*, void*> m_AgentMap;
     typedef std::pair<const IPluginAgent*, void*> AgentMapPair;
 
-    std::map<std::string, IMediaPack*> m_MediaPackMap;
+    std::unordered_map<std::string, IMediaPack*> m_MediaPackMap;
     typedef std::pair<std::string, IMediaPack*> MediaPackMapPair;
 
-    std::map<std::string, ITagParser*> m_TagParserMap;
+    std::unordered_map<std::string, ITagParser*> m_TagParserMap;
     typedef std::pair<std::string, ITagParser*> TagParserMapPair;
 };
 

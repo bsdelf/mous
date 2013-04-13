@@ -27,7 +27,7 @@ vector<string> CuePack::FileSuffix() const
 }
 
 void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& list,
-    const std::map<std::string, IMediaPack*>* pMap) const
+    const std::unordered_map<std::string, IMediaPack*>* pMap) const
 {
     FILE* file = fopen(path.c_str(), "r");
     if (file == nullptr)
@@ -41,7 +41,7 @@ void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& list,
 }
 
 void CuePack::DumpStream(const std::string& stream, std::deque<MediaItem>& list,
-    const std::map<std::string, IMediaPack*>* pMap) const
+    const std::unordered_map<std::string, IMediaPack*>* pMap) const
 {
     Cd* cd = cue_parse_string(stream.c_str());
     DumpCue("", cd, list);

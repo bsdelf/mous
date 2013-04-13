@@ -9,7 +9,7 @@ using namespace mous;
 #include <taglib/audioproperties.h>
 using namespace TagLib;
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 using namespace std;
 
@@ -69,8 +69,8 @@ private:
     Tag* m_pTag;
     AudioProperties* m_pProp;
 
-    std::map<std::string, FnDumpCover> m_DumpHandlers;
-    std::map<std::string, FnStoreCover> m_StoreHandlers;
+    std::unordered_map<std::string, FnDumpCover> m_DumpHandlers;
+    std::unordered_map<std::string, FnStoreCover> m_StoreHandlers;
 };
 
 #endif
