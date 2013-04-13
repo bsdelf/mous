@@ -25,14 +25,14 @@ public:
     void FreeObject(void* inf) const;
 
 private:
-    void* m_Handle;
+    void* m_Handle = nullptr;
 
-    FnPluginType m_FnPluginType;
-    FnPluginInfo m_FnGetInfo;
-    FnCreateObject m_FnCreate;
-    FnFreeObject m_FnFree;
+    FnPluginType m_FnPluginType = nullptr;
+    FnPluginInfo m_FnGetInfo = nullptr;
+    FnCreateObject m_FnCreate = nullptr;
+    FnFreeObject m_FnFree = nullptr;
 
-    EmPluginType m_Type;
+    EmPluginType m_Type = PluginType::None;
 };
 
 }

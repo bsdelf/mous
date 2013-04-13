@@ -16,12 +16,7 @@ void IPluginAgent::Free(IPluginAgent* ptr)
         delete ptr;
 }
 
-PluginAgent::PluginAgent():
-    m_Handle(nullptr),
-    m_FnGetInfo(nullptr),
-    m_FnCreate(nullptr),
-    m_FnFree(nullptr),
-    m_Type(PluginType::None)
+PluginAgent::PluginAgent()
 {
 
 }
