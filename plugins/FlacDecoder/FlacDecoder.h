@@ -57,6 +57,7 @@ private:
     int32_t m_Channels;
     int32_t m_BitsPerSample;
     int32_t m_SampleRate;
+    int32_t m_SamplesPerFrame;
     int32_t m_BitRate;
     uint64_t m_Duration;
 };

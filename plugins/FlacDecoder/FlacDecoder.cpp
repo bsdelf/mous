@@ -13,9 +13,7 @@ FlacDecoder::~FlacDecoder()
 
 vector<string> FlacDecoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("flac");
-    return list;
+    return { "flac" };
 }
 
 EmErrorCode FlacDecoder::Open(const string& url)
@@ -25,7 +23,7 @@ EmErrorCode FlacDecoder::Open(const string& url)
             m_pDecoder,
             url.c_str(),
             &WriteCallback,
-            nullptr,
+            nullptr,        // metadata_callback
             &ErrorCallback,
             nullptr);
 
@@ -37,10 +35,12 @@ EmErrorCode FlacDecoder::Open(const string& url)
 
     m_Channels = FLAC__stream_decoder_get_channels(m_pDecoder);
     m_SampleRate = FLAC__stream_decoder_get_sample_rate(m_pDecoder);
+    m_SamplesPerFrame = FLAC__stream_decoder_get_blocksize(m_pDecoder);
     m_BitsPerSample = FLAC__stream_decoder_get_bits_per_sample(m_pDecoder);
 
     m_SampleCount = FLAC__stream_decoder_get_total_samples(m_pDecoder);
     m_Duration = m_SampleCount / FLAC__stream_decoder_get_sample_rate(m_pDecoder) * 1000.f;
+    m_BitRate = m_SampleRate * 8 * m_Channels / 1000.f;
     m_SampleIndex = 0;
 
     return ErrorCode::Ok;
@@ -74,13 +74,13 @@ EmErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCo
 EmErrorCode FlacDecoder::SetUnitIndex(uint64_t index)
 {
     m_SampleIndex = index;
-    FLAC__stream_decoder_seek_absolute(m_pDecoder, index);
+    FLAC__stream_decoder_seek_absolute(m_pDecoder, m_SampleIndex);
     return ErrorCode::Ok;
 }
 
 uint32_t FlacDecoder::MaxBytesPerUnit() const
 {
-    return FLAC__MAX_BLOCK_SIZE * FLAC__MAX_CHANNELS * sizeof(uint32_t);
+    return FLAC__MAX_BLOCK_SIZE * m_Channels * sizeof(uint32_t);
 }
 
 uint64_t FlacDecoder::UnitIndex() const
@@ -133,11 +133,10 @@ FLAC__StreamDecoderWriteStatus FlacDecoder::WriteCallback(
         const FLAC__int32 * const buffer[], 
         void *client_data)
 {
-    const size_t& samples = frame->header.blocksize;
-    const size_t& channels = frame->header.channels;
+    const size_t samples = frame->header.blocksize;
+    const size_t channels = frame->header.channels;
 
     if (gBuf != nullptr) {
-
         for (size_t i = 0, sample = 0; sample < samples; ++sample) {
             for (size_t channel = 0; channel < channels; ++channel, i+=2) {
                 gBuf[i+1] = (buffer[channel][sample] >> 8);
@@ -145,10 +144,8 @@ FLAC__StreamDecoderWriteStatus FlacDecoder::WriteCallback(
             }
         }
         gBufLen = (samples * channels) *2 ;
-
+        gSamplesRead = samples;
     }
-
-    gSamplesRead = samples;
 
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
