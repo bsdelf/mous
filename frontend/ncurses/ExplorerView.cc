@@ -279,7 +279,7 @@ bool ExplorerView::InjectKey(int key)
             BuildFileItems();
             break;
 
-        case 'e':
+        case 's':
             m_BeginStack = { 0 };
             m_SelectionStack = { 0 };
             m_HideUnknown = !m_HideUnknown;

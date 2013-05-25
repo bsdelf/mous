@@ -232,7 +232,7 @@ bool MainUi::HandleTopKey(int key, bool& quit)
             OnResize();
             break;
 
-        case 'E':
+        case 'e':
             if (d->layerStack.size() == 1)
                 ShowOrHideExplorer();
             break;
@@ -255,11 +255,11 @@ bool MainUi::HandleTopKey(int key, bool& quit)
                 SwitchPlaylist(StrToNum<int>(string(1, (char)key)));
             break;
 
-        case 'Q':
+        case 'q':
             quit = true;
             break;
 
-        case 'X':
+        case 'x':
             quit = true;
             d->client.StopService();
             break;

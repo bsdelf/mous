@@ -11,9 +11,9 @@ static const char* const STR_ARRAY[] =
 
     "^bGlobal Keys:",
     "H          show/hide help",
-    "E          show/hide file explorer",
-    "Q          quit",
-    "X          quit and stop server",
+    "e          show/hide file explorer",
+    "q          quit",
+    "x          quit and stop server",
 //"0      switch to temporary playlist",
     "0-5        switch playlist",
     "",
@@ -42,7 +42,7 @@ static const char* const STR_ARRAY[] =
 //"ENTER  open item in temporary playlist",
     "a          add file to playlist",
     "r          refresh",
-    "e          show/hide unsupported files",
+    "s          show/hide unsupported files",
     ".          show/hide files whose names begin with a dot",
     "",
 
