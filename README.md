@@ -1,5 +1,6 @@
 <font font-family="monospace">
 
+
 Mous Player
 ==============
 * lightweight
@@ -57,6 +58,16 @@ Dependencies
 
     Tag parse:          taglib
     Cue playlist:       libcue
+
+Install
+==============
+FreeBSD
+
+Ports:
+cd /usr/ports/audio/mous/ && make config && make install clean
+
+Package(pkgng):
+pkg install audio/mous
 
 License
 =============
