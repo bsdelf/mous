@@ -89,6 +89,7 @@ int cmd_play(int argc, char* argv[])
             break;
 
         default:
+            rval = 1;
             goto LABEL_CLEANUP;
         }
     }
