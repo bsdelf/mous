@@ -20,10 +20,7 @@ ConvTask::ConvTask(const MediaItem& item,
                    const IPluginAgent* encAgent):
     m_Item(item),
     m_DecAgent(decAgent),
-    m_EncAgent(encAgent),
-    m_Progress(-1),
-    m_Finished(true),
-    m_Canceled(false)
+    m_EncAgent(encAgent)
 {
     m_Decoder = (IDecoder*)m_DecAgent->CreateObject();
     m_Encoder = (IEncoder*)m_EncAgent->CreateObject();

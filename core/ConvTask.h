@@ -40,9 +40,9 @@ private:
     IDecoder* m_Decoder;
     IEncoder* m_Encoder;
 
-    double m_Progress;
-    bool m_Finished;
-    bool m_Canceled;
+    double m_Progress = -1;
+    bool m_Finished = true;
+    bool m_Canceled = false;
 };
 
 }
