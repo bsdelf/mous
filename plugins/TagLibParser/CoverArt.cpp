@@ -121,10 +121,15 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
 bool StoreMp3Cover(const string& path, EmCoverFormat fmt, const char* buf, size_t len)
 {
     TagLib::MPEG::File file(path.c_str(), false);
-    if (StoreID3v2Cover(file.ID3v2Tag(), fmt, buf, len))
-        return file.save();
-    else
-        return false;
+    if (StoreID3v2Cover(file.ID3v2Tag(), fmt, buf, len)) {
+        auto ref = dynamic_cast<TagLib::MPEG::File*>(&file);
+        if (ref != nullptr) {
+            return ref->save(TagLib::MPEG::File::TagTypes::ID3v2, true, 3, true);
+        } else {
+            cout << "bad type" << endl;
+        }
+    }
+    return false;
 }
 
 bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_t len)

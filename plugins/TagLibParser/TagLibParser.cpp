@@ -12,6 +12,8 @@ using namespace scx;
 
 #include "CoverArt.h"
 
+#include <taglib/mpegfile.h>
+
 static string StringToStdString(const String& str)
 {
     if (str.isLatin1()) {
@@ -174,7 +176,17 @@ bool TagLibParser::CanEdit() const
 
 bool TagLibParser::Save()
 {
-    return m_pFileRef != nullptr ? m_pFileRef->save() : false;
+    const string& ext = ToLower(FileHelper::FileSuffix(m_FileName));
+    if (ext == "mp3") {
+        auto ref = dynamic_cast<TagLib::MPEG::File*>(m_pFileRef->file());
+        if (ref == nullptr) {
+            cout << "bad type" << endl;
+            return false;
+        }
+        return ref->save(TagLib::MPEG::File::TagTypes::ID3v2, true, 3, true);
+    } else {
+        return m_pFileRef != nullptr ? m_pFileRef->save() : false;
+    }
 }
 
 void TagLibParser::SetTitle(const string& title)
