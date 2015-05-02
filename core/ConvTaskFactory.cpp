@@ -138,7 +138,7 @@ void ConvTaskFactory::AddDecAgent(const IPluginAgent* pAgent)
         if (iter == m_DecAgentMap.end()) {
             agentList = new vector<const IPluginAgent*>();
             agentList->push_back(pAgent);
-            m_DecAgentMap.insert(DecAgentMapPair(suffix, agentList));
+            m_DecAgentMap.emplace(suffix, agentList);
         } else {
             agentList = iter->second;
             agentList->push_back(pAgent);
@@ -172,7 +172,7 @@ void ConvTaskFactory::RemoveDecAgent(const IPluginAgent* pAgent)
 
 void ConvTaskFactory::AddEncAgent(const IPluginAgent* pAgent)
 {
-    m_EncAgentMap.insert(EncAgentMapPair(pAgent->Info()->name, pAgent));
+    m_EncAgentMap.emplace(pAgent->Info()->name, pAgent);
 }
 
 void ConvTaskFactory::RemoveEncAgent(const IPluginAgent* pAgent)

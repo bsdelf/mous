@@ -37,10 +37,7 @@ private:
 
 private:
     unordered_map<string, vector<const IPluginAgent*>*> m_DecAgentMap;
-    typedef pair<string, vector<const IPluginAgent*>*> DecAgentMapPair;
-
     unordered_map<string, const IPluginAgent*> m_EncAgentMap;
-    typedef pair<string, const IPluginAgent*> EncAgentMapPair;
 
 };
 
