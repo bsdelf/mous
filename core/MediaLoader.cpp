@@ -24,16 +24,6 @@ void IMediaLoader::Free(IMediaLoader* ptr)
         delete ptr;
 }
 
-MediaLoader::MediaLoader()
-{
-
-}
-
-MediaLoader::~MediaLoader()
-{
-
-}
-
 void MediaLoader::RegisterMediaPackPlugin(const IPluginAgent* pAgent)
 {
     if (pAgent->Type() == PluginType::MediaPack)
@@ -95,14 +85,14 @@ void MediaLoader::AddMediaPack(const IPluginAgent* pAgent)
 {
     // Register agent.
     IMediaPack* pPack = (IMediaPack*)pAgent->CreateObject();
-    m_AgentMap.insert(AgentMapPair(pAgent, pPack));
+    m_AgentMap.emplace(pAgent, pPack);
 
     // Register MediaPack.
     for (const string& item: pPack->FileSuffix()) {
         const string& suffix = ToLower(item);
         auto iter = m_MediaPackMap.find(suffix);
         if (iter == m_MediaPackMap.end()) {
-            m_MediaPackMap.insert(MediaPackMapPair(suffix, pPack));
+            m_MediaPackMap.emplace(suffix, pPack);
         }
     }
 }
@@ -131,14 +121,14 @@ void MediaLoader::AddTagParser(const IPluginAgent* pAgent)
 {
     // Register IPluginAgent.
     ITagParser* pParser = (ITagParser*)pAgent->CreateObject();
-    m_AgentMap.insert(AgentMapPair(pAgent, pParser));
+    m_AgentMap.emplace(pAgent, pParser);
 
     // Register TagParser.
     for (const string& item: pParser->FileSuffix()) {
         const string& suffix = ToLower(item);
         auto iter = m_TagParserMap.find(suffix);
         if (iter == m_TagParserMap.end()) {
-            m_TagParserMap.insert(TagParserMapPair(suffix, pParser));
+            m_TagParserMap.emplace(suffix, pParser);
         }
     }
 }
@@ -167,8 +157,9 @@ vector<string> MediaLoader::SupportedSuffixes() const
 {
     vector<string> list;
     list.reserve(m_MediaPackMap.size());
-    for (const auto& entry: m_MediaPackMap)
+    for (const auto& entry: m_MediaPackMap) {
         list.push_back(entry.first);
+    }
     return list;
 }
 

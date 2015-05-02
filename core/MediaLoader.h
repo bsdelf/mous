@@ -15,8 +15,8 @@ class ITagParser;
 class MediaLoader: public IMediaLoader
 {
 public:
-    MediaLoader();
-    ~MediaLoader();
+    MediaLoader() = default;
+    ~MediaLoader() = default;
 
     void RegisterMediaPackPlugin(const IPluginAgent* pAgent);
     void RegisterMediaPackPlugin(std::vector<const IPluginAgent*>& agents);
@@ -42,13 +42,8 @@ private:
 
 private:
     std::unordered_map<const IPluginAgent*, void*> m_AgentMap;
-    typedef std::pair<const IPluginAgent*, void*> AgentMapPair;
-
     std::unordered_map<std::string, IMediaPack*> m_MediaPackMap;
-    typedef std::pair<std::string, IMediaPack*> MediaPackMapPair;
-
     std::unordered_map<std::string, ITagParser*> m_TagParserMap;
-    typedef std::pair<std::string, ITagParser*> TagParserMapPair;
 };
 
 }
