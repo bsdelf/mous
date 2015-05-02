@@ -31,7 +31,6 @@ public:
 
 private:
     std::unordered_map<std::string, IPluginAgent*> m_PluginMap;
-    typedef std::pair<std::string, IPluginAgent*> PluginMapPair;
 };
 
 }

@@ -103,6 +103,5 @@ vector<string> PluginManager::PluginPaths() const
 const PluginInfo* PluginManager::QueryPluginInfo(const std::string& path) const
 {
     auto iter = m_PluginMap.find(path);
-    return (iter != m_PluginMap.end()) ?
-        iter->second->Info() : nullptr;
+    return (iter != m_PluginMap.end()) ? iter->second->Info() : nullptr;
 }
