@@ -126,21 +126,21 @@ private:
     };
 
 private:
-    EmPlayerStatus m_Status;
+    EmPlayerStatus m_Status = PlayerStatus::Closed;
 
     string m_DecodeFile;
-    bool m_StopDecoder;
-    bool m_SuspendDecoder;
-    bool m_PauseDecoder;
-    IDecoder* m_Decoder;
+    bool m_StopDecoder = false;
+    bool m_SuspendDecoder = true;
+    bool m_PauseDecoder = false;
+    IDecoder* m_Decoder = nullptr;
     std::thread m_ThreadForDecoder;
     scx::SemVar m_SemWakeDecoder;
     scx::SemVar m_SemDecoderBegin;
     scx::SemVar m_SemDecoderEnd;
 
-    bool m_StopRenderer;
-    bool m_SuspendRenderer;
-    IRenderer* m_Renderer;
+    bool m_StopRenderer = false;
+    bool m_SuspendRenderer = true;
+    IRenderer* m_Renderer = nullptr;
     std::thread m_ThreadForRenderer;
     scx::SemVar m_SemWakeRenderer;
     scx::SemVar m_SemRendererBegin;
@@ -148,18 +148,17 @@ private:
 
     scx::LPVBuffer<UnitBuffer> m_UnitBuffers;
 
-    uint64_t m_UnitBeg;
-    uint64_t m_UnitEnd;
+    uint64_t m_UnitBeg = 0;
+    uint64_t m_UnitEnd = 0;
 
-    uint64_t m_DecoderIndex;
-    uint64_t m_RendererIndex;
+    uint64_t m_DecoderIndex = 0;
+    uint64_t m_RendererIndex = 0;
 
-    double m_UnitPerMs;
+    double m_UnitPerMs = 0;
 
-    const IPluginAgent* m_RendererPlugin;
+    const IPluginAgent* m_RendererPlugin = nullptr;
 
     std::map<std::string, DecoderPluginNode> m_DecoderPluginMap;
-    typedef std::pair<std::string, DecoderPluginNode> DecoderPluginMapPair;
 
     scx::Signal<void (void)> m_SigFinished;
 };

@@ -28,21 +28,7 @@ void IPlayer::Free(IPlayer* player)
         delete player;
 }
 
-Player::Player():
-    m_Status(PlayerStatus::Closed),
-    m_StopDecoder(false),
-    m_SuspendDecoder(true),
-    m_PauseDecoder(false),
-    m_Decoder(nullptr),
-    m_StopRenderer(false),
-    m_SuspendRenderer(true),
-    m_Renderer(nullptr),
-    m_UnitBeg(0),
-    m_UnitEnd(0),
-    m_DecoderIndex(0),
-    m_RendererIndex(0),
-    m_UnitPerMs(0),
-    m_RendererPlugin(nullptr)
+Player::Player()
 {
     m_UnitBuffers.AllocBuffer(5);
 
@@ -131,8 +117,7 @@ void Player::AddDecoderPlugin(const IPluginAgent* pAgent)
         const string& suffix = ToLower(item);
         auto iter = m_DecoderPluginMap.find(suffix);
         if (iter == m_DecoderPluginMap.end()) {
-            DecoderPluginNode node = { pAgent, pDecoder };
-            m_DecoderPluginMap.insert(DecoderPluginMapPair(suffix, node));
+            m_DecoderPluginMap.emplace(suffix, DecoderPluginNode { pAgent, pDecoder });
             usedAtLeastOnce = true;
         }
     }
