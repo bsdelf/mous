@@ -30,7 +30,7 @@ void TagParserFactory::RegisterTagParserPlugin(const IPluginAgent* pAgent)
         for (const string& suffix: suffixList) {
             auto iter = m_AgentMap.find(suffix);
             if (iter == m_AgentMap.end()) {
-                m_AgentMap[suffix] = pAgent;
+                m_AgentMap.emplace(suffix, pAgent);
             }
         }
     }
