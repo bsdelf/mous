@@ -28,6 +28,7 @@ SimplePlaylistView::SimplePlaylistView(QWidget *parent) :
     QTreeView(parent),
     m_MediaLoader(nullptr),
     m_Clipboard(nullptr),
+    m_PlaylistMutex(QMutex::Recursive),
     m_PlayModeGroup(this),
     m_ShortcutCopy(qobject_cast<QWidget*>(this)),
     m_ShortcutCut(qobject_cast<QWidget*>(this)),

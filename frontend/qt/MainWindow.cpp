@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_TimerUpdateUi(new QTimer),
     m_UpdateInterval(500),
+    m_PlayerMutex(QMutex::Recursive),
     m_UsedPlaylistView(nullptr),
     m_UsedMediaItem(nullptr),
     m_SliderPlayingPreempted(false)
@@ -323,8 +324,9 @@ void MainWindow::SlotBtnPrev()
 
 void MainWindow::SlotBtnNext()
 {
-    if (m_UsedPlaylistView == nullptr)
+    if (m_UsedPlaylistView == nullptr) {
         return;
+    }
 
     const mous::MediaItem* item = m_UsedPlaylistView->NextItem();
     if (item != nullptr)
@@ -393,6 +395,8 @@ void MainWindow::SlotWidgetPlayListDoubleClick()
 
 void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 {
+    m_UsedPlaylistView = view;
+
     QMutexLocker locker(&m_PlayerMutex);
 
     if (m_Player->Status() == PlayerStatus::Playing) {
@@ -408,8 +412,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
     if (m_Player->Open(item.url) != ErrorCode::Ok) {
         setWindowTitle("Mous ( " + tr("Failed to open!") + " )");
         usleep(100*1000);
-        SlotBtnNext();
-        return;
+        return SlotBtnNext();
     }
 
     m_TimerUpdateUi->start(m_UpdateInterval);
@@ -420,8 +423,6 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
     m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
 
     setWindowTitle("Mous ( " + QString::fromUtf8(item.tag.title.c_str()) + " )");
-
-    m_UsedPlaylistView = view;
 
     m_FrmTagEditor.LoadMediaItem(item);
 }

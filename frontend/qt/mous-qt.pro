@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui
+CONFIG += c++11
 
 TARGET = mous-qt
 TEMPLATE = app
