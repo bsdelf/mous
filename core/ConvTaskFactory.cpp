@@ -149,7 +149,7 @@ void ConvTaskFactory::AddDecAgent(const IPluginAgent* pAgent)
 void ConvTaskFactory::RemoveDecAgent(const IPluginAgent* pAgent)
 {
     IDecoder* dec = (IDecoder*)pAgent->CreateObject();
-    const vector<string>& list = dec->FileSuffix();
+    vector<string> list = dec->FileSuffix();
     pAgent->FreeObject(dec);
 
     for (const string& suffix: list) {
