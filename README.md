@@ -5,7 +5,7 @@ Mous Player
 ==============
 * lightweight
 * plugin mechanism
-* few dependencies
+* only a few dependencies
 * support FreeBSD/Linux/OS X
 
 Front End
