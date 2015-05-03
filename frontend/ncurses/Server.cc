@@ -101,11 +101,9 @@ void Server::StopService()
 {
     m_Socket.Shutdown();
 
-    SessionSetIter iter = m_SessionSet.begin();
-    SessionSetIter end = m_SessionSet.end();
-    for (; iter != end; ++iter) {
-        (*iter)->Stop();
-        delete *iter;
+    for (auto session: m_SessionSet) {
+        session->Stop();
+        delete session;
     }
     m_SessionSet.clear();
 
@@ -123,7 +121,7 @@ void Server::OpenSession(TcpSocket& clientSocket)
 
 void Server::CloseSession(Session* session)
 {
-    SessionSetIter iter = m_SessionSet.find(session);
+    auto iter = m_SessionSet.find(session);
     if (iter != m_SessionSet.end()) {
         m_SessionSet.erase(iter);
         session->Stop();

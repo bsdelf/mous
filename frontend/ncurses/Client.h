@@ -50,9 +50,9 @@ private:
 private:
     thread m_RecvThread;
 
-    int m_ConnectMaxRetry;
-    int m_ConnectRetryInterval;
-    bool m_ConnectStopRetry;
+    int m_ConnectMaxRetry = 25;
+    int m_ConnectRetryInterval = 200;
+    bool m_ConnectStopRetry = false;
 
     TcpSocket m_Socket;
     mutex m_SendOutBufMutex;

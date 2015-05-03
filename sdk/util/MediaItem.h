@@ -8,22 +8,16 @@ namespace mous {
 struct MediaItem
 {
     std::string url;
-    int32_t duration;
+    int32_t duration = -1;
 
-    bool hasRange;
-    uint64_t msBeg;
-    uint64_t msEnd;
+    // for wav/ape/flac/... with cue
+    bool hasRange = false;
+    uint64_t msBeg = 0;
+    uint64_t msEnd = 0;
 
     MediaTag tag;
 
-    void* userData;
-
-    MediaItem():
-        duration(-1),
-        userData(nullptr)
-    {
-
-    }
+    void* userData = nullptr;
 
     template<typename buf_t> void operator>>(buf_t& buf) const
     {

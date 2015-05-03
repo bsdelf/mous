@@ -80,33 +80,33 @@ private slots:
     void SlotTagUpdated(const MediaItem& item);
 
 private:
-    Ui::MainWindow *ui;
-    QDockWidget* m_Dock;
+    Ui::MainWindow *ui = nullptr;
+    QDockWidget* m_Dock = nullptr;
     FrmToolBar m_FrmToolBar;
     FrmTagEditor m_FrmTagEditor;
-    sqt::MidClickTabBar* m_TabBarPlaylist;
-    sqt::CustomHeadTabWidget* m_TabWidgetPlaylist;
+    sqt::MidClickTabBar* m_TabBarPlaylist = nullptr;
+    sqt::CustomHeadTabWidget* m_TabWidgetPlaylist = nullptr;
 
     QIcon m_IconPlaying;
     QIcon m_IconPaused;
 
-    QToolButton* m_BtnPreference;
+    QToolButton* m_BtnPreference = nullptr;
 
-    QTimer* m_TimerUpdateUi;
-    const int m_UpdateInterval;
+    QTimer m_TimerUpdateUi;
+    const int m_UpdateInterval = 500;
 
-    IPluginManager* m_PluginManager;
-    IMediaLoader* m_MediaLoader;
-    IPlayer* m_Player;
-    IConvTaskFactory* m_ConvFactory;
-    ITagParserFactory* m_ParserFactory;
-    QMutex m_PlayerMutex;
+    IPluginManager* m_PluginManager = nullptr;
+    IMediaLoader* m_MediaLoader = nullptr;
+    IPlayer* m_Player = nullptr;
+    IConvTaskFactory* m_ConvFactory = nullptr;
+    ITagParserFactory* m_ParserFactory = nullptr;
+    QMutex m_PlayerMutex { QMutex::Recursive };
 
-    IPlaylistView* m_UsedPlaylistView;
-    const MediaItem* m_UsedMediaItem;
+    IPlaylistView* m_UsedPlaylistView = nullptr;
+    const MediaItem* m_UsedMediaItem = nullptr;
     PlaylistClipboard<MediaItem> m_Clipboard;
 
-    bool m_SliderPlayingPreempted;
+    bool m_SliderPlayingPreempted = false;
 
     DlgConvertTask m_DlgConvertTask;
 };

@@ -29,7 +29,6 @@ private:
     TcpSocket m_Socket;
     int m_PipeFd[2];
     set<Session*> m_SessionSet;
-    typedef set<Session*>::iterator SessionSetIter;
 };
 
 #endif

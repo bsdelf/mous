@@ -16,9 +16,7 @@ const size_t SENDOUTBUF_MAX_KEEP = 256;
 
 namespace phs = std::placeholders;
 
-Client::Client():
-    m_ConnectMaxRetry(25),
-    m_ConnectRetryInterval(200)
+Client::Client()
 {
     m_PlaylistHandler.fnGetPayloadBuffer = 
         m_PlayerHandler.fnGetPayloadBuffer = 

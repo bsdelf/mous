@@ -69,16 +69,8 @@ class Playlist
     friend class PlaylistSerializer<item_t>;
 
 public:
-    Playlist():
-        m_Mode(PlaylistMode::Normal),
-        m_SeqIndex(-1)
-    {
-
-    }
-
-    ~Playlist()
-    {
-    }
+    Playlist() = default;
+    ~Playlist() = default;
 
     void SetMode(EmPlaylistMode mode)
     {
@@ -443,11 +435,11 @@ private:
     }
 
 private:
-    EmPlaylistMode m_Mode;
+    EmPlaylistMode m_Mode = PlaylistMode::Normal;
 
     std::deque<item_t> m_ItemQueue;
 
-    int m_SeqIndex;
+    int m_SeqIndex = -1;
     std::deque<int> m_SeqShuffleQueue;
 
 };

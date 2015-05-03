@@ -22,13 +22,7 @@ using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    m_TimerUpdateUi(new QTimer),
-    m_UpdateInterval(500),
-    m_PlayerMutex(QMutex::Recursive),
-    m_UsedPlaylistView(nullptr),
-    m_UsedMediaItem(nullptr),
-    m_SliderPlayingPreempted(false)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);    
     InitMousCore();
@@ -52,10 +46,8 @@ MainWindow::~MainWindow()
     if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
     }
-    if (m_TimerUpdateUi != nullptr) {
-        if (m_TimerUpdateUi->isActive())
-            m_TimerUpdateUi->stop();
-        delete m_TimerUpdateUi;
+    if (m_TimerUpdateUi.isActive()) {
+        m_TimerUpdateUi.stop();
     }
 
     delete ui;
@@ -206,7 +198,7 @@ void MainWindow::InitMyUi()
 
 void MainWindow::InitQtSlots()
 {
-    connect(m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
+    connect(&m_TimerUpdateUi, SIGNAL(timeout()), this, SLOT(SlotUpdateUi()));
 
     connect(m_FrmToolBar.BtnPlay(), SIGNAL(clicked()), this, SLOT(SlotBtnPlay()));
     connect(m_FrmToolBar.BtnPrev(), SIGNAL(clicked()), this, SLOT(SlotBtnPrev()));
@@ -291,18 +283,18 @@ void MainWindow::SlotBtnPlay()
 
     case PlayerStatus::Playing:
         m_Player->Pause();
-        m_TimerUpdateUi->stop();
+        m_TimerUpdateUi.stop();
         m_FrmToolBar.BtnPlay()->setIcon(m_IconPlaying);
         break;
 
     case PlayerStatus::Paused:
-        m_TimerUpdateUi->start(m_UpdateInterval);
+        m_TimerUpdateUi.start(m_UpdateInterval);
         m_Player->Resume();
         m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
         break;
 
     case PlayerStatus::Stopped:
-        m_TimerUpdateUi->start(m_UpdateInterval);
+        m_TimerUpdateUi.start(m_UpdateInterval);
         if (m_UsedMediaItem->hasRange)
             m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
         else
@@ -404,7 +396,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
     }
     if (m_Player->Status() != PlayerStatus::Closed) {
         m_Player->Close();
-        m_TimerUpdateUi->stop();
+        m_TimerUpdateUi.stop();
     }
 
     m_UsedMediaItem = &item;
@@ -415,7 +407,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
         return SlotBtnNext();
     }
 
-    m_TimerUpdateUi->start(m_UpdateInterval);
+    m_TimerUpdateUi.start(m_UpdateInterval);
     if (item.hasRange)
         m_Player->Play(item.msBeg, item.msEnd);
     else
