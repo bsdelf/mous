@@ -43,7 +43,7 @@ Dependencies
 
     mp3 decoding:       mpg123
     mp3 encoding:       lame
-    m4a decoding:       faad2
+    m4a decoding:       faad2/fdk-aac
     m4a encoding:       faac
     wv codec:           wavpack
     ogg codec:          libvorbis
