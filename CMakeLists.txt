@@ -76,8 +76,13 @@ option(WithPluginWmaDecoder "WMA Decoder" off)
 option(WithPluginMacDecoder "MAC Decoder" off)
 option(WithPluginMac4Decoder "MAC4.11 Decoder" off)
 option(WithPluginMPG123 "MPG123 Decoder" off)
+<<<<<<< HEAD
 option(WithPluginVorbisDecoder "Ogg Decoder" off)
 option(WithPluginVorbisEncoder "Ogg Encoder" off)
+=======
+option(WithPluginOggDecoder "Ogg Decoder" off)
+option(WithPluginOggEncoder "Ogg Encoder" off)
+>>>>>>> bdf9088621a48f175ef15674b23c4480ed971e87
 option(WithPluginLAME "LAME Encoder" off)
 option(WithPluginFlacDecoder "FLAC Decoder" off)
 option(WithPluginFlacEncoder "FLAC Encoder" off)
