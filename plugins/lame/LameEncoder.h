@@ -34,15 +34,14 @@ private:
     EnumedIntOption m_BitRate;
     BooleanOption m_ReplayGain;
 
-    lame_global_flags* m_gfp;
-    FILE* m_OutputFile;
+    lame_global_flags* m_gfp = nullptr;
+    FILE* m_OutputFile = nullptr;
 
-    int m_BitsPerSample;
+    int m_BitsPerSample = 0;
 
-    unsigned char* m_EncodeBuffer;
-    int m_EncodeBufferSize;
+    vector<unsigned char> m_Buffer;
 
-    const MediaTag* m_MediaTag;
+    const MediaTag* m_MediaTag = nullptr;
 };
 
 #endif

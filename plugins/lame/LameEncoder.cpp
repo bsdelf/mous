@@ -1,13 +1,7 @@
 #include "LameEncoder.h"
 #include <scx/Conv.hpp>
 
-LameEncoder::LameEncoder():
-    m_gfp(nullptr),
-    m_OutputFile(nullptr),
-    m_BitsPerSample(0),
-    m_EncodeBuffer(nullptr),
-    m_EncodeBufferSize(0),
-    m_MediaTag(nullptr)
+LameEncoder::LameEncoder()
 {
     m_Quality.desc = "Quality\n0=best(very slow), 9 worst";
     m_Quality.min = 0;
@@ -83,12 +77,6 @@ void LameEncoder::CloseOutput()
         ::lame_close(m_gfp);
         m_gfp = nullptr;
     }
-
-    if (m_EncodeBuffer != nullptr) {
-        delete[] m_EncodeBuffer;
-        m_EncodeBuffer = nullptr;
-        m_EncodeBufferSize = 0;
-    }
 }
 
 EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
@@ -96,22 +84,19 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
     // prepare buffer
     int samplesPerChannel = 
         len / ::lame_get_num_channels(m_gfp) / (m_BitsPerSample / 8); 
-    int minBufferSize = 1.25 * samplesPerChannel + 7200;
-    if (m_EncodeBufferSize < minBufferSize) {
-        if (m_EncodeBuffer != nullptr)
-            delete[] m_EncodeBuffer;
-        m_EncodeBuffer = new unsigned char[minBufferSize];
-        m_EncodeBufferSize = minBufferSize;
+    int minsz = 1.25 * samplesPerChannel + 7200;
+    if (m_Buffer.size() < minsz) {
+        m_Buffer.resize(minsz);
     }
 
     // encode
     int ret = lame_encode_buffer_interleaved(
             m_gfp,
             (short int*)buf, samplesPerChannel,
-            m_EncodeBuffer, m_EncodeBufferSize);
+            m_Buffer.data(), m_Buffer.size());
 
     if (ret >= 0) {
-        if ((int)::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile) == ret) {
+        if ((int)::fwrite(m_Buffer.data(), 1, ret, m_OutputFile) == ret) {
             return ErrorCode::Ok;
         }
     }
@@ -121,9 +106,9 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
 
 EmErrorCode LameEncoder::FlushRest()
 {
-    int ret = lame_encode_flush(m_gfp, m_EncodeBuffer, m_EncodeBufferSize);
+    int ret = lame_encode_flush(m_gfp, m_Buffer.data(), m_Buffer.size());
     if (ret >= 0) {
-        if ((int)::fwrite(m_EncodeBuffer, 1, ret, m_OutputFile) == ret) {
+        if ((int)::fwrite(m_Buffer.data(), 1, ret, m_OutputFile) == ret) {
             ::lame_mp3_tags_fid(m_gfp, m_OutputFile);
             return ErrorCode::Ok;
         }
@@ -153,12 +138,7 @@ void LameEncoder::SetMediaTag(const MediaTag* tag)
 
 std::vector<const BaseOption*> LameEncoder::Options() const 
 {
-    std::vector<const BaseOption*> list(3);
-    list.resize(3);
-    list[0] = &m_Quality;
-    list[1] = &m_BitRate;
-    list[2] = &m_ReplayGain;
-    return list;
+    return { &m_Quality, &m_BitRate, &m_ReplayGain };
 }
 
 
