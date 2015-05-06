@@ -1,6 +1,7 @@
 #include "cmd.h"
 
 #include <unistd.h>
+#include <iostream>
 
 #include <thread>
 #include <mutex>

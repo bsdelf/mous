@@ -87,8 +87,8 @@ private:
     void OnSyncTask();
 
 private:
-    function<char* (char, int)> fnGetPayloadBuffer;
-    function<void (void)> fnSendOut;
+    std::function<char* (char, int)> fnGetPayloadBuffer;
+    std::function<void (void)> fnSendOut;
 
     Signal<void ()> m_SigPause;
     Signal<void ()> m_SigSeek;

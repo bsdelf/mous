@@ -44,7 +44,7 @@ private:
 
     ClientPlayerHandler* m_PlayerHandler = nullptr;
 
-    mutable mutex m_RefreshMutex;
+    mutable std::mutex m_RefreshMutex;
     bool m_WaitReply = false;
     int m_NeedRefresh = 0;
     int m_Volume = 0;
