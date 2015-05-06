@@ -5,9 +5,6 @@
 #include <memory>
 #include <functional>
 
-#include <iostream>
-using namespace std;
-
 namespace scx {
 
 template <class S>
@@ -115,8 +112,8 @@ public:
 
     void operator()(P... p) const
     {
-        for (const auto& slot: m_slots) {
-            slot->Invoke(p...);
+        for (size_t i = 0; i < m_slots.size(); ++i) {
+            m_slots[i]->Invoke(p...);
         }
     }
 
