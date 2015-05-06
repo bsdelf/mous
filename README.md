@@ -29,8 +29,8 @@ Front End
 
 Plugins
 ==============
-* decoding: ape/flac/m4a/mp3/ogg/wav/wma/wv
-* encoding: m4a/mp3/wav
+* decoding: ape/flac/mp4/mp3/ogg/wav/wma/wv
+* encoding: mp4/mp3/wav
 * output: oss/alsa/libao
 * tag parser(ID3/mp4/etc.)
 * cue playlist
@@ -43,8 +43,8 @@ Dependencies
 
     mp3 decoding:       mpg123
     mp3 encoding:       lame
-    m4a decoding:       faad2/fdk-aac
-    m4a encoding:       faac
+    mp4 decoding:       faad2/fdk-aac
+    mp4 encoding:       faac
     wv codec:           wavpack
     ogg codec:          libvorbis
     flac codec:         flac
@@ -102,19 +102,20 @@ Mous 播放器
 
 ### 3.命令行: mous-cli
 
-现有插件
+支持的格式
 ==============
-* 解码：ape/flac/m4a/mp3/ogg/wav/wma/wv
-* 编码：m4a/mp3/wav
+* 解码：ape/flac/mp3/mp4/ogg/wav/wma/wv
+* 编码：mp4/mp3/wav
 * 输出：oss/alsa/libao
-* ID3 等标签解析
-* CUE 列表
+* 播放列表：cue
+* ID3v2.3 编辑
 
-规划中的插件
+TODO
 ==============
 * 解码：tta
 * 编码：wv/flac/ogg
-* 内嵌 CUE
+* 内嵌式 cue
+* m3u 播放列表
 * 音量均衡
 * 音效处理
 
@@ -126,8 +127,8 @@ Mous 播放器
 
     mp3 解码：      mpg123
     mp3 编码：      lame
-    m4a 解码：      faad2
-    m4a 编码：      faac
+    mp4 解码：      faad2
+    mp4 编码：      faac
     wv 解码：       wavpack
     ogg 编解码：    libvorbis
     flac 编解码：   flac
