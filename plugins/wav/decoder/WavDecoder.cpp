@@ -21,9 +21,7 @@ WavDecoder::~WavDecoder()
 
 vector<string> WavDecoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("wav");
-    return list;
+    return { "wav" };
 }
 
 EmErrorCode WavDecoder::Open(const std::string& url)

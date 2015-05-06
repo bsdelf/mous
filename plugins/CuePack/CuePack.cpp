@@ -20,10 +20,7 @@ CuePack::~CuePack()
 
 vector<string> CuePack::FileSuffix() const
 {
-    vector<string> list;
-    list.clear();
-    list.push_back("cue");
-    return list;
+    return { "cue" };
 }
 
 void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& list,

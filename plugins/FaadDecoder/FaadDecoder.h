@@ -13,7 +13,7 @@ using namespace std;
 class FaadDecoder: public IDecoder
 {
 public:
-    FaadDecoder();
+    FaadDecoder() = default;
     virtual ~FaadDecoder();
 
     virtual vector<string> FileSuffix() const;
@@ -65,12 +65,12 @@ private:
     static long aacChannelConfig2wavexChannelMask(NeAACDecFrameInfo *hInfo);
 
 private:
-    FILE* m_File;
+    FILE* m_File = nullptr;
 
     bool m_IsMp4File;
 
-    mp4ff_t* m_Infile;
-    NeAACDecHandle m_NeAACDecHandle;
+    mp4ff_t* m_Infile = nullptr;
+    NeAACDecHandle m_NeAACDecHandle = nullptr;
 
     int m_Track;
 

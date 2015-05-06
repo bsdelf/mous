@@ -11,9 +11,7 @@ OggDecoder::~OggDecoder()
 
 vector<string> OggDecoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("ogg");
-    return list;
+    return { "ogg" };
 }
 
 EmErrorCode OggDecoder::Open(const std::string& url)

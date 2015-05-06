@@ -3,25 +3,14 @@
 #include <iostream>
 using namespace std;
 
-FaadDecoder::FaadDecoder():
-    m_File(nullptr),
-    m_Infile(nullptr),
-    m_NeAACDecHandle(nullptr)
-{
-
-}
-
 FaadDecoder::~FaadDecoder()
 {
+    Close();
 }
 
 vector<string> FaadDecoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("m4a");
-    list.push_back("aac");
-    list.push_back("mp4");
-    return list;
+    return { "m4a", "mp4" };
 }
 
 EmErrorCode FaadDecoder::Open(const string& url)

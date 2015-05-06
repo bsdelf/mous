@@ -12,7 +12,7 @@ using namespace mous;
 class MacDecoder: public IDecoder
 {
 public:
-    MacDecoder();
+    MacDecoder() = default;
     virtual ~MacDecoder();
 
     virtual vector<string> FileSuffix() const;
@@ -36,7 +36,7 @@ public:
     virtual uint64_t Duration() const;
 
 private:
-    IAPEDecompress* m_pDecompress;
+    IAPEDecompress* m_pDecompress = nullptr;
 
     uint64_t m_BlockIndex;
     uint64_t m_BlockCount;

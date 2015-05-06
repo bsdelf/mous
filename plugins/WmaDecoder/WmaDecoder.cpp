@@ -2,9 +2,7 @@
 #include <string.h>
 #include <iostream>
 
-WmaDecoder::WmaDecoder():
-    m_CodecCtx(nullptr),
-    m_FormatCtx(nullptr)
+WmaDecoder::WmaDecoder()
 {
     avcodec_init();
     avcodec_register_all();
@@ -13,13 +11,12 @@ WmaDecoder::WmaDecoder():
 
 WmaDecoder::~WmaDecoder()
 {
+    Close();
 }
 
 vector<string> WmaDecoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("wma");
-    return list;
+    return { "wma" };
 }
 
 EmErrorCode WmaDecoder::Open(const std::string& url)

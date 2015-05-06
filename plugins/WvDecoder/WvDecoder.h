@@ -12,7 +12,7 @@ using namespace std;
 class WvDecoder: public IDecoder
 {
 public:
-    WvDecoder();
+    WvDecoder() = default;
     virtual ~WvDecoder();
 
     virtual std::vector<std::string> FileSuffix() const;
@@ -36,7 +36,7 @@ public:
     virtual uint64_t Duration() const;
 
 private:
-    WavpackContext* m_Ctx;
+    WavpackContext* m_Ctx = nullptr;
     vector<int32_t> m_Buf;
 
     int m_BytesPerSample;

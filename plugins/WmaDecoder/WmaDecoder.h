@@ -35,8 +35,8 @@ public:
     virtual uint64_t Duration() const;
 
 private:
-    AVCodecContext* m_CodecCtx;
-    AVFormatContext* m_FormatCtx;
+    AVCodecContext* m_CodecCtx = nullptr;
+    AVFormatContext* m_FormatCtx = nullptr;
 
     uint64_t m_UnitIndex;
     uint64_t m_UnitCount;

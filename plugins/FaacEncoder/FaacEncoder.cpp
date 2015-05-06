@@ -263,12 +263,7 @@ void FaacEncoder::SetMediaTag(const MediaTag* tag)
 
 std::vector<const BaseOption*> FaacEncoder::Options() const
 {
-    std::vector<const BaseOption*> list(4);
-    list[0] = &m_OptVbrOrAbr;
-    list[1] = &m_OptTns;
-    list[2] = &m_OptMidSide;
-    list[3] = &m_OptOptimize;
-    return list;
+    return { &m_OptVbrOrAbr, &m_OptTns, &m_OptMidSide, &m_OptOptimize };
 }
 
 /*

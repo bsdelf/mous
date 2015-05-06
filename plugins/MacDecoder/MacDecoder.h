@@ -11,7 +11,7 @@ using namespace mous;
 class MacDecoder: public IDecoder
 {
 public:
-    MacDecoder();
+    MacDecoder() = default;
     virtual ~MacDecoder();
 
     virtual vector<string> FileSuffix() const;
@@ -38,7 +38,7 @@ private:
     static str_utf16 * GetUTF16FromUTF8(const str_utf8 * pUTF8);
 
 private:
-    IAPEDecompress* m_pDecompress;
+    IAPEDecompress* m_pDecompress = nullptr;
 
     uint32_t m_MaxBytesPerUnit;
     uint64_t m_BlockIndex;

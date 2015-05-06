@@ -28,9 +28,7 @@ Mpg123Decoder::~Mpg123Decoder()
 
 vector<string> Mpg123Decoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("mp3");
-    return list;
+    return { "mp3" };
 }
 
 EmErrorCode Mpg123Decoder::Open(const std::string& url)

@@ -3,20 +3,14 @@
 
 static void format_samples(int bps, unsigned char *dst, int32_t *src, uint32_t samcnt);
 
-WvDecoder::WvDecoder():
-    m_Ctx(nullptr)
-{
-}
-
 WvDecoder::~WvDecoder()
 {
+    Close();
 }
 
 vector<string> WvDecoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("wv");
-    return list;
+    return { "wv" };
 }
 
 EmErrorCode WvDecoder::Open(const std::string& url)
@@ -45,7 +39,10 @@ EmErrorCode WvDecoder::Open(const std::string& url)
 
 void WvDecoder::Close()
 {
-    WavpackCloseFile(m_Ctx);
+    if (m_Ctx != nullptr) {
+        WavpackCloseFile(m_Ctx);
+        m_Ctx = nullptr;
+    }
 }
 
 bool WvDecoder::IsFormatVaild() const

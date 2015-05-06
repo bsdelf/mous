@@ -2,25 +2,14 @@
 
 #include <stdio.h>
 
-MacDecoder::MacDecoder():
-    m_pDecompress(nullptr)
-{
-
-}
-
 MacDecoder::~MacDecoder()
 {
-    if (m_pDecompress != nullptr) {
-        delete m_pDecompress;
-        m_pDecompress = nullptr;
-    }
+    Close();
 }
 
 vector<string> MacDecoder::FileSuffix() const
 {
-    vector<string> list;
-    list.push_back("ape");
-    return list;
+    return { "ape" };
 }
 
 EmErrorCode MacDecoder::Open(const string& url)
