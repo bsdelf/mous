@@ -194,11 +194,11 @@ endif()
 
 # WAV plugin
 if(WithPluginWavDecoder)
-    file(GLOB SRC_WAV_DECODER plugins/WavDecoder/*)
+    file(GLOB SRC_WAV_DECODER plugins/wav/decoder/*)
     add_library(WavDecoder SHARED ${SRC_WAV_DECODER})
 endif()
 if(WithPluginWavEncoder)
-    file(GLOB SRC_WAV_ENCODER plugins/WavEncoder/*)
+    file(GLOB SRC_WAV_ENCODER plugins/wav/encoder/*)
     add_library(WavEncoder SHARED ${SRC_WAV_ENCODER})
 endif()
 
