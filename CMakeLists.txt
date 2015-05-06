@@ -81,6 +81,7 @@ option(WithPluginOggEncoder "Ogg Encoder" off)
 option(WithPluginLameEncoder "LAME Encoder" off)
 option(WithPluginFlacDecoder "FLAC Decoder" off)
 option(WithPluginFlacEncoder "FLAC Encoder" off)
+option(WithPluginFdkDecoder "Fdk Decoder" off)
 option(WithPluginFaadDecoder "FAAD Decoder" off)
 option(WithPluginFaacEncoder "FAAC Encoder" off)
 option(WithPluginWvDecoder "WavPack Decoder" off)
@@ -283,6 +284,13 @@ if(WithPluginWvDecoder)
     file(GLOB SRC_WV_DECODER plugins/WvDecoder/*)
     add_library(WvDecoder SHARED ${SRC_WV_DECODER})
     target_link_libraries(WvDecoder -lwavpack)
+endif()
+
+# FDK-AAC plugins
+if(WithPluginFdkDecoder)
+    file(GLOB SRC_FDK_DECODER plugins/fdk-aac/decoder/*)
+    add_library(FdkDecoder SHARED ${SRC_FDK_DECODER})
+    target_link_libraries(FdkDecoder -lfdk-aac -lmp4v2)
 endif()
 
 # FAAD & FAAC plugin
