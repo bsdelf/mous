@@ -78,14 +78,8 @@ public:
         using namespace PlaylistMode;
 
         if (m_SeqIndex >= 0 && (size_t)m_SeqIndex < m_ItemQueue.size())  {
-            set<EmPlaylistMode> normalSet;
-            normalSet.insert(Normal);
-            normalSet.insert(Repeat);
-            normalSet.insert(RepeatOne);
-
-            set<EmPlaylistMode> shuffleSet;
-            shuffleSet.insert(Shuffle);
-            shuffleSet.insert(ShuffleRepeat);
+            set<EmPlaylistMode> normalSet { Normal, Repeat, RepeatOne };
+            set<EmPlaylistMode> shuffleSet { Shuffle, ShuffleRepeat };
 
             // normal <=> shuffle
             if (MOUS_HAS(normalSet, m_Mode) && MOUS_HAS(shuffleSet, mode)) {
@@ -237,7 +231,7 @@ public:
                 || m_Mode == PlaylistMode::ShuffleRepeat) ? 
             m_SeqShuffleQueue[m_SeqIndex] : m_SeqIndex;
 
-        vector<int>::iterator iter = find(oldPos.begin(), oldPos.end(), seqIndex);
+        const auto iter = find(oldPos.begin(), oldPos.end(), seqIndex);
         if (iter != oldPos.end()) {
             seqIndex = realNewPos + (iter - oldPos.begin());
         } else {
