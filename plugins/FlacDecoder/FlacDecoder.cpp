@@ -25,7 +25,7 @@ EmErrorCode FlacDecoder::Open(const string& url)
             &WriteCallback,
             nullptr,        // metadata_callback
             &ErrorCallback,
-            nullptr);
+            &m_dctx);
 
     if (!FLAC__stream_decoder_process_until_end_of_metadata(m_pDecoder))
         return ErrorCode::DecoderFailedToOpen;
@@ -59,11 +59,14 @@ bool FlacDecoder::IsFormatVaild() const
 
 EmErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
-    gBuf = data;
+    m_dctx.buf = data;
+    m_dctx.buf_used = 0;
+    m_dctx.samples_read = 0;
+
     if (FLAC__stream_decoder_process_single(m_pDecoder)) {
-        used = gBufLen;
-        unitCount = gSamplesRead;
-        m_SampleIndex += gSamplesRead;
+        used = m_dctx.buf_used;
+        unitCount = m_dctx.samples_read;
+        m_SampleIndex += m_dctx.samples_read;
     } else {
         used = 0;
         unitCount = 0;
@@ -123,28 +126,26 @@ uint64_t FlacDecoder::Duration() const
     return m_Duration;
 }
 
-char* FlacDecoder::gBuf = nullptr;
-int32_t FlacDecoder::gBufLen = 0;
-int32_t FlacDecoder::gSamplesRead = 0;
-
 FLAC__StreamDecoderWriteStatus FlacDecoder::WriteCallback(
         const FLAC__StreamDecoder *decoder, 
         const FLAC__Frame *frame, 
         const FLAC__int32 * const buffer[], 
         void *client_data)
 {
+    auto pctx = static_cast<decoder_context_t*>(client_data);
+
     const size_t samples = frame->header.blocksize;
     const size_t channels = frame->header.channels;
 
-    if (gBuf != nullptr) {
+    if (pctx->buf != nullptr) {
         for (size_t i = 0, sample = 0; sample < samples; ++sample) {
             for (size_t channel = 0; channel < channels; ++channel, i+=2) {
-                gBuf[i+1] = (buffer[channel][sample] >> 8);
-                gBuf[i] = buffer[channel][sample];
+                pctx->buf[i+1] = (buffer[channel][sample] >> 8);
+                pctx->buf[i] = buffer[channel][sample];
             }
         }
-        gBufLen = (samples * channels) *2 ;
-        gSamplesRead = samples;
+        pctx->buf_used = (samples * channels) * 2 ;
+        pctx->samples_read = samples;
     }
 
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;

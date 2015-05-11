@@ -44,12 +44,15 @@ private:
 	    FLAC__StreamDecoderErrorStatus status, 
 	    void *client_data);
 
-    static char* gBuf;
-    static int32_t gBufLen;
-    static int32_t gSamplesRead;
-
 private:
+    struct decoder_context_t {
+        char* buf = nullptr;
+        int32_t buf_used = 0;
+        int32_t samples_read = 0;
+    };
+
     FLAC__StreamDecoder* m_pDecoder;
+    decoder_context_t m_dctx;
 
     uint64_t m_SampleIndex;
     uint64_t m_SampleCount;
