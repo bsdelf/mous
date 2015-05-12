@@ -18,7 +18,7 @@ public:
     virtual void Close() = 0;
 
     virtual EmErrorCode Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample) = 0;
-    virtual EmErrorCode Write(const char* buf, uint32_t len) = 0;
+    virtual EmErrorCode Write(const char* dat, uint32_t len) = 0;
 
     // 0(muted) to 100(max)
     virtual int VolumeLevel() const = 0;

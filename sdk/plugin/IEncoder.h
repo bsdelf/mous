@@ -21,7 +21,7 @@ public:
     virtual EmErrorCode OpenOutput(const std::string& path) = 0;
     virtual void CloseOutput() = 0;
 
-    virtual EmErrorCode Encode(char* buf, uint32_t len) = 0;
+    virtual EmErrorCode Encode(char* dat, uint32_t len) = 0;
     virtual EmErrorCode FlushRest() = 0;
 
     // these will be called before OpenOutput()
@@ -30,7 +30,7 @@ public:
     virtual void SetBitsPerSample(int32_t bitsPerSample) = 0;
 
     // reimplement this to support tagging
-    // called befor OpenOutput()
+    // called before OpenOutput()
     // you can write tag after open but before close
     virtual void SetMediaTag(const MediaTag* tag)
     {
