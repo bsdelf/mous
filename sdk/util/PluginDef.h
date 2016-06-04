@@ -1,5 +1,4 @@
-#ifndef MOUS_PLUGINDEF_H
-#define MOUS_PLUGINDEF_H
+#pragma once
 
 #include <inttypes.h>
 
@@ -67,5 +66,3 @@ inline const char* ToString(EmPluginType type)
 }
 
 }
-
-#endif

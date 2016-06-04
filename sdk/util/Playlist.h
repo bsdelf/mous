@@ -1,5 +1,4 @@
-#ifndef MOUS_PLAYLIST_H
-#define MOUS_PLAYLIST_H
+#pragma once
 
 #include <vector>
 #include <set>
@@ -443,5 +442,3 @@ private:
 #undef MOUS_HAS
 #undef MOUS_FIND
 #undef MOUS_CONTAINS
-
-#endif

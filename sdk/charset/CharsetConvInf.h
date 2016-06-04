@@ -1,5 +1,4 @@
-#ifndef MOUS_CHARSETCONVINF_H
-#define MOUS_CHARSETCONVINF_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,6 +8,4 @@ extern "C" {
     //TODO: complete c interfaces
 #ifdef __cplusplus
 }
-#endif
-
 #endif

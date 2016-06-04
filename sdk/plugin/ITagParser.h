@@ -1,5 +1,4 @@
-#ifndef MOUS_ITAGPARSER_H
-#define MOUS_ITAGPARSER_H
+#pragma once
 
 #include <inttypes.h>
 #include <vector>
@@ -64,5 +63,3 @@ public:
 };
 
 }
-
-#endif

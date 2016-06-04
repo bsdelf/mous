@@ -1,5 +1,4 @@
-#ifndef MOUS_OPTION_H
-#define MOUS_OPTION_H
+#pragma once
 
 #include <inttypes.h>
 #include <string>
@@ -175,5 +174,3 @@ struct GroupedOption: public BaseOption
 };
 
 }
-
-#endif

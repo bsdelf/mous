@@ -1,5 +1,4 @@
-#ifndef MOUS_IDECODER_H
-#define MOUS_IDECODER_H
+#pragma once
 
 #include <inttypes.h>
 #include <string>
@@ -43,5 +42,3 @@ public:
 };
 
 }
-
-#endif

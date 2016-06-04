@@ -1,5 +1,4 @@
-#ifndef MOUS_PLUGINHELPER_H
-#define MOUS_PLUGINHELPER_H
+#pragma once
 
 #include <util/PluginDef.h>
 
@@ -28,5 +27,3 @@ extern "C" {\
     }                                           \
     \
 } struct __MOUS_MACRO_END__
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef MOUS_MEDIALOADER_H
-#define MOUS_MEDIALOADER_H
+#pragma once
 
 #include <unordered_map>
 #include <core/IMediaLoader.h>
@@ -47,5 +46,3 @@ private:
 };
 
 }
-
-#endif

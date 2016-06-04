@@ -1,5 +1,4 @@
-#ifndef MOUS_IPLUGINMANAGER_H
-#define MOUS_IPLUGINMANAGER_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -31,5 +30,3 @@ public:
 };
 
 }
-
-#endif

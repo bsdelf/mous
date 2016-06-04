@@ -1,5 +1,4 @@
-#ifndef MOUS_ERRORCODE_H
-#define MOUS_ERRORCODE_H
+#pragma once
 
 namespace mous {
 
@@ -63,5 +62,3 @@ const char* const ErrorMsg[] = {
 */
 
 }
-
-#endif

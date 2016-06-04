@@ -1,5 +1,4 @@
-#ifndef MOUS_CONVTASK_H
-#define MOUS_CONVTASK_H
+#pragma once
 
 #include <thread>
 using namespace std;
@@ -46,5 +45,3 @@ private:
 };
 
 }
-
-#endif

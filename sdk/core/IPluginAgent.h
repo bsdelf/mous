@@ -1,5 +1,4 @@
-#ifndef MOUS_IPLUGINAGENT_H
-#define MOUS_IPLUGINAGENT_H
+#pragma once
 
 #include <string>
 #include <util/ErrorCode.h>
@@ -26,4 +25,3 @@ public:
 };
 
 }
-#endif

@@ -1,5 +1,4 @@
-#ifndef MOUS_IEVENT_WATCHER_H
-#define MOUS_IEVENT_WATCHER_H
+#pragma once
 
 namespace mous {
 
@@ -15,5 +14,3 @@ public:
 };
 
 }
-
-#endif

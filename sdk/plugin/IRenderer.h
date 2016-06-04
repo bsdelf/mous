@@ -1,5 +1,4 @@
-#ifndef MOUS_IRENDERER_H
-#define MOUS_IRENDERER_H
+#pragma once
 
 #include <inttypes.h>
 #include <vector>
@@ -32,5 +31,3 @@ public:
 };
 
 }
-
-#endif

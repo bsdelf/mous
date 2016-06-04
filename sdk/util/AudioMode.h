@@ -1,5 +1,4 @@
-#ifndef MOUS_AUDIOMODE_H
-#define MOUS_AUDIOMODE_H
+#pragma once
 
 namespace mous {
 
@@ -38,5 +37,3 @@ inline const char* ToString(EmAudioMode mode)
 }
 
 }
-
-#endif

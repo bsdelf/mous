@@ -1,5 +1,4 @@
-#ifndef MOUS_ICHARSETCONV_H
-#define MOUS_ICHARSETCONV_H
+#pragma once
 
 #include <string>
 #include "CharsetConvInf.h"
@@ -26,5 +25,3 @@ public:
 };
 
 }
-
-#endif

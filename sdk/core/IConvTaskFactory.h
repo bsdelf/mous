@@ -1,5 +1,4 @@
-#ifndef MOUS_ICONVTASKFACTORY_H
-#define MOUS_ICONVTASKFACTORY_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -34,6 +33,3 @@ public:
 };
 
 }
-
-#endif
-

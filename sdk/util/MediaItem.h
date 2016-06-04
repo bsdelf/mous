@@ -1,5 +1,4 @@
-#ifndef MOUS_MEDIAITEM_H
-#define MOUS_MEDIAITEM_H
+#pragma once
 
 #include <util/MediaTag.h>
 
@@ -33,4 +32,3 @@ struct MediaItem
 };
 
 }
-#endif

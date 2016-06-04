@@ -1,5 +1,4 @@
-#ifndef MOUS_IMEDIALOADER_H
-#define MOUS_IMEDIALOADER_H
+#pragma once
 
 #include <vector>
 #include <deque>
@@ -37,5 +36,3 @@ public:
 };
 
 }
-
-#endif

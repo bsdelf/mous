@@ -1,5 +1,4 @@
-#ifndef MOUS_PLUGINAGENT_H
-#define MOUS_PLUGINAGENT_H
+#pragma once
 
 #include <core/IPluginAgent.h>
 
@@ -36,4 +35,3 @@ private:
 };
 
 }
-#endif

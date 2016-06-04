@@ -1,5 +1,4 @@
-#ifndef MOUS_PLUGINMANAGER_H
-#define MOUS_PLUGINMANAGER_H
+#pragma once
 
 #include <unordered_map>
 #include <core/IPluginManager.h>
@@ -34,5 +33,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef MOUS_PLUGINOPTION_H
-#define MOUS_PLUGINOPTION_H
+#pragma once
 
 #include <vector>
 #include <util/Option.h>
@@ -15,5 +14,3 @@ struct PluginOption
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef MOUS_PLAYER_H
-#define MOUS_PLAYER_H
+#pragma once
 
 #include <vector>
 #include <map>
@@ -164,5 +163,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef MOUS_PLAYLISTSERIALIZER_H
-#define MOUS_PLAYLISTSERIALIZER_H
+#pragma once
 
 #include <vector>
 #include <fstream>
@@ -192,5 +191,3 @@ template<typename item_t>
 const size_t PlaylistSerializer<item_t>::STL_MAX = std::numeric_limits<int>::max();
 
 }
-
-#endif

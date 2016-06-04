@@ -1,5 +1,4 @@
-#ifndef MOUS_ITAGPARSERFACTORY_H
-#define MOUS_ITAGPARSERFACTORY_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -29,5 +28,3 @@ public:
 };
 
 }
-
-#endif

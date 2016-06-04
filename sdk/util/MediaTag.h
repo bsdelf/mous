@@ -1,5 +1,4 @@
-#ifndef MOUS_MEDIATAG_H
-#define MOUS_MEDIATAG_H
+#pragma once
 
 #include <string>
 #include <inttypes.h>
@@ -28,5 +27,3 @@ struct MediaTag
 };
 
 }
-
-#endif

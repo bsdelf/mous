@@ -1,5 +1,4 @@
-#ifndef MOUS_IPLAYER_H
-#define MOUS_IPLAYER_H
+#pragma once
 
 #include <inttypes.h>
 #include <string>
@@ -94,5 +93,3 @@ public:
 };
 
 }
-
-#endif

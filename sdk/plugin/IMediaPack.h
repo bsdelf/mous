@@ -1,5 +1,4 @@
-#ifndef MOUS_IMEDIAPACK_H
-#define MOUS_IMEDIAPACK_H
+#pragma once
 
 #include <unordered_map>
 #include <vector>
@@ -32,5 +31,3 @@ public:
 };
 
 }
-
-#endif

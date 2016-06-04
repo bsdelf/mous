@@ -1,5 +1,4 @@
-#ifndef MOUS_IENCODER_H
-#define MOUS_IENCODER_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -44,5 +43,3 @@ public:
 };
 
 }
-
-#endif

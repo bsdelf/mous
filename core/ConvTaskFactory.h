@@ -1,5 +1,4 @@
-#ifndef MOUS_CONVTASKFACTORY_H
-#define MOUS_CONVTASKFACTORY_H
+#pragma once
 
 #include <unordered_map>
 #include <util/MediaItem.h>
@@ -42,5 +41,3 @@ private:
 };
 
 }
-
-#endif
