@@ -27,7 +27,7 @@ void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& items,
     const std::unordered_map<std::string, IMediaPack*>* pMap) const
 {
     FILE* file = fopen(path.c_str(), "r");
-    if (file == nullptr) return;
+    if (!file) return;
     Cd* cd = cue_parse_file(file);
     fclose(file);
     string dir = FileHelper::FileDir(path);
@@ -71,16 +71,14 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& items) const
 
         item.url = dir + track_get_filename(track);
         item.hasRange = true;
-        //item->msBeg = (track_get_start(track))/75*1000;
-        //item->msEnd = item->msBeg + ((uint64_t)track_get_length(track))/75*1000;
-        item.msBeg = ((track_get_start(track)
-                    //+ track_get_index(track, 1)
-                    - track_get_zero_pre(track)) * 1000) / 75;
-        item.msEnd = ((track_get_start(track) + track_get_length(track)
-                    //- track_get_index(track, 1)
-                    + track_get_zero_pre(track)) * 1000) / 75;
-        if (item.msBeg >= item.msEnd || i == ntrack) {
-            item.msEnd = -1;
+        // TODO: take care of length <= 0
+        {
+            const auto start = track_get_start(track);
+            const auto length = track_get_length(track);
+            const auto zero_pre = track_get_zero_pre(track);
+            item.msBeg = (start - zero_pre) * 1000 / 75;
+            item.msEnd = (start + length + zero_pre) * 1000 / 75;
+            if (item.msBeg >= item.msEnd || i == ntrack) item.msEnd = -1;
         }
 
         Cdtext* cdt = track_get_cdtext(track);
