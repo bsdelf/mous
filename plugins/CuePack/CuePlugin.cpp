@@ -5,7 +5,7 @@ static const PluginInfo info = {
     "Yanhui Shen",
     "Cue Pack",
     "Cue sheet parser.",
-    1
+    2
 };
 
 MOUS_DEF_PLUGIN(PluginType::MediaPack, &info, CuePack);

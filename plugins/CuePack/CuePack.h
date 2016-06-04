@@ -1,12 +1,8 @@
 #include <plugin/IMediaPack.h>
-extern "C" {
-#include <libcue-1.4/libcue/libcue.h>
-#include <libcue-1.4/libcue/cd.h>
-}
+#include <libcue.h>
+
 using namespace std;
 using namespace mous;
-
-struct Cd;
 
 class CuePack: public IMediaPack
 {
