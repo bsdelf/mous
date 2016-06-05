@@ -1,7 +1,7 @@
 #include "cmd.h"
 
 #include <unistd.h>
-#include <iostream>
+#include <stdio.h>
 
 #include <thread>
 #include <mutex>
@@ -30,7 +30,7 @@ void on_finished()
     if (PLAYLIST->HasNext(1)) {
         const MediaItem& item = PLAYLIST->NextItem(1, true);
 
-        cout << "playing: \"" << item.url << "\""<< endl;
+        printf("playing: \"%s\"\n", item.url.c_str());
 
         lock_guard<mutex> locker(PLAYER_MUTEX);
         if (PLAYER->Status() != PlayerStatus::Closed)
@@ -43,7 +43,7 @@ void on_finished()
     } else {
         QUIT = true;
     }
-    //cout << "finished!" << endl;
+    //printf("finished!\n");
 }
 
 void do_playing()
@@ -54,9 +54,9 @@ void do_playing()
         int32_t rate = PLAYER->BitRate();
         PLAYER_MUTEX.unlock();
 
-        cout << rate << " kbps "
-             << ms/1000/60 << ":" << ms/1000%60 << "." << ms%1000
-             << '\r' << flush;
+        printf("\r%d kbps %02d:%02d.%d ",
+                rate, (int)(ms/1000/60), (int)(ms/1000%60), (int)(ms%1000));
+        fflush(stdout);
 
         usleep(200*1000);
     }
@@ -105,18 +105,18 @@ int cmd_play(int argc, char* argv[])
             ctx.loader->LoadMedia(argv[i], media_list);
             PLAYLIST->Append(media_list);
         } else {
-            cout << "invaild file: " << argv[i] << endl;
+            printf("invaild file: %s\n", argv[i]);
         }
     }
     if (PLAYLIST->Empty()) {
-        cout << "PLAYLIST is empty!" << endl;
+        printf("playlist is empty!\n");
         rval = -1;
         goto LABEL_CLEANUP;
     }
 
     // begin to play
     {
-        //cout << "[n(next)/q(quit)/p(pause)/r(replay)] [enter]" << endl;
+        printf("[n(next)/q(quit)/p(pause)/r(replay)] [enter]\n");
 
         on_finished();
         thread th = thread(std::bind(&do_playing));

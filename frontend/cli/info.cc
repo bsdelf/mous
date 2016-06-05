@@ -1,6 +1,6 @@
 #include "cmd.h"
 
-#include <iostream>
+#include <stdio.h>
 #include <iomanip>
 #include <sstream>
 #include <deque>
@@ -25,11 +25,9 @@ int cmd_info(int argc, char** argv)
     for (int i = 1; i < argc; ++i) {
         FileInfo info(argv[i]);
         if (!info.Exists() || (info.Type() == FileType::Directory)) {
-            cout << "invaild file: " << argv[i] << endl;
+            printf("invalid file: %s\n", argv[i]);
             continue;
         }
-
-        cout.precision(2);
 
         // phy info
         {
@@ -43,9 +41,9 @@ int cmd_info(int argc, char** argv)
                 csize = 'K';
                 dsize = size/1024.f;
             }
-            cout << "file:      " << info.BaseName() << endl;
-            cout << "path:      " << info.AbsPath() << endl;
-            cout << "size:      " << dsize << csize << " (" << size << "B)" << endl;
+            printf("file: %s\n", info.BaseName().c_str());
+            printf("path: %s\n", info.AbsPath().c_str());
+            printf("size: %lf%c (%zuB)\n", dsize, csize, size);
         }
 
         // tag info
@@ -57,23 +55,23 @@ int cmd_info(int argc, char** argv)
                 if (item.hasRange) {
                     if (item.msEnd == (uint64_t)-1)
                         item.msEnd = item.duration;
-                    cout << "range:     " << ms2str(item.msBeg) << " - " << ms2str(item.msEnd) << endl;
-                    cout << "duration:  " << ms2str(item.msEnd - item.msBeg) << endl;
+                    printf("range:      %s - %s\n", ms2str(item.msBeg).c_str(), ms2str(item.msEnd).c_str());
+                    printf("duration:   %s\n", ms2str(item.msEnd - item.msBeg).c_str());
                 } else {
-                    cout << "duration:  " << ms2str(item.duration) << endl;
+                    printf("duration:   %s\n", ms2str(item.duration).c_str());
                 }
                 // tag
-                cout << "title:     " << item.tag.title << endl;
-                cout << "artist:    " << item.tag.artist << endl;
-                cout << "album:     " << item.tag.album << endl;
-                cout << "comment:   " << item.tag.comment << endl;
-                cout << "genre:     " << item.tag.genre << endl;
-                cout << "year:      " << item.tag.year << endl;
-                cout << "track:     " << item.tag.track << endl;
+                printf("title:    %s\n", item.tag.title.c_str());
+                printf("artist:   %s\n", item.tag.artist.c_str());
+                printf("album:    %s\n", item.tag.album.c_str());
+                printf("comment:  %s\n", item.tag.comment.c_str());
+                printf("genre:    %s\n", item.tag.genre.c_str());
+                printf("year:     %d\n", item.tag.year);
+                printf("track:    %d\n", item.tag.track);
             }
         }
 
-        cout << endl;
+        printf("\n");
     }
 
     return 0;

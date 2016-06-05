@@ -2,8 +2,8 @@
 #include <unistd.h> // for usleep()
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-#include <iostream>
 #include <vector>
 #include <string>
 using namespace std;
@@ -46,14 +46,14 @@ static const char* cli_name = nullptr;
 
 int cmd_help(int, char**)
 {
-    cout << "Usage: " << cli_name << " <command> <options> <files>\n"
+    printf("Usage: %s <command> <options> <files>\n"
             "play   (default command)\n"
             "       -r(repeat) -s(shuffle)\n"
             "dec    (decode to wav)\n"
             "img    (dump cover art)\n"
             "info   (display file information)\n"
             "plugin (display plugin information)\n"
-            "help   (display help information)\n";
+            "help   (display help information)\n", cli_name);
 
     return 0;
 }
@@ -62,22 +62,29 @@ int cmd_plugin(int, char**)
 {
     const vector<string>& path_list = ctx.mgr->PluginPaths();
     for (size_t i = 0; i < path_list.size(); ++i) {
-        cout << "(" << i+1 << ") ";
-        cout << path_list[i] << endl;
         const PluginInfo* info = ctx.mgr->QueryPluginInfo(path_list[i]);
-        cout << "   " << info->author << endl;
-        cout << "   " << info->name << endl;
-        cout << "   " << info->desc << endl;
-        cout << "   " << info->version << endl;
+        printf("#%02zu %s\n"
+               "    %s\n"
+               "    %s\n"
+               "    %s\n"
+               "    %d\n",
+               i+1, path_list[i].c_str(),
+               info->name,
+               info->desc,
+               info->author,
+               info->version);
     }
-    cout << endl;
 
-    cout << ">> Decoders:   " << ctx.dec_agents.size() << endl;
-    cout << ">> Encoders:   " << ctx.enc_agents.size() << endl;
-    cout << ">> Renderers:  " << ctx.red_agents.size() << endl;
-    cout << ">> MediaPacks: " << ctx.pack_agents.size() << endl;
-    cout << ">> TagParsers: " << ctx.tag_agents.size() << endl;
-    cout << endl;
+    printf("Decoders:   %zu\n"
+           "Endocers:   %zu\n"
+           "Renderers:  %zu\n"
+           "MediaPacks: %zu\n"
+           "TagParsers: %zu\n",
+           ctx.dec_agents.size(),
+           ctx.enc_agents.size(),
+           ctx.red_agents.size(),
+           ctx.pack_agents.size(),
+           ctx.tag_agents.size());
 
     return 0;
 }
@@ -98,7 +105,7 @@ int main(int argc, char** argv)
     if (!dir_info.Exists() 
         || dir_info.Type() != FileType::Directory
         || pluginDir.empty()) {
-        cout << "bad plugin directory!" << endl;
+        printf("bad plugin directory!\n");
         exit(-1);
     }
     ctx.mgr = IPluginManager::Create();
@@ -111,7 +118,7 @@ int main(int argc, char** argv)
     ctx.pack_agents = ctx.mgr->PluginAgents(PluginType::MediaPack);
     ctx.tag_agents = ctx.mgr->PluginAgents(PluginType::TagParser);
     if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
-        cout << "need more plugins!" << endl;
+        printf("need more plugins!\n");
         cmd_plugin(0, nullptr);
         exit(-1);
     }

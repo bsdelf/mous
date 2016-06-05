@@ -1,8 +1,8 @@
 #include "cmd.h"
 
 #include <unistd.h>
+#include <stdio.h>
 
-#include <iostream>
 #include <fstream>
 using namespace std;
 
@@ -23,7 +23,7 @@ int cmd_dec(int argc, char** argv)
             wav_enc = encoders[i];
     }
     if (wav_enc.empty()) {
-        cout << "can't find wav encoder!" << endl;
+        printf("can't find wav encoder!\n");
         return -1;
     }
 
@@ -44,11 +44,11 @@ int cmd_dec(int argc, char** argv)
                 (info.BaseName() + "." + NumToStr(mi) + ".wav").c_str() :
                 (media_list[mi].tag.title + ".wav").c_str(); 
                  
-            cout << "save to: " << outname << endl;
+            printf("save to: %s\n", outname);
             if (FileInfo(outname).Exists()) {
-                cout << "file already exist! overwrite? [n/y]";
+                printf("file already exist! overwrite? [n/y]\n");
                 char ch;
-                cin >> ch;
+                scanf("%c", &ch);
                 if (ch != 'y')
                     continue;
             }
@@ -60,17 +60,17 @@ int cmd_dec(int argc, char** argv)
             while (!task->IsFinished()) {
                 double percent = task->Progress();
                 if (percent < 0) {
-                    cout << "failed!" << endl;
+                    printf("failed!\n");
                     break;
                 }
-                cout << "progress: " << (int)(percent*100) << "%" << "\r" << flush;
+                printf("\rprogress: %02d%% ", (int)(percent*100));
                 usleep(200);
             }
-            cout << "\ndone!" << endl;
+            printf("\ndone!\n");
             IConvTask::Free(task);
         }
 
-        cout << endl;
+        printf("\n");
     }
 
     return 0;
