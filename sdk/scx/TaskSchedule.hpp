@@ -76,8 +76,9 @@ public:
     void Stop()
     {
         m_work = false;
-        if (m_thread.joinable())
+        if (m_thread.joinable()) {
             m_thread.join();
+        }
     }
 
     bool IsRunning() const
@@ -105,7 +106,7 @@ public:
     void Cancel(long key)
     {
         Task* task = reinterpret_cast<Task*>(key);
-        if (task != nullptr) {
+        if (!task) {
             task->canceled = true;
         }
     }
@@ -120,8 +121,9 @@ public:
     void Wait()
     {
         std::unique_lock<std::mutex> locker(m_emutex);
-        while (!m_tasks.empty() || !m_pendings.empty())
+        while (!m_tasks.empty() || !m_pendings.empty()) {
             m_econd.wait(locker);
+        }
     }
 
     /* destroy all tasks immediately */
@@ -129,12 +131,15 @@ public:
     {
         bool work = IsRunning();
         Stop();
-        for (Task* task: m_tasks)
+        for (Task* task: m_tasks) {
             delete task;
-        for (Task* task: m_pendings)
+        }
+        for (Task* task: m_pendings) {
             delete task;
-        if (work)
+        }
+        if (work) {
             Start();
+        }
     }
 
     /* count of tasks still alive(not destroyed yet) */
@@ -155,10 +160,11 @@ private:
 		mach_port_deallocate(mach_task_self(), cclock);
 		ts.tv_sec = mts.tv_sec;
 		ts.tv_nsec = mts.tv_nsec;
+        struct timeval tv = { ts.tv_sec, static_cast<__darwin_suseconds_t>(ts.tv_nsec / 1000L) };
 #else
         ::clock_gettime(CLOCK_MONOTONIC, &ts);
-#endif
         struct timeval tv = { ts.tv_sec, ts.tv_nsec / 1000L };
+#endif
         return tv;
     }
 
@@ -189,18 +195,21 @@ private:
                 m_tasks.erase(m_tasks.begin(), end);
 
                 for (Task* task: expired) {
-                    if (!m_work)
+                    if (!m_work) {
                         return;
+                    }
 
-                    if (!task->canceled && !m_cancel)
+                    if (!task->canceled && !m_cancel) {
                         task->callback();
+                    }
 
                     if (task->oneshot || task->canceled || m_cancel) {
                         delete task;
                         --m_count;
                         std::lock_guard<std::mutex> elocker(m_emutex);
-                        if (m_tasks.empty() && m_pendings.empty())
+                        if (m_tasks.empty() && m_pendings.empty()) {
                             m_econd.notify_all();
+                        }
                     } else {
                         RefreshTask(task);
                         InsertTask(task);
