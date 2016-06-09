@@ -106,7 +106,7 @@ public:
     void Cancel(long key)
     {
         Task* task = reinterpret_cast<Task*>(key);
-        if (!task) {
+        if (task) {
             task->canceled = true;
         }
     }
