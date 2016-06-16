@@ -38,7 +38,7 @@ public:
     // reimplement this to provide options
     virtual std::vector<const BaseOption*> Options() const 
     { 
-        return std::vector<const BaseOption*>();
+        return {};
     };
 };
 
