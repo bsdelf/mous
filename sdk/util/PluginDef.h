@@ -60,7 +60,10 @@ inline const char* ToString(EmPluginType type)
             return "Filter";
 
         case PluginType::EventWatcher:
-            return "EventWatche";
+            return "EventWatcher";
+
+        default:
+            return "Unknown";
     }
     return "";
 }
