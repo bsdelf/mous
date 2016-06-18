@@ -196,7 +196,7 @@ bool PlaylistView::InjectKey(int key)
 
         case KEY_NPAGE:
             if (!empty) {
-                int line = (d.h - 3) / 2;
+                const int line = (d.h - 3) / 2;
                 for (int i = 0; i < line; ++i) {
                     ScrollDown();
                 }
@@ -205,7 +205,7 @@ bool PlaylistView::InjectKey(int key)
 
         case KEY_PPAGE:
             if (!empty) {
-                int line = (d.h - 3) / 2;
+                const int line = (d.h - 3) / 2;
                 for (int i = 0; i < line; ++i) {
                     ScrollUp();
                 }

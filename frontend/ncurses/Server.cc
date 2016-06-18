@@ -47,7 +47,7 @@ int Server::Exec()
     if (!m_Socket.Listen())
         return 1;
 
-    int maxfd = std::max(m_Socket.Fd(), m_PipeFd[0]) + 1;
+    const int maxfd = std::max(m_Socket.Fd(), m_PipeFd[0]) + 1;
     fd_set rset;
     FD_ZERO(&rset);
 

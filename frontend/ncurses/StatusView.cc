@@ -15,7 +15,7 @@ inline static string FormatTime(int ms)
         return "00:00";
 
     char buf[5+1];
-    int sec = ms / 1000;
+    const int sec = ms / 1000;
     snprintf(buf, sizeof(buf), "%.2d:%.2d", (int)(sec/60), (int)(sec%60));
     return string(buf, 5);
 }

@@ -66,8 +66,8 @@ void Client::SetConnectRetryInterval(int ms)
 
 void Client::StopService()
 {
-    char op = Op::App::StopService;
-    int payloadSize = (BufObj(nullptr) << op).Offset();
+    const char op = Op::App::StopService;
+    const int payloadSize = (BufObj(nullptr) << op).Offset();
 
     char* buf = GetPayloadBuffer(Group::App, payloadSize);
     BufObj(buf) << op;
@@ -179,7 +179,7 @@ void Client::ThRecvLoop(const string& ip, int port)
 char* Client::GetPayloadBuffer(char group, int payloadSize)
 {
     Header header(group, payloadSize);
-    size_t totalSize = header.TotalSize();
+    const auto totalSize = header.TotalSize();
 
     m_SendOutBufMutex.lock();
 
