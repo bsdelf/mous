@@ -17,11 +17,11 @@ plugin:
 5.播放统计插件
 6.APE/FLAC 内嵌 CUE 的 MediaPack 插件
 7.支持除了 FrontCover 之外的封面，flac，ape 等格式的封面
+8.libresample
 
 sdk:
 1.m3u 播放列表读取
 2.更好的播放列表序列化格式？
-3.适时迁移到 C++11
 
 qt:
 1.涉及 player, playlist 的操作需要 mutex 保护
