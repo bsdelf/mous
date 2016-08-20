@@ -77,7 +77,7 @@ void StatusView::Refresh()
 
     d.AttrSet(Attr::Normal);
     d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, string(wVolSlider * (m_Volume/100.f), '='));
+    d.Print(xoff, yoff, string(wVolSlider * (m_Volume/100.f), '#'));
     xoff += wVolSlider;
 
     d.AttrSet(Attr::Bold);
