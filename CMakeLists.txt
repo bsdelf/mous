@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.4)
 
 project(MOUS)
 
@@ -18,6 +18,10 @@ link_directories(/usr/local/lib)
 link_directories(/opt/local/lib)
 include_directories(BEFORE sdk)
 include_directories(BEFORE contrib)
+
+#==== threading ====#
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 SET(CMAKE_INSTALL_RPATH "\${CMAKE_INSTALL_PREFIX}/lib:\${CMAKE_INSTALL_PREFIX}/bin")
 
@@ -109,9 +113,9 @@ add_library(MousCore SHARED ${LIB_MOUS_CORE})
 set_target_properties(MousCore PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 if(IS_FREEBSD OR IS_APPLE)
-    target_link_libraries(MousCore -pthread)
+    target_link_libraries(MousCore Threads::Threads)
 elseif(IS_LINUX)
-    target_link_libraries(MousCore -pthread -ldl)
+    target_link_libraries(MousCore Threads::Threads -ldl)
 endif()
 
 # mous-cli
@@ -129,7 +133,7 @@ if(WithFrontendNcurses)
     file(GLOB EXE_MOUS_NCURSES frontend/ncurses/*)
     add_executable(mous-ncurses ${EXE_MOUS_NCURSES})
     add_dependencies(mous-ncurses MousCore)
-    set(EXE_MOUS_NCURSES_LIBS MousCore -pthread -lncursesw)
+    set(EXE_MOUS_NCURSES_LIBS MousCore Threads::Threads -lncursesw)
     if(IS_FREEBSD OR IS_APPLE)
         target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS} -liconv)
     elseif(IS_LINUX)
