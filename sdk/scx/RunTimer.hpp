@@ -1,5 +1,4 @@
-#ifndef SCX_RUNTIMER_HPP
-#define SCX_RUNTIMER_HPP
+#pragma once
 
 #include <iostream>
 #include <time.h>
@@ -153,4 +152,3 @@ private:
 
 }
 
-#endif

@@ -30,10 +30,6 @@ int Server::Exec()
     if (!m_Context->Init())
         return 1;
 
-    const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == nullptr)
-        return 2;
-
     m_Context->Restore();
 
     SocketOpt opt;
@@ -42,6 +38,7 @@ int Server::Exec()
     opt.keepAlive = true;
     m_Socket.SetOption(opt);
 
+    auto env = GlobalAppEnv::Instance();
     if (!m_Socket.Bind(env->serverIp, env->serverPort))
         return 1;
     if (!m_Socket.Listen())

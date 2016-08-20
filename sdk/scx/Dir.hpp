@@ -1,5 +1,4 @@
-#ifndef SCX_DIR_HPP
-#define SCX_DIR_HPP
+#pragma once
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -91,4 +90,3 @@ public:
 
 }
 
-#endif

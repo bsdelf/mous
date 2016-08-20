@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    AppEnv* env = GlobalAppEnv::Instance();
+    auto env = GlobalAppEnv::Instance();
     env->Init();
 
     QApplication app(argc, argv);

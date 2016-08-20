@@ -16,41 +16,36 @@ using namespace std;
 pid_t FetchPid()
 {
     pid_t pid = 0;
-    const AppEnv* env = GlobalAppEnv::Instance();
-    if (env != nullptr) {
-        fstream stream;
-        stream.open(env->pidFile.c_str(), ios::in);
-        if (stream) {
-            stream >> pid;
-        }
-        stream.close();
+    const auto env = GlobalAppEnv::Instance();
+    fstream stream;
+    stream.open(env->pidFile.c_str(), ios::in);
+    if (stream) {
+        stream >> pid;
     }
+    stream.close();
     return pid;
 }
 
 void StorePid()
 {
-    const AppEnv* config = GlobalAppEnv::Instance();
-    if (config != nullptr) {
-        fstream stream;
-        stream.open(config->pidFile.c_str(), ios::out);
-        stream << ::getpid();
-        stream.close();
-    }
+    const auto env = GlobalAppEnv::Instance();
+    fstream stream;
+    stream.open(env->pidFile.c_str(), ios::out);
+    stream << ::getpid();
+    stream.close();
 }
 
 void ClearPid()
 {
-    const AppEnv* env = GlobalAppEnv::Instance();
-    if (env != nullptr) {
-        ::unlink(env->pidFile.c_str());
-    }
+    const auto env = GlobalAppEnv::Instance();
+    ::unlink(env->pidFile.c_str());
 }
 
 int main(int argc, char** argv)
 {
     std::locale::global(std::locale(""));
 
+    
     if (!GlobalAppEnv::Instance()->Init())
         return 1;
 

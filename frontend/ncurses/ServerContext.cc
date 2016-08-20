@@ -31,7 +31,7 @@ ServerContext::ServerContext():
 
 ServerContext::~ServerContext()
 {
-    player->SigFinished()->DisconnectObject(this);
+    player->SigFinished()->Disconnect(this);
 
     ClosePlayer();
 
@@ -42,10 +42,7 @@ ServerContext::~ServerContext()
 
 bool ServerContext::Init()
 {
-    const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == nullptr)
-        return false;
-
+    const auto env = GlobalAppEnv::Instance();
     if (!mgr->LoadPluginDir(env->pluginDir))
         return false;
 
@@ -78,9 +75,7 @@ void ServerContext::Dump()
 {
     typedef PlaylistSerializer<MediaItem> Serializer;
 
-    const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == nullptr)
-        return;
+    const auto env = GlobalAppEnv::Instance();
 
     // save context
     BufObj buf(nullptr);
@@ -112,9 +107,7 @@ void ServerContext::Restore()
 {
     typedef PlaylistSerializer<MediaItem> Serializer;
 
-    const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == nullptr)
-        return;
+    const auto env = GlobalAppEnv::Instance();
 
     // load context
     stringstream stream;

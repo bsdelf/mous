@@ -76,13 +76,13 @@ FrmTagEditor::~FrmTagEditor()
 
 void FrmTagEditor::SaveUiStatus()
 {
-    AppEnv* env = GlobalAppEnv::Instance();
+    auto env = GlobalAppEnv::Instance();
     env->tagEditorSplitterState = ui->splitter->saveState();
 }
 
 void FrmTagEditor::RestoreUiStatus()
 {
-    const AppEnv* env = GlobalAppEnv::Instance();
+    auto env = GlobalAppEnv::Instance();
     ui->splitter->restoreState(env->tagEditorSplitterState);
 }
 

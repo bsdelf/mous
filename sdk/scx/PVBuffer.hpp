@@ -1,5 +1,4 @@
-#ifndef SCX_PVBUFFER_HPP
-#define SCX_PVBUFFER_HPP
+#pragma once
 
 #include <deque>
 #include <mutex>
@@ -180,4 +179,3 @@ private:
 
 }
 
-#endif

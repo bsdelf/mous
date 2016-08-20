@@ -47,7 +47,7 @@ Session::~Session()
     m_Socket.Close();
 
     lock_guard<mutex> locker(m_Context->mtx);
-    m_Context->sigPlayNextItem.DisconnectObject(this);
+    m_Context->sigPlayNextItem.Disconnect(this);
     m_Context = nullptr;
 }
 
@@ -567,7 +567,7 @@ void Session::TryConvertToUtf8(string& str) const
         return;
 
     const char* bad = "?????";
-    const AppEnv* env = GlobalAppEnv::Instance();
+    const auto env = GlobalAppEnv::Instance();
     string tmp;
     if (ConvFromTo(env->ifNotUtf8, "UTF-8", str.data(), str.size(), tmp)) {
         str = tmp;

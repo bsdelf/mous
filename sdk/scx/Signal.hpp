@@ -1,5 +1,4 @@
-#ifndef SCX_SIGNAL_HPP
-#define SCX_SIGNAL_HPP
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -7,21 +6,13 @@
 
 namespace scx {
 
-template <class S>
+template<class>
 class Signal;
 
-template <class R, class... P>
-class Signal<R (P...)>
-{
-public:
-    struct Slot
-    {
-        virtual ~Slot() { }
-        virtual char Type() const = 0;
-        virtual R Invoke(P...) const = 0;
-        virtual const void* Object() const = 0;
-        virtual bool EqualTo(const Slot*) const = 0;
-    };
+template<class R, class... P>
+class Signal<R (P...)> {
+private:
+    struct Slot;
 
 public:
     Signal() = default;
@@ -29,128 +20,85 @@ public:
     Signal(const Signal&) = delete;
     Signal& operator=(const Signal&) = delete;
 
-    const Slot* Connect(R (*p)(P...))
-    {
-        Slot* slot = new PtrSlot(p);
-        m_slots.push_back(std::unique_ptr<Slot>(slot));
-        return slot;
+    template<class... Args>
+    void Connect(Args... args) {
+        Connect(std::move(MakeSlot(args...)));
     }
 
-    template<typename O>
-    const Slot* Connect(R (O::*f)(P...), O* o)
-    {
-        Slot* slot = new MemSlot<O>(f, o);
-        m_slots.push_back(std::unique_ptr<Slot>(slot));
-        return slot;
+    void Connect(std::unique_ptr<Slot>&& slot) {
+        _slots.emplace_back(std::move(slot));
     }
 
-    template<typename O>
-    const Slot* Connect(R (O::*f)(P...) const, const O* o)
-    {
-        Slot* slot = new ConstSlot<O>(f, o);
-        m_slots.push_back(std::unique_ptr<Slot>(slot));
-        return slot;
+    template<class... Args>
+    bool Disconnect(Args... args) {
+        return Disconnect(MakeSlot(args...));
     }
 
-    template<typename F>
-    const Slot* Connect(const F& f)
-    {
-        Slot* slot = new FnSlot(f);
-        m_slots.push_back(std::unique_ptr<Slot>(slot));
-        return slot;
-    }
-
-    bool Disconnect(R (*f)(P...))
-    {
-        PtrSlot slot(f);
-        return Disconnect(&slot);
-    }
-
-    template<typename O>
-    bool Disconnect(R (O::*f)(P...), O* o)
-    {
-        MemSlot<O> slot(f, o);
-        return Disconnect(&slot);
-    }
-
-    template<typename O>
-    bool Disconnect(R (O::*f)(P...) const, const O* o)
-    {
-        ConstSlot<O> slot(f, o);
-        return Disconnect(&slot);
-    }
-
-    bool Disconnect(const void* slot)
-    {
-        const Slot* ts = static_cast<const Slot*>(slot);
-        for (size_t i = 0; i < m_slots.size(); ++i) {
-            if (m_slots[i]->EqualTo(ts)) {
-                m_slots.erase(m_slots.begin()+i);
+    bool Disconnect(const std::unique_ptr<Slot>& slot) {
+        auto ps = static_cast<const Slot*>(slot.get());
+        for (size_t i = 0; i < _slots.size(); ++i) {
+            if (_slots[i]->EqualTo(ps)) {
+                _slots.erase(_slots.begin() + i);
                 return true;
             }
         }
         return false;
     }
 
-    bool DisconnectObject(const void* o)
-    {
-        if (o != nullptr) {
-            for (size_t i = 0; i < m_slots.size(); ++i) {
-                if (m_slots[i]->Object() == o) {
-                    m_slots.erase(m_slots.begin()+i);
-                    return true;
-                }
+    bool Disconnect(const void* o) {
+        bool y = false;
+        _slots.erase(std::remove_if(_slots.begin(), _slots.end(), [&y, o](const auto& slot) {
+            if (slot->Object() == o) {
+                y = true;
+                return true;
             }
+            return false;
+        }), _slots.end());
+        return y;
+    }
+
+    void Clear() {
+        _slots.clear();
+    }
+
+    void operator()(P... p) const {
+        for (size_t i = 0; i < _slots.size(); ++i) {
+            _slots[i]->Invoke(p...);
         }
-        return false;
     }
 
-    void Clear()
-    {
-        m_slots.clear();
+    auto Empty() const {
+        return _slots.empty();
     }
 
-    void operator()(P... p) const
-    {
-        for (size_t i = 0; i < m_slots.size(); ++i) {
-            m_slots[i]->Invoke(p...);
-        }
-    }
-
-    size_t Count() const
-    {
-        return m_slots.size();
+    auto Size() const {
+        return _slots.size();
     }
 
 private:
-    struct PtrSlot: public Slot
-    {
+    std::vector<std::unique_ptr<Slot>> _slots;
+
+    struct Slot {
+        virtual ~Slot() { }
+        virtual char Type() const = 0;
+        virtual R Invoke(P...) const = 0;
+        virtual const void* Object() const = 0;
+        virtual bool EqualTo(const Slot*) const = 0;
+    };
+
+    struct PtrSlot: public Slot {
         typedef R (*ptr_t)(P...);
 
-        explicit PtrSlot(ptr_t p):
-            ptr(p)
-        {
-        }
+        explicit PtrSlot(ptr_t p): ptr(p) { }
 
-        virtual char Type() const
-        {
-            return 'p';
-        }
+        virtual char Type() const { return 'p'; }
 
-        virtual R Invoke(P... p) const
-        {
-            return ptr(p...);
-        }
+        virtual R Invoke(P... p) const { return ptr(p...); }
 
-        virtual const void* Object() const
-        {
-            return nullptr;
-        }
+        virtual const void* Object() const { return nullptr; }
 
-        virtual bool EqualTo(const Slot* slot) const
-        {
+        virtual bool EqualTo(const Slot* slot) const {
             if (Type() == slot->Type()) {
-                // I think dynamic_cast is unnecessary.
                 const PtrSlot* ps = static_cast<const PtrSlot*>(slot);
                 return (ptr == ps->ptr);
             }
@@ -161,33 +109,19 @@ private:
         ptr_t ptr;
     };
 
-    template<typename O>
-    struct MemSlot: public Slot
-    {
+    template<class O>
+    struct MemSlot: public Slot {
         typedef R (O::*fn_t)(P...);
 
-        MemSlot(fn_t f, O* o):
-            fn(f), obj(o)
-        {
-        }
+        MemSlot(fn_t f, O* o): fn(f), obj(o) { }
 
-        virtual char Type() const
-        {
-            return 'm';
-        }
+        virtual char Type() const { return 'm'; }
 
-        virtual R Invoke(P... p) const
-        {
-            return (obj->*fn)(p...);
-        }
+        virtual R Invoke(P... p) const { return (obj->*fn)(p...); }
 
-        virtual const void* Object() const
-        {
-            return obj;
-        }
+        virtual const void* Object() const { return obj; }
 
-        virtual bool EqualTo(const Slot* slot) const
-        {
+        virtual bool EqualTo(const Slot* slot) const {
             if (Type() == slot->Type()) {
                 const MemSlot* ms = static_cast<const MemSlot*>(slot);
                 return (obj == ms->obj && fn == ms->fn);
@@ -200,33 +134,19 @@ private:
         O* obj;
     };
 
-    template<typename O>
-    struct ConstSlot: public Slot
-    {
+    template<class O>
+    struct ConstSlot: public Slot {
         typedef R (O::*fn_t)(P...) const;
 
-        ConstSlot(fn_t f, const O* o):
-            fn(f), obj(o)
-        {
-        }
+        ConstSlot(fn_t f, const O* o): fn(f), obj(o) { }
 
-        virtual char Type() const
-        {
-            return 'c';
-        }
+        virtual char Type() const { return 'c'; }
 
-        virtual R Invoke(P... p) const
-        {
-            return (obj->*fn)(p...);
-        }
+        virtual R Invoke(P... p) const { return (obj->*fn)(p...); }
 
-        virtual const void* Object() const
-        {
-            return obj;
-        }
+        virtual const void* Object() const { return obj; }
 
-        virtual bool EqualTo(const Slot* slot) const
-        {
+        virtual bool EqualTo(const Slot* slot) const {
             if (Type() == slot->Type()) {
                 const ConstSlot* cs = static_cast<const ConstSlot*>(slot);
                 return (obj == cs->obj && fn == cs->fn);
@@ -239,43 +159,52 @@ private:
         const O* obj;
     };
 
-    struct FnSlot: public Slot
-    {
+    struct FnSlot: public Slot {
         typedef std::function<R (P...)> fn_t;
 
-        explicit FnSlot(const fn_t& f):
-            fn(f)
-        {
-        }
+        explicit FnSlot(const fn_t& f): fn(f) { }
 
-        virtual char Type() const
-        {
-            return 'f';
-        }
+        virtual char Type() const { return 'f'; }
 
-        virtual R Invoke(P... p) const
-        {
-            return fn(p...);
-        }
+        virtual R Invoke(P... p) const { return fn(p...); }
 
-        virtual const void* Object() const
-        {
-            return nullptr;
-        }
+        virtual const void* Object() const { return nullptr; }
 
-        virtual bool EqualTo(const Slot* slot) const
-        {
-            return (slot == this);
-        }
+        virtual bool EqualTo(const Slot* slot) const { return (slot == this); }
 
     private:
         const fn_t fn;
     };
 
-private:
-    std::vector<std::unique_ptr<Slot>> m_slots;
+    template<class O>
+    static const void* MakeSlot(O* o) {
+        return o;
+    }
+
+    template<class O>
+    static const void* MakeSlot(const O* o) {
+        return o;
+    }
+
+    static std::unique_ptr<Slot> MakeSlot(R (*p)(P...)) {
+        return std::make_unique<PtrSlot>(p);
+    }
+
+    template<class O>
+    static std::unique_ptr<Slot> MakeSlot(R (O::*f)(P...), O* o) {
+        return std::make_unique<MemSlot<O>>(f, o);
+    }
+
+    template<class O>
+    static std::unique_ptr<Slot> MakeSlot(R (O::*f)(P...) const, const O* o) {
+        return std::make_unique<ConstSlot<O>>(f, o);
+    }
+
+    template<class F>
+    static std::unique_ptr<Slot> MakeSlot(const F& f) {
+        return std::make_unique<FnSlot>(f);
+    }
 };
 
 }
 
-#endif

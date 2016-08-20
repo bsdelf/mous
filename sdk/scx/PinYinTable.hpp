@@ -1,5 +1,4 @@
-#ifndef SCX_PINYINTABLE_HPP
-#define SCX_PINYINTABLE_HPP
+#pragma once
 
 namespace scx {
 
@@ -65289,4 +65288,3 @@ constexpr static const char* PinYinTable[] = {
 
 }
 
-#endif

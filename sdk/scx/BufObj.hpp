@@ -1,5 +1,4 @@
-#ifndef SCX_BUFOBJ_HPP
-#define SCX_BUFOBJ_HPP
+#pragma once
 
 #include <inttypes.h>
 #include <string.h>
@@ -350,4 +349,3 @@ private:
 
 }
 
-#endif

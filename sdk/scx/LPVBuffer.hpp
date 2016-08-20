@@ -1,5 +1,4 @@
-#ifndef SCX_LPVBUFFER_HPP
-#define SCX_LPVBUFFER_HPP
+#pragma once
 
 #include <mutex>
 
@@ -167,4 +166,3 @@ private:
 
 }
 
-#endif

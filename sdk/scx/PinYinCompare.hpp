@@ -1,5 +1,4 @@
-#ifndef SCX_PINYINCOMPARE_HPP
-#define SCX_PINYINCOMPARE_HPP
+#pragma once
 
 #include <string>
 
@@ -170,4 +169,3 @@ private:
 
 }
 
-#endif

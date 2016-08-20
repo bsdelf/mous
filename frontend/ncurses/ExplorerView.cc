@@ -36,7 +36,7 @@ ExplorerView::ExplorerView()
 
     m_BeginStack = { 0 };
     m_SelectionStack = { 0 };
-    m_Path = Env::Get(Env::Home);
+    m_Path = Env::Get("HOME");
 
     BuildFileItems();
 }

@@ -45,7 +45,7 @@ bool AppEnv::Init()
     resourceDir = resDirInfo.AbsFilePath();
 
     // prepare root dir
-    configDir = Env::Get(Env::Home) + Path::ConfigRoot;
+    configDir = Env::Get("HOME") + Path::ConfigRoot;
 
     pyMapFile = resourceDir + Path::ResourcePinYin + Path::PyMapFile;
     configFile = configDir + Path::ConfigFile;

@@ -1,5 +1,4 @@
-#ifndef SCX_CONFIGFILE_HPP
-#define SCX_CONFIGFILE_HPP
+#pragma once
 
 #include <string>
 #include <fstream>
@@ -84,7 +83,7 @@ public:
                 key = buf.substr(off, lineEnd-off);
             }
 
-            m_Lines.push_back(Line(iskv, key, val));
+            m_Lines.emplace_back(iskv, key, val);
             off = lineEnd+1;
         }
 
@@ -173,7 +172,7 @@ public:
     std::string operator[](const std::string& key) const
     {
         if (!m_Index.empty()) {
-            IndexConstIter iter = m_Index.find(key);
+            auto iter = m_Index.find(key);
             return iter != m_Index.end() ? m_Lines[iter->second].val : "";
         } else {
             for (size_t i = 0; i < m_Lines.size(); ++i) {
@@ -197,7 +196,7 @@ public:
             }
         }
         if (val == nullptr) {
-            m_Lines.push_back(Line(true, key));
+            m_Lines.emplace_back(true, key);
             val = &(m_Lines[m_Lines.size()-1].val);
         }
         return *val;
@@ -221,7 +220,7 @@ public:
 
     void AppendComment(const std::string& txt)
     {
-        m_Lines.push_back(Line(false, txt));
+        m_Lines.emplace_back(false, txt);
     }
 
     // Build index can imporve performance when searching key.
@@ -256,11 +255,7 @@ private:
     mutable std::string m_Invaild;
 
     std::map<std::string, size_t> m_Index;
-    typedef std::map<std::string, size_t>::iterator IndexIter;
-    typedef std::map<std::string, size_t>::const_iterator IndexConstIter;
-    typedef std::pair<std::string, size_t> IndexPair;
 };
 
 }
 
-#endif

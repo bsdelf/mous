@@ -1,44 +1,36 @@
-#ifndef SCX_SINGLETON_HPP
-#define SCX_SINGLETON_HPP
+#pragma once
 
 #include <pthread.h>
+#include <memory>
 
 namespace scx {
 
-template<typename T>
-class Singleton
-{
-public:
-    static T* Instance()
-    {
-        pthread_once(&control, &Singleton::Init);
-        return sInstance;
-    }
-
-    static void Cleanup()
-    {
-        if (sInstance != nullptr) {
-            delete sInstance;
-            sInstance = nullptr;
+    template<typename T>
+    class Singleton {
+    public:
+        static std::shared_ptr<T> Instance() {
+            pthread_once(&_ctrl, &Singleton::Init);
+            return _instance;
         }
-    }
 
-private:
-    static void Init()
-    {
-        sInstance = new T;
-    }
+        static void Cleanup() {
+            _instance.reset();
+        }
 
-private:
-    static pthread_once_t control;
-    static T* sInstance;
-};
+    private:
+        static void Init() {
+            _instance = std::make_shared<T>();
+        }
 
-template<typename T>
-pthread_once_t Singleton<T>::control = PTHREAD_ONCE_INIT;
+    private:
+        static pthread_once_t _ctrl;
+        static std::shared_ptr<T> _instance;
+    };
 
-template<typename T>
-T* Singleton<T>::sInstance = nullptr;
+    template<typename T>
+    pthread_once_t Singleton<T>::_ctrl = PTHREAD_ONCE_INIT;
+
+    template<typename T>
+    std::shared_ptr<T> Singleton<T>::_instance = nullptr;
 
 }
-#endif

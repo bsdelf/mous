@@ -301,12 +301,12 @@ void PlaylistView::SetIndex(int index)
 void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
 {
     if (m_PlaylistHandler != nullptr) {
-        m_PlaylistHandler->SigSelect().DisconnectObject(this);
-        m_PlaylistHandler->SigPlay().DisconnectObject(this);
-        m_PlaylistHandler->SigAppend().DisconnectObject(this);
-        m_PlaylistHandler->SigRemove().DisconnectObject(this);
-        m_PlaylistHandler->SigMove().DisconnectObject(this);
-        m_PlaylistHandler->SigClear().DisconnectObject(this);
+        m_PlaylistHandler->SigSelect().Disconnect(this);
+        m_PlaylistHandler->SigPlay().Disconnect(this);
+        m_PlaylistHandler->SigAppend().Disconnect(this);
+        m_PlaylistHandler->SigRemove().Disconnect(this);
+        m_PlaylistHandler->SigMove().Disconnect(this);
+        m_PlaylistHandler->SigClear().Disconnect(this);
     }
 
     if (handler != nullptr) {

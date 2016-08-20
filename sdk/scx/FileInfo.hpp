@@ -1,5 +1,4 @@
-#ifndef SCX_FILEINFO_HPP
-#define SCX_FILEINFO_HPP
+#pragma once
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -181,4 +180,3 @@ private:
 
 }
 
-#endif

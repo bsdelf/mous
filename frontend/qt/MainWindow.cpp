@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     InitQtSlots();
 
     m_FrmTagEditor.RestoreUiStatus();
-    const AppEnv* env = GlobalAppEnv::Instance();
+    auto env = GlobalAppEnv::Instance();
     restoreGeometry(env->windowGeometry);
     restoreState(env->windowState);
 }
@@ -41,7 +41,7 @@ MainWindow::~MainWindow()
 
     QMutexLocker locker(&m_PlayerMutex);
 
-    m_Player->SigFinished()->DisconnectObject(this);
+    m_Player->SigFinished()->Disconnect(this);
 
     if (m_Player->Status() == PlayerStatus::Playing) {
         m_Player->Close();
@@ -57,7 +57,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent*)
 {
-    AppEnv* env = GlobalAppEnv::Instance();
+    auto env = GlobalAppEnv::Instance();
     env->tagEditorSplitterState = m_FrmTagEditor.saveGeometry();
     env->windowGeometry = saveGeometry();
     env->windowState = saveState();
@@ -123,7 +123,7 @@ void MainWindow::InitMousCore()
 
 void MainWindow::ClearMousCore()
 {
-    m_Player->SigFinished()->DisconnectObject(this);
+    m_Player->SigFinished()->Disconnect(this);
     m_FrmTagEditor.SetPlayer(nullptr);
     m_FrmTagEditor.SetTagParserFactory(nullptr);
 
@@ -142,7 +142,7 @@ void MainWindow::ClearMousCore()
 
 void MainWindow::InitMyUi()
 {
-    AppEnv* env = GlobalAppEnv::Instance();
+    auto env = GlobalAppEnv::Instance();
 
     // Playing & Paused icon
     m_IconPlaying.addFile(QString::fromUtf8(":/img/resource/play.png"), QSize(), QIcon::Normal, QIcon::On);

@@ -1,5 +1,4 @@
-#ifndef SCX_FILEHELPER_HPP
-#define SCX_FILEHELPER_HPP
+#pragma once
 
 #include <inttypes.h>
 #include <sys/types.h>
@@ -71,4 +70,3 @@ inline std::string ReadAll(const char* filename, bool asBin = false)
 }
 }
 
-#endif

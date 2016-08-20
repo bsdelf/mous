@@ -1,5 +1,4 @@
-#ifndef SCX_ICONVHELPER_HPP
-#define SCX_ICONVHELPER_HPP
+#pragma once
 
 #include <errno.h>
 #include <iconv.h>
@@ -77,4 +76,3 @@ static inline bool ConvFromTo(const std::string& from, const std::string& wanted
 }
 }
 
-#endif

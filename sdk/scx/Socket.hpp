@@ -1,5 +1,4 @@
-#ifndef SCX_SOCKET_HPP
-#define SCX_SOCKET_HPP
+#pragma once
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -18,80 +17,62 @@
 
 namespace scx {
 
-struct SocketOpt
-{
-    bool reuseAddr;
-    bool reusePort;
-    bool keepAlive;
-
-    SocketOpt():
-        reuseAddr(false),
-        reusePort(false),
-        keepAlive(true)
-    { }
+struct SocketOpt {
+    bool reuseAddr = false;
+    bool reusePort = false;
+    bool keepAlive = true;
 };
 
 class UdpSocket;
 class TcpSocket;
 
-class InetAddr
-{
-friend class UdpSocket;
-friend class TcpSocket;
+class InetAddr {
+    friend class UdpSocket;
+    friend class TcpSocket;
 
 public:
-    InetAddr(): 
-        m_AddrLen(sizeof(struct sockaddr_in))
-    {
+    InetAddr() {
         bzero(&m_Addr, sizeof(m_Addr));
         m_Addr.sin_family = AF_INET;
     }
 
-    InetAddr(const std::string& ip, int port): 
-        m_AddrLen(sizeof(struct sockaddr_in))
-    {
+    InetAddr(const std::string& ip, int port) {
         bzero(&m_Addr, sizeof(m_Addr));
         m_Addr.sin_family = AF_INET;
         inet_pton(AF_INET, ip.c_str(), &m_Addr.sin_addr);
         m_Addr.sin_port = htons(port);
     }
 
-    explicit InetAddr(int port): 
-        m_AddrLen(sizeof(struct sockaddr_in))
-    {
+    explicit InetAddr(int port) {
         bzero(&m_Addr, sizeof(m_Addr));
         m_Addr.sin_family = AF_INET;
         m_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
         m_Addr.sin_port = htons(port);
     }
 
-    void Assign(const std::string& ip, int port)
-    {
+    void Assign(const std::string& ip, int port) {
         inet_pton(AF_INET, ip.c_str(), &m_Addr.sin_addr);
         m_Addr.sin_port = htons(port);
     }
 
-    void Assign(int port)
-    {
+    void Assign(int port) {
         m_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
         m_Addr.sin_port = htons(port);
     }
 
-    std::string Ip() const
-    {
+    std::string Ip() const {
         char buf[INET6_ADDRSTRLEN];
         const char* p = inet_ntop(AF_INET, &m_Addr.sin_addr, buf, sizeof(buf));
-        return p != nullptr ? p : "";
+        return (p != nullptr) ? p : "";
     }
 
-    int Port() const
-    {
+    int Port() const {
         return ntohs(m_Addr.sin_port);
     }
 
 private:
     struct sockaddr_in m_Addr;
-    socklen_t m_AddrLen;
+    socklen_t m_AddrLen = sizeof(struct sockaddr_in);
 };
 
 namespace HowShutdown {
@@ -285,4 +266,3 @@ class UnixSocket
 #undef SCX_SOCKET_SO_REUSEPORT
 #endif
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef SCX_SEMVAR_HPP
-#define SCX_SEMVAR_HPP
+#pragma once
 
 #ifdef USE_POSIX_SEMAPHORE // POSIX unnamed semaphore
 #include <semaphore.h> 
@@ -10,14 +9,12 @@
 
 namespace scx {
 
-class SemVar
-{
+class SemVar {
 public:
     SemVar(const SemVar&) = delete;
     SemVar& operator=(const SemVar&) = delete;
 
-    explicit SemVar(int value = 0)
-    {
+    explicit SemVar(int value = 0) {
 #ifdef USE_POSIX_SEMAPHORE
         ::sem_init(&m_sem, 0, value);
 #else
@@ -26,24 +23,20 @@ public:
     }
 
 #ifdef USE_POSIX_SEMAPHORE
-    SemVar(int pshared, int value)
-    {
+    SemVar(int pshared, int value) {
         ::sem_init(&m_sem, pshared, value);
     }
 #endif
 
-    ~SemVar()
-    {
+    ~SemVar() {
 #ifdef USE_POSIX_SEMAPHORE
         ::sem_destroy(&m_sem);
 #endif
     }
 
-    void Post(int n = 1)
-    {
+    void Post(int n = 1) {
 #ifdef USE_POSIX_SEMAPHORE
-        while (n-- > 0)
-            ::sem_post(&m_sem);
+        while (n-- > 0) ::sem_post(&m_sem);
 #else
         std::lock_guard<std::mutex> locker(m_vmtx);
         m_value += n;
@@ -51,45 +44,35 @@ public:
 #endif
     }
 
-    bool TryWait(int n = 1)
-    {
+    bool TryWait(int n = 1) {
 #ifdef USE_POSIX_SEMAPHORE
-        while (n > 0 && ::sem_trywait(&m_sem) == 0) {
-            --n;
-        }
+        while (n > 0 && ::sem_trywait(&m_sem) == 0) --n;
         return (n == 0);
 #else
         std::lock_guard<std::mutex> locker(m_vmtx);
-        if (n > m_value)
-            return false;
+        if (n > m_value) return false;
         m_value -= n;
         return true;
 #endif
     }
 
-    void Wait(int n = 1)
-    {
+    void Wait(int n = 1) {
 #ifdef USE_POSIX_SEMAPHORE
-        while (n-- > 0) {
-            ::sem_wait(&m_sem);
-        }
+        while (n-- > 0) ::sem_wait(&m_sem);
 #else
         std::unique_lock<std::mutex> locker(m_vmtx);
-        while (n > m_value)
-            m_vcond.wait(locker);
+        while (n > m_value) m_vcond.wait(locker);
         m_value -= n;
 #endif
     }
 
     /*
-    void TimeWait()
-    {
+    void TimeWait() {
         //return sem_timewait(&m_sem, timeout);
     }
     */
 
-    int Value() const
-    {
+    int Value() const {
 #ifdef USE_POSIX_SEMAPHORE
         int sval = 0;
         ::sem_getvalue(&m_sem, &sval);
@@ -100,8 +83,7 @@ public:
 #endif
     }
 
-    void Clear()
-    {
+    void Clear() {
 #ifdef USE_POSIX_SEMAPHORE
         while (::sem_trywait(&m_sem) == 0);
 #else
@@ -122,4 +104,3 @@ private:
 
 }
 
-#endif

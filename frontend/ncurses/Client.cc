@@ -33,14 +33,11 @@ Client::~Client()
 
 bool Client::Run()
 {
-    const AppEnv* env = GlobalAppEnv::Instance();
-    if (env == nullptr)
-        return false;
-
     m_ConnectStopRetry = false;
 
-    const auto& f = std::bind(&Client::ThRecvLoop, this, phs::_1, phs::_2);
-    m_RecvThread = thread(f, env->serverIp, env->serverPort);
+    const auto func = std::bind(&Client::ThRecvLoop, this, phs::_1, phs::_2);
+    const auto env = GlobalAppEnv::Instance();
+    m_RecvThread = thread(func, env->serverIp, env->serverPort);
 
     return true;
 }
