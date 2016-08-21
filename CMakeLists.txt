@@ -227,7 +227,7 @@ endif()
 if(WithPluginVorbisEncoder)
     file(GLOB SRC_VORBIS_ENCODER plugins/vorbis/encoder/*)
     add_library(VorbisEncoder SHARED ${SRC_VORBIS_ENCODER})
-    target_link_libraries(VorbisEncoder -lvorbisfile -lvorbisenc)
+    target_link_libraries(VorbisEncoder -lvorbis -lvorbisfile -lvorbisenc -logg)
 endif()
 
 # Wma plugin
