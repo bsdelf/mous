@@ -177,21 +177,21 @@ endif()
 
 # OSS plugin
 if(WithPluginOssRenderer)
-    file(GLOB SRC_OSS_RENDERER plugins/OssRenderer/*)
+    file(GLOB SRC_OSS_RENDERER plugins/oss/*)
     add_library(OssRenderer SHARED ${SRC_OSS_RENDERER})
     target_link_libraries(OssRenderer)
 endif()
 
 # ALSA plugin
 if(WithPluginAlsaRenderer)
-    file(GLOB SRC_ALSA_RENDERER plugins/AlsaRenderer/*)
+    file(GLOB SRC_ALSA_RENDERER plugins/alsa/*)
     add_library(AlsaRenderer SHARED ${SRC_ALSA_RENDERER})
     target_link_libraries(AlsaRenderer -lasound)
 endif()
 
 # AO plugin
 if(WithPluginAoRenderer)
-    file(GLOB SRC_AO_RENDERER plugins/AoRenderer/*)
+    file(GLOB SRC_AO_RENDERER plugins/libao/*)
     add_library(AoRenderer SHARED ${SRC_AO_RENDERER})
     target_link_libraries(AoRenderer -lao)
 endif()
@@ -278,14 +278,14 @@ endif()
 
 # Flac plugin
 if(WithPluginFlacDecoder)
-    file(GLOB SRC_FLAC_DECODER plugins/FlacDecoder/*)
+    file(GLOB SRC_FLAC_DECODER plugins/flac/*)
     add_library(FlacDecoder SHARED ${SRC_FLAC_DECODER})
     target_link_libraries(FlacDecoder -lFLAC)
 endif()
 
 # WavPack plugin
 if(WithPluginWvDecoder)
-    file(GLOB SRC_WV_DECODER plugins/WvDecoder/*)
+    file(GLOB SRC_WV_DECODER plugins/wvpack/*)
     add_library(WvDecoder SHARED ${SRC_WV_DECODER})
     target_link_libraries(WvDecoder -lwavpack)
 endif()
@@ -299,19 +299,19 @@ endif()
 
 # FAAD & FAAC plugin
 if(WithPluginFaadDecoder)
-    file(GLOB SRC_FAAD_DECODER plugins/FaadDecoder/*)
+    file(GLOB SRC_FAAD_DECODER plugins/faad/*)
     add_library(FaadDecoder SHARED ${SRC_FAAD_DECODER})
     target_link_libraries(FaadDecoder -lfaad -lmp4ff)
 endif()
 if(WithPluginFaacEncoder)
-    file(GLOB SRC_FAAC_ENCODER plugins/FaacEncoder/*)
+    file(GLOB SRC_FAAC_ENCODER plugins/faac/*)
     add_library(FaacEncoder SHARED ${SRC_FAAC_ENCODER})
     target_link_libraries(FaacEncoder -lfaac -lmp4v2)
 endif()
 
 # TagLib plugin
 if(WithPluginTagLibParser)
-    file(GLOB SRC_TAGLIB_PARSER plugins/TagLibParser/*)
+    file(GLOB SRC_TAGLIB_PARSER plugins/taglib/*)
     add_library(TagLibParser SHARED ${SRC_TAGLIB_PARSER})
     if(IS_FREEBSD OR IS_APPLE)
         target_link_libraries(TagLibParser -ltag -liconv)
@@ -322,7 +322,7 @@ endif()
 
 # CuePack plugin
 if(WithPluginCuePack)
-    file(GLOB SRC_CUEPACK plugins/CuePack/*)
+    file(GLOB SRC_CUEPACK plugins/libcue/*)
     add_library(CuePack SHARED ${SRC_CUEPACK})
     target_link_libraries(CuePack -lcue)
 endif()
