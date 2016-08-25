@@ -1,5 +1,4 @@
-#ifndef HELPVIEW_H
-#define HELPVIEW_H
+#pragma once
 
 #include "IView.h"
 
@@ -27,4 +26,3 @@ private:
     int m_LineCount;
 };
 
-#endif

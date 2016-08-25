@@ -1,5 +1,4 @@
-#ifndef APPENV_H
-#define APPENV_H
+#pragma once
 
 #include <string>
 #include <scx/Singleton.hpp>
@@ -31,4 +30,3 @@ private:
 
 typedef scx::Singleton<AppEnv> GlobalAppEnv;
 
-#endif

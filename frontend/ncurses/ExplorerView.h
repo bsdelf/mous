@@ -1,5 +1,4 @@
-#ifndef EXPLORERVIEW_H
-#define EXPLORERVIEW_H
+#pragma once
 
 #include "IView.h"
 
@@ -69,4 +68,3 @@ private:
     std::set<std::string> m_Suffixes;
 };
 
-#endif

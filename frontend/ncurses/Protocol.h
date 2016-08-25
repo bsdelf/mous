@@ -1,5 +1,4 @@
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#pragma once
 
 #include <inttypes.h>
 #include <string.h>
@@ -199,4 +198,3 @@ typedef Playlist::e EmPlaylist;
 
 //#pragma pack(pop)
 
-#endif

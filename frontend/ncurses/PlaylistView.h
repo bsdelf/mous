@@ -1,5 +1,4 @@
-#ifndef PLAYLISTVIEW_H
-#define PLAYLISTVIEW_H
+#pragma once
 
 #include <deque>
 #include <mutex>
@@ -78,4 +77,3 @@ private:
     ClientPlaylistHandler* m_PlaylistHandler = nullptr;
 };
 
-#endif

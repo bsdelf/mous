@@ -1,5 +1,4 @@
-#ifndef CLIENTPLAYERHANDLER_H
-#define CLIENTPLAYERHANDLER_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -105,4 +104,3 @@ private:
     TaskSchedule m_SyncSchedule;
 };
 
-#endif

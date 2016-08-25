@@ -1,5 +1,4 @@
-#ifndef BGWINDOW_H
-#define BGWINDOW_H
+#pragma once
 
 #include <ncurses.h>
 
@@ -53,4 +52,3 @@ private:
     WINDOW* m_Wnd = nullptr;
 };
 
-#endif

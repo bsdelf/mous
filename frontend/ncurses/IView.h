@@ -1,5 +1,4 @@
-#ifndef IVIEW_H
-#define IVIEW_H
+#pragma once
 
 #include <ncurses.h>
 
@@ -313,4 +312,3 @@ LABEL_END:
     }
 };
 
-#endif

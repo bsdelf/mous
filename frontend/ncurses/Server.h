@@ -1,5 +1,4 @@
-#ifndef SERVER_H
-#define SERVER_H
+#pragma once
 
 #include <set>
 #include <thread>
@@ -31,4 +30,3 @@ private:
     set<Session*> m_SessionSet;
 };
 
-#endif

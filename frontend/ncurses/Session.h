@@ -1,5 +1,4 @@
-#ifndef SESSION_H
-#define SESSION_H
+#pragma once
 
 #include <scx/Socket.hpp>
 #include <scx/BufObj.hpp>
@@ -70,4 +69,3 @@ private:
     string m_IfNotUtf8;
 };
 
-#endif

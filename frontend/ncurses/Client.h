@@ -1,5 +1,4 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -66,4 +65,3 @@ private:
     Signal<void (const std::vector<std::string>&)> m_SigSuffixes;
 };
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef MAINUI_H
-#define MAINUI_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -51,4 +50,3 @@ private:
     PrivateMainUi* d;
 };
 
-#endif

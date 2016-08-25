@@ -1,5 +1,4 @@
-#ifndef SERVERCONTEXT_H
-#define SERVERCONTEXT_H
+#pragma once
 
 #include <vector>
 #include <mutex>
@@ -61,4 +60,3 @@ private:
     void SlotFinished();
 };
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef CLIENTPLAYLISTHANDLER_H
-#define CLIENTPLAYLISTHANDLER_H
+#pragma once
 
 #include <functional>
 #include <deque>
@@ -85,4 +84,3 @@ private:
     Signal<void (int)> m_SigClear;
 };
 
-#endif

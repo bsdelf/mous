@@ -1,5 +1,4 @@
-#ifndef STATUSVIEW_H
-#define STATUSVIEW_H
+#pragma once
 
 #include <mutex>
 
@@ -52,4 +51,3 @@ private:
     ClientPlayerHandler::PlayerStatus m_PlayerStatus;
 };
 
-#endif
