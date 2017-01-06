@@ -17,8 +17,11 @@ private:
 public:
     Signal() = default;
     ~Signal() = default;
+
     Signal(const Signal&) = delete;
+    Signal(Signal&&) = delete;
     Signal& operator=(const Signal&) = delete;
+    Signal& operator=(Signal&&) = delete;
 
     template<class... Args>
     void Connect(Args... args) {
