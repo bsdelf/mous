@@ -25,7 +25,6 @@ public:
     void Stop();
 
 private:
-    void ThRecvLoop();
     void HandleApp(char*, int);
     void HandlePlayer(char*, int);
     void HandlePlaylist(char*, int);

@@ -18,12 +18,12 @@ namespace phs = std::placeholders;
 
 Client::Client()
 {
-    m_PlaylistHandler.fnGetPayloadBuffer = 
-        m_PlayerHandler.fnGetPayloadBuffer = 
+    m_PlaylistHandler.fnGetPayloadBuffer =
+    m_PlayerHandler.fnGetPayloadBuffer =
         std::bind(&Client::GetPayloadBuffer, this, phs::_1, phs::_2);
 
-    m_PlayerHandler.fnSendOut = 
-        m_PlaylistHandler.fnSendOut = 
+    m_PlayerHandler.fnSendOut =
+    m_PlaylistHandler.fnSendOut =
         std::bind(&Client::SendOut, this);
 }
 
@@ -35,9 +35,87 @@ bool Client::Run()
 {
     m_ConnectStopRetry = false;
 
-    const auto func = std::bind(&Client::ThRecvLoop, this, phs::_1, phs::_2);
     const auto env = GlobalAppEnv::Instance();
-    m_RecvThread = thread(func, env->serverIp, env->serverPort);
+
+    m_RecvThread = thread([this](const string& ip, int port) {
+        for (int retryCount = 0; ; ++retryCount) {
+            m_SigTryConnect();
+
+            if (m_Socket.Connect(InetAddr(ip, port))) {
+                break;
+            }
+
+            if (retryCount < m_ConnectMaxRetry && !m_ConnectStopRetry) {
+                m_Socket = TcpSocket();
+                ::usleep(m_ConnectRetryInterval*1000);
+            } else {
+                ::perror("Failed to connect");
+                return;
+            }
+        }
+
+        m_SigConnected();
+
+        vector<char> headerBuf(Header::Size());
+        vector<char> payloadBuf;
+        Header header(Group::None, -1);
+        char* buf;
+        int size;
+
+        while (true) {
+            if (!m_Socket.RecvN(headerBuf.data(), headerBuf.size()))
+                break;
+            if (!header.Read(headerBuf.data()))
+                continue;
+            if (header.payloadSize <= 0)
+                continue;
+
+            payloadBuf.resize(header.payloadSize);
+            if (payloadBuf.size() > PAYLOADBUF_MAX_KEEP && (size_t)header.payloadSize <= PAYLOADBUF_MAX_KEEP)
+                payloadBuf.shrink_to_fit();
+
+            buf = payloadBuf.data();
+            size = payloadBuf.size();
+            if (!m_Socket.RecvN(buf, size))
+                break;
+
+            switch (header.group) {
+                case Group::App:
+                {
+                    if (size < (int)sizeof(char))
+                        return;
+
+                    char op = Op::App::None;
+                    BufObj bufObj(buf);
+                    bufObj >> op;
+                    switch (op) {
+                        case Op::App::Suffixes:
+                            {
+                                vector<string> list;
+                                bufObj >> list;
+                                m_SigSuffixes(list);
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+                    break;
+
+                case Group::Player:
+                    m_PlayerHandler.Handle(buf, size);
+                    break;
+
+                case Group::Playlist:
+                    m_PlaylistHandler.Handle(buf, size);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }, env->serverIp, env->serverPort);
 
     return true;
 }
@@ -90,87 +168,6 @@ Signal<void ()>& Client::SigTryConnect()
 Signal<void ()>& Client::SigConnected()
 {
     return m_SigConnected;
-}
-
-void Client::ThRecvLoop(const string& ip, int port)
-{
-    for (int retryCount = 0; ; ++retryCount) {
-        m_SigTryConnect();
-
-        if (m_Socket.Connect(InetAddr(ip, port))) {
-            break;
-        }
-
-        if (retryCount < m_ConnectMaxRetry && !m_ConnectStopRetry) {
-            m_Socket = TcpSocket();
-            ::usleep(m_ConnectRetryInterval*1000);
-        } else {
-            ::perror("Failed to connect");
-            return;
-        }
-    }
-
-    m_SigConnected();
-
-    vector<char> headerBuf(Header::Size());
-    vector<char> payloadBuf;
-    Header header(Group::None, -1);
-    char* buf;
-    int size;
-
-    while (true) {
-        if (!m_Socket.RecvN(headerBuf.data(), headerBuf.size()))
-            break;
-        if (!header.Read(headerBuf.data()))
-            continue;
-        if (header.payloadSize <= 0)
-            continue;
-
-        payloadBuf.resize(header.payloadSize);
-        if (payloadBuf.size() > PAYLOADBUF_MAX_KEEP && (size_t)header.payloadSize <= PAYLOADBUF_MAX_KEEP)
-            payloadBuf.shrink_to_fit();
-
-        buf = payloadBuf.data();
-        size = payloadBuf.size();
-        if (!m_Socket.RecvN(buf, size))
-            break;
-
-        switch (header.group) {
-            case Group::App:
-            {
-                if (size < (int)sizeof(char))
-                    return;
-
-                char op = Op::App::None;
-                BufObj bufObj(buf);
-                bufObj >> op;
-                switch (op) {
-                    case Op::App::Suffixes:
-                        {
-                            vector<string> list;
-                            bufObj >> list;
-                            m_SigSuffixes(list);
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-                break;
-
-            case Group::Player:
-                m_PlayerHandler.Handle(buf, size);
-                break;
-
-            case Group::Playlist:
-                m_PlaylistHandler.Handle(buf, size);
-                break;
-
-            default:
-                break;
-        }
-    }
 }
 
 char* Client::GetPayloadBuffer(char group, int payloadSize)

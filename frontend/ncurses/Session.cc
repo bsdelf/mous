@@ -56,7 +56,55 @@ bool Session::Run(const TcpSocket& socket, int notifyFd)
     m_GotReqStopService = false;
     m_Socket = socket;
     m_NotifyFd = notifyFd;
-    m_RecvThread = thread(std::bind(&Session::ThRecvLoop, this));
+
+    m_RecvThread = thread([this]() {
+        vector<char> headerBuf(Header::Size());
+        vector<char> payloadBuf;
+        Header header(Group::None, -1);
+        char* buf;
+        int len;
+
+        NotifySupportedSuffixes();
+
+        while (!m_GotReqStopService) {
+            if (!m_Socket.RecvN(headerBuf.data(), headerBuf.size()))
+                break;
+            if (!header.Read(headerBuf.data()))
+                break;
+            if (header.payloadSize <= 0)
+                continue;
+
+            payloadBuf.resize(header.payloadSize);
+            if (payloadBuf.size() > PAYLOADBUF_MAX_KEEP && (size_t)header.payloadSize <= PAYLOADBUF_MAX_KEEP)
+                payloadBuf.shrink_to_fit();
+
+            buf = payloadBuf.data();
+            len = header.payloadSize;
+            if (!m_Socket.RecvN(buf, len))
+                break;
+
+            switch (header.group) {
+                case Group::App:
+                    HandleApp(buf, len);
+                    break;
+
+                case Group::Player:
+                    HandlePlayer(buf, len);
+                    break;
+
+                case Group::Playlist:
+                    HandlePlaylist(buf, len);
+                    break;
+            }
+        }
+
+        if (!m_GotReqStopService) {
+            ptr_t ptr = reinterpret_cast<ptr_t>(this);
+            write(m_NotifyFd, "q", 1);
+            write(m_NotifyFd, &ptr, sizeof(ptr));
+        }
+    });
+
     return true;
 }
 
@@ -65,55 +113,6 @@ void Session::Stop()
     m_Socket.Shutdown();
     if (m_RecvThread.joinable())
         m_RecvThread.join();
-}
-
-void Session::ThRecvLoop()
-{
-    vector<char> headerBuf(Header::Size());
-    vector<char> payloadBuf;
-    Header header(Group::None, -1);
-    char* buf;
-    int len;
-
-    NotifySupportedSuffixes();
-
-    while (!m_GotReqStopService) {
-        if (!m_Socket.RecvN(headerBuf.data(), headerBuf.size()))
-            break;
-        if (!header.Read(headerBuf.data()))
-            break;
-        if (header.payloadSize <= 0)
-            continue;
-
-        payloadBuf.resize(header.payloadSize);
-        if (payloadBuf.size() > PAYLOADBUF_MAX_KEEP && (size_t)header.payloadSize <= PAYLOADBUF_MAX_KEEP)
-            payloadBuf.shrink_to_fit();
-
-        buf = payloadBuf.data();
-        len = header.payloadSize;
-        if (!m_Socket.RecvN(buf, len))
-            break;
-
-        switch (header.group) {
-            case Group::App:
-                HandleApp(buf, len);
-                break;
-
-            case Group::Player:
-                HandlePlayer(buf, len);
-                break;
-
-            case Group::Playlist:
-                HandlePlaylist(buf, len);
-                break;
-        }
-    }
-
-    if (!m_GotReqStopService) {
-        ptr_t ptr = reinterpret_cast<ptr_t>(this); 
-        write(m_NotifyFd, "q", 1);
-        write(m_NotifyFd, &ptr, sizeof(ptr));
-    }
 }
 
 void Session::NotifySupportedSuffixes()

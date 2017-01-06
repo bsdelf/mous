@@ -41,8 +41,6 @@ public:
     }
 
 private:
-    void ThRecvLoop(const string&, int);
-
     char* GetPayloadBuffer(char, int);
     inline void SendOut();
 
