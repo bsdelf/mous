@@ -24,8 +24,9 @@ IPlayer* IPlayer::Create()
 
 void IPlayer::Free(IPlayer* player)
 {
-    if (player != nullptr)
+    if (player != nullptr) {
         delete player;
+    }
 }
 
 Player::Player()
@@ -48,10 +49,12 @@ Player::~Player()
     m_SemWakeDecoder.Post();
     m_SemWakeRenderer.Post();
 
-    if (m_ThreadForDecoder.joinable())
+    if (m_ThreadForDecoder.joinable()) {
         m_ThreadForDecoder.join();
-    if (m_ThreadForRenderer.joinable())
+    }
+    if (m_ThreadForRenderer.joinable()) {
         m_ThreadForRenderer.join();
+    }
 
     m_UnitBuffers.ClearBuffer();
 
@@ -65,8 +68,9 @@ EmPlayerStatus Player::Status() const
 
 void Player::RegisterDecoderPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent->Type() == PluginType::Decoder)
+    if (pAgent->Type() == PluginType::Decoder) {
         AddDecoderPlugin(pAgent);
+    }
 }
 
 void Player::RegisterDecoderPlugin(vector<const IPluginAgent*>& agents)
@@ -78,8 +82,9 @@ void Player::RegisterDecoderPlugin(vector<const IPluginAgent*>& agents)
 
 void Player::RegisterRendererPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent->Type() == PluginType::Renderer)
+    if (pAgent->Type() == PluginType::Renderer) {
         SetRendererPlugin(pAgent);
+    }
 }
 
 void Player::UnregisterPlugin(const IPluginAgent* pAgent)
@@ -158,8 +163,9 @@ void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
 
 void Player::SetRendererPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent == nullptr || m_RendererPlugin != nullptr)
+    if (pAgent == nullptr || m_RendererPlugin != nullptr) {
         return;
+    }
 
     m_RendererPlugin = pAgent;
     m_Renderer = (IRenderer*)pAgent->CreateObject();
@@ -168,8 +174,9 @@ void Player::SetRendererPlugin(const IPluginAgent* pAgent)
 
 void Player::UnsetRendererPlugin(const IPluginAgent* pAgent)
 {
-    if (pAgent != m_RendererPlugin || m_RendererPlugin == nullptr)
+    if (pAgent != m_RendererPlugin || m_RendererPlugin == nullptr) {
         return;
+    }
 
     m_Renderer->Close();
     m_RendererPlugin->FreeObject(m_Renderer);
@@ -214,8 +221,9 @@ int Player::Volume() const
 
 void Player::SetVolume(int level)
 {
-    if (m_Renderer != nullptr)
+    if (m_Renderer != nullptr) {
         m_Renderer->SetVolumeLevel(level);
+    }
 }
 
 EmErrorCode Player::Open(const string& path)
@@ -229,8 +237,9 @@ EmErrorCode Player::Open(const string& path)
         return ErrorCode::PlayerNoDecoder;
     }
 
-    if (m_Renderer == nullptr)
+    if (m_Renderer == nullptr) {
         return ErrorCode::PlayerNoRenderer;
+    }
 
     EmErrorCode err = m_Decoder->Open(path);
     if (err != ErrorCode::Ok) {
@@ -280,8 +289,9 @@ EmErrorCode Player::Open(const string& path)
 
 void Player::Close()
 {
-    if (m_Status == PlayerStatus::Closed)
+    if (m_Status == PlayerStatus::Closed) {
         return;
+    }
 
     Pause();
 
@@ -312,13 +322,15 @@ void Player::Play(uint64_t msBegin, uint64_t msEnd)
     uint64_t end = 0;
 
     beg = m_UnitPerMs * msBegin;
-    if (beg > total)
+    if (beg > total) {
         beg = total;
+    }
 
     if (msEnd != (uint64_t)-1) {
         end = m_UnitPerMs * msEnd;
-        if (end > total)
+        if (end > total) {
             end = total;
+        }
     } else {
         end = total;
     }
@@ -354,8 +366,9 @@ void Player::PlayRange(uint64_t beg, uint64_t end)
 
 void Player::Pause()
 {
-    if (m_Status == PlayerStatus::Paused)
+    if (m_Status == PlayerStatus::Paused) {
         return;
+    }
 
     // suspend renderer
     if (!m_SuspendRenderer) {
@@ -442,10 +455,11 @@ void Player::DoSeekTime(uint64_t msPos)
 
 void Player::DoSeekUnit(uint64_t unit)
 {
-    if (unit < m_UnitBeg) 
+    if (unit < m_UnitBeg) {
         unit = m_UnitBeg;
-    else if (unit > m_UnitEnd)
+    } else if (unit > m_UnitEnd) {
         unit = m_UnitEnd;
+    }
 
     m_Decoder->SetUnitIndex(unit);
 
@@ -566,8 +580,9 @@ void Player::ThDecoder()
 {
     while (true) {
         m_SemWakeDecoder.Wait();
-        if (m_StopDecoder)
+        if (m_StopDecoder) {
             break;
+        }
 
         m_SemDecoderBegin.Clear();
         m_SemDecoderEnd.Clear();
@@ -575,12 +590,14 @@ void Player::ThDecoder()
         m_SemDecoderBegin.Post();
 
         for (UnitBuffer* buf = nullptr; ; ) {
-            if (m_PauseDecoder)
+            if (m_PauseDecoder) {
                 break;
+            }
 
             buf = m_UnitBuffers.TakeFree();
-            if (m_SuspendDecoder)
+            if (m_SuspendDecoder) {
                 break;
+            }
 
             assert(buf != nullptr);
             assert(buf->data != nullptr);
@@ -603,8 +620,9 @@ void Player::ThRenderer()
 {
     while (true) {
         m_SemWakeRenderer.Wait();
-        if (m_StopRenderer)
+        if (m_StopRenderer) {
             break;
+        }
 
         m_SemRendererBegin.Clear();
         m_SemRendererEnd.Clear();
@@ -613,15 +631,17 @@ void Player::ThRenderer()
 
         for (UnitBuffer* buf = nullptr; ; ) {
             buf = m_UnitBuffers.TakeData();
-            if (m_SuspendRenderer)
+            if (m_SuspendRenderer) {
                 break;
+            }
 
             assert(buf != nullptr);
             assert(buf->data != nullptr);
 
             // avoid busy write
-            if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok)
+            if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok) {
                 ::usleep(10*1000);
+            }
             m_RendererIndex += buf->unitCount;
             m_UnitBuffers.RecycleData();
 
