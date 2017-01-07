@@ -45,7 +45,7 @@ EmErrorCode FdkDecoder::Open(const string& url)
 EmErrorCode FdkDecoder::OpenMP4(const string& url)
 {
     // mp4v2
-    m_mp4 = MP4Read(url.c_str(), 0);
+    m_mp4 = MP4Read(url.c_str());
     if (m_mp4 == nullptr) {
         return ErrorCode::DecoderFailedToOpen;
     }
