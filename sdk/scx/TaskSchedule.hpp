@@ -69,7 +69,51 @@ public:
 
         m_work = true;
         m_cancel = false;
-        m_thread = std::thread(std::bind(&TaskSchedule::Loop, this));
+
+        m_thread = std::thread([this] {
+            Task dummy;
+            while (m_work) {
+                struct timeval tv = { 0L, 2L };
+                if (::select(0, nullptr, nullptr, nullptr, &tv) == 0) {
+                    // pick up expired tasks
+                    dummy.attime = CurrentTimeVal();
+                    auto end = std::lower_bound(
+                        m_tasks.begin(), m_tasks.end(), &dummy, Task::NotLater);
+                    TaskList expired(m_tasks.begin(), end);
+                    m_tasks.erase(m_tasks.begin(), end);
+
+                    for (Task* task: expired) {
+                        if (!m_work)
+                            return;
+
+                        if (!task->canceled && !m_cancel)
+                            task->callback();
+
+                        if (task->oneshot || task->canceled || m_cancel) {
+                            delete task;
+                            --m_count;
+                            std::lock_guard<std::mutex> elocker(m_emutex);
+                            if (m_tasks.empty() && m_pendings.empty())
+                                m_econd.notify_all();
+                        } else {
+                            RefreshTask(task);
+                            InsertTask(task);
+                        }
+                    }
+                } else {
+                    // fatal error occurs
+                    break;
+                }
+
+                // take all pendings
+                std::lock_guard<std::mutex> plocker(m_pmutex);
+                for (Task* task: m_pendings) {
+                    RefreshTask(task);
+                    InsertTask(task);
+                }
+                m_pendings.clear();
+            }
+        });
     }
 
     void Stop()
@@ -170,52 +214,6 @@ private:
         auto pos = std::lower_bound(
             m_tasks.begin(), m_tasks.end(), task, Task::IsEarlier);
         m_tasks.insert(pos, task);
-    }
-
-    void Loop()
-    {
-        Task dummy;
-        while (m_work) {
-            struct timeval tv = { 0L, 2L };
-            if (::select(0, nullptr, nullptr, nullptr, &tv) == 0) {
-                // pick up expired tasks
-                dummy.attime = CurrentTimeVal();
-                auto end = std::lower_bound(
-                    m_tasks.begin(), m_tasks.end(), &dummy, Task::NotLater);
-                TaskList expired(m_tasks.begin(), end);
-                m_tasks.erase(m_tasks.begin(), end);
-
-                for (Task* task: expired) {
-                    if (!m_work)
-                        return;
-
-                    if (!task->canceled && !m_cancel)
-                        task->callback();
-
-                    if (task->oneshot || task->canceled || m_cancel) {
-                        delete task;
-                        --m_count;
-                        std::lock_guard<std::mutex> elocker(m_emutex);
-                        if (m_tasks.empty() && m_pendings.empty())
-                            m_econd.notify_all();
-                    } else {
-                        RefreshTask(task);
-                        InsertTask(task);
-                    }
-                }
-            } else {
-                // fatal error occurs
-                break;
-            }
-
-            // take all pendings
-            std::lock_guard<std::mutex> plocker(m_pmutex);
-            for (Task* task: m_pendings) {
-                RefreshTask(task);
-                InsertTask(task);
-            }
-            m_pendings.clear();
-        }
     }
 
 private:
