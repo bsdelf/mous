@@ -100,7 +100,20 @@ void ClientPlayerHandler::StartSync()
 {
     m_Status.playing = false;
     m_SyncSchedule.Start();
-    m_SyncSchedule.Add(std::bind(&ClientPlayerHandler::OnSyncTask, this), 200);
+    m_SyncSchedule.Add([this] {
+        unique_lock<mutex> locker(m_MutexWaitSyncReply);
+
+        if (m_WaitSyncReply) {
+            return;
+        }
+        m_WaitSyncReply = true;
+
+        locker.unlock();
+
+        m_SigStatus(m_Status);
+
+        SEND_PACKET(<< (char)Op::Player::Sync << (char)(m_Status.playing ? 1 : 0));
+    }, 200);
 }
 
 void ClientPlayerHandler::StopSync()
@@ -156,19 +169,4 @@ void ClientPlayerHandler::PlayNext()
 void ClientPlayerHandler::PlayPrevious()
 {
     SEND_PACKET(<< (char)Op::Player::PlayNext << (char)-1);
-}
-
-void ClientPlayerHandler::OnSyncTask()
-{
-    unique_lock<mutex> locker(m_MutexWaitSyncReply);
-
-    if (m_WaitSyncReply)
-        return;
-    m_WaitSyncReply = true;
-
-    locker.unlock();
-
-    m_SigStatus(m_Status);
-
-    SEND_PACKET(<< (char)Op::Player::Sync << (char)(m_Status.playing ? 1 : 0));
 }

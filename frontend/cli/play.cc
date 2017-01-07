@@ -48,18 +48,6 @@ void on_finished()
 
 void do_playing()
 {
-    while (PLAYER != nullptr && !QUIT) {
-        PLAYER_MUTEX.lock();
-        uint64_t ms = PLAYER->OffsetMs();
-        int32_t rate = PLAYER->BitRate();
-        PLAYER_MUTEX.unlock();
-
-        printf("\r%d kbps %02d:%02d.%d ",
-                rate, (int)(ms/1000/60), (int)(ms/1000%60), (int)(ms%1000));
-        fflush(stdout);
-
-        usleep(200*1000);
-    }
 }
 
 int cmd_play(int argc, char* argv[])
@@ -119,7 +107,20 @@ int cmd_play(int argc, char* argv[])
         printf("[n(next)/q(quit)/p(pause)/r(replay)] [enter]\n");
 
         on_finished();
-        thread th = thread(std::bind(&do_playing));
+        thread th = thread([] {
+            while (PLAYER != nullptr && !QUIT) {
+                PLAYER_MUTEX.lock();
+                uint64_t ms = PLAYER->OffsetMs();
+                int32_t rate = PLAYER->BitRate();
+                PLAYER_MUTEX.unlock();
+
+                printf("\r%d kbps %02d:%02d.%d ",
+                        rate, (int)(ms/1000/60), (int)(ms/1000%60), (int)(ms%1000));
+                fflush(stdout);
+
+                usleep(200*1000);
+            }
+        });
 
         /*
         bool paused;

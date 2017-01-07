@@ -19,12 +19,14 @@ namespace phs = std::placeholders;
 Client::Client()
 {
     m_PlaylistHandler.fnGetPayloadBuffer =
-    m_PlayerHandler.fnGetPayloadBuffer =
-        std::bind(&Client::GetPayloadBuffer, this, phs::_1, phs::_2);
+    m_PlayerHandler.fnGetPayloadBuffer = [this](char group, int payloadSize) {
+        return GetPayloadBuffer(group, payloadSize);
+    };
 
     m_PlayerHandler.fnSendOut =
-    m_PlaylistHandler.fnSendOut =
-        std::bind(&Client::SendOut, this);
+    m_PlaylistHandler.fnSendOut = [this] {
+        SendOut();
+    };
 }
 
 Client::~Client()

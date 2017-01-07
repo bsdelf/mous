@@ -83,9 +83,6 @@ public:
     }
 
 private:
-    void OnSyncTask();
-
-private:
     std::function<char* (char, int)> fnGetPayloadBuffer;
     std::function<void (void)> fnSendOut;
 

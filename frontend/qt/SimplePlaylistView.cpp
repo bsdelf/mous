@@ -382,8 +382,9 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
             qDebug() << files[i];
         }
 
-        const auto& f = std::bind(&SimplePlaylistView::LoadMediaItem, this, files);
-        std::thread(f).detach();
+        std::thread([this, files] {
+            LoadMediaItem(files);
+        }).detach();
     } else if (text.isEmpty()) {
         QList<int> rowList = PickSelectedRows();
         qSort(rowList);
@@ -453,8 +454,9 @@ void SimplePlaylistView::SlotAppend()
     m_PrevMediaFilePath = pathList.first();
 
     // Async load
-    const auto& f = std::bind(&SimplePlaylistView::LoadMediaItem, this, pathList);
-    std::thread(f).detach();
+    std::thread([this, pathList] {
+        LoadMeidaItem(pathList);
+    }).detach();
 }
 
 void SimplePlaylistView::SlotTagging()

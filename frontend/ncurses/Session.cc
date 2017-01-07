@@ -57,7 +57,7 @@ bool Session::Run(const TcpSocket& socket, int notifyFd)
     m_Socket = socket;
     m_NotifyFd = notifyFd;
 
-    m_RecvThread = thread([this]() {
+    m_RecvThread = thread([this] {
         vector<char> headerBuf(Header::Size());
         vector<char> payloadBuf;
         Header header(Group::None, -1);
