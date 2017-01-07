@@ -14,9 +14,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 #==== Library path ====#
 include_directories(SYSTEM /usr/local/include)
-include_directories(SYSTEM /opt/local/include)
 link_directories(/usr/local/lib)
-link_directories(/opt/local/lib)
 include_directories(BEFORE sdk)
 include_directories(BEFORE contrib)
 
