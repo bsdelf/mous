@@ -87,9 +87,6 @@ private:
     inline void DoSeekTime(uint64_t msPos);
     inline void DoSeekUnit(uint64_t unit);
 
-    void ThDecoder();
-    void ThRenderer();
-
 private:
     struct UnitBuffer
     {

@@ -28,9 +28,6 @@ public:
     virtual bool IsFinished() const;
 
 private:
-    void DoConvert(const string& output);
-
-private:
     MediaItem m_Item;
     const IPluginAgent* m_DecAgent;
     const IPluginAgent* m_EncAgent;

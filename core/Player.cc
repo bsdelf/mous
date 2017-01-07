@@ -33,11 +33,87 @@ Player::Player()
 {
     m_UnitBuffers.AllocBuffer(5);
 
-    const auto& f1 = std::bind(&Player::ThDecoder, this);
-    m_ThreadForDecoder = std::thread(f1);
+    m_ThreadForDecoder = std::thread([this]() {
+        while (true) {
+            m_SemWakeDecoder.Wait();
+            if (m_StopDecoder) {
+                break;
+            }
 
-    const auto& f2 = std::bind(&Player::ThRenderer, this);
-    m_ThreadForRenderer = std::thread(f2);
+            m_SemDecoderBegin.Clear();
+            m_SemDecoderEnd.Clear();
+
+            m_SemDecoderBegin.Post();
+
+            for (UnitBuffer* buf = nullptr; ; ) {
+                if (m_PauseDecoder) {
+                    break;
+                }
+
+                buf = m_UnitBuffers.TakeFree();
+                if (m_SuspendDecoder) {
+                    break;
+                }
+
+                assert(buf != nullptr);
+                assert(buf->data != nullptr);
+
+                m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
+                m_DecoderIndex += buf->unitCount;
+                m_UnitBuffers.RecycleFree();
+
+                if (m_DecoderIndex >= m_UnitEnd) {
+                    m_SuspendDecoder = true;
+                    break;
+                }
+            }
+
+            m_SemDecoderEnd.Post();
+        }
+    });
+
+    m_ThreadForRenderer = std::thread([this]() {
+        while (true) {
+            m_SemWakeRenderer.Wait();
+            if (m_StopRenderer) {
+                break;
+            }
+
+            m_SemRendererBegin.Clear();
+            m_SemRendererEnd.Clear();
+
+            m_SemRendererBegin.Post();
+
+            for (UnitBuffer* buf = nullptr; ; ) {
+                buf = m_UnitBuffers.TakeData();
+                if (m_SuspendRenderer) {
+                    break;
+                }
+
+                assert(buf != nullptr);
+                assert(buf->data != nullptr);
+
+                // avoid busy write
+                if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok) {
+                    ::usleep(10*1000);
+                }
+                m_RendererIndex += buf->unitCount;
+                m_UnitBuffers.RecycleData();
+
+                if (m_RendererIndex >= m_UnitEnd) {
+                    m_SuspendRenderer = true;
+                    break;
+                }
+            }
+
+            m_SemRendererEnd.Post();
+
+            if (m_RendererIndex >= m_UnitEnd) {
+                m_Status = PlayerStatus::Stopped;
+                std::thread([this]() { m_SigFinished(); }).detach();
+            }
+        }
+    });
 }
 
 Player::~Player()
@@ -576,86 +652,3 @@ Signal<void (void)>* Player::SigFinished()
     return &m_SigFinished;
 }
 
-void Player::ThDecoder()
-{
-    while (true) {
-        m_SemWakeDecoder.Wait();
-        if (m_StopDecoder) {
-            break;
-        }
-
-        m_SemDecoderBegin.Clear();
-        m_SemDecoderEnd.Clear();
-
-        m_SemDecoderBegin.Post();
-
-        for (UnitBuffer* buf = nullptr; ; ) {
-            if (m_PauseDecoder) {
-                break;
-            }
-
-            buf = m_UnitBuffers.TakeFree();
-            if (m_SuspendDecoder) {
-                break;
-            }
-
-            assert(buf != nullptr);
-            assert(buf->data != nullptr);
-
-            m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
-            m_DecoderIndex += buf->unitCount;
-            m_UnitBuffers.RecycleFree();
-
-            if (m_DecoderIndex >= m_UnitEnd) {
-                m_SuspendDecoder = true;
-                break;
-            }
-        }
-
-        m_SemDecoderEnd.Post();
-    }
-}
-
-void Player::ThRenderer()
-{
-    while (true) {
-        m_SemWakeRenderer.Wait();
-        if (m_StopRenderer) {
-            break;
-        }
-
-        m_SemRendererBegin.Clear();
-        m_SemRendererEnd.Clear();
-
-        m_SemRendererBegin.Post();
-
-        for (UnitBuffer* buf = nullptr; ; ) {
-            buf = m_UnitBuffers.TakeData();
-            if (m_SuspendRenderer) {
-                break;
-            }
-
-            assert(buf != nullptr);
-            assert(buf->data != nullptr);
-
-            // avoid busy write
-            if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok) {
-                ::usleep(10*1000);
-            }
-            m_RendererIndex += buf->unitCount;
-            m_UnitBuffers.RecycleData();
-
-            if (m_RendererIndex >= m_UnitEnd) {
-                m_SuspendRenderer = true;
-                break;
-            }
-        }
-
-        m_SemRendererEnd.Post();
-
-        if (m_RendererIndex >= m_UnitEnd) {
-            m_Status = PlayerStatus::Stopped;
-            std::thread([this]() { m_SigFinished(); }).detach();
-        }
-    }
-}
