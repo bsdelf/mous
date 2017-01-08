@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 project(MOUS)
 
-#=== Compiler Settings====#
+#=== Compiler Settings ====#
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -114,10 +114,14 @@ endif()
 
 # mous-ncurses
 if(WithFrontendNcurses)
+    find_library(NCURSES NAMES ncursesw ncurses)
+    if(NOT NCURSES)
+        message(FATAL_ERROR "ncurses/ncursesw not found")
+    endif()
     file(GLOB EXE_MOUS_NCURSES frontend/ncurses/*)
     add_executable(mous-ncurses ${EXE_MOUS_NCURSES})
     add_dependencies(mous-ncurses MousCore)
-    set(EXE_MOUS_NCURSES_LIBS MousCore Threads::Threads -lncursesw)
+    set(EXE_MOUS_NCURSES_LIBS MousCore Threads::Threads ${NCURSES})
     if(IS_FREEBSD OR IS_APPLE)
         target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS} -liconv)
     elseif(IS_LINUX)
