@@ -13,10 +13,7 @@ using namespace scx;
 namespace Path {
     const char* const ConfigRoot = "/.config/mous/ncurses/";
     const char* const PluginRoot = "/lib/mous/";
-    const char* const ResourceRoot = "/share/mous/";
-    const char* const ResourcePinYin = "/pinyin/";
 
-    const char* const PyMapFile = "unipy.map";
     const char* const ConfigFile = "config";
     const char* const PidFile = "server.pid";
 
@@ -39,15 +36,9 @@ bool AppEnv::Init()
         return false;
     pluginDir = pluginDirInfo.AbsFilePath();
 
-    FileInfo resDirInfo(string(CMAKE_INSTALL_PREFIX) + Path::ResourceRoot);
-    if (!resDirInfo.Exists() || resDirInfo.Type() != FileType::Directory)
-        return false;
-    resourceDir = resDirInfo.AbsFilePath();
-
     // prepare root dir
     configDir = Env::Get("HOME") + Path::ConfigRoot;
 
-    pyMapFile = resourceDir + Path::ResourcePinYin + Path::PyMapFile;
     configFile = configDir + Path::ConfigFile;
     pidFile = configDir + Path::PidFile;
     contextFile = configDir + Path::ContextFile;

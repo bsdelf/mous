@@ -8,13 +8,11 @@ struct AppEnv
     bool Init();
 
     // environment
-    std::string pluginDir;
-    std::string resourceDir;
     std::string configDir;
+    std::string pluginDir;
 
     std::string configFile;
     std::string pidFile;
-    std::string pyMapFile;
     std::string contextFile;
     std::string playlistFile;
 
