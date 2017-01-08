@@ -56,6 +56,7 @@ option(WithHeadFiles "Install with head files" off)
 
 option(WithPluginOssRenderer "OSS Output" off)
 option(WithPluginAlsaRenderer "ALSA output" off)
+option(WithPluginCoreAudioRenderer "Core Audio Output" off)
 option(WithPluginAoRenderer "AO output" off)
 
 option(WithPluginWavDecoder "WAV Decoder" on)
@@ -175,6 +176,16 @@ if(WithPluginAlsaRenderer)
     file(GLOB ALSA_RENDERER_SRC plugins/alsa/*)
     add_library(AlsaRenderer SHARED ${ALSA_RENDERER_SRC})
     target_link_libraries(AlsaRenderer -lasound)
+endif()
+
+# Core Audio plugin
+if(WithPluginCoreAudioRenderer)
+    find_library(AUDIO_UNIT AudioUnit)
+    find_library(AUDIO_TOOLBOX AudioToolbox)
+    find_library(CORE_AUDIO CoreAudio)
+    file(GLOB_RECURSE CORE_AUDIO_RENDERER_SRC plugins/coreaudio/*)
+    add_library(CoreAudioRenderer SHARED ${CORE_AUDIO_RENDERER_SRC})
+    target_link_libraries(CoreAudioRenderer ${AUDIO_UNIT} ${AUDIO_TOOLBOX} ${CORE_AUDIO})
 endif()
 
 # AO plugin
