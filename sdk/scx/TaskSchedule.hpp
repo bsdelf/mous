@@ -73,7 +73,7 @@ public:
         m_thread = std::thread([this] {
             Task dummy;
             while (m_work) {
-                struct timeval tv = { 0L, 2L };
+                struct timeval tv = { 0L, 20000L };
                 if (::select(0, nullptr, nullptr, nullptr, &tv) == 0) {
                     // pick up expired tasks
                     dummy.attime = CurrentTimeVal();
