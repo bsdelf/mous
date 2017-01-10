@@ -4,27 +4,33 @@ using namespace std;
 #include <unistd.h>
 
 #include "cmus/op.h"
+#include "cmus/mixer.h"
 
 const char* program_name = "CoreAudioRenderer";
 
 CoreAudioRenderer::CoreAudioRenderer()
 {
     op_pcm_ops.init(); 
+    op_mixer_ops.init();
 }
 
 CoreAudioRenderer::~CoreAudioRenderer()
 {
     Close();
     op_pcm_ops.exit();
+    op_mixer_ops.exit();
 }
 
 EmErrorCode CoreAudioRenderer::Open()
 {
+    int maxVol = 0;
+    op_mixer_ops.open(&maxVol);
     return ErrorCode::Ok;
 }
 
 void CoreAudioRenderer::Close()
 {
+    op_mixer_ops.close();
 }
 
 EmErrorCode CoreAudioRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
@@ -53,11 +59,14 @@ EmErrorCode CoreAudioRenderer::Write(const char* buf, uint32_t len)
 
 int CoreAudioRenderer::VolumeLevel() const
 {
-    return 0;
+    int l, r;
+    op_mixer_ops.get_volume(&l, &r);
+    return (l + r) / 2;
 }
 
 void CoreAudioRenderer::SetVolumeLevel(int avg)
 {
+    op_mixer_ops.set_volume(avg, avg);
 }
 
 std::vector<const BaseOption*> CoreAudioRenderer::Options() const
