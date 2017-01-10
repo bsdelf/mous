@@ -82,7 +82,7 @@ EmErrorCode OggEncoder::Encode(char* buf, uint32_t len)
     return ErrorCode::EncoderFailedToEncode;
 }
 
-EmErrorCode OggEncoder::FlushRest()
+EmErrorCode OggEncoder::Flush()
 {
     /*
     int ret = lame_encode_flush(m_gfp, m_EncodeBuffer, m_EncodeBufferSize);

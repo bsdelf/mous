@@ -19,7 +19,7 @@ public:
     virtual void CloseOutput();
 
     virtual EmErrorCode Encode(char* buf, uint32_t len);
-    virtual EmErrorCode FlushRest();
+    virtual EmErrorCode Flush();
 
     virtual void SetChannels(int32_t channels);
     virtual void SetSampleRate(int32_t sampleRate);

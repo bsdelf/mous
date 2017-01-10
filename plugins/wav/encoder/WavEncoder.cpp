@@ -53,7 +53,7 @@ EmErrorCode WavEncoder::Encode(char* buf, uint32_t len)
     return ErrorCode::Ok;
 }
 
-EmErrorCode WavEncoder::FlushRest()
+EmErrorCode WavEncoder::Flush()
 {
     return ErrorCode::Ok;
 }

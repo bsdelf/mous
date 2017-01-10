@@ -21,7 +21,7 @@ public:
     virtual void CloseOutput() = 0;
 
     virtual EmErrorCode Encode(char* dat, uint32_t len) = 0;
-    virtual EmErrorCode FlushRest() = 0;
+    virtual EmErrorCode Flush() = 0;
 
     // these will be called before OpenOutput()
     virtual void SetChannels(int32_t channels) = 0;

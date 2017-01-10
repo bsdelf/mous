@@ -209,7 +209,7 @@ EmErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
     return ErrorCode::Ok;
 }
 
-EmErrorCode FaacEncoder::FlushRest()
+EmErrorCode FaacEncoder::Flush()
 {
     // this maybe unnecessary
     int need = m_InputBufferSize - m_InputBufferUsed;

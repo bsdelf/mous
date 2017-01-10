@@ -110,7 +110,7 @@ void ConvTask::Run(const string& output)
             m_Progress = (double)(unitOff-unitBeg) / (unitEnd-unitBeg);
         }
 
-        m_Encoder->FlushRest();
+        m_Encoder->Flush();
 
         m_Encoder->CloseOutput();
         m_Decoder->Close();

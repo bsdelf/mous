@@ -104,7 +104,7 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
     return ErrorCode::EncoderFailedToEncode;
 }
 
-EmErrorCode LameEncoder::FlushRest()
+EmErrorCode LameEncoder::Flush()
 {
     int ret = lame_encode_flush(m_gfp, m_Buffer.data(), m_Buffer.size());
     if (ret >= 0) {
