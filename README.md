@@ -157,5 +157,6 @@ Screenshots
 ### mous-qt
 ![qt frontend 1](https://github.com/bsdelf/mous/raw/master/screenshot/qt.png)
 ![qt frontend 2](https://github.com/bsdelf/mous/raw/master/screenshot/qt-conv.png)
+![qt frontend 3](https://github.com/bsdelf/mous/raw/master/screenshot/qt5-macos.png)
 
 </font>
