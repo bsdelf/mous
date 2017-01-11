@@ -47,7 +47,7 @@ set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Install path prefix")
 add_definitions(-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 
 #==== Frontend ====#
-option(WithFrontendQt "Build Qt frontend" off)
+option(WithFrontendQt4 "Build Qt frontend" off)
 option(WithFrontendNcurses "Build ncurses frontend" off)
 
 #==== Optional ====#
@@ -131,15 +131,15 @@ if(WithFrontendNcurses)
 endif()
 
 # mous-qt
-if(WithFrontendQt)
+if(WithFrontendQt4)
     find_package(Qt4 REQUIRED QtCore QtGui)
     include(${QT_USE_FILE})
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
-    file(GLOB EXE_MOUS_QT_HEADERS frontend/qt/*.h frontend/qt/*.hpp)
-    file(GLOB EXE_MOUS_QT_SOURCES frontend/qt/*.cpp)
-    file(GLOB EXE_MOUS_QT_UI frontend/qt/*.ui)
-    file(GLOB EXE_MOUS_QT_QRC frontend/qt/*.qrc)
-    file(GLOB EXE_MOUS_QT_TS frontend/qt/*.ts)
+    file(GLOB EXE_MOUS_QT_HEADERS frontend/qt4/*.h frontend/qt4/*.hpp)
+    file(GLOB EXE_MOUS_QT_SOURCES frontend/qt4/*.cpp)
+    file(GLOB EXE_MOUS_QT_UI frontend/qt4/*.ui)
+    file(GLOB EXE_MOUS_QT_QRC frontend/qt4/*.qrc)
+    file(GLOB EXE_MOUS_QT_TS frontend/qt4/*.ts)
 
     set(EXE_MOUS_QT_MOC_HEADERS)
     foreach(header ${EXE_MOUS_QT_HEADERS})
@@ -404,7 +404,7 @@ if(WithFrontendNcurses)
         RUNTIME DESTINATION bin)
 endif()
 
-if(WithFrontendQt)
+if(WithFrontendQt4)
     install(TARGETS mous-qt
         RUNTIME DESTINATION bin)
     install(
