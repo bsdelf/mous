@@ -18,18 +18,6 @@ using namespace scx;
 constexpr const char* const STR_TITLE = "[ Explorer ]";
 constexpr const char* const SIZE_HINT = "BKMG";
 
-class FileItemCmp
-{
-public:
-    bool operator()(const ExplorerView::FileItem& a, const ExplorerView::FileItem& b) const
-    {
-        return pyc.CmpUtf8(a.name, b.name);
-    }
-
-private:
-    PinYinCompare pyc;
-};
-
 ExplorerView::ExplorerView()
 {
     //const AppEnv* config = GlobalAppEnv::Instance();
@@ -362,8 +350,12 @@ void ExplorerView::BuildFileItems()
             otherItems.push_back(std::move(item));
     }
 
-    std::sort(dirItems.begin(), dirItems.end(), FileItemCmp());
-    std::sort(otherItems.begin(), otherItems.end(), FileItemCmp());
+    PinYinCompare pyc;
+    auto cmp = [&pyc](const FileItem& a, const FileItem& b) {
+        return pyc.CmpUtf8(a.name, b.name);
+    };
+    std::sort(dirItems.begin(), dirItems.end(), cmp);
+    std::sort(otherItems.begin(), otherItems.end(), cmp);
 
     m_FileItems.insert(m_FileItems.end(), otherItems.begin(), otherItems.end());
 }
