@@ -1,3 +1,4 @@
+*.app
 *.dylib
 *.exe
 *.o
@@ -10,5 +11,7 @@
 .DS_Store
 .clang
 .clang_complete
+.qmake.stash
+Makefile
 build
 build*
