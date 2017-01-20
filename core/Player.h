@@ -97,7 +97,7 @@ private:
         uint32_t unitCount;
 
         UnitBuffer(): 
-            data(NULL),
+            data(nullptr),
             used(0),
             max(0),
             unitCount(0)
@@ -106,9 +106,10 @@ private:
 
         ~UnitBuffer()
         {
-            if (data != NULL)
+            if (data != nullptr) {
                 delete[] data;
-            data = NULL;
+            }
+            data = nullptr;
             used = 0;
             max = 0;
             unitCount = 0;
