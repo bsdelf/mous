@@ -15,8 +15,6 @@ using namespace scx;
 
 class Client
 {
-    friend class PayloadSender;
-
 public:
     Client();
     ~Client();

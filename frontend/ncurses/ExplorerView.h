@@ -9,12 +9,8 @@
 
 #include <scx/Signal.hpp>
 
-class FileItemCmp;
-
 class ExplorerView: public IView
 {
-    friend class FileItemCmp;
-
 public:
     ExplorerView();
     ~ExplorerView();
