@@ -37,8 +37,12 @@ Qt:
 - 媒体管理？
 - 歌词？
 
-ncurses:
+ncurses client side:
 
 - 文件查找，播放列表复制粘贴
 - 支持配置快捷键和色彩？
 
+ncurses server side:
+
+- Introduce the concept of protocol parser
+- Use asynchronous I/O + worker instead of multi-threaded mode
