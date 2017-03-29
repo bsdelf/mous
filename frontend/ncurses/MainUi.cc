@@ -170,7 +170,7 @@ void MainUi::SlotConnected()
 
 void MainUi::SlotGotSuffixes(const std::vector<std::string>& list)
 {
-    d->explorerView.SetSuffixes(list);
+    d->explorerView.AddSuffixes(list);
 }
 
 void MainUi::SlotSwitchPlaylist(bool toNext)

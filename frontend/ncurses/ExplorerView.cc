@@ -308,10 +308,11 @@ bool ExplorerView::HasFocus() const
     return m_Focused;
 }
 
-void ExplorerView::SetSuffixes(const std::vector<std::string>& list)
+void ExplorerView::AddSuffixes(const std::vector<std::string>& list)
 {
-    for (const string& ext: list)
+    for (const string& ext: list) {
         m_Suffixes.insert(ext);
+    }
 }
 
 void ExplorerView::BuildFileItems()

@@ -31,7 +31,7 @@ public:
     scx::Signal<void (const std::string&)> SigTmpOpen;
     scx::Signal<void (const std::string&)> SigUserOpen;
 
-    void SetSuffixes(const std::vector<std::string>&);
+    void AddSuffixes(const std::vector<std::string>&);
 
 private:
     void BuildFileItems();
