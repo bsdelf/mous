@@ -145,7 +145,8 @@ void StatusView::Refresh()
     if (m_PlayerStatus.duration != 0) {
         float percent = std::min((float)m_PlayerStatus.pos / m_PlayerStatus.duration, 1.0000f);
         int wSlider = (w - 1 - 1) * percent;
-        string slider = string(wSlider, '-') + ">";
+        string slider(wSlider + 1, '-');
+        slider.back() = '>';
 
         d.AttrSet(Attr::Bold);
         d.ColorOn(Color::Yellow, Color::Black);
