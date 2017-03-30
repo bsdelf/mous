@@ -6,6 +6,13 @@ namespace mous {
 
 struct MediaItem
 {
+    MediaItem() = default;
+
+    MediaItem(const std::string& url):
+        url(url)
+    {
+    }
+
     std::string url;
     int32_t duration = -1;
 

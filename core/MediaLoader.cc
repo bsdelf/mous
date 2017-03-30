@@ -179,12 +179,9 @@ EmErrorCode MediaLoader::TryUnpack(const string& path, deque<MediaItem>& list) c
     const string& suffix = ToLower(FileHelper::FileSuffix(path));
     auto iter = m_MediaPackMap.find(suffix);
 
-    MediaItem tmpItem;
     if (iter == m_MediaPackMap.end()) {
         // General Media
-        tmpItem.url = path;
-        tmpItem.hasRange = false;
-        list.push_back(tmpItem);
+        list.emplace_back(path);
     } else {
         // MediaPack
         IMediaPack* pack = iter->second;
