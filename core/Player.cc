@@ -617,16 +617,12 @@ EmAudioMode Player::AudioMode() const
 std::vector<PluginOption> Player::DecoderPluginOption() const
 {
     std::vector<PluginOption> list;
-    PluginOption optionItem;
 
-    for (auto entry: m_DecoderPluginMap) {
-        const DecoderPluginNode& node = entry.second;
-        const vector<const BaseOption*>& opt = node.decoder->Options();
-        if (!opt.empty()) {
-            optionItem.pluginType = node.agent->Type();
-            optionItem.pluginInfo = node.agent->Info();
-            list.push_back(optionItem);
-        }
+    list.reserve(m_DecoderPluginMap.size());
+
+    for (const auto entry: m_DecoderPluginMap) {
+        auto node = entry.second;
+        list.emplace_back(node.agent->Type(), node.agent->Info(), node.decoder->Options());
     }
 
     return list;
@@ -634,17 +630,11 @@ std::vector<PluginOption> Player::DecoderPluginOption() const
 
 PluginOption Player::RendererPluginOption() const
 {
-    PluginOption option;
-    if (m_RendererPlugin != nullptr) {
-        option.pluginType = m_RendererPlugin->Type();
-        option.pluginInfo = m_RendererPlugin->Info();
-        option.options = m_Renderer->Options();
+    if (m_RendererPlugin != nullptr && m_Renderer != nullptr) {
+        return { m_RendererPlugin->Type(), m_RendererPlugin->Info(), m_Renderer->Options() };
     } else {
-        option.pluginType = PluginType::None; 
-        option.pluginInfo = nullptr;
-        option.options.clear();
+        return {};
     }
-    return option;
 }
 
 Signal<void (void)>* Player::SigFinished()
