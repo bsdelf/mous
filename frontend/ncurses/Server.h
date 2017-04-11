@@ -2,6 +2,7 @@
 
 #include <set>
 #include <thread>
+#include <memory>
 using namespace std;
 
 #include <scx/Socket.hpp>
@@ -24,7 +25,7 @@ private:
     void CloseSession(Session*);
 
 private:
-    ServerContext* m_Context;
+    unique_ptr<ServerContext> m_Context;
     TcpSocket m_Socket;
     int m_PipeFd[2];
     set<Session*> m_SessionSet;

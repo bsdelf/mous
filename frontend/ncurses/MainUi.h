@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <memory>
 using namespace std;
 
 struct PrivateMainUi;
@@ -47,6 +48,6 @@ private:
     void SwitchPlaylist(int);
 
 private:
-    PrivateMainUi* d;
+    unique_ptr<PrivateMainUi> d;
 };
 

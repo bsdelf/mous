@@ -11,15 +11,14 @@
 #include <iostream>
 using namespace std;
 
-Server::Server()
+Server::Server():
+    m_Context(make_unique<ServerContext>())
 {
-    m_Context = new ServerContext;
     pipe(m_PipeFd);
 }
 
 Server::~Server()
 {
-    delete m_Context;
     close(m_PipeFd[0]);
     close(m_PipeFd[1]);
     m_Socket.Close();
@@ -109,7 +108,7 @@ void Server::StopService()
 
 void Server::OpenSession(TcpSocket& clientSocket)
 {
-    Session* session = new Session(m_Context);
+    Session* session = new Session(m_Context.get());
     m_SessionSet.insert(session);
     session->Run(clientSocket, m_PipeFd[1]);
 

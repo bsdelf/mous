@@ -115,14 +115,13 @@ struct PrivateMainUi
     }
 };
 
-MainUi::MainUi()
+MainUi::MainUi():
+    d(make_unique<PrivateMainUi>(this))
 {
-    d = new PrivateMainUi(this);
 }
 
 MainUi::~MainUi()
 {
-    delete d;
 }
 
 int MainUi::Exec()
