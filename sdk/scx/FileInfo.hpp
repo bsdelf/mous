@@ -46,12 +46,6 @@ typedef FileType::e EmFileType;
 class FileInfo
 {
 public:
-    FileInfo():
-        m_exists(false),
-        m_type(FileType::None)
-    {
-    }
-
     explicit FileInfo(const std::string& file):
         m_name(file),
         m_exists(false),
@@ -148,34 +142,37 @@ private:
 
     void CheckFileType()
     {
-        m_exists = !m_name.empty() && (stat(m_name.c_str(), &m_stat) == 0);
-        if (!m_exists)
+        if (m_name.empty() || ::stat(m_name.c_str(), &m_stat) != 0) {
+            m_exists = false;
             return;
+        }
 
-        if (S_ISREG(m_stat.st_mode))
+        m_exists = true;
+
+        if (S_ISREG(m_stat.st_mode)) {
             m_type = FileType::Regular;
-        else if (S_ISDIR(m_stat.st_mode))
+        } else if (S_ISDIR(m_stat.st_mode)) {
             m_type = FileType::Directory;
-        else if (S_ISCHR(m_stat.st_mode))
+        } else if (S_ISCHR(m_stat.st_mode)) {
             m_type = FileType::CharacterSpecial;
-        else if (S_ISBLK(m_stat.st_mode))
+        } else if (S_ISBLK(m_stat.st_mode)) {
             m_type = FileType::Block;
-        else if (S_ISFIFO(m_stat.st_mode))
+        } else if (S_ISFIFO(m_stat.st_mode)) {
             m_type = FileType::Pipe;
-        else if (S_ISLNK(m_stat.st_mode))
+        } else if (S_ISLNK(m_stat.st_mode)) {
             m_type = FileType::Link;
-        else if (S_ISSOCK(m_stat.st_mode))
+        } else if (S_ISSOCK(m_stat.st_mode)) {
             m_type = FileType::Socket;
-        else
+        } else {
             m_type = FileType::Other;
+        }
     }
 
 private:
     struct stat m_stat;
-
     std::string m_name;
-    bool m_exists;
-    EmFileType m_type;
+    bool m_exists = false;
+    EmFileType m_type = FileType::None;
 };
 
 }
