@@ -9,14 +9,11 @@ namespace mous {
 class IPluginAgent
 {
 public:
-    static IPluginAgent* Create();
+    static IPluginAgent* Create(const std::string&);
     static void Free(IPluginAgent*);
 
 public:
     virtual ~IPluginAgent() { }
-
-    virtual EmErrorCode Open(const std::string& path) = 0;
-    virtual void Close() = 0;
 
     virtual EmPluginType Type() const = 0;
     virtual const PluginInfo* Info() const = 0;

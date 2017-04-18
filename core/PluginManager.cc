@@ -1,3 +1,4 @@
+#include "PluginAgent.h"
 #include "PluginManager.h"
 #include <core/IPluginAgent.h>
 using namespace std;
@@ -35,8 +36,9 @@ size_t PluginManager::LoadPluginDir(const string& dir)
     for (size_t i = 0; i < files.size(); ++i) {
         if (files[i].substr(0, 3) == "lib") {
             string full = dir + "/" + files[i];
-            if (FileInfo(full).Type() == FileType::Regular)
+            if (FileInfo(full).Type() == FileType::Regular) {
                 LoadPlugin(full);
+            }
         }
     }
 
@@ -45,15 +47,8 @@ size_t PluginManager::LoadPluginDir(const string& dir)
 
 EmErrorCode PluginManager::LoadPlugin(const string& path)
 {
-    IPluginAgent* pAgent = IPluginAgent::Create();
-    EmErrorCode ret = pAgent->Open(path);
-    if (ret == ErrorCode::Ok) {
-        m_PluginMap[path] = pAgent;
-    } else {
-        IPluginAgent::Free(pAgent);
-    }
-
-    return ret;
+    m_PluginMap[path] = IPluginAgent::Create(path);
+    return ErrorCode::Ok;
 }
 
 void PluginManager::UnloadPlugin(const string& path)
@@ -61,7 +56,6 @@ void PluginManager::UnloadPlugin(const string& path)
     auto iter = m_PluginMap.find(path);
     if (iter != m_PluginMap.end()) {
         IPluginAgent* pAgent = iter->second;
-        pAgent->Close();
         IPluginAgent::Free(pAgent);
         m_PluginMap.erase(iter);
     }
@@ -71,7 +65,6 @@ void PluginManager::UnloadAll()
 {
     for (auto entry: m_PluginMap) {
         IPluginAgent* pAgent = entry.second;
-        pAgent->Close();
         IPluginAgent::Free(pAgent);
     }
     m_PluginMap.clear();

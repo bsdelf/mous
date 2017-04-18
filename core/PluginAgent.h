@@ -6,17 +6,14 @@ namespace mous {
 
 class PluginAgent: public IPluginAgent
 {
-    typedef EmPluginType (*FnPluginType)(void);
-    typedef const PluginInfo* (*FnPluginInfo)(void);
-    typedef void* (*FnCreateObject)(void);
-    typedef void (*FnFreeObject)(void*);
+    using FnPluginType = EmPluginType (*)(void);
+    using FnPluginInfo = const PluginInfo* (*)(void);
+    using FnCreateObject = void* (*)(void);
+    using FnFreeObject = void (*)(void*);
 
 public:
-    PluginAgent();
+    explicit PluginAgent(const std::string& path);
     ~PluginAgent();
-
-    EmErrorCode Open(const std::string& path);
-    void Close();
 
     EmPluginType Type() const;
     const PluginInfo* Info() const;
