@@ -4,7 +4,7 @@
 #include <util/MediaItem.h>
 #include <core/IConvTaskFactory.h>
 #include <core/IConvTask.h>
-#include <core/IPluginAgent.h>
+#include <core/Plugin.h>
 using namespace std;
 
 namespace mous {
@@ -15,28 +15,28 @@ public:
     ConvTaskFactory();
     virtual ~ConvTaskFactory();
 
-    virtual void RegisterDecoderPlugin(const IPluginAgent* pAgent);
-    virtual void RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents);
+    virtual void RegisterDecoderPlugin(const Plugin* pAgent);
+    virtual void RegisterDecoderPlugin(std::vector<const Plugin*>& agents);
 
-    virtual void RegisterEncoderPlugin(const IPluginAgent* pAgent);
-    virtual void RegisterEncoderPlugin(std::vector<const IPluginAgent*>& agents);
+    virtual void RegisterEncoderPlugin(const Plugin* pAgent);
+    virtual void RegisterEncoderPlugin(std::vector<const Plugin*>& agents);
 
-    virtual void UnregisterPlugin(const IPluginAgent* pAgent);
-    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents);
+    virtual void UnregisterPlugin(const Plugin* pAgent);
+    virtual void UnregisterPlugin(std::vector<const Plugin*>& agents);
     virtual void UnregisterAll();
 
     virtual vector<string> EncoderNames() const;
     virtual IConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const;
 
 private:
-    void AddDecAgent(const IPluginAgent* pAgent);
-    void RemoveDecAgent(const IPluginAgent* pAgent);
-    void AddEncAgent(const IPluginAgent* pAgent);
-    void RemoveEncAgent(const IPluginAgent* pAgent);
+    void AddDecAgent(const Plugin* pAgent);
+    void RemoveDecAgent(const Plugin* pAgent);
+    void AddEncAgent(const Plugin* pAgent);
+    void RemoveEncAgent(const Plugin* pAgent);
 
 private:
-    unordered_map<string, vector<const IPluginAgent*>*> m_DecAgentMap;
-    unordered_map<string, const IPluginAgent*> m_EncAgentMap;
+    unordered_map<string, vector<const Plugin*>*> m_DecAgentMap;
+    unordered_map<string, const Plugin*> m_EncAgentMap;
 
 };
 

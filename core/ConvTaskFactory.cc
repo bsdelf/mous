@@ -28,35 +28,35 @@ ConvTaskFactory::~ConvTaskFactory()
     UnregisterAll();
 }
 
-void ConvTaskFactory::RegisterDecoderPlugin(const IPluginAgent* pAgent)
+void ConvTaskFactory::RegisterDecoderPlugin(const Plugin* pAgent)
 {
     if (pAgent->Type() == PluginType::Decoder) {
         AddDecAgent(pAgent);
     }
 }
 
-void ConvTaskFactory::RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents)
+void ConvTaskFactory::RegisterDecoderPlugin(std::vector<const Plugin*>& agents)
 {
     for (auto agent: agents) {
         RegisterDecoderPlugin(agent);
     }
 }
 
-void ConvTaskFactory::RegisterEncoderPlugin(const IPluginAgent* pAgent)
+void ConvTaskFactory::RegisterEncoderPlugin(const Plugin* pAgent)
 {
     if (pAgent->Type() == PluginType::Encoder) {
         AddEncAgent(pAgent);
     }
 }
 
-void ConvTaskFactory::RegisterEncoderPlugin(std::vector<const IPluginAgent*>& agents)
+void ConvTaskFactory::RegisterEncoderPlugin(std::vector<const Plugin*>& agents)
 {
     for (auto agent: agents) {
         RegisterEncoderPlugin(agent);
     }
 }
 
-void ConvTaskFactory::UnregisterPlugin(const IPluginAgent* pAgent)
+void ConvTaskFactory::UnregisterPlugin(const Plugin* pAgent)
 {
     switch (pAgent->Type()) {
         case PluginType::Decoder:
@@ -72,7 +72,7 @@ void ConvTaskFactory::UnregisterPlugin(const IPluginAgent* pAgent)
     }
 }
 
-void ConvTaskFactory::UnregisterPlugin(std::vector<const IPluginAgent*>& agents)
+void ConvTaskFactory::UnregisterPlugin(std::vector<const Plugin*>& agents)
 {
     for (auto agent: agents) {
         UnregisterPlugin(agent);
@@ -105,15 +105,15 @@ vector<string> ConvTaskFactory::EncoderNames() const
 
 IConvTask* ConvTaskFactory::CreateTask(const MediaItem& item, const std::string& encoder) const
 {
-    const IPluginAgent* decAgent = nullptr;
+    const Plugin* decAgent = nullptr;
     const string& suffix = ToLower(FileHelper::FileSuffix(item.url));
     auto decAgentIter = m_DecAgentMap.find(suffix);
     if (decAgentIter != m_DecAgentMap.end()) {
-        vector<const IPluginAgent*> list = *(decAgentIter->second);
+        vector<const Plugin*> list = *(decAgentIter->second);
         decAgent = list[0];
     }
 
-    const IPluginAgent* encAgent = nullptr;
+    const Plugin* encAgent = nullptr;
     auto encAgentIter = m_EncAgentMap.find(encoder);
     if (encAgentIter != m_EncAgentMap.end()) {
         encAgent = encAgentIter->second;
@@ -126,17 +126,17 @@ IConvTask* ConvTaskFactory::CreateTask(const MediaItem& item, const std::string&
     return task;
 }
 
-void ConvTaskFactory::AddDecAgent(const IPluginAgent* pAgent)
+void ConvTaskFactory::AddDecAgent(const Plugin* pAgent)
 {
     IDecoder* dec = (IDecoder*)pAgent->CreateObject();
     vector<string> list = dec->FileSuffix();
     pAgent->FreeObject(dec);
 
     for (const string& suffix: list) {
-        vector<const IPluginAgent*>* agentList = nullptr;
+        vector<const Plugin*>* agentList = nullptr;
         auto iter = m_DecAgentMap.find(suffix);
         if (iter == m_DecAgentMap.end()) {
-            agentList = new vector<const IPluginAgent*>();
+            agentList = new vector<const Plugin*>();
             agentList->push_back(pAgent);
             m_DecAgentMap.emplace(suffix, agentList);
         } else {
@@ -146,7 +146,7 @@ void ConvTaskFactory::AddDecAgent(const IPluginAgent* pAgent)
     }
 }
 
-void ConvTaskFactory::RemoveDecAgent(const IPluginAgent* pAgent)
+void ConvTaskFactory::RemoveDecAgent(const Plugin* pAgent)
 {
     IDecoder* dec = (IDecoder*)pAgent->CreateObject();
     vector<string> list = dec->FileSuffix();
@@ -155,7 +155,7 @@ void ConvTaskFactory::RemoveDecAgent(const IPluginAgent* pAgent)
     for (const string& suffix: list) {
         auto iter = m_DecAgentMap.find(suffix);
         if (iter != m_DecAgentMap.end()) {
-            vector<const IPluginAgent*>& agentList = *(iter->second);
+            vector<const Plugin*>& agentList = *(iter->second);
             for (size_t i = 0; i < agentList.size(); ++i) {
                 if (agentList[i] == pAgent) {
                     agentList.erase(agentList.begin()+i);
@@ -170,12 +170,12 @@ void ConvTaskFactory::RemoveDecAgent(const IPluginAgent* pAgent)
     }
 }
 
-void ConvTaskFactory::AddEncAgent(const IPluginAgent* pAgent)
+void ConvTaskFactory::AddEncAgent(const Plugin* pAgent)
 {
     m_EncAgentMap.emplace(pAgent->Info()->name, pAgent);
 }
 
-void ConvTaskFactory::RemoveEncAgent(const IPluginAgent* pAgent)
+void ConvTaskFactory::RemoveEncAgent(const Plugin* pAgent)
 {
     auto iter = m_EncAgentMap.find(pAgent->Info()->name);
     if (iter != m_EncAgentMap.end())

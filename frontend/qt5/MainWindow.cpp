@@ -86,19 +86,19 @@ void MainWindow::InitMousCore()
     m_PluginManager->LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
     //const vector<string>& pathList = m_PluginManager->PluginPaths();
 
-    vector<const IPluginAgent*> packAgentList = 
+    vector<const Plugin*> packAgentList = 
         m_PluginManager->PluginAgents(PluginType::MediaPack);
-    vector<const IPluginAgent*> tagAgentList = 
+    vector<const Plugin*> tagAgentList = 
         m_PluginManager->PluginAgents(PluginType::TagParser);
 
     m_MediaLoader->RegisterMediaPackPlugin(packAgentList);
     m_MediaLoader->RegisterTagParserPlugin(tagAgentList);
 
-    vector<const IPluginAgent*> decoderAgentList =
+    vector<const Plugin*> decoderAgentList =
         m_PluginManager->PluginAgents(PluginType::Decoder);
-    vector<const IPluginAgent*> encoderAgentList = 
+    vector<const Plugin*> encoderAgentList = 
         m_PluginManager->PluginAgents(PluginType::Encoder);
-    vector<const IPluginAgent*> rendererAgentList =
+    vector<const Plugin*> rendererAgentList =
         m_PluginManager->PluginAgents(PluginType::Renderer);
 
     m_Player->RegisterRendererPlugin(rendererAgentList[0]);

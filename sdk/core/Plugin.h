@@ -1,10 +1,10 @@
 #pragma once
 
-#include <core/IPluginAgent.h>
+#include <util/PluginDef.h>
 
 namespace mous {
 
-class PluginAgent: public IPluginAgent
+class Plugin
 {
     using FnPluginType = EmPluginType (*)(void);
     using FnPluginInfo = const PluginInfo* (*)(void);
@@ -12,8 +12,8 @@ class PluginAgent: public IPluginAgent
     using FnFreeObject = void (*)(void*);
 
 public:
-    explicit PluginAgent(const std::string& path);
-    ~PluginAgent();
+    explicit Plugin(const std::string& path);
+    ~Plugin();
 
     EmPluginType Type() const;
     const PluginInfo* Info() const;

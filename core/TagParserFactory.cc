@@ -21,7 +21,7 @@ TagParserFactory::~TagParserFactory()
     UnregisterAll();
 }
 
-void TagParserFactory::RegisterTagParserPlugin(const IPluginAgent* pAgent)
+void TagParserFactory::RegisterTagParserPlugin(const Plugin* pAgent)
 {
     ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
     const auto& suffixList = parser->FileSuffix();
@@ -36,14 +36,14 @@ void TagParserFactory::RegisterTagParserPlugin(const IPluginAgent* pAgent)
     }
 }
 
-void TagParserFactory::RegisterTagParserPlugin(std::vector<const IPluginAgent*>& agents)
+void TagParserFactory::RegisterTagParserPlugin(std::vector<const Plugin*>& agents)
 {
     for (auto agent: agents) {
         RegisterTagParserPlugin(agent);
     }
 }
 
-void TagParserFactory::UnregisterPlugin(const IPluginAgent* pAgent)
+void TagParserFactory::UnregisterPlugin(const Plugin* pAgent)
 {
     ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
     const auto& suffixList = parser->FileSuffix();
@@ -59,7 +59,7 @@ void TagParserFactory::UnregisterPlugin(const IPluginAgent* pAgent)
     }
 }
 
-void TagParserFactory::UnregisterPlugin(std::vector<const IPluginAgent*>& agents)
+void TagParserFactory::UnregisterPlugin(std::vector<const Plugin*>& agents)
 {
     for (auto agent: agents) {
         UnregisterPlugin(agent);

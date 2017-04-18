@@ -1,6 +1,5 @@
-#include "PluginAgent.h"
 #include "PluginManager.h"
-#include <core/IPluginAgent.h>
+#include <core/Plugin.h>
 using namespace std;
 using namespace mous;
 
@@ -47,7 +46,7 @@ size_t PluginManager::LoadPluginDir(const string& dir)
 
 EmErrorCode PluginManager::LoadPlugin(const string& path)
 {
-    m_PluginMap[path] = IPluginAgent::Create(path);
+    m_PluginMap[path] = new Plugin(path);
     return ErrorCode::Ok;
 }
 
@@ -55,8 +54,8 @@ void PluginManager::UnloadPlugin(const string& path)
 {
     auto iter = m_PluginMap.find(path);
     if (iter != m_PluginMap.end()) {
-        IPluginAgent* pAgent = iter->second;
-        IPluginAgent::Free(pAgent);
+        Plugin* pAgent = iter->second;
+        delete pAgent;
         m_PluginMap.erase(iter);
     }
 }
@@ -64,18 +63,18 @@ void PluginManager::UnloadPlugin(const string& path)
 void PluginManager::UnloadAll()
 {
     for (auto entry: m_PluginMap) {
-        IPluginAgent* pAgent = entry.second;
-        IPluginAgent::Free(pAgent);
+        Plugin* pAgent = entry.second;
+        delete pAgent;
     }
     m_PluginMap.clear();
 }
 
-vector<const IPluginAgent*> PluginManager::PluginAgents(EmPluginType type) const
+vector<const Plugin*> PluginManager::PluginAgents(EmPluginType type) const
 {
-    vector<const IPluginAgent*> list;
+    vector<const Plugin*> list;
     list.reserve(m_PluginMap.size());
     for (auto entry: m_PluginMap) {
-        IPluginAgent* pAgent = entry.second;
+        Plugin* pAgent = entry.second;
         if (pAgent->Type() == type) {
             list.push_back(pAgent);
         }

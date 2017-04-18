@@ -14,7 +14,7 @@ namespace mous {
 class ConvTask: public IConvTask
 {
 public:
-    explicit ConvTask(const MediaItem&, const IPluginAgent*, const IPluginAgent*);
+    explicit ConvTask(const MediaItem&, const Plugin*, const Plugin*);
     virtual ~ConvTask();
 
     virtual std::vector<const BaseOption*> DecoderOptions() const;
@@ -29,8 +29,8 @@ public:
 
 private:
     MediaItem m_Item;
-    const IPluginAgent* m_DecAgent;
-    const IPluginAgent* m_EncAgent;
+    const Plugin* m_DecAgent;
+    const Plugin* m_EncAgent;
     std::thread m_WorkThread;
 
     IDecoder* m_Decoder;

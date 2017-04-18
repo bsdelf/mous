@@ -13,7 +13,7 @@ using namespace std;
 
 namespace mous {
 
-class IPluginAgent;
+class Plugin;
 class IDecoder;
 class IRenderer;
 
@@ -26,13 +26,13 @@ public:
 public:
     EmPlayerStatus Status() const;
 
-    void RegisterDecoderPlugin(const IPluginAgent* pAgent);
-    void RegisterDecoderPlugin(vector<const IPluginAgent*>& agents);
+    void RegisterDecoderPlugin(const Plugin* pAgent);
+    void RegisterDecoderPlugin(vector<const Plugin*>& agents);
 
-    void RegisterRendererPlugin(const IPluginAgent* pAgent);
+    void RegisterRendererPlugin(const Plugin* pAgent);
 
-    void UnregisterPlugin(const IPluginAgent* pAgent);
-    void UnregisterPlugin(vector<const IPluginAgent*>& agents);
+    void UnregisterPlugin(const Plugin* pAgent);
+    void UnregisterPlugin(vector<const Plugin*>& agents);
     void UnregisterAll();
 
     std::vector<std::string> SupportedSuffixes() const;
@@ -74,14 +74,14 @@ public:
     scx::Signal<void (void)>* SigFinished();
 
 private:
-    void AddDecoderPlugin(const IPluginAgent* pAgent);
-    void RemoveDecoderPlugin(const IPluginAgent* pAgent);
+    void AddDecoderPlugin(const Plugin* pAgent);
+    void RemoveDecoderPlugin(const Plugin* pAgent);
 
-    void SetRendererPlugin(const IPluginAgent* pAgent);
-    void UnsetRendererPlugin(const IPluginAgent* pAgent);
+    void SetRendererPlugin(const Plugin* pAgent);
+    void UnsetRendererPlugin(const Plugin* pAgent);
 
-    void AddEventListener(const IPluginAgent* pAgent);
-    void RemoveEventListener(const IPluginAgent* pAgent);
+    void AddEventListener(const Plugin* pAgent);
+    void RemoveEventListener(const Plugin* pAgent);
 
     void PlayRange(uint64_t beg, uint64_t end);
     inline void DoSeekTime(uint64_t msPos);
@@ -118,7 +118,7 @@ private:
 
     struct DecoderPluginNode
     {
-        const IPluginAgent* agent;
+        const Plugin* agent;
         IDecoder* decoder;
     };
 
@@ -153,7 +153,7 @@ private:
 
     double m_UnitPerMs = 0;
 
-    const IPluginAgent* m_RendererPlugin = nullptr;
+    const Plugin* m_RendererPlugin = nullptr;
 
     std::map<std::string, DecoderPluginNode> m_DecoderPluginMap;
 

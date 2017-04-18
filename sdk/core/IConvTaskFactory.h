@@ -7,7 +7,7 @@ namespace mous {
 
 struct MediaItem;
 class IConvTask;
-class IPluginAgent;
+class Plugin;
 
 class IConvTaskFactory
 {
@@ -18,14 +18,14 @@ public:
 public:
     virtual ~IConvTaskFactory() { }
 
-    virtual void RegisterDecoderPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void RegisterDecoderPlugin(const Plugin* pAgent) = 0;
+    virtual void RegisterDecoderPlugin(std::vector<const Plugin*>& agents) = 0;
 
-    virtual void RegisterEncoderPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void RegisterEncoderPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void RegisterEncoderPlugin(const Plugin* pAgent) = 0;
+    virtual void RegisterEncoderPlugin(std::vector<const Plugin*>& agents) = 0;
 
-    virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void UnregisterPlugin(const Plugin* pAgent) = 0;
+    virtual void UnregisterPlugin(std::vector<const Plugin*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
     virtual std::vector<std::string> EncoderNames() const = 0;

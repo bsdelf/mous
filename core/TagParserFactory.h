@@ -12,17 +12,17 @@ public:
     TagParserFactory();
     virtual ~TagParserFactory();
 
-    virtual void RegisterTagParserPlugin(const IPluginAgent* pAgent);
-    virtual void RegisterTagParserPlugin(std::vector<const IPluginAgent*>& agents);
+    virtual void RegisterTagParserPlugin(const Plugin* pAgent);
+    virtual void RegisterTagParserPlugin(std::vector<const Plugin*>& agents);
 
-    virtual void UnregisterPlugin(const IPluginAgent* pAgent);
-    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents);
+    virtual void UnregisterPlugin(const Plugin* pAgent);
+    virtual void UnregisterPlugin(std::vector<const Plugin*>& agents);
     virtual void UnregisterAll();
 
     virtual ITagParser* CreateParser(const std::string& fileName) const;
     virtual void FreeParser(ITagParser* parser) const;
 
 private:
-    unordered_map<string, const IPluginAgent*> m_AgentMap;
-    mutable unordered_map<ITagParser*, const IPluginAgent*> m_ParserParentMap;
+    unordered_map<string, const Plugin*> m_AgentMap;
+    mutable unordered_map<ITagParser*, const Plugin*> m_ParserParentMap;
 };

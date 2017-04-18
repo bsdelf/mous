@@ -15,7 +15,7 @@ template<typename signature> class Signal;
 
 namespace mous {
 
-class IPluginAgent;
+class Plugin;
 
 namespace PlayerStatus {
 enum e
@@ -39,13 +39,13 @@ public:
 
     virtual EmPlayerStatus Status() const = 0;
 
-    virtual void RegisterDecoderPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void RegisterDecoderPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void RegisterDecoderPlugin(const Plugin* pAgent) = 0;
+    virtual void RegisterDecoderPlugin(std::vector<const Plugin*>& agents) = 0;
 
-    virtual void RegisterRendererPlugin(const IPluginAgent* pAgent) = 0;
+    virtual void RegisterRendererPlugin(const Plugin* pAgent) = 0;
 
-    virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void UnregisterPlugin(const Plugin* pAgent) = 0;
+    virtual void UnregisterPlugin(std::vector<const Plugin*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
     virtual std::vector<std::string> SupportedSuffixes() const = 0;

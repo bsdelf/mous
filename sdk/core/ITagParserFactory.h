@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <core/IPluginAgent.h>
+#include <core/Plugin.h>
 #include <plugin/ITagParser.h>
 
 namespace mous {
@@ -16,11 +16,11 @@ public:
 public:
     virtual ~ITagParserFactory() { }
 
-    virtual void RegisterTagParserPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void RegisterTagParserPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void RegisterTagParserPlugin(const Plugin* pAgent) = 0;
+    virtual void RegisterTagParserPlugin(std::vector<const Plugin*>& agents) = 0;
 
-    virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void UnregisterPlugin(const Plugin* pAgent) = 0;
+    virtual void UnregisterPlugin(std::vector<const Plugin*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
     virtual ITagParser* CreateParser(const std::string& fileName) const = 0;

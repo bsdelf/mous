@@ -14,7 +14,7 @@ using namespace scx;
 
 #include <plugin/IDecoder.h>
 #include <plugin/IRenderer.h>
-#include <core/IPluginAgent.h>
+#include <core/Plugin.h>
 using namespace mous;
 
 IPlayer* IPlayer::Create()
@@ -142,28 +142,28 @@ EmPlayerStatus Player::Status() const
     return m_Status;
 }
 
-void Player::RegisterDecoderPlugin(const IPluginAgent* pAgent)
+void Player::RegisterDecoderPlugin(const Plugin* pAgent)
 {
     if (pAgent->Type() == PluginType::Decoder) {
         AddDecoderPlugin(pAgent);
     }
 }
 
-void Player::RegisterDecoderPlugin(vector<const IPluginAgent*>& agents)
+void Player::RegisterDecoderPlugin(vector<const Plugin*>& agents)
 {
     for (const auto agent: agents) {
         RegisterDecoderPlugin(agent);
     }
 }
 
-void Player::RegisterRendererPlugin(const IPluginAgent* pAgent)
+void Player::RegisterRendererPlugin(const Plugin* pAgent)
 {
     if (pAgent->Type() == PluginType::Renderer) {
         SetRendererPlugin(pAgent);
     }
 }
 
-void Player::UnregisterPlugin(const IPluginAgent* pAgent)
+void Player::UnregisterPlugin(const Plugin* pAgent)
 {
     switch (pAgent->Type()) {
         case PluginType::Decoder:
@@ -179,14 +179,14 @@ void Player::UnregisterPlugin(const IPluginAgent* pAgent)
     }
 }
 
-void Player::UnregisterPlugin(vector<const IPluginAgent*>& agents)
+void Player::UnregisterPlugin(vector<const Plugin*>& agents)
 {
     for (const auto agent: agents) {
         UnregisterPlugin(agent);
     }
 }
 
-void Player::AddDecoderPlugin(const IPluginAgent* pAgent)
+void Player::AddDecoderPlugin(const Plugin* pAgent)
 {
     // create Decoder & get suffix
     IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
@@ -209,7 +209,7 @@ void Player::AddDecoderPlugin(const IPluginAgent* pAgent)
     }
 }
 
-void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
+void Player::RemoveDecoderPlugin(const Plugin* pAgent)
 {
     // get suffix
     IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
@@ -237,7 +237,7 @@ void Player::RemoveDecoderPlugin(const IPluginAgent* pAgent)
     }
 }
 
-void Player::SetRendererPlugin(const IPluginAgent* pAgent)
+void Player::SetRendererPlugin(const Plugin* pAgent)
 {
     if (pAgent == nullptr || m_RendererPlugin != nullptr) {
         return;
@@ -248,7 +248,7 @@ void Player::SetRendererPlugin(const IPluginAgent* pAgent)
     m_Renderer->Open();
 }
 
-void Player::UnsetRendererPlugin(const IPluginAgent* pAgent)
+void Player::UnsetRendererPlugin(const Plugin* pAgent)
 {
     if (pAgent != m_RendererPlugin || m_RendererPlugin == nullptr) {
         return;

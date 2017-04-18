@@ -8,7 +8,7 @@
 namespace mous {
 
 struct PluginInfo;
-class IPluginAgent;
+class Plugin;
 
 class IPluginManager
 {
@@ -24,7 +24,7 @@ public:
     virtual void UnloadPlugin(const std::string& path) = 0;
     virtual void UnloadAll() = 0;
 
-    virtual std::vector<const IPluginAgent*> PluginAgents(EmPluginType) const = 0;
+    virtual std::vector<const Plugin*> PluginAgents(EmPluginType) const = 0;
     virtual std::vector<std::string> PluginPaths() const = 0;
     virtual const PluginInfo* QueryPluginInfo(const std::string& path) const = 0;
 };

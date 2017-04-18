@@ -10,7 +10,7 @@
 
 struct mous_ctx
 {
-    typedef std::vector<const mous::IPluginAgent*> plugin_list_t;
+    typedef std::vector<const mous::Plugin*> plugin_list_t;
 
     mous::IPluginManager* mgr;
 

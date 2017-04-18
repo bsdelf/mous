@@ -24,12 +24,12 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadAll();
 
-    std::vector<const IPluginAgent*> PluginAgents(EmPluginType) const;
+    std::vector<const Plugin*> PluginAgents(EmPluginType) const;
     std::vector<std::string> PluginPaths() const;
     const PluginInfo* QueryPluginInfo(const std::string& path) const;
 
 private:
-    std::unordered_map<std::string, IPluginAgent*> m_PluginMap;
+    std::unordered_map<std::string, Plugin*> m_PluginMap;
 };
 
 }

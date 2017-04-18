@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <core/IPluginAgent.h>
+#include <core/Plugin.h>
 
 namespace mous {
 
@@ -13,7 +13,7 @@ class IConvTask
 {
 public:
     // the content pointed by MediaItem* will be copyed
-    static IConvTask* Create(const MediaItem&, const IPluginAgent* decAgent, const IPluginAgent* encAgent);
+    static IConvTask* Create(const MediaItem&, const Plugin* decAgent, const Plugin* encAgent);
     static void Free(IConvTask*);
 
 public:

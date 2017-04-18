@@ -10,7 +10,7 @@
 namespace mous {
 
 struct MediaItem;
-class IPluginAgent;
+class Plugin;
 
 class IMediaLoader
 {
@@ -21,14 +21,14 @@ public:
 public:
     virtual ~IMediaLoader() { }
 
-    virtual void RegisterMediaPackPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void RegisterMediaPackPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void RegisterMediaPackPlugin(const Plugin* pAgent) = 0;
+    virtual void RegisterMediaPackPlugin(std::vector<const Plugin*>& agents) = 0;
 
-    virtual void RegisterTagParserPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void RegisterTagParserPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void RegisterTagParserPlugin(const Plugin* pAgent) = 0;
+    virtual void RegisterTagParserPlugin(std::vector<const Plugin*>& agents) = 0;
 
-    virtual void UnregisterPlugin(const IPluginAgent* pAgent) = 0;
-    virtual void UnregisterPlugin(std::vector<const IPluginAgent*>& agents) = 0;
+    virtual void UnregisterPlugin(const Plugin* pAgent) = 0;
+    virtual void UnregisterPlugin(std::vector<const Plugin*>& agents) = 0;
     virtual void UnregisterAll() = 0;
 
     virtual std::vector<std::string> SupportedSuffixes() const = 0;

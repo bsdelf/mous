@@ -46,7 +46,7 @@ bool ServerContext::Init()
     if (!mgr->LoadPluginDir(env->pluginDir))
         return false;
 
-    typedef vector<const IPluginAgent*> PluginAgentArray;
+    typedef vector<const Plugin*> PluginAgentArray;
 
     PluginAgentArray decoders = mgr->PluginAgents(PluginType::Decoder);
     //PluginAgentArray encoders;

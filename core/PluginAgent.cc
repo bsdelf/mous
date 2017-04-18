@@ -3,22 +3,10 @@
 #include <string>
 #include <stdexcept>
 
-#include "PluginAgent.h"
+#include <core/Plugin.h>
 using namespace mous;
 
-IPluginAgent* IPluginAgent::Create(const std::string& path)
-{
-    return new PluginAgent(path);
-}
-
-void IPluginAgent::Free(IPluginAgent* ptr)
-{
-    if (ptr != nullptr) {
-        delete ptr;
-    }
-}
-
-PluginAgent::PluginAgent(const std::string& path)
+Plugin::Plugin(const std::string& path)
 {
     std::string what;
 
@@ -60,27 +48,27 @@ CleanupAndRaise:
     throw std::runtime_error(what);
 }
 
-PluginAgent::~PluginAgent()
+Plugin::~Plugin()
 {
     dlclose(m_Handle);
 }
 
-EmPluginType PluginAgent::Type() const
+EmPluginType Plugin::Type() const
 {
     return m_Type;
 }
 
-const PluginInfo* PluginAgent::Info() const
+const PluginInfo* Plugin::Info() const
 {
     return m_FnGetInfo();
 }
 
-void* PluginAgent::CreateObject() const
+void* Plugin::CreateObject() const
 {
     return m_FnCreate();
 }
 
-void PluginAgent::FreeObject(void* obj) const
+void Plugin::FreeObject(void* obj) const
 {
     m_FnFree(obj);
 }

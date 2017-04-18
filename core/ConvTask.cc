@@ -3,8 +3,8 @@
 #include <vector>
 
 IConvTask* IConvTask::Create(const MediaItem& item, 
-                             const IPluginAgent* decAgent, 
-                             const IPluginAgent* encAgent)
+                             const Plugin* decAgent, 
+                             const Plugin* encAgent)
 {
     return new ConvTask(item, decAgent, encAgent);
 }
@@ -16,8 +16,8 @@ void IConvTask::Free(IConvTask* task)
 }
 
 ConvTask::ConvTask(const MediaItem& item, 
-                   const IPluginAgent* decAgent, 
-                   const IPluginAgent* encAgent):
+                   const Plugin* decAgent, 
+                   const Plugin* encAgent):
     m_Item(item),
     m_DecAgent(decAgent),
     m_EncAgent(encAgent)
