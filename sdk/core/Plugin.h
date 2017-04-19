@@ -1,15 +1,15 @@
 #pragma once
 
+#include <memory>
 #include <util/PluginDef.h>
 
 namespace mous {
 
+class PluginPrivate;
+
 class Plugin
 {
-    using FnPluginType = EmPluginType (*)(void);
-    using FnPluginInfo = const PluginInfo* (*)(void);
-    using FnCreateObject = void* (*)(void);
-    using FnFreeObject = void (*)(void*);
+    friend PluginPrivate;
 
 public:
     explicit Plugin(const std::string& path);
@@ -21,14 +21,7 @@ public:
     void FreeObject(void* inf) const;
 
 private:
-    void* m_Handle = nullptr;
-
-    FnPluginType m_FnPluginType = nullptr;
-    FnPluginInfo m_FnGetInfo = nullptr;
-    FnCreateObject m_FnCreate = nullptr;
-    FnFreeObject m_FnFree = nullptr;
-
-    EmPluginType m_Type = PluginType::None;
+    std::unique_ptr<PluginPrivate> d;
 };
 
 }
