@@ -9,7 +9,7 @@ using namespace scx;
 
 #include <util/MediaItem.h>
 #include <util/Playlist.h>
-#include <core/IPlayer.h>
+#include <core/Player.h>
 #include <core/MediaLoader.h>
 #include <core/PluginManager.h>
 #include <core/ITagParserFactory.h>
@@ -21,7 +21,7 @@ struct ServerContext
 
     PluginManager mgr;
     MediaLoader loader;
-    IPlayer* player;
+    Player player;
 
     typedef Playlist<MediaItem> playlist_t;
     vector<playlist_t> playlists;

@@ -13,13 +13,13 @@ using namespace std;
 using namespace scx;
 
 #include "util/Playlist.h"
-#include "core/IPlayer.h"
+#include "core/Player.h"
 using namespace mous;
 
 static bool QUIT = false;
 static mutex PLAYER_MUTEX;
 
-static IPlayer* PLAYER = nullptr;
+static Player PLAYER;
 static Playlist<MediaItem>* PLAYLIST = nullptr;
 
 void on_finished()
@@ -33,13 +33,13 @@ void on_finished()
         printf("playing: \"%s\"\n", item.url.c_str());
 
         lock_guard<mutex> locker(PLAYER_MUTEX);
-        if (PLAYER->Status() != PlayerStatus::Closed)
-            PLAYER->Close();
-        PLAYER->Open(item.url);
+        if (PLAYER.Status() != PlayerStatus::Closed)
+            PLAYER.Close();
+        PLAYER.Open(item.url);
         if (item.hasRange)
-            PLAYER->Play(item.msBeg, item.msEnd);
+            PLAYER.Play(item.msBeg, item.msEnd);
         else
-            PLAYER->Play();
+            PLAYER.Play();
     } else {
         QUIT = true;
     }
@@ -55,10 +55,9 @@ int cmd_play(int argc, char* argv[])
     int rval = 0;
 
     // init player
-    PLAYER = IPlayer::Create();
-    PLAYER->SigFinished()->Connect(&on_finished);
-    PLAYER->RegisterRendererPlugin(ctx.red_agents[0]);
-    PLAYER->RegisterDecoderPlugin(ctx.dec_agents);
+    PLAYER.SigFinished()->Connect(&on_finished);
+    PLAYER.RegisterRendererPlugin(ctx.red_agents[0]);
+    PLAYER.RegisterDecoderPlugin(ctx.dec_agents);
     PLAYLIST = new Playlist<MediaItem>();
     PLAYLIST->SetMode(PlaylistMode::Normal);
 
@@ -108,10 +107,10 @@ int cmd_play(int argc, char* argv[])
 
         on_finished();
         thread th = thread([] {
-            while (PLAYER != nullptr && !QUIT) {
+            while (!QUIT) {
                 PLAYER_MUTEX.lock();
-                uint64_t ms = PLAYER->OffsetMs();
-                int32_t rate = PLAYER->BitRate();
+                uint64_t ms = PLAYER.OffsetMs();
+                int32_t rate = PLAYER.BitRate();
                 PLAYER_MUTEX.unlock();
 
                 printf("\r%d kbps %02d:%02d.%d ",
@@ -134,25 +133,25 @@ int cmd_play(int argc, char* argv[])
                 break;
 
             case 'q':
-                PLAYER->Close();
+                PLAYER.Close();
                 break;
 
             case 'p':
                 if (paused) {
-                    PLAYER->Resume();
+                    PLAYER.Resume();
                     paused = false;
                 } else {
-                    PLAYER->Pause();
+                    PLAYER.Pause();
                     paused = true;
                 }
                 break;
 
             case 'r':
-                PLAYER->Pause();
+                PLAYER.Pause();
                 if (item.hasRange) {
-                    PLAYER->Play(item.msBeg, item.msEnd);
+                    PLAYER.Play(item.msBeg, item.msEnd);
                 } else {
-                    PLAYER->Play();
+                    PLAYER.Play();
                 }
                 break;
             }
@@ -167,8 +166,7 @@ int cmd_play(int argc, char* argv[])
 LABEL_CLEANUP:
     PLAYLIST->Clear();
     delete PLAYLIST;
-    PLAYER->UnregisterAll();
-    IPlayer::Free(PLAYER);
+    PLAYER.UnregisterAll();
 
     return rval;
 }

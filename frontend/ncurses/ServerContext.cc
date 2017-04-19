@@ -21,19 +21,16 @@ ServerContext::ServerContext():
     selectedPlaylist(1),
     selectedItem(6, 0)
 {
-    player = IPlayer::Create();
-    player->SigFinished()->Connect(&ServerContext::SlotFinished, this);
+    player.SigFinished()->Connect(&ServerContext::SlotFinished, this);
 
     SetPlayMode(PlaylistMode::Normal);
 }
 
 ServerContext::~ServerContext()
 {
-    player->SigFinished()->Disconnect(this);
+    player.SigFinished()->Disconnect(this);
 
     ClosePlayer();
-
-    IPlayer::Free(player);
 }
 
 bool ServerContext::Init()
@@ -54,8 +51,8 @@ bool ServerContext::Init()
     loader.RegisterMediaPackPlugin(mediaPacks);
     loader.RegisterTagParserPlugin(tagParsers);
 
-    player->RegisterRendererPlugin(renderers[0]);
-    player->RegisterDecoderPlugin(decoders);
+    player.RegisterRendererPlugin(renderers[0]);
+    player.RegisterDecoderPlugin(decoders);
 
     return true;
 }
@@ -63,7 +60,7 @@ bool ServerContext::Init()
 void ServerContext::Cleanup()
 {
     loader.UnregisterAll();
-    player->UnregisterAll();
+    player.UnregisterAll();
     mgr.UnloadAll();
 }
 
@@ -170,13 +167,13 @@ bool ServerContext::PlayNext(char direct)
 
 void ServerContext::PausePlayer()
 {
-    switch (player->Status()) {
+    switch (player.Status()) {
         case PlayerStatus::Playing:
-            player->Pause();
+            player.Pause();
             break;
             
         case PlayerStatus::Paused:
-            player->Resume();
+            player.Resume();
             break;
 
         default:
@@ -194,13 +191,13 @@ bool ServerContext::PlayItem(const MediaItem& item)
 {
     ClosePlayer();
 
-    if (player->Open(item.url) != mous::ErrorCode::Ok)
+    if (player.Open(item.url) != mous::ErrorCode::Ok)
         return false;
 
     if (item.hasRange)
-        player->Play(item.msBeg, item.msEnd);
+        player.Play(item.msBeg, item.msEnd);
     else
-        player->Play();
+        player.Play();
 
     return true;
 }
@@ -215,8 +212,8 @@ void ServerContext::SetPlayMode(EmPlaylistMode mode)
 
 void ServerContext::ClosePlayer()
 {
-    if (player->Status() != PlayerStatus::Closed)
-        player->Close();
+    if (player.Status() != PlayerStatus::Closed)
+        player.Close();
 }
 
 void ServerContext::SlotFinished()

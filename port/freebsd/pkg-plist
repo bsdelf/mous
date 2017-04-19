@@ -5,7 +5,7 @@
 %%SDK%%include/mous/core/IConvTask.h
 %%SDK%%include/mous/core/IConvTaskFactory.h
 %%SDK%%include/mous/core/MediaLoader.h
-%%SDK%%include/mous/core/IPlayer.h
+%%SDK%%include/mous/core/Player.h
 %%SDK%%include/mous/core/Plugin.h
 %%SDK%%include/mous/core/PluginManager.h
 %%SDK%%include/mous/core/ITagParserFactory.h

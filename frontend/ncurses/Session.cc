@@ -118,7 +118,7 @@ void Session::Stop()
 void Session::NotifySupportedSuffixes()
 {
     lock_guard<mutex> locker(m_Context->mtx);
-    const auto& s1 = m_Context->player->SupportedSuffixes();
+    const auto& s1 = m_Context->player.SupportedSuffixes();
     auto s2 = m_Context->loader.SupportedSuffixes();
     s2.insert(s2.begin(), s1.begin(), s1.end());
     SEND_PACKET((char)Protocol::Group::App, << (char)Op::App::Suffixes << s2);
@@ -201,8 +201,8 @@ void Session::PlayerSeek(BufObj& buf)
         case -1:
         {
             int64_t delta = direct * 1000 * 3;
-            uint64_t pos = m_Context->player->CurrentMs() + delta;
-            m_Context->player->SeekTime(pos);
+            uint64_t pos = m_Context->player.CurrentMs() + delta;
+            m_Context->player.SeekTime(pos);
 
             SEND_PLAYER_PACKET(<< (char)Op::Player::Seek);
         }
@@ -226,12 +226,12 @@ void Session::PlayerVolume(BufObj& buf)
         case 1:
         case -1:
         {
-            int vol = m_Context->player->Volume() + change*5;
+            int vol = m_Context->player.Volume() + change*5;
             if (vol > 100)
                 vol = 100;
             else if (vol < 0)
                 vol = 0;
-            m_Context->player->SetVolume(vol);
+            m_Context->player.SetVolume(vol);
         }
             break;
 
@@ -239,7 +239,7 @@ void Session::PlayerVolume(BufObj& buf)
             return;
     }
 
-    SEND_PLAYER_PACKET(<< (char)Op::Player::Volume << (char)m_Context->player->Volume());
+    SEND_PLAYER_PACKET(<< (char)Op::Player::Volume << (char)m_Context->player.Volume());
 }
 
 void Session::PlayerPlayMode(BufObj& buf)
@@ -282,7 +282,7 @@ void Session::PlayerSync(BufObj& buf)
 
     lock_guard<mutex> locker(m_Context->mtx);
 
-    EmPlayerStatus status = m_Context->player->Status();
+    EmPlayerStatus status = m_Context->player.Status();
     int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
 
     int mask = BINARY_MASK(running, nowRunning);
@@ -295,8 +295,8 @@ void Session::PlayerSync(BufObj& buf)
         }
         case BINARY_MASK(1, 1):
         {
-            uint64_t ms = m_Context->player->OffsetMs();
-            int32_t bitRate = m_Context->player->BitRate();
+            uint64_t ms = m_Context->player.OffsetMs();
+            int32_t bitRate = m_Context->player.BitRate();
 
             SEND_PLAYER_PACKET(<< (char)Op::Player::ItemProgress << ms << bitRate);
         }
@@ -602,8 +602,8 @@ void Session::SendMediaItemInfo(const MediaItem& item)
 {
     char op = Op::Player::ItemInfo;
 
-    int32_t sampleRate = m_Context->player->SamleRate();
-    uint64_t duration = m_Context->player->RangeDuration();
+    int32_t sampleRate = m_Context->player.SamleRate();
+    uint64_t duration = m_Context->player.RangeDuration();
 
     BufObj buf(nullptr);
     buf << op;
