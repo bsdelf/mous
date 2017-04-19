@@ -11,7 +11,7 @@ using namespace std;
 #include "util/MediaItem.h"
 #include "util/PluginOption.h"
 #include "core/IMediaLoader.h"
-#include "core/IPluginManager.h"
+#include "core/PluginManager.h"
 #include "core/IConvTask.h"
 #include "core/IConvTaskFactory.h"
 using namespace mous;
@@ -60,9 +60,9 @@ int cmd_help(int, char**)
 
 int cmd_plugin(int, char**)
 {
-    const vector<string>& path_list = ctx.mgr->PluginPaths();
+    const vector<string>& path_list = ctx.mgr.PluginPaths();
     for (size_t i = 0; i < path_list.size(); ++i) {
-        const PluginInfo* info = ctx.mgr->QueryPluginInfo(path_list[i]);
+        const PluginInfo* info = ctx.mgr.QueryPluginInfo(path_list[i]);
         printf("#%02zu %s\n"
                "    %s\n"
                "    %s\n"
@@ -108,15 +108,14 @@ int main(int argc, char** argv)
         printf("bad plugin directory!\n");
         exit(-1);
     }
-    ctx.mgr = IPluginManager::Create();
-    ctx.mgr->LoadPluginDir(pluginDir);
+    ctx.mgr.LoadPluginDir(pluginDir);
 
     // get plugin agents and check if we have enough
-    ctx.dec_agents = ctx.mgr->PluginAgents(PluginType::Decoder);
-    ctx.enc_agents = ctx.mgr->PluginAgents(PluginType::Encoder);
-    ctx.red_agents = ctx.mgr->PluginAgents(PluginType::Renderer);
-    ctx.pack_agents = ctx.mgr->PluginAgents(PluginType::MediaPack);
-    ctx.tag_agents = ctx.mgr->PluginAgents(PluginType::TagParser);
+    ctx.dec_agents = ctx.mgr.PluginAgents(PluginType::Decoder);
+    ctx.enc_agents = ctx.mgr.PluginAgents(PluginType::Encoder);
+    ctx.red_agents = ctx.mgr.PluginAgents(PluginType::Renderer);
+    ctx.pack_agents = ctx.mgr.PluginAgents(PluginType::MediaPack);
+    ctx.tag_agents = ctx.mgr.PluginAgents(PluginType::TagParser);
     if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
         printf("need more plugins!\n");
         cmd_plugin(0, nullptr);
@@ -161,8 +160,7 @@ int main(int argc, char** argv)
     ctx.conv_factory->UnregisterAll();
     IConvTaskFactory::Free(ctx.conv_factory);
 
-    ctx.mgr->UnloadAll();
-    IPluginManager::Free(ctx.mgr);
+    ctx.mgr.UnloadAll();
 
     exit(ret);
 }

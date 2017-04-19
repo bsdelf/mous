@@ -7,7 +7,7 @@
 %%SDK%%include/mous/core/IMediaLoader.h
 %%SDK%%include/mous/core/IPlayer.h
 %%SDK%%include/mous/core/Plugin.h
-%%SDK%%include/mous/core/IPluginManager.h
+%%SDK%%include/mous/core/PluginManager.h
 %%SDK%%include/mous/core/ITagParserFactory.h
 %%SDK%%include/mous/plugin/IDecoder.h
 %%SDK%%include/mous/plugin/IEncoder.h

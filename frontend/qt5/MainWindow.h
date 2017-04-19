@@ -2,7 +2,7 @@
 
 #include <QtWidgets>
 
-#include <core/IPluginManager.h>
+#include <core/PluginManager.h>
 #include <core/IMediaLoader.h>
 #include <core/IPlayer.h>
 #include <core/IConvTask.h>
@@ -93,7 +93,7 @@ private:
     QTimer m_TimerUpdateUi;
     const int m_UpdateInterval = 500;
 
-    IPluginManager* m_PluginManager = nullptr;
+    PluginManager m_PluginManager;
     IMediaLoader* m_MediaLoader = nullptr;
     IPlayer* m_Player = nullptr;
     IConvTaskFactory* m_ConvFactory = nullptr;

@@ -11,7 +11,7 @@ using namespace scx;
 #include <util/Playlist.h>
 #include <core/IPlayer.h>
 #include <core/IMediaLoader.h>
-#include <core/IPluginManager.h>
+#include <core/PluginManager.h>
 #include <core/ITagParserFactory.h>
 using namespace mous;
 
@@ -19,7 +19,7 @@ struct ServerContext
 {
     mutex mtx;
 
-    IPluginManager* mgr;
+    PluginManager mgr;
     IMediaLoader* loader;
     IPlayer* player;
 

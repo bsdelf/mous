@@ -1,20 +1,30 @@
 #pragma once
 
-#include <unordered_map>
-#include <core/IPluginManager.h>
+#include <vector>
+#include <string>
+#include <memory>
+#include <util/ErrorCode.h>
+#include <util/PluginDef.h>
+#include <core/Plugin.h>
 
 struct stat;
 
 namespace mous {
 
 struct PluginInfo;
+/*
 class IDecoder;
 class IRenderer;
 class IMediaPack;
 class ITagParser;
+*/
 
-class PluginManager: public IPluginManager
+class PluginManagerPrivate;
+
+class PluginManager
 {
+    friend PluginManagerPrivate;
+
 public:
     PluginManager();
     ~PluginManager();
@@ -29,7 +39,7 @@ public:
     const PluginInfo* QueryPluginInfo(const std::string& path) const;
 
 private:
-    std::unordered_map<std::string, Plugin*> m_PluginMap;
+    std::unique_ptr<PluginManagerPrivate> d;
 };
 
 }

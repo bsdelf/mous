@@ -21,7 +21,6 @@ ServerContext::ServerContext():
     selectedPlaylist(1),
     selectedItem(6, 0)
 {
-    mgr = IPluginManager::Create();
     loader = IMediaLoader::Create();
     player = IPlayer::Create();
     player->SigFinished()->Connect(&ServerContext::SlotFinished, this);
@@ -35,7 +34,6 @@ ServerContext::~ServerContext()
 
     ClosePlayer();
 
-    IPluginManager::Free(mgr);
     IMediaLoader::Free(loader);
     IPlayer::Free(player);
 }
@@ -43,17 +41,17 @@ ServerContext::~ServerContext()
 bool ServerContext::Init()
 {
     const auto env = GlobalAppEnv::Instance();
-    if (!mgr->LoadPluginDir(env->pluginDir))
+    if (!mgr.LoadPluginDir(env->pluginDir))
         return false;
 
     typedef vector<const Plugin*> PluginAgentArray;
 
-    PluginAgentArray decoders = mgr->PluginAgents(PluginType::Decoder);
+    PluginAgentArray decoders = mgr.PluginAgents(PluginType::Decoder);
     //PluginAgentArray encoders;
-    //mgr->DumpPluginAgent(encoders, PluginType::Encoder);
-    PluginAgentArray renderers = mgr->PluginAgents(PluginType::Renderer);
-    PluginAgentArray mediaPacks = mgr->PluginAgents(PluginType::MediaPack);
-    PluginAgentArray tagParsers = mgr->PluginAgents(PluginType::TagParser);
+    //mgr.DumpPluginAgent(encoders, PluginType::Encoder);
+    PluginAgentArray renderers = mgr.PluginAgents(PluginType::Renderer);
+    PluginAgentArray mediaPacks = mgr.PluginAgents(PluginType::MediaPack);
+    PluginAgentArray tagParsers = mgr.PluginAgents(PluginType::TagParser);
 
     loader->RegisterMediaPackPlugin(mediaPacks);
     loader->RegisterTagParserPlugin(tagParsers);
@@ -68,7 +66,7 @@ void ServerContext::Cleanup()
 {
     loader->UnregisterAll();
     player->UnregisterAll();
-    mgr->UnloadAll();
+    mgr.UnloadAll();
 }
 
 void ServerContext::Dump()

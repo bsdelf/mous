@@ -1,24 +1,21 @@
-#include "PluginManager.h"
-#include <core/Plugin.h>
+#include <core/PluginManager.h>
 using namespace std;
-using namespace mous;
 
 #include "scx/Dir.hpp"
 #include "scx/FileInfo.hpp"
 using namespace scx;
 
-IPluginManager* IPluginManager::Create()
-{
-    return new PluginManager;
-}
+#include <unordered_map>
+namespace mous {
 
-void IPluginManager::Free(IPluginManager* ptr)
+class PluginManagerPrivate
 {
-    if (ptr != nullptr)
-        delete ptr;
-}
+public:
+    std::unordered_map<std::string, Plugin*> indexedPlugins;
+};
 
 PluginManager::PluginManager()
+    : d(std::make_unique<PluginManagerPrivate>())
 {
 
 }
@@ -41,39 +38,39 @@ size_t PluginManager::LoadPluginDir(const string& dir)
         }
     }
 
-    return m_PluginMap.size();
+    return d->indexedPlugins.size();
 }
 
 EmErrorCode PluginManager::LoadPlugin(const string& path)
 {
-    m_PluginMap[path] = new Plugin(path);
+    d->indexedPlugins[path] = new Plugin(path);
     return ErrorCode::Ok;
 }
 
 void PluginManager::UnloadPlugin(const string& path)
 {
-    auto iter = m_PluginMap.find(path);
-    if (iter != m_PluginMap.end()) {
+    auto iter = d->indexedPlugins.find(path);
+    if (iter != d->indexedPlugins.end()) {
         Plugin* pAgent = iter->second;
         delete pAgent;
-        m_PluginMap.erase(iter);
+        d->indexedPlugins.erase(iter);
     }
 }
 
 void PluginManager::UnloadAll()
 {
-    for (auto entry: m_PluginMap) {
+    for (auto entry: d->indexedPlugins) {
         Plugin* pAgent = entry.second;
         delete pAgent;
     }
-    m_PluginMap.clear();
+    d->indexedPlugins.clear();
 }
 
 vector<const Plugin*> PluginManager::PluginAgents(EmPluginType type) const
 {
     vector<const Plugin*> list;
-    list.reserve(m_PluginMap.size());
-    for (auto entry: m_PluginMap) {
+    list.reserve(d->indexedPlugins.size());
+    for (auto entry: d->indexedPlugins) {
         Plugin* pAgent = entry.second;
         if (pAgent->Type() == type) {
             list.push_back(pAgent);
@@ -85,8 +82,8 @@ vector<const Plugin*> PluginManager::PluginAgents(EmPluginType type) const
 vector<string> PluginManager::PluginPaths() const
 {
     vector<string> list;
-    list.reserve(m_PluginMap.size());
-    for (auto entry: m_PluginMap) {
+    list.reserve(d->indexedPlugins.size());
+    for (auto entry: d->indexedPlugins) {
         list.push_back(entry.first);
     }
     return list;
@@ -94,6 +91,8 @@ vector<string> PluginManager::PluginPaths() const
 
 const PluginInfo* PluginManager::QueryPluginInfo(const std::string& path) const
 {
-    auto iter = m_PluginMap.find(path);
-    return (iter != m_PluginMap.end()) ? iter->second->Info() : nullptr;
+    auto iter = d->indexedPlugins.find(path);
+    return (iter != d->indexedPlugins.end()) ? iter->second->Info() : nullptr;
+}
+
 }

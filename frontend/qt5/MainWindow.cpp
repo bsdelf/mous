@@ -77,29 +77,28 @@ void MainWindow::closeEvent(QCloseEvent*)
 
 void MainWindow::InitMousCore()
 {
-    m_PluginManager = IPluginManager::Create();
     m_MediaLoader = IMediaLoader::Create();
     m_Player = IPlayer::Create();
     m_ConvFactory = IConvTaskFactory::Create();
     m_ParserFactory = ITagParserFactory::Create();
 
-    m_PluginManager->LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
-    //const vector<string>& pathList = m_PluginManager->PluginPaths();
+    m_PluginManager.LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
+    //const vector<string>& pathList = m_PluginManager.PluginPaths();
 
     vector<const Plugin*> packAgentList = 
-        m_PluginManager->PluginAgents(PluginType::MediaPack);
+        m_PluginManager.PluginAgents(PluginType::MediaPack);
     vector<const Plugin*> tagAgentList = 
-        m_PluginManager->PluginAgents(PluginType::TagParser);
+        m_PluginManager.PluginAgents(PluginType::TagParser);
 
     m_MediaLoader->RegisterMediaPackPlugin(packAgentList);
     m_MediaLoader->RegisterTagParserPlugin(tagAgentList);
 
     vector<const Plugin*> decoderAgentList =
-        m_PluginManager->PluginAgents(PluginType::Decoder);
+        m_PluginManager.PluginAgents(PluginType::Decoder);
     vector<const Plugin*> encoderAgentList = 
-        m_PluginManager->PluginAgents(PluginType::Encoder);
+        m_PluginManager.PluginAgents(PluginType::Encoder);
     vector<const Plugin*> rendererAgentList =
-        m_PluginManager->PluginAgents(PluginType::Renderer);
+        m_PluginManager.PluginAgents(PluginType::Renderer);
 
     m_Player->RegisterRendererPlugin(rendererAgentList[0]);
     m_Player->RegisterDecoderPlugin(decoderAgentList);
@@ -131,9 +130,8 @@ void MainWindow::ClearMousCore()
     m_MediaLoader->UnregisterAll();
     m_ConvFactory->UnregisterAll();
     m_ParserFactory->UnregisterAll();
-    m_PluginManager->UnloadAll();
+    m_PluginManager.UnloadAll();
 
-    IPluginManager::Free(m_PluginManager);
     IMediaLoader::Free(m_MediaLoader);
     IPlayer::Free(m_Player);
     IConvTaskFactory::Free(m_ConvFactory);
