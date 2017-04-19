@@ -1,33 +1,40 @@
-#include "MediaLoader.h"
+#include <unordered_map>
+
+#include "core/MediaLoader.h"
 
 #include <scx/FileHelper.hpp>
 #include <scx/Conv.hpp>
 using namespace scx;
 
-#include "util/MediaItem.h"
 #include "plugin/IMediaPack.h"
+#include "util/MediaItem.h"
 #include "plugin/ITagParser.h"
 #include "core/Plugin.h"
-using namespace mous;
 
-//#include <iostream>
-//using namespace std;
+namespace mous {
 
-IMediaLoader* IMediaLoader::Create()
+class MediaLoaderPrivate
 {
-    return new MediaLoader;
+public:
+    std::unordered_map<const Plugin*, void*> indexedObjects;
+    std::unordered_map<std::string, IMediaPack*> indexedMediaPacks;
+    std::unordered_map<std::string, ITagParser*> indexedTagParsers;
+};
+
+MediaLoader::MediaLoader()
+    : d(std::make_unique<MediaLoaderPrivate>())
+{
 }
 
-void IMediaLoader::Free(IMediaLoader* ptr)
+MediaLoader::~MediaLoader()
 {
-    if (ptr != nullptr)
-        delete ptr;
 }
 
 void MediaLoader::RegisterMediaPackPlugin(const Plugin* pAgent)
 {
-    if (pAgent->Type() == PluginType::MediaPack)
+    if (pAgent->Type() == PluginType::MediaPack) {
         AddMediaPack(pAgent);
+    }
 }
 
 void MediaLoader::RegisterMediaPackPlugin(vector<const Plugin*>& agents)
@@ -39,8 +46,9 @@ void MediaLoader::RegisterMediaPackPlugin(vector<const Plugin*>& agents)
 
 void MediaLoader::RegisterTagParserPlugin(const Plugin* pAgent)
 {
-    if (pAgent->Type() == PluginType::TagParser)
+    if (pAgent->Type() == PluginType::TagParser) {
         AddTagParser(pAgent);
+    }
 }
 
 void MediaLoader::RegisterTagParserPlugin(vector<const Plugin*>& agents)
@@ -75,8 +83,8 @@ void MediaLoader::UnregisterPlugin(vector<const Plugin*>& agents)
 
 void MediaLoader::UnregisterAll()
 {
-    while (!m_AgentMap.empty()) {
-        auto iter = m_AgentMap.begin();
+    while (!d->indexedObjects.empty()) {
+        auto iter = d->indexedObjects.begin();
         UnregisterPlugin(iter->first);
     }
 }
@@ -85,35 +93,35 @@ void MediaLoader::AddMediaPack(const Plugin* pAgent)
 {
     // Register agent.
     IMediaPack* pPack = (IMediaPack*)pAgent->CreateObject();
-    m_AgentMap.emplace(pAgent, pPack);
+    d->indexedObjects.emplace(pAgent, pPack);
 
     // Register MediaPack.
     for (const string& item: pPack->FileSuffix()) {
         const string& suffix = ToLower(item);
-        auto iter = m_MediaPackMap.find(suffix);
-        if (iter == m_MediaPackMap.end()) {
-            m_MediaPackMap.emplace(suffix, pPack);
+        auto iter = d->indexedMediaPacks.find(suffix);
+        if (iter == d->indexedMediaPacks.end()) {
+            d->indexedMediaPacks.emplace(suffix, pPack);
         }
     }
 }
 
 void MediaLoader::RemoveMediaPack(const Plugin* pAgent)
 {
-    auto iter = m_AgentMap.find(pAgent);
-    if (iter != m_AgentMap.end()) {
+    auto iter = d->indexedObjects.find(pAgent);
+    if (iter != d->indexedObjects.end()) {
         // Unregister MediaPack.
         IMediaPack* pPack = (IMediaPack*)iter->second;
         for (const string& item: pPack->FileSuffix()) {
             const string& suffix = ToLower(item);
-            auto iter = m_MediaPackMap.find(suffix);
-            if (iter != m_MediaPackMap.end()) {
-                m_MediaPackMap.erase(iter);
+            auto iter = d->indexedMediaPacks.find(suffix);
+            if (iter != d->indexedMediaPacks.end()) {
+                d->indexedMediaPacks.erase(iter);
             }
         }
 
         // Unregister Plugin.
         pAgent->FreeObject(pPack);
-        m_AgentMap.erase(iter);
+        d->indexedObjects.erase(iter);
     }
 }
 
@@ -121,43 +129,43 @@ void MediaLoader::AddTagParser(const Plugin* pAgent)
 {
     // Register Plugin.
     ITagParser* pParser = (ITagParser*)pAgent->CreateObject();
-    m_AgentMap.emplace(pAgent, pParser);
+    d->indexedObjects.emplace(pAgent, pParser);
 
     // Register TagParser.
     for (const string& item: pParser->FileSuffix()) {
         const string& suffix = ToLower(item);
-        auto iter = m_TagParserMap.find(suffix);
-        if (iter == m_TagParserMap.end()) {
-            m_TagParserMap.emplace(suffix, pParser);
+        auto iter = d->indexedTagParsers.find(suffix);
+        if (iter == d->indexedTagParsers.end()) {
+            d->indexedTagParsers.emplace(suffix, pParser);
         }
     }
 }
 
 void MediaLoader::RemoveTagParser(const Plugin* pAgent)
 {
-    auto iter = m_AgentMap.find(pAgent);
-    if (iter != m_AgentMap.end()) {
+    auto iter = d->indexedObjects.find(pAgent);
+    if (iter != d->indexedObjects.end()) {
         // Unregister TagParser.
         ITagParser* pParser = (ITagParser*)iter->second;
         for (const string& item: pParser->FileSuffix()) {
             const string& suffix = ToLower(item);
-            auto iter = m_TagParserMap.find(suffix);
-            if (iter != m_TagParserMap.end()) {
-                m_TagParserMap.erase(iter);
+            auto iter = d->indexedTagParsers.find(suffix);
+            if (iter != d->indexedTagParsers.end()) {
+                d->indexedTagParsers.erase(iter);
             }
         }
 
         // Unregister Plugin.
         pAgent->FreeObject(pParser);
-        m_AgentMap.erase(iter);
+        d->indexedObjects.erase(iter);
     }
 }
 
 vector<string> MediaLoader::SupportedSuffixes() const
 {
     vector<string> list;
-    list.reserve(m_MediaPackMap.size());
-    for (const auto& entry: m_MediaPackMap) {
+    list.reserve(d->indexedMediaPacks.size());
+    for (const auto& entry: d->indexedMediaPacks) {
         list.push_back(entry.first);
     }
     return list;
@@ -177,15 +185,15 @@ EmErrorCode MediaLoader::TryUnpack(const string& path, deque<MediaItem>& list) c
 {
     // Find MediaPack.
     const string& suffix = ToLower(FileHelper::FileSuffix(path));
-    auto iter = m_MediaPackMap.find(suffix);
+    auto iter = d->indexedMediaPacks.find(suffix);
 
-    if (iter == m_MediaPackMap.end()) {
+    if (iter == d->indexedMediaPacks.end()) {
         // General Media
         list.emplace_back(path);
     } else {
         // MediaPack
         IMediaPack* pack = iter->second;
-        pack->DumpMedia(path, list, &m_MediaPackMap);
+        pack->DumpMedia(path, list, &d->indexedMediaPacks);
     }
 
     return ErrorCode::Ok;
@@ -196,38 +204,47 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem>& list) const
     for (auto& item: list) {
         // Find TagParser.
         const string& suffix = ToLower(FileHelper::FileSuffix(item.url));
-        auto iter = m_TagParserMap.find(suffix);
-        if (iter == m_TagParserMap.end()) {
-            iter = m_TagParserMap.find("*");
-            if (iter == m_TagParserMap.end())
+        auto iter = d->indexedTagParsers.find(suffix);
+        if (iter == d->indexedTagParsers.end()) {
+            iter = d->indexedTagParsers.find("*");
+            if (iter == d->indexedTagParsers.end()) {
                 continue;
+            }
         }
 
         // Parse & Fill.
         ITagParser* parser = iter->second;
         parser->Open(item.url);
         if (parser->HasTag()) {
-            if (item.tag.title.empty())
+            if (item.tag.title.empty()) {
                 item.tag.title = parser->Title();
-            if (item.tag.artist.empty())
+            }
+            if (item.tag.artist.empty()) {
                 item.tag.artist = parser->Artist();
-            if (item.tag.album.empty())
+            }
+            if (item.tag.album.empty()) {
                 item.tag.album = parser->Album();
-            if (item.tag.comment.empty())
+            }
+            if (item.tag.comment.empty()) {
                 item.tag.comment = parser->Comment();
-            if (item.tag.genre.empty())
+            }
+            if (item.tag.genre.empty()) {
                 item.tag.genre = parser->Genre();
-            if (item.tag.year < 0)
+            }
+            if (item.tag.year < 0) {
                 item.tag.year = parser->Year();
-            if (item.tag.track < 0)
+            }
+            if (item.tag.track < 0) {
                 item.tag.track = parser->Track();
+            }
         } else {
             //cout << "WARN: no tag!!" << endl;
         }
 
         if (parser->HasAudioProperty()) {
-            if (item.duration < 0)
+            if (item.duration < 0) {
                 item.duration = parser->Duration();
+            }
         } else {
             item.duration = 0;
             //cout << "FATAL: no properties!!" << endl;
@@ -237,4 +254,6 @@ EmErrorCode MediaLoader::TryParseTag(deque<MediaItem>& list) const
     }
 
     return ErrorCode::Ok;
+}
+
 }

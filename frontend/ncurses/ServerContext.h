@@ -10,7 +10,7 @@ using namespace scx;
 #include <util/MediaItem.h>
 #include <util/Playlist.h>
 #include <core/IPlayer.h>
-#include <core/IMediaLoader.h>
+#include <core/MediaLoader.h>
 #include <core/PluginManager.h>
 #include <core/ITagParserFactory.h>
 using namespace mous;
@@ -20,7 +20,7 @@ struct ServerContext
     mutex mtx;
 
     PluginManager mgr;
-    IMediaLoader* loader;
+    MediaLoader loader;
     IPlayer* player;
 
     typedef Playlist<MediaItem> playlist_t;

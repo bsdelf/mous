@@ -119,7 +119,7 @@ void Session::NotifySupportedSuffixes()
 {
     lock_guard<mutex> locker(m_Context->mtx);
     const auto& s1 = m_Context->player->SupportedSuffixes();
-    auto s2 = m_Context->loader->SupportedSuffixes();
+    auto s2 = m_Context->loader.SupportedSuffixes();
     s2.insert(s2.begin(), s1.begin(), s1.end());
     SEND_PACKET((char)Protocol::Group::App, << (char)Op::App::Suffixes << s2);
 }
@@ -427,7 +427,7 @@ void Session::PlaylistAppend(BufObj& buf)
         return;
 
     deque<MediaItem> list;
-    if (m_Context->loader->LoadMedia(path, list) != ErrorCode::Ok)
+    if (m_Context->loader.LoadMedia(path, list) != ErrorCode::Ok)
         return;
     if (list.empty())
         return;

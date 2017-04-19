@@ -49,7 +49,7 @@ int cmd_info(int argc, char** argv)
         // tag info
         {
             deque<MediaItem> media_list;
-            ctx.loader->LoadMedia(argv[i], media_list);
+            ctx.loader.LoadMedia(argv[i], media_list);
             for (auto& item: media_list) {
                 // duration
                 if (item.hasRange) {

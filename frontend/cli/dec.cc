@@ -34,7 +34,7 @@ int cmd_dec(int argc, char** argv)
 
         // load media file
         deque<MediaItem> media_list;
-        ctx.loader->LoadMedia(argv[i], media_list);
+        ctx.loader.LoadMedia(argv[i], media_list);
 
         // convert each track
         for (size_t mi = 0; mi < media_list.size(); ++mi) {

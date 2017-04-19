@@ -4,7 +4,7 @@
 %%SDK%%include/mous/charset/ICharsetConv.h
 %%SDK%%include/mous/core/IConvTask.h
 %%SDK%%include/mous/core/IConvTaskFactory.h
-%%SDK%%include/mous/core/IMediaLoader.h
+%%SDK%%include/mous/core/MediaLoader.h
 %%SDK%%include/mous/core/IPlayer.h
 %%SDK%%include/mous/core/Plugin.h
 %%SDK%%include/mous/core/PluginManager.h

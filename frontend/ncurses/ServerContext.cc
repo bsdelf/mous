@@ -21,7 +21,6 @@ ServerContext::ServerContext():
     selectedPlaylist(1),
     selectedItem(6, 0)
 {
-    loader = IMediaLoader::Create();
     player = IPlayer::Create();
     player->SigFinished()->Connect(&ServerContext::SlotFinished, this);
 
@@ -34,7 +33,6 @@ ServerContext::~ServerContext()
 
     ClosePlayer();
 
-    IMediaLoader::Free(loader);
     IPlayer::Free(player);
 }
 
@@ -53,8 +51,8 @@ bool ServerContext::Init()
     PluginAgentArray mediaPacks = mgr.PluginAgents(PluginType::MediaPack);
     PluginAgentArray tagParsers = mgr.PluginAgents(PluginType::TagParser);
 
-    loader->RegisterMediaPackPlugin(mediaPacks);
-    loader->RegisterTagParserPlugin(tagParsers);
+    loader.RegisterMediaPackPlugin(mediaPacks);
+    loader.RegisterTagParserPlugin(tagParsers);
 
     player->RegisterRendererPlugin(renderers[0]);
     player->RegisterDecoderPlugin(decoders);
@@ -64,7 +62,7 @@ bool ServerContext::Init()
 
 void ServerContext::Cleanup()
 {
-    loader->UnregisterAll();
+    loader.UnregisterAll();
     player->UnregisterAll();
     mgr.UnloadAll();
 }

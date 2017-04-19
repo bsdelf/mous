@@ -90,7 +90,7 @@ int cmd_play(int argc, char* argv[])
         deque<MediaItem> media_list;
         FileInfo info(argv[i]);
         if (info.Exists() && (info.Type() != FileType::Directory)) {
-            ctx.loader->LoadMedia(argv[i], media_list);
+            ctx.loader.LoadMedia(argv[i], media_list);
             PLAYLIST->Append(media_list);
         } else {
             printf("invaild file: %s\n", argv[i]);

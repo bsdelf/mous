@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "core/PluginManager.h"
-#include "core/IMediaLoader.h"
+#include "core/MediaLoader.h"
 #include "core/ITagParserFactory.h"
 #include "core/IConvTaskFactory.h"
 
@@ -14,7 +14,7 @@ struct mous_ctx
 
     mous::PluginManager mgr;
 
-    mous::IMediaLoader* loader;
+    mous::MediaLoader loader;
     mous::ITagParserFactory* parser_factory;
     mous::IConvTaskFactory* conv_factory;
 

@@ -10,7 +10,7 @@ using namespace std;
 
 #include "util/MediaItem.h"
 #include "util/PluginOption.h"
-#include "core/IMediaLoader.h"
+#include "core/MediaLoader.h"
 #include "core/PluginManager.h"
 #include "core/IConvTask.h"
 #include "core/IConvTaskFactory.h"
@@ -123,9 +123,8 @@ int main(int argc, char** argv)
     }
 
     // setup media loader
-    ctx.loader = IMediaLoader::Create();
-    ctx.loader->RegisterMediaPackPlugin(ctx.pack_agents);
-    ctx.loader->RegisterTagParserPlugin(ctx.tag_agents);
+    ctx.loader.RegisterMediaPackPlugin(ctx.pack_agents);
+    ctx.loader.RegisterTagParserPlugin(ctx.tag_agents);
     // setup parser factory
     ctx.parser_factory = ITagParserFactory::Create();
     ctx.parser_factory->RegisterTagParserPlugin(ctx.tag_agents);
@@ -153,8 +152,7 @@ int main(int argc, char** argv)
     }
 
     // cleanup
-    ctx.loader->UnregisterAll();
-    IMediaLoader::Free(ctx.loader);
+    ctx.loader.UnregisterAll();
     ctx.parser_factory->UnregisterAll();
     ITagParserFactory::Free(ctx.parser_factory);
     ctx.conv_factory->UnregisterAll();

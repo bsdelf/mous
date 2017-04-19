@@ -1,21 +1,27 @@
 #pragma once
 
-#include <unordered_map>
-#include <core/IMediaLoader.h>
 using namespace std;
+
+#include <vector>
+#include <deque>
+#include <string>
+#include <memory>
+
+#include <util/ErrorCode.h>
+#include <util/MediaItem.h>
+#include <core/Plugin.h>
 
 namespace mous {
 
-struct MediaItem;
-class Plugin;
-class IMediaPack;
-class ITagParser;
+class MediaLoaderPrivate;
 
-class MediaLoader: public IMediaLoader
+class MediaLoader
 {
+    friend MediaLoaderPrivate;
+
 public:
-    MediaLoader() = default;
-    ~MediaLoader() = default;
+    MediaLoader();
+    ~MediaLoader();
 
     void RegisterMediaPackPlugin(const Plugin* pAgent);
     void RegisterMediaPackPlugin(std::vector<const Plugin*>& agents);
@@ -40,9 +46,7 @@ private:
     EmErrorCode TryParseTag(std::deque<MediaItem>& list) const;
 
 private:
-    std::unordered_map<const Plugin*, void*> m_AgentMap;
-    std::unordered_map<std::string, IMediaPack*> m_MediaPackMap;
-    std::unordered_map<std::string, ITagParser*> m_TagParserMap;
+    std::unique_ptr<MediaLoaderPrivate> d;
 };
 
 }
