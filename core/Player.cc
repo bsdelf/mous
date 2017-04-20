@@ -1,12 +1,12 @@
-#include <core/Plugin.h>
 #include <core/Player.h>
+#include <core/Plugin.h>
 
-#include "PlayerPrivate.h"
+#include "PlayerImpl.h"
 
 namespace mous {
 
 Player::Player()
-    : d(std::make_unique<PlayerPrivate>())
+    : impl(std::make_unique<Impl>())
 {
 }
 
@@ -16,177 +16,177 @@ Player::~Player()
 
 EmPlayerStatus Player::Status() const
 {
-    return d->Status();
+    return impl->Status();
 }
 
 void Player::RegisterDecoderPlugin(const Plugin* pAgent)
 {
-    d->RegisterDecoderPlugin(pAgent);
+    return impl->RegisterDecoderPlugin(pAgent);
 }
 
 void Player::RegisterDecoderPlugin(vector<const Plugin*>& agents)
 {
-    d->RegisterDecoderPlugin(agents);
+    return impl->RegisterDecoderPlugin(agents);
 }
 
 void Player::RegisterRendererPlugin(const Plugin* pAgent)
 {
-    d->RegisterRendererPlugin(pAgent);
+    return impl->RegisterRendererPlugin(pAgent);
 }
 
 void Player::UnregisterPlugin(const Plugin* pAgent)
 {
-    d->UnregisterPlugin(pAgent);
+    return impl->UnregisterPlugin(pAgent);
 }
 
 void Player::UnregisterPlugin(vector<const Plugin*>& agents)
 {
-    d->UnregisterPlugin(agents);
+    return impl->UnregisterPlugin(agents);
 }
 
 void Player::UnregisterAll()
 {
-    d->UnregisterAll();
+    return impl->UnregisterAll();
 }
 
 vector<string> Player::SupportedSuffixes() const
 {
-    return d->SupportedSuffixes();
+    return impl->SupportedSuffixes();
 }
 
 int Player::BufferCount() const
 {
-    return d->BufferCount();
+    return impl->BufferCount();
 }
 
 void Player::SetBufferCount(int count)
 {
-    d->SetBufferCount(count);
+    return impl->SetBufferCount(count);
 }
 
 int Player::Volume() const
 {
-    return d->Volume();
+    return impl->Volume();
 }
 
 void Player::SetVolume(int level)
 {
-    d->SetVolume(level);
+    return impl->SetVolume(level);
 }
 
 EmErrorCode Player::Open(const string& path)
 {
-    return d->Open(path);
+    return impl->Open(path);
 }
 
 void Player::Close()
 {
-    d->Close();
+    return impl->Close();
 }
 
 string Player::FileName() const
 {
-    return d->FileName();
+    return impl->FileName();
 }
 
 void Player::Play()
 {
-    d->Play();
+    return impl->Play();
 }
 
 void Player::Play(uint64_t msBegin, uint64_t msEnd)
 {
-    d->Play(msBegin, msEnd);
+    return impl->Play(msBegin, msEnd);
 }
 
 void Player::Pause()
 {
-    d->Pause();
+    return impl->Pause();
 }
 
 void Player::Resume()
 {
-    d->Resume();
+    return impl->Resume();
 }
 
 void Player::SeekTime(uint64_t msPos)
 {
-    d->SeekTime(msPos);
+    return impl->SeekTime(msPos);
 }
 
 void Player::SeekPercent(double percent)
 {
-    d->SeekPercent(percent);
+    return impl->SeekPercent(percent);
 }
 
 void Player::PauseDecoder()
 {
-    d->PauseDecoder();
+    return impl->PauseDecoder();
 }
 
 void Player::ResumeDecoder()
 {
-    d->ResumeDecoder();
+    return impl->ResumeDecoder();
 }
 
 int32_t Player::BitRate() const
 {
-    return d->BitRate();
+    return impl->BitRate();
 }
 
 int32_t Player::SamleRate() const
 {
-    return d->SamleRate();
+    return impl->SamleRate();
 }
 
 uint64_t Player::Duration() const
 {
-    return d->Duration();
+    return impl->Duration();
 }
 
 uint64_t Player::RangeBegin() const
 {
-    return d->RangeBegin();
+    return impl->RangeBegin();
 }
 
 uint64_t Player::RangeEnd() const
 {
-    return d->RangeEnd();
+    return impl->RangeEnd();
 }
 
 uint64_t Player::RangeDuration() const
 {
-    return d->RangeDuration();
+    return impl->RangeDuration();
 }
 
 uint64_t Player::OffsetMs() const
 {
-    return d->OffsetMs();
+    return impl->OffsetMs();
 }
 
 uint64_t Player::CurrentMs() const
 {
-    return d->CurrentMs();
+    return impl->CurrentMs();
 }
 
 EmAudioMode Player::AudioMode() const
 {
-    return d->AudioMode();
+    return impl->AudioMode();
 }
 
 std::vector<PluginOption> Player::DecoderPluginOption() const
 {
-    return d->DecoderPluginOption();
+    return impl->DecoderPluginOption();
 }
 
 PluginOption Player::RendererPluginOption() const
 {
-    return d->RendererPluginOption();
+    return impl->RendererPluginOption();
 }
 
 Signal<void (void)>* Player::SigFinished()
 {
-    return d->SigFinished();
+    return impl->SigFinished();
 }
 
 }

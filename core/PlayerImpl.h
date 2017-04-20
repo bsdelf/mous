@@ -56,10 +56,10 @@ struct DecoderPluginNode
     IDecoder* decoder;
 };
 
-class PlayerPrivate
+class Player::Impl
 {
   public:
-    PlayerPrivate()
+    Impl()
     {
         m_UnitBuffers.AllocBuffer(5);
 
@@ -146,7 +146,7 @@ class PlayerPrivate
         });
     }
 
-    ~PlayerPrivate()
+    ~Impl()
     {
         Close();
 
@@ -211,80 +211,6 @@ class PlayerPrivate
         for (const auto agent : agents) {
             UnregisterPlugin(agent);
         }
-    }
-
-    void AddDecoderPlugin(const Plugin* pAgent)
-    {
-        // create Decoder & get suffix
-        IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
-        const vector<string>& list = pDecoder->FileSuffix();
-
-        // try add
-        bool usedAtLeastOnce = false;
-        for (const string& item : list) {
-            const string& suffix = ToLower(item);
-            auto iter = m_DecoderPluginMap.find(suffix);
-            if (iter == m_DecoderPluginMap.end()) {
-                m_DecoderPluginMap.emplace(suffix, DecoderPluginNode{ pAgent, pDecoder });
-                usedAtLeastOnce = true;
-            }
-        }
-
-        // clear if not used
-        if (!usedAtLeastOnce) {
-            pAgent->FreeObject(pDecoder);
-        }
-    }
-
-    void RemoveDecoderPlugin(const Plugin* pAgent)
-    {
-        // get suffix
-        IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
-        const vector<string>& list = pDecoder->FileSuffix();
-        pAgent->FreeObject(pDecoder);
-
-        // find plugin
-        bool freedOnce = false;
-        for (const string& item : list) {
-            const string& suffix = ToLower(item);
-            auto iter = m_DecoderPluginMap.find(suffix);
-            if (iter != m_DecoderPluginMap.end()) {
-                const DecoderPluginNode& node = iter->second;
-                if (node.agent == pAgent) {
-                    if (!freedOnce) {
-                        if (node.decoder == m_Decoder) {
-                            Close();
-                        }
-                        pAgent->FreeObject(node.decoder);
-                        freedOnce = true;
-                    }
-                    m_DecoderPluginMap.erase(iter);
-                }
-            }
-        }
-    }
-
-    void SetRendererPlugin(const Plugin* pAgent)
-    {
-        if (pAgent == nullptr || m_RendererPlugin != nullptr) {
-            return;
-        }
-
-        m_RendererPlugin = pAgent;
-        m_Renderer = (IRenderer*)pAgent->CreateObject();
-        m_Renderer->Open();
-    }
-
-    void UnsetRendererPlugin(const Plugin* pAgent)
-    {
-        if (pAgent != m_RendererPlugin || m_RendererPlugin == nullptr) {
-            return;
-        }
-
-        m_Renderer->Close();
-        m_RendererPlugin->FreeObject(m_Renderer);
-        m_Renderer = nullptr;
-        m_RendererPlugin = nullptr;
     }
 
     void UnregisterAll()
@@ -630,6 +556,82 @@ class PlayerPrivate
 
     Signal<void(void)>* SigFinished() { return &m_SigFinished; }
 
+  private:
+    void AddDecoderPlugin(const Plugin* pAgent)
+    {
+        // create Decoder & get suffix
+        IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
+        const vector<string>& list = pDecoder->FileSuffix();
+
+        // try add
+        bool usedAtLeastOnce = false;
+        for (const string& item : list) {
+            const string& suffix = ToLower(item);
+            auto iter = m_DecoderPluginMap.find(suffix);
+            if (iter == m_DecoderPluginMap.end()) {
+                m_DecoderPluginMap.emplace(suffix, DecoderPluginNode{ pAgent, pDecoder });
+                usedAtLeastOnce = true;
+            }
+        }
+
+        // clear if not used
+        if (!usedAtLeastOnce) {
+            pAgent->FreeObject(pDecoder);
+        }
+    }
+
+    void RemoveDecoderPlugin(const Plugin* pAgent)
+    {
+        // get suffix
+        IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
+        const vector<string>& list = pDecoder->FileSuffix();
+        pAgent->FreeObject(pDecoder);
+
+        // find plugin
+        bool freedOnce = false;
+        for (const string& item : list) {
+            const string& suffix = ToLower(item);
+            auto iter = m_DecoderPluginMap.find(suffix);
+            if (iter != m_DecoderPluginMap.end()) {
+                const DecoderPluginNode& node = iter->second;
+                if (node.agent == pAgent) {
+                    if (!freedOnce) {
+                        if (node.decoder == m_Decoder) {
+                            Close();
+                        }
+                        pAgent->FreeObject(node.decoder);
+                        freedOnce = true;
+                    }
+                    m_DecoderPluginMap.erase(iter);
+                }
+            }
+        }
+    }
+
+    void SetRendererPlugin(const Plugin* pAgent)
+    {
+        if (pAgent == nullptr || m_RendererPlugin != nullptr) {
+            return;
+        }
+
+        m_RendererPlugin = pAgent;
+        m_Renderer = (IRenderer*)pAgent->CreateObject();
+        m_Renderer->Open();
+    }
+
+    void UnsetRendererPlugin(const Plugin* pAgent)
+    {
+        if (pAgent != m_RendererPlugin || m_RendererPlugin == nullptr) {
+            return;
+        }
+
+        m_Renderer->Close();
+        m_RendererPlugin->FreeObject(m_Renderer);
+        m_Renderer = nullptr;
+        m_RendererPlugin = nullptr;
+    }
+
+  private:
     EmPlayerStatus m_Status = PlayerStatus::Closed;
 
     string m_DecodeFile;

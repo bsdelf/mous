@@ -5,11 +5,9 @@
 
 namespace mous {
 
-class PluginPrivate;
-
 class Plugin
 {
-    friend PluginPrivate;
+    class Impl;
 
 public:
     explicit Plugin(const std::string& path);
@@ -21,7 +19,7 @@ public:
     void FreeObject(void* inf) const;
 
 private:
-    std::unique_ptr<PluginPrivate> d;
+    std::unique_ptr<Impl> impl;
 };
 
 }

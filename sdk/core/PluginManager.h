@@ -7,23 +7,11 @@
 #include <util/PluginDef.h>
 #include <core/Plugin.h>
 
-struct stat;
-
 namespace mous {
-
-struct PluginInfo;
-/*
-class IDecoder;
-class IRenderer;
-class IMediaPack;
-class ITagParser;
-*/
-
-class PluginManagerPrivate;
 
 class PluginManager
 {
-    friend PluginManagerPrivate;
+    class Impl;
 
 public:
     PluginManager();
@@ -39,7 +27,7 @@ public:
     const PluginInfo* QueryPluginInfo(const std::string& path) const;
 
 private:
-    std::unique_ptr<PluginManagerPrivate> d;
+    std::unique_ptr<Impl> impl;
 };
 
 }

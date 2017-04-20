@@ -26,11 +26,9 @@ enum e
 }
 using EmPlayerStatus = PlayerStatus::e;
 
-class PlayerPrivate;
-
 class Player
 {
-    friend PlayerPrivate;
+    class Impl;
 
 public:
     Player();
@@ -87,7 +85,7 @@ public:
     scx::Signal<void (void)>* SigFinished();
 
 private:
-    std::unique_ptr<PlayerPrivate> d;
+    std::unique_ptr<Impl> impl;
 };
 
 }

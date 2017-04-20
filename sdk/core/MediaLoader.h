@@ -1,7 +1,5 @@
 #pragma once
 
-using namespace std;
-
 #include <vector>
 #include <deque>
 #include <string>
@@ -13,11 +11,9 @@ using namespace std;
 
 namespace mous {
 
-class MediaLoaderPrivate;
-
 class MediaLoader
 {
-    friend MediaLoaderPrivate;
+    class Impl;
 
 public:
     MediaLoader();
@@ -30,23 +26,14 @@ public:
     void RegisterTagParserPlugin(std::vector<const Plugin*>& agents);
 
     void UnregisterPlugin(const Plugin* pAgent);
-    void UnregisterPlugin(vector<const Plugin*>& agents);
+    void UnregisterPlugin(std::vector<const Plugin*>& agents);
     void UnregisterAll();
 
     std::vector<std::string> SupportedSuffixes() const;
     EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const;
 
 private:
-    void AddMediaPack(const Plugin* pAgent);
-    void RemoveMediaPack(const Plugin* pAgent);
-    void AddTagParser(const Plugin* pAgent);
-    void RemoveTagParser(const Plugin* pAgent);
- 
-    EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem>& list) const;
-    EmErrorCode TryParseTag(std::deque<MediaItem>& list) const;
-
-private:
-    std::unique_ptr<MediaLoaderPrivate> d;
+    std::unique_ptr<Impl> impl;
 };
 
 }
