@@ -41,10 +41,10 @@ MainWindow::~MainWindow()
 
     QMutexLocker locker(&m_PlayerMutex);
 
-    m_Player->SigFinished()->Disconnect(this);
+    m_Player.SigFinished()->Disconnect(this);
 
-    if (m_Player->Status() == PlayerStatus::Playing) {
-        m_Player->Close();
+    if (m_Player.Status() == PlayerStatus::Playing) {
+        m_Player.Close();
     }
     if (m_TimerUpdateUi.isActive()) {
         m_TimerUpdateUi.stop();
@@ -64,7 +64,7 @@ void MainWindow::closeEvent(QCloseEvent*)
     env->tabCount = m_TabWidgetPlaylist->count();
     env->tabIndex = m_TabWidgetPlaylist->currentIndex();
     QMutexLocker locker(&m_PlayerMutex);
-    env->volume = m_Player->Volume();
+    env->volume = m_Player.Volume();
     locker.unlock();
     m_FrmTagEditor.SaveUiStatus();
 
@@ -77,8 +77,6 @@ void MainWindow::closeEvent(QCloseEvent*)
 
 void MainWindow::InitMousCore()
 {
-    m_MediaLoader = IMediaLoader::Create();
-    m_Player = IPlayer::Create();
     m_ConvFactory = IConvTaskFactory::Create();
     m_ParserFactory = ITagParserFactory::Create();
 
@@ -90,8 +88,8 @@ void MainWindow::InitMousCore()
     vector<const Plugin*> tagAgentList = 
         m_PluginManager.PluginAgents(PluginType::TagParser);
 
-    m_MediaLoader->RegisterMediaPackPlugin(packAgentList);
-    m_MediaLoader->RegisterTagParserPlugin(tagAgentList);
+    m_MediaLoader.RegisterMediaPackPlugin(packAgentList);
+    m_MediaLoader.RegisterTagParserPlugin(tagAgentList);
 
     vector<const Plugin*> decoderAgentList =
         m_PluginManager.PluginAgents(PluginType::Decoder);
@@ -100,17 +98,17 @@ void MainWindow::InitMousCore()
     vector<const Plugin*> rendererAgentList =
         m_PluginManager.PluginAgents(PluginType::Renderer);
 
-    m_Player->RegisterRendererPlugin(rendererAgentList[0]);
-    m_Player->RegisterDecoderPlugin(decoderAgentList);
-    m_Player->SetBufferCount(102);
-    m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
+    m_Player.RegisterRendererPlugin(rendererAgentList[0]);
+    m_Player.RegisterDecoderPlugin(decoderAgentList);
+    m_Player.SetBufferCount(102);
+    m_Player.SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
 
     m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
     m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
 
     m_ParserFactory->RegisterTagParserPlugin(tagAgentList);
 
-    m_FrmTagEditor.SetPlayer(m_Player);
+    m_FrmTagEditor.SetPlayer(&m_Player);
     m_FrmTagEditor.SetTagParserFactory(m_ParserFactory);
 
     qDebug() << ">> MediaPack count:" << packAgentList.size();
@@ -122,18 +120,16 @@ void MainWindow::InitMousCore()
 
 void MainWindow::ClearMousCore()
 {
-    m_Player->SigFinished()->Disconnect(this);
+    m_Player.SigFinished()->Disconnect(this);
     m_FrmTagEditor.SetPlayer(nullptr);
     m_FrmTagEditor.SetTagParserFactory(nullptr);
 
-    m_Player->UnregisterAll();
-    m_MediaLoader->UnregisterAll();
+    m_Player.UnregisterAll();
+    m_MediaLoader.UnregisterAll();
     m_ConvFactory->UnregisterAll();
     m_ParserFactory->UnregisterAll();
     m_PluginManager.UnloadAll();
 
-    IMediaLoader::Free(m_MediaLoader);
-    IPlayer::Free(m_Player);
     IConvTaskFactory::Free(m_ConvFactory);
     ITagParserFactory::Free(m_ParserFactory);
 }
@@ -148,9 +144,9 @@ void MainWindow::InitMyUi()
 
     // Volume
     if (env->volume < 0) {
-        env->volume = m_Player->Volume();
+        env->volume = m_Player.Volume();
     } else {
-        m_Player->SetVolume(env->volume);
+        m_Player.SetVolume(env->volume);
     }
     m_FrmToolBar.SliderVolume()->setValue(env->volume);
 
@@ -239,11 +235,11 @@ void MainWindow::SlotUpdateUi()
     if (!m_PlayerMutex.tryLock())
         return;
 
-    if (m_Player->Status() == PlayerStatus::Playing) {
-        long total = m_Player->RangeDuration();
-        long ms = m_Player->OffsetMs();
-        long hz = m_Player->SamleRate();
-        long kbps = m_Player->BitRate();
+    if (m_Player.Status() == PlayerStatus::Playing) {
+        long total = m_Player.RangeDuration();
+        long ms = m_Player.OffsetMs();
+        long hz = m_Player.SamleRate();
+        long kbps = m_Player.BitRate();
         m_PlayerMutex.unlock();
 
         const QString& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6").arg(hz).arg(kbps, 4).
@@ -269,34 +265,34 @@ void MainWindow::SlotBtnPlay()
 {
     QMutexLocker locker(&m_PlayerMutex);
 
-    qDebug() << m_Player->Status();
+    qDebug() << m_Player.Status();
 
-    switch (m_Player->Status()) {
+    switch (m_Player.Status()) {
     case PlayerStatus::Closed:
         if (m_UsedMediaItem != nullptr) {
-            if (m_Player->Open(m_UsedMediaItem->url) == ErrorCode::Ok)
+            if (m_Player.Open(m_UsedMediaItem->url) == ErrorCode::Ok)
                 SlotBtnPlay();
         }
         break;
 
     case PlayerStatus::Playing:
-        m_Player->Pause();
+        m_Player.Pause();
         m_TimerUpdateUi.stop();
         m_FrmToolBar.BtnPlay()->setIcon(m_IconPlaying);
         break;
 
     case PlayerStatus::Paused:
         m_TimerUpdateUi.start(m_UpdateInterval);
-        m_Player->Resume();
+        m_Player.Resume();
         m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
         break;
 
     case PlayerStatus::Stopped:
         m_TimerUpdateUi.start(m_UpdateInterval);
         if (m_UsedMediaItem->hasRange)
-            m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
+            m_Player.Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
         else
-            m_Player->Play();
+            m_Player.Play();
         m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
         break;
     }
@@ -326,7 +322,7 @@ void MainWindow::SlotBtnNext()
 void MainWindow::SlotSliderVolumeValueChanged(int val)
 {
     QMutexLocker locker(&m_PlayerMutex);
-    m_Player->SetVolume(val);
+    m_Player.SetVolume(val);
 }
 
 void MainWindow::SlotSliderPlayingPressed()
@@ -347,8 +343,8 @@ void MainWindow::SlotSliderPlayingValueChanged(int val)
     const double& percent = (double)val / m_FrmToolBar.SliderPlaying()->maximum();
 
     QMutexLocker locker(&m_PlayerMutex);
-    if (m_Player->Status() != PlayerStatus::Closed)
-        m_Player->SeekPercent(percent);
+    if (m_Player.Status() != PlayerStatus::Closed)
+        m_Player.SeekPercent(percent);
 }
 
 void MainWindow::SlotBarPlayListMidClick(int index)
@@ -369,7 +365,7 @@ void MainWindow::SlotBarPlayListMidClick(int index)
 void MainWindow::SlotWidgetPlayListDoubleClick()
 {
     SimplePlaylistView* view = new SimplePlaylistView(this);
-    view->SetMediaLoader(m_MediaLoader);
+    view->SetMediaLoader(&m_MediaLoader);
     view->SetClipboard(&m_Clipboard);
 
     connect(view, SIGNAL(SigPlayMediaItem(IPlaylistView*, const MediaItem&)),
@@ -389,17 +385,17 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 
     QMutexLocker locker(&m_PlayerMutex);
 
-    if (m_Player->Status() == PlayerStatus::Playing) {
-        m_Player->Close();
+    if (m_Player.Status() == PlayerStatus::Playing) {
+        m_Player.Close();
     }
-    if (m_Player->Status() != PlayerStatus::Closed) {
-        m_Player->Close();
+    if (m_Player.Status() != PlayerStatus::Closed) {
+        m_Player.Close();
         m_TimerUpdateUi.stop();
     }
 
     m_UsedMediaItem = &item;
 
-    if (m_Player->Open(item.url) != ErrorCode::Ok) {
+    if (m_Player.Open(item.url) != ErrorCode::Ok) {
         setWindowTitle("Mous ( " + tr("Failed to open!") + " )");
         usleep(100*1000);
         return SlotBtnNext();
@@ -407,9 +403,9 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 
     m_TimerUpdateUi.start(m_UpdateInterval);
     if (item.hasRange)
-        m_Player->Play(item.msBeg, item.msEnd);
+        m_Player.Play(item.msBeg, item.msEnd);
     else
-        m_Player->Play();
+        m_Player.Play();
     m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
 
     setWindowTitle("Mous ( " + QString::fromUtf8(item.tag.title.c_str()) + " )");

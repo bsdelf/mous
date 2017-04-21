@@ -26,7 +26,7 @@ public:
 public:
     virtual ~SimplePlaylistView();
 
-    virtual void SetMediaLoader(const IMediaLoader* loader);
+    virtual void SetMediaLoader(const MediaLoader* loader);
     virtual void SetClipboard(PlaylistClipboard<mous::MediaItem>* clipboard);
 
     virtual const MediaItem* NextItem() const;
@@ -95,7 +95,7 @@ private:
     ListRow BuildListRow(MediaItem &item) const;
 
 private:
-    const IMediaLoader* m_MediaLoader;
+    const MediaLoader* m_MediaLoader;
     PlaylistClipboard<mous::MediaItem>* m_Clipboard;
 
     QString m_PrevMediaFilePath;

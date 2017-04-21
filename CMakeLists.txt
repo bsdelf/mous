@@ -142,26 +142,30 @@ endif()
 # mous-qt
 if(WithFrontendQt4)
     find_package(Qt4 REQUIRED QtCore QtGui)
+
     include(${QT_USE_FILE})
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
-    file(GLOB EXE_MOUS_QT_HEADERS frontend/qt4/*.h frontend/qt4/*.hpp)
-    file(GLOB EXE_MOUS_QT_SOURCES frontend/qt4/*.cpp)
-    file(GLOB EXE_MOUS_QT_UI frontend/qt4/*.ui)
-    file(GLOB EXE_MOUS_QT_QRC frontend/qt4/*.qrc)
-    file(GLOB EXE_MOUS_QT_TS frontend/qt4/*.ts)
 
     set(EXE_MOUS_QT_MOC_HEADERS)
+    file(GLOB EXE_MOUS_QT_HEADERS frontend/qt4/*.h frontend/qt4/*.hpp)
     foreach(header ${EXE_MOUS_QT_HEADERS})
         file(STRINGS "${header}" lines REGEX "Q_OBJECT")
         if(lines)
             list(APPEND EXE_MOUS_QT_MOC_HEADERS "${header}")
         endif()
     endforeach()
-
     QT4_WRAP_CPP(EXE_MOUS_QT_WCPP ${EXE_MOUS_QT_MOC_HEADERS})
+
+    file(GLOB EXE_MOUS_QT_UI frontend/qt4/*.ui)
     QT4_WRAP_UI(EXE_MOUS_QT_WUI ${EXE_MOUS_QT_UI})
+
+    file(GLOB EXE_MOUS_QT_QRC frontend/qt4/*.qrc)
     QT4_ADD_RESOURCES(EXE_MOUS_QT_RES ${EXE_MOUS_QT_QRC})
+
+    file(GLOB EXE_MOUS_QT_TS frontend/qt4/*.ts)
     QT4_ADD_TRANSLATION(EXE_MOUS_QT_QM ${EXE_MOUS_QT_TS})
+
+    file(GLOB EXE_MOUS_QT_SOURCES frontend/qt4/*.cpp)
     add_executable(mous-qt ${EXE_MOUS_QT_SOURCES}
         ${EXE_MOUS_QT_WCPP} ${EXE_MOUS_QT_WUI} ${EXE_MOUS_QT_RES} ${EXE_MOUS_QT_QM})
     add_dependencies(mous-qt MousCore)

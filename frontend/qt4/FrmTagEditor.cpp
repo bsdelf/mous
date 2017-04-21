@@ -86,7 +86,7 @@ void FrmTagEditor::RestoreUiStatus()
     ui->splitter->restoreState(env->tagEditorSplitterState);
 }
 
-void FrmTagEditor::SetPlayer(IPlayer *player)
+void FrmTagEditor::SetPlayer(Player *player)
 {
     m_Player = player;
 }

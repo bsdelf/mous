@@ -3,7 +3,7 @@
 
 namespace mous {
     struct MediaItem;
-    class IMediaLoader;
+    class MediaLoader;
 }
 
 #include "PlaylistClipboard.h"
@@ -13,7 +13,7 @@ class IPlaylistView
 public:
     virtual ~IPlaylistView() { }
 
-    virtual void SetMediaLoader(const mous::IMediaLoader* loader) = 0;
+    virtual void SetMediaLoader(const mous::MediaLoader* loader) = 0;
     virtual void SetClipboard(PlaylistClipboard<mous::MediaItem>* clipboard) = 0;
 
     virtual const mous::MediaItem* PrevItem() const = 0;

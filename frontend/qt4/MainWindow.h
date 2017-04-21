@@ -5,8 +5,8 @@
 #include <QtGui>
 
 #include <core/PluginManager.h>
-#include <core/IMediaLoader.h>
-#include <core/IPlayer.h>
+#include <core/MediaLoader.h>
+#include <core/Player.h>
 #include <core/IConvTask.h>
 #include <core/IConvTaskFactory.h>
 #include <core/ITagParserFactory.h>
@@ -96,8 +96,8 @@ private:
     const int m_UpdateInterval = 500;
 
     PluginManager m_PluginManager;
-    IMediaLoader* m_MediaLoader = nullptr;
-    IPlayer* m_Player = nullptr;
+    MediaLoader m_MediaLoader;
+    Player m_Player;
     IConvTaskFactory* m_ConvFactory = nullptr;
     ITagParserFactory* m_ParserFactory = nullptr;
     QMutex m_PlayerMutex { QMutex::Recursive };
