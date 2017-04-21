@@ -1,103 +1,50 @@
-#include "TagParserFactory.h"
-#include <scx/FileHelper.hpp>
+#include <core/TagParserFactory.h>
+#include "TagParserFactoryImpl.h"
 
-ITagParserFactory* ITagParserFactory::Create()
-{
-    return new TagParserFactory();
-}
-
-void ITagParserFactory::Free(ITagParserFactory* factory)
-{
-    if (factory != nullptr)
-        delete factory;
-}
+namespace mous {
 
 TagParserFactory::TagParserFactory()
+    : impl(std::make_unique<Impl>())
 {
 }
 
 TagParserFactory::~TagParserFactory()
 {
-    UnregisterAll();
 }
 
-void TagParserFactory::RegisterTagParserPlugin(const Plugin* pAgent)
+void TagParserFactory::RegisterTagParserPlugin(const Plugin* plugin)
 {
-    ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
-    const auto& suffixList = parser->FileSuffix();
-    if (parser != nullptr) {
-        pAgent->FreeObject(parser);
-        for (const string& suffix: suffixList) {
-            auto iter = m_AgentMap.find(suffix);
-            if (iter == m_AgentMap.end()) {
-                m_AgentMap.emplace(suffix, pAgent);
-            }
-        }
-    }
+    return impl->RegisterTagParserPlugin(plugin);
 }
 
-void TagParserFactory::RegisterTagParserPlugin(std::vector<const Plugin*>& agents)
+void TagParserFactory::RegisterTagParserPlugin(std::vector<const Plugin*>& plugins)
 {
-    for (auto agent: agents) {
-        RegisterTagParserPlugin(agent);
-    }
+    return impl->RegisterTagParserPlugin(plugins);
 }
 
-void TagParserFactory::UnregisterPlugin(const Plugin* pAgent)
+void TagParserFactory::UnregisterPlugin(const Plugin* plugin)
 {
-    ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
-    const auto& suffixList = parser->FileSuffix();
-    if (parser != nullptr) {
-        pAgent->FreeObject(parser);
-        for (const string& suffix: suffixList) {
-            auto iter = m_AgentMap.find(suffix);
-            if (iter != m_AgentMap.end() && pAgent == iter->second) {
-                m_AgentMap.erase(iter);
-                // we do not care about the TagParser in use, let it leak/crash!
-            }
-        }
-    }
+    return impl->UnregisterPlugin(plugin);
 }
 
-void TagParserFactory::UnregisterPlugin(std::vector<const Plugin*>& agents)
+void TagParserFactory::UnregisterPlugin(std::vector<const Plugin*>& plugins)
 {
-    for (auto agent: agents) {
-        UnregisterPlugin(agent);
-    }
+    return impl->UnregisterPlugin(plugins);
 }
 
 void TagParserFactory::UnregisterAll()
 {
-    while (!m_AgentMap.empty()) {
-        UnregisterPlugin(m_AgentMap.begin()->second);
-    }
+    return impl->UnregisterAll();
 }
 
 ITagParser* TagParserFactory::CreateParser(const std::string& fileName) const
 {
-    ITagParser* parser = nullptr;
-    const string& suffix = scx::FileHelper::FileSuffix(fileName);
-    auto iter = m_AgentMap.find(suffix);
-    if (iter == m_AgentMap.end()) {
-        iter = m_AgentMap.find("*");
-    }
-    if (iter != m_AgentMap.end()) {
-        parser =  static_cast<ITagParser*>(iter->second->CreateObject());
-    }
-    if (parser != nullptr) {
-        m_ParserParentMap[parser] = iter->second;
-    }
-    return parser;
+    return impl->CreateParser(fileName);
 }
 
 void TagParserFactory::FreeParser(ITagParser* parser) const
 {
-    auto iter = m_ParserParentMap.find(parser);
-    if (iter != m_ParserParentMap.end()) {
-        iter->second->FreeObject(parser);
-        m_ParserParentMap.erase(iter);
-    }
+    return impl->FreeParser(parser);
 }
 
-
-
+}

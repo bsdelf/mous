@@ -126,8 +126,7 @@ int main(int argc, char** argv)
     ctx.loader.RegisterMediaPackPlugin(ctx.pack_agents);
     ctx.loader.RegisterTagParserPlugin(ctx.tag_agents);
     // setup parser factory
-    ctx.parser_factory = ITagParserFactory::Create();
-    ctx.parser_factory->RegisterTagParserPlugin(ctx.tag_agents);
+    ctx.parser_factory.RegisterTagParserPlugin(ctx.tag_agents);
     // setup conv factory
     ctx.conv_factory = IConvTaskFactory::Create();
     ctx.conv_factory->RegisterDecoderPlugin(ctx.dec_agents);
@@ -153,8 +152,6 @@ int main(int argc, char** argv)
 
     // cleanup
     ctx.loader.UnregisterAll();
-    ctx.parser_factory->UnregisterAll();
-    ITagParserFactory::Free(ctx.parser_factory);
     ctx.conv_factory->UnregisterAll();
     IConvTaskFactory::Free(ctx.conv_factory);
 

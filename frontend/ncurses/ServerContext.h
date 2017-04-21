@@ -12,7 +12,6 @@ using namespace scx;
 #include <core/Player.h>
 #include <core/MediaLoader.h>
 #include <core/PluginManager.h>
-#include <core/ITagParserFactory.h>
 using namespace mous;
 
 struct ServerContext

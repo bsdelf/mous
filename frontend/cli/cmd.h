@@ -5,7 +5,7 @@
 
 #include "core/PluginManager.h"
 #include "core/MediaLoader.h"
-#include "core/ITagParserFactory.h"
+#include "core/TagParserFactory.h"
 #include "core/IConvTaskFactory.h"
 
 struct mous_ctx
@@ -15,7 +15,7 @@ struct mous_ctx
     mous::PluginManager mgr;
 
     mous::MediaLoader loader;
-    mous::ITagParserFactory* parser_factory;
+    mous::TagParserFactory parser_factory;
     mous::IConvTaskFactory* conv_factory;
 
     plugin_list_t dec_agents;

@@ -91,7 +91,7 @@ void FrmTagEditor::SetPlayer(Player *player)
     m_Player = player;
 }
 
-void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *factory)
+void FrmTagEditor::SetTagParserFactory(const TagParserFactory *factory)
 {
     if (m_ParserFactory == nullptr && m_ParserFactory != nullptr && m_CurrentParser != nullptr) {
         m_CurrentParser->Close();

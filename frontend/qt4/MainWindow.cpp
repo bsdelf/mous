@@ -78,7 +78,6 @@ void MainWindow::closeEvent(QCloseEvent*)
 void MainWindow::InitMousCore()
 {
     m_ConvFactory = IConvTaskFactory::Create();
-    m_ParserFactory = ITagParserFactory::Create();
 
     m_PluginManager.LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
     //const vector<string>& pathList = m_PluginManager.PluginPaths();
@@ -106,10 +105,10 @@ void MainWindow::InitMousCore()
     m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
     m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
 
-    m_ParserFactory->RegisterTagParserPlugin(tagAgentList);
+    m_ParserFactory.RegisterTagParserPlugin(tagAgentList);
 
     m_FrmTagEditor.SetPlayer(&m_Player);
-    m_FrmTagEditor.SetTagParserFactory(m_ParserFactory);
+    m_FrmTagEditor.SetTagParserFactory(&m_ParserFactory);
 
     qDebug() << ">> MediaPack count:" << packAgentList.size();
     qDebug() << ">> TagParser count:" << tagAgentList.size();
@@ -127,11 +126,10 @@ void MainWindow::ClearMousCore()
     m_Player.UnregisterAll();
     m_MediaLoader.UnregisterAll();
     m_ConvFactory->UnregisterAll();
-    m_ParserFactory->UnregisterAll();
+    m_ParserFactory.UnregisterAll();
     m_PluginManager.UnloadAll();
 
     IConvTaskFactory::Free(m_ConvFactory);
-    ITagParserFactory::Free(m_ParserFactory);
 }
 
 void MainWindow::InitMyUi()

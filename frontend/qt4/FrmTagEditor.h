@@ -6,7 +6,7 @@
 
 #include <util/MediaItem.h>
 #include <core/Player.h>
-#include <core/ITagParserFactory.h>
+#include <core/TagParserFactory.h>
 using namespace mous;
 
 #include <string>
@@ -28,7 +28,7 @@ public:
     void RestoreUiStatus();
 
     void SetPlayer(mous::Player* player);
-    void SetTagParserFactory(const mous::ITagParserFactory* factory);
+    void SetTagParserFactory(const mous::TagParserFactory* factory);
     void WaitForLoadFinished();
     void LoadMediaItem(const mous::MediaItem& item);
 
@@ -58,7 +58,7 @@ private:
     Ui::FrmTagEditor *ui;
 
     mous::Player* m_Player;
-    const mous::ITagParserFactory* m_ParserFactory;    
+    const mous::TagParserFactory* m_ParserFactory;
     mous::ITagParser* m_CurrentParser;
     mous::MediaItem m_CurrentItem;
 
