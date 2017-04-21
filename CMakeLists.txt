@@ -22,6 +22,15 @@ include_directories(BEFORE contrib)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+#==== iconv ====#
+find_library(ICONV NAMES iconv libiconv)
+if(ICONV)
+    message(STATUS "iconv: ${ICONV}")
+else()
+    set(ICONV "")
+    message(STATUS "iconv: libc")
+endif()
+
 SET(CMAKE_INSTALL_RPATH "\${CMAKE_INSTALL_PREFIX}/lib:\${CMAKE_INSTALL_PREFIX}/bin")
 
 #==== OS Check ====#
@@ -122,11 +131,11 @@ if(WithFrontendNcurses)
     file(GLOB EXE_MOUS_NCURSES frontend/ncurses/*)
     add_executable(mous-ncurses ${EXE_MOUS_NCURSES})
     add_dependencies(mous-ncurses MousCore)
-    set(EXE_MOUS_NCURSES_LIBS MousCore Threads::Threads ${NCURSES})
-    if(IS_FREEBSD OR IS_APPLE)
-        target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS} -liconv)
-    elseif(IS_LINUX)
+    set(EXE_MOUS_NCURSES_LIBS MousCore Threads::Threads ${NCURSES} ${ICONV})
+    if(IS_LINUX)
         target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS} -ldl -lrt)
+    else()
+        target_link_libraries(mous-ncurses ${EXE_MOUS_NCURSES_LIBS})
     endif()
 endif()
 
@@ -156,12 +165,7 @@ if(WithFrontendQt4)
     add_executable(mous-qt ${EXE_MOUS_QT_SOURCES}
         ${EXE_MOUS_QT_WCPP} ${EXE_MOUS_QT_WUI} ${EXE_MOUS_QT_RES} ${EXE_MOUS_QT_QM})
     add_dependencies(mous-qt MousCore)
-    set(EXE_MOUS_QT_LIBS MousCore ${QT_LIBRARIES})
-    if(IS_FREEBSD OR IS_APPLE)
-        target_link_libraries(mous-qt ${EXE_MOUS_QT_LIBS} -liconv)
-    elseif(IS_LINUX)
-        target_link_libraries(mous-qt ${EXE_MOUS_QT_LIBS})
-    endif()
+    target_link_libraries(mous-qt MousCore ${QT_LIBRARIES} ${ICONV})
 endif()
 
 # OSS plugin
@@ -368,11 +372,7 @@ if(WithPluginTagLibParser)
     endif()
     file(GLOB TAGLIB_PARSER_SRC plugins/taglib/*)
     add_library(TagLibParser SHARED ${TAGLIB_PARSER_SRC})
-    if(IS_FREEBSD OR IS_APPLE)
-        target_link_libraries(TagLibParser ${TAGLIB} -liconv)
-    elseif(IS_LINUX)
-        target_link_libraries(TagLibParser ${TAGLIB})
-    endif()
+    target_link_libraries(TagLibParser ${TAGLIB} ${ICONV})
 endif()
 
 # CuePack plugin
