@@ -25,12 +25,11 @@ public:
 
 private:
     std::string m_PrevPath;
-    int m_Fd;
-    bool m_IsOpened;
-    int32_t m_Channels;
-    int32_t m_SampleRate;
-    int32_t m_BitsPerSample;
-
+    int m_Fd = -1;
+    bool m_IsOpened = false;
+    int32_t m_Channels = -1;
+    int32_t m_SampleRate = -1;
+    int32_t m_BitsPerSample = -1;
     StringOption m_OptDevicePath;
 };
 

@@ -8,12 +8,7 @@
 #include <iostream>
 using namespace std;
 
-OssRenderer::OssRenderer():
-    m_Fd(-1),
-    m_IsOpened(false),
-    m_Channels(-1),
-    m_SampleRate(-1),
-    m_BitsPerSample(-1)
+OssRenderer::OssRenderer()
 {
     m_OptDevicePath.desc = "Output device.";
     m_OptDevicePath.userVal = m_OptDevicePath.defaultVal = "/dev/dsp";
@@ -130,7 +125,5 @@ void OssRenderer::SetVolumeLevel(int avg)
 
 std::vector<const BaseOption*> OssRenderer::Options() const
 {
-    std::vector<const BaseOption*> list(1);
-    list[0] = &m_OptDevicePath;
-    return list;
+    return { &m_OptDevicePath };
 }
