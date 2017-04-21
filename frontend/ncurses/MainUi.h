@@ -1,20 +1,10 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <deque>
 #include <memory>
-using namespace std;
-
-struct PrivateMainUi;
-
-namespace mous {
-    struct MediaItem;
-}
 
 class MainUi
 {
-    friend struct PrivateMainUi;
+    class Impl;
 
 public:
     MainUi();
@@ -23,31 +13,6 @@ public:
     int Exec();
 
 private:
-    void SlotTryConnect();
-    void SlotConnected();
-    void SlotGotSuffixes(const std::vector<std::string>&);
-    void SlotSwitchPlaylist(bool);
-    void SlotTmpOpen(const std::string&);
-    void SlotReqUserOpen(const std::string&);
-
-private:
-    bool StartClient();
-    void StopClient();
-
-    void BeginNcurses();
-    void EndNcurses();
-
-    bool HandleTopKey(int, bool&);
-    void SyncRefresh();
-
-    void OnResize();
-    void UpdateTopLayout();
-    void ShowOrHideExplorer();
-    void ShowOrHideHelp();
-    void SwitchFocus();
-    void SwitchPlaylist(int);
-
-private:
-    unique_ptr<PrivateMainUi> d;
+    std::unique_ptr<Impl> impl;
 };
 

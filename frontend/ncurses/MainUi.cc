@@ -1,21 +1,23 @@
 #include "MainUi.h"
 
-//#include <ncurses.h>
-
+#include <deque>
+#include <mutex>
 #include <set>
 #include <stack>
-#include <mutex>
+#include <string>
+#include <vector>
+using namespace std;
 
 #include <scx/Conv.hpp>
 #include <util/MediaItem.h>
 
-#include "Client.h"
 #include "BgWindow.h"
-#include "IView.h"
+#include "Client.h"
 #include "ExplorerView.h"
+#include "HelpView.h"
+#include "IView.h"
 #include "PlaylistView.h"
 #include "StatusView.h"
-#include "HelpView.h"
 
 using namespace scx;
 using namespace mous;
@@ -37,7 +39,6 @@ const mask_t MaskExplorer = 1 << Explorer;
 const mask_t MaskPlaylist = 1 << Playlist;
 const mask_t MaskHelp = 1 << Help;
 const mask_t MaskStatus = 1 << Status;
-
 }
 typedef View::Type EmViewType;
 
@@ -51,23 +52,357 @@ struct LayerInfo
 
     void RefreshViews(bool forced)
     {
-        for (auto view: views) {
-            if (forced || view->NeedRefresh())
+        for (auto view : views) {
+            if (forced || view->NeedRefresh()) {
                 view->Refresh();
+            }
         }
     }
 
     void ShowViews(bool show)
     {
-        for (auto view: views) {
+        for (auto view : views) {
             view->Show(show);
         }
     }
 };
 
-struct PrivateMainUi
+class MainUi::Impl
 {
-    MainUi* parent = nullptr;
+  public:
+    Impl()
+    {
+        client.SigTryConnect().Connect(&Impl::SlotTryConnect, this);
+        client.SigConnected().Connect(&Impl::SlotConnected, this);
+        client.SigSuffixes().Connect(&Impl::SlotGotSuffixes, this);
+        client.PlaylistHandler().SigSwitch().Connect(&Impl::SwitchPlaylist, this);
+
+        statusView.SetPlayerHandler(&client.PlayerHandler());
+
+        PlaylistView& playlist = playlistView[iPlaylist];
+
+        LayerInfo layer;
+        layer.mask = View::MaskPlaylist | View::MaskStatus;
+        layer.views.insert(&playlist);
+        layer.views.insert(&statusView);
+        layer.focused.push(&playlist);
+        layerStack.push(std::move(layer));
+
+        explorerView.SigTmpOpen.Connect(&Impl::SlotTmpOpen, this);
+        explorerView.SigUserOpen.Connect(&Impl::SlotReqUserOpen, this);
+
+        for (int i = 0; i < PLAYLIST_COUNT; ++i) {
+            playlistView[i].SetIndex(i);
+            playlistView[i].SetPlaylistHandle(&client.PlaylistHandler());
+            playlistView[i].SigSwitchPlaylist.Connect(&Impl::SlotSwitchPlaylist, this);
+        }
+        playlist.SetFocus(true);
+    }
+
+    int Exec()
+    {
+        BeginNcurses();
+        OnResize();
+
+        if (StartClient()) {
+            for (bool quit = false; !quit; quit = false) {
+                SyncRefresh();
+
+                int key = bgWindow.Input();
+                if (key != ERR && HandleTopKey(key, quit)) {
+                    if (quit) {
+                        break;
+                    } else {
+                        continue;
+                    }
+                } else if (statusView.InjectKey(key)) {
+                    continue;
+                } else {
+                    layerStack.top().focused.top()->InjectKey(key);
+                }
+            }
+        }
+
+        EndNcurses();
+        StopClient();
+
+        return 0;
+    }
+
+  private:
+    void SlotTryConnect() {}
+
+    void SlotConnected()
+    {
+        client.PlayerHandler().StartSync();
+        client.PlayerHandler().QueryVolume();
+        client.PlayerHandler().QueryPlayMode();
+
+        for (int i = 0; i < PLAYLIST_COUNT; ++i) {
+            client.PlaylistHandler().Sync(i);
+        }
+    }
+
+    void SlotGotSuffixes(const std::vector<std::string>& list) { explorerView.AddSuffixes(list); }
+
+    void SlotSwitchPlaylist(bool toNext)
+    {
+        int n = iPlaylist + (toNext ? 1 : -1);
+        n = std::min(std::max(n, 0), PLAYLIST_COUNT - 1);
+
+        lock_guard<mutex> locker(needSwitchPlaylistMutex);
+        switchPlaylistTo = n;
+        ++needSwitchPlaylist;
+    }
+
+    void SlotTmpOpen(const string& path) {}
+
+    void SlotReqUserOpen(const string& path) { client.PlaylistHandler().Append(iPlaylist, path); }
+
+    bool StartClient() { return client.Run(); }
+
+    void StopClient() { client.Stop(); }
+
+    void BeginNcurses()
+    {
+        initscr();
+        start_color();
+        cbreak();
+        noecho();
+        refresh();
+        halfdelay(1);
+    }
+
+    void EndNcurses() { endwin(); }
+
+    /*
+     * NOTE: the best solution is that
+     * each layer has its own HandleTopKey()
+     * which is stored in layerStack as a function,
+     * and handle KEY_RESIZE in HandleResize().
+     * by this way,
+     * we do not need to check layerStack.size()!
+     */
+    bool HandleTopKey(int key, bool& quit)
+    {
+        switch (key) {
+            case KEY_RESIZE:
+                OnResize();
+                break;
+
+            case 'e':
+                if (layerStack.size() == 1)
+                    ShowOrHideExplorer();
+                break;
+
+            case 'H':
+                ShowOrHideHelp();
+                break;
+
+            case '\t':
+                if (layerStack.size() == 1)
+                    SwitchFocus();
+                break;
+
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+                SwitchPlaylist(StrToNum<int>(string(1, (char)key)));
+                break;
+
+            case 'q':
+                quit = true;
+                break;
+
+            case 'x':
+                quit = true;
+                client.StopService();
+                break;
+
+            case ERR:
+                break;
+
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    void SyncRefresh()
+    {
+        // switch playlist as needed
+        {
+            lock_guard<mutex> locker(needSwitchPlaylistMutex);
+            if (needSwitchPlaylist > 0) {
+                SwitchPlaylist(switchPlaylistTo);
+                --needSwitchPlaylist;
+            }
+        }
+
+        // refresh top layer as needed
+        {
+            layerStack.top().RefreshViews(false);
+        }
+    }
+
+    void OnResize()
+    {
+        bgWindow.OnResize();
+
+        layerStack.top().ShowViews(false);
+        UpdateTopLayout();
+    }
+
+    /* update the layout of top layer */
+    void UpdateTopLayout()
+    {
+        const int w = bgWindow.Width();
+        const int h = bgWindow.Height();
+
+        layerStack.top().ShowViews(true);
+
+        View::mask_t mask = layerStack.top().mask;
+        switch (mask) {
+            case View::MaskHelp: {
+                helpView.MoveTo(0, 0);
+                helpView.Resize(w, h);
+            } break;
+
+            case View::MaskPlaylist | View::MaskStatus: {
+                int x = 0, y = 0;
+                int hStatus = statusView.MinHeight();
+                int hPlaylist = h - hStatus;
+
+                PlaylistView& playlist = playlistView[iPlaylist];
+                playlist.MoveTo(x, y);
+                playlist.Resize(w, hPlaylist);
+                y += hPlaylist;
+
+                statusView.MoveTo(x, y);
+                statusView.Resize(w, hStatus);
+            } break;
+
+            case View::MaskExplorer | View::MaskPlaylist | View::MaskStatus: {
+                int wExplorer = w / 2;
+                int wPlaylist = w - wExplorer;
+                int hStatus = statusView.MinHeight();
+                int hExplorer = h - hStatus;
+                int x = 0, y = 0;
+
+                explorerView.MoveTo(x, y);
+                explorerView.Resize(wExplorer, hExplorer);
+                x += wExplorer;
+
+                PlaylistView& playlist = playlistView[iPlaylist];
+                playlist.MoveTo(x, y);
+                playlist.Resize(wPlaylist, hExplorer);
+                x = 0;
+                y += hExplorer;
+
+                statusView.MoveTo(x, y);
+                statusView.Resize(w, hStatus);
+            } break;
+
+            default:
+                break;
+        }
+
+        layerStack.top().RefreshViews(true);
+    }
+
+    /* on same layer */
+    void ShowOrHideExplorer()
+    {
+        LayerInfo& layer = layerStack.top();
+        layer.focused.top()->SetFocus(false);
+        if (explorerView.IsShown()) {
+            // remove view
+            explorerView.Show(false);
+            layer.mask &= ~View::MaskExplorer;
+            layer.views.erase(&explorerView);
+            layer.focused.pop();
+            layer.focused.top() = playlistView + iPlaylist;
+            layer.focused.top()->SetFocus(true);
+        } else {
+            // add view
+            layer.mask |= View::MaskExplorer;
+            layer.views.insert(&explorerView);
+            layer.focused.push(&explorerView);
+        }
+        layer.focused.top()->SetFocus(true);
+        UpdateTopLayout();
+    }
+
+    /* between different layers */
+    void ShowOrHideHelp()
+    {
+        bool helpViewShown = helpView.IsShown();
+        layerStack.top().ShowViews(false);
+        layerStack.top().focused.top()->SetFocus(false);
+        if (helpViewShown) {
+            // drop layer
+            layerStack.pop();
+        } else {
+            // push layer
+            LayerInfo layer;
+            layer.mask = View::MaskHelp;
+            layer.focused.push(&helpView);
+            layer.views.insert(&helpView);
+            layerStack.push(layer);
+        }
+        layerStack.top().focused.top()->SetFocus(true);
+        UpdateTopLayout();
+    }
+
+    // on same layer
+    void SwitchFocus()
+    {
+        if (!explorerView.IsShown()) {
+            return;
+        }
+
+        LayerInfo& layer = layerStack.top();
+        IView* focused = layer.focused.top();
+        layer.focused.top()->SetFocus(false);
+        layer.focused.top() = (focused == (IView*)&explorerView) ? (IView*)(playlistView + iPlaylist) : (IView*)&explorerView;
+        layer.focused.top()->SetFocus(true);
+
+        // NOTE: avoid refresh status view
+        // layer.RefreshViews();
+        explorerView.Refresh();
+        playlistView[iPlaylist].Refresh();
+    }
+
+    void SwitchPlaylist(int n)
+    {
+        if (n == iPlaylist) {
+            return;
+        }
+        int oldn = iPlaylist;
+        iPlaylist = n;
+
+        playlistView[oldn].Show(false);
+
+        LayerInfo& layer = layerStack.top();
+        layer.views.erase(playlistView + oldn);
+        layer.views.insert(playlistView + n);
+        if (playlistView[oldn].HasFocus()) {
+            playlistView[oldn].SetFocus(false);
+            layer.focused.top() = playlistView + n;
+            layer.focused.top()->SetFocus(true);
+        }
+
+        UpdateTopLayout();
+
+        // tell server
+        ClientPlaylistHandler& handle = client.PlaylistHandler();
+        handle.Switch(n);
+    }
+
+  private:
     Client client;
 
     BgWindow bgWindow;
@@ -83,40 +418,10 @@ struct PrivateMainUi
     mutex needSwitchPlaylistMutex;
     int needSwitchPlaylist = 0;
     int switchPlaylistTo = -1;
-
-    explicit PrivateMainUi(MainUi* p):
-        parent(p)
-    {
-        client.SigTryConnect().Connect(&MainUi::SlotTryConnect, parent);
-        client.SigConnected().Connect(&MainUi::SlotConnected, parent);
-        client.SigSuffixes().Connect(&MainUi::SlotGotSuffixes, parent);
-        client.PlaylistHandler().SigSwitch().Connect(&MainUi::SwitchPlaylist, parent);
-
-        statusView.SetPlayerHandler(&client.PlayerHandler());
-
-        PlaylistView& playlist = playlistView[iPlaylist];
-
-        LayerInfo layer;
-        layer.mask = View::MaskPlaylist | View::MaskStatus;
-        layer.views.insert(&playlist);
-        layer.views.insert(&statusView);
-        layer.focused.push(&playlist);
-        layerStack.push(std::move(layer));
-
-        explorerView.SigTmpOpen.Connect(&MainUi::SlotTmpOpen, parent);
-        explorerView.SigUserOpen.Connect(&MainUi::SlotReqUserOpen, parent);
-
-        for (int i = 0; i < PLAYLIST_COUNT; ++i) {
-            playlistView[i].SetIndex(i);
-            playlistView[i].SetPlaylistHandle(&client.PlaylistHandler());
-            playlistView[i].SigSwitchPlaylist.Connect(&MainUi::SlotSwitchPlaylist, parent);
-        }
-        playlist.SetFocus(true);
-    }
 };
 
-MainUi::MainUi():
-    d(make_unique<PrivateMainUi>(this))
+MainUi::MainUi()
+  : impl(make_unique<Impl>())
 {
 }
 
@@ -124,327 +429,8 @@ MainUi::~MainUi()
 {
 }
 
-int MainUi::Exec()
+int
+MainUi::Exec()
 {
-    BeginNcurses();
-    OnResize();
-
-    if (StartClient()) {
-        for (bool quit = false; !quit; quit = false) {
-            SyncRefresh();
-
-            int key = d->bgWindow.Input();
-            if (key != ERR && HandleTopKey(key, quit)) {
-                if (quit)
-                    break;
-                else
-                    continue;
-            } else if (d->statusView.InjectKey(key)) {
-                continue;
-            } else  {
-                d->layerStack.top().focused.top()->InjectKey(key);
-            }
-        }
-    }
-
-    EndNcurses();
-    StopClient();
-
-    return 0;
-}
-
-void MainUi::SlotTryConnect()
-{
-}
-
-void MainUi::SlotConnected()
-{
-    d->client.PlayerHandler().StartSync();
-    d->client.PlayerHandler().QueryVolume();
-    d->client.PlayerHandler().QueryPlayMode();
-
-    for (int i = 0; i < PLAYLIST_COUNT; ++i)
-        d->client.PlaylistHandler().Sync(i);
-}
-
-void MainUi::SlotGotSuffixes(const std::vector<std::string>& list)
-{
-    d->explorerView.AddSuffixes(list);
-}
-
-void MainUi::SlotSwitchPlaylist(bool toNext)
-{
-    int n = d->iPlaylist + (toNext ? 1 : -1);
-    n = std::min(std::max(n, 0), PLAYLIST_COUNT-1);
-
-    lock_guard<mutex> locker(d->needSwitchPlaylistMutex);
-    d->switchPlaylistTo = n;
-    ++d->needSwitchPlaylist;
-}
-
-void MainUi::SlotTmpOpen(const string& path)
-{
-}
-
-void MainUi::SlotReqUserOpen(const string& path)
-{
-    d->client.PlaylistHandler().Append(d->iPlaylist, path);
-}
-
-bool MainUi::StartClient()
-{
-    return d->client.Run();
-}
-
-void MainUi::StopClient()
-{
-    d->client.Stop();
-}
-
-void MainUi::BeginNcurses()
-{  
-    initscr();
-    start_color();
-    cbreak();
-    noecho();
-    refresh();
-    halfdelay(1);
-}
-
-void MainUi::EndNcurses()
-{
-    endwin();
-}
-
-/* 
- * NOTE: the best solution is that 
- * each layer has its own HandleTopKey() 
- * which is stored in layerStack as a function,
- * and handle KEY_RESIZE in HandleResize().
- * by this way,
- * we do not need to check layerStack.size()!
- */
-bool MainUi::HandleTopKey(int key, bool& quit)
-{
-    switch (key) {
-        case KEY_RESIZE:
-            OnResize();
-            break;
-
-        case 'e':
-            if (d->layerStack.size() == 1)
-                ShowOrHideExplorer();
-            break;
-
-        case 'H':
-            ShowOrHideHelp();
-            break;
-
-        case '\t':
-            if (d->layerStack.size() == 1)
-                SwitchFocus();
-            break;
-
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-                SwitchPlaylist(StrToNum<int>(string(1, (char)key)));
-            break;
-
-        case 'q':
-            quit = true;
-            break;
-
-        case 'x':
-            quit = true;
-            d->client.StopService();
-            break;
-
-        case ERR:
-            break;
-
-        default:
-            return false;
-    }
-    return true;
-}
-
-void MainUi::SyncRefresh()
-{
-    // switch playlist as needed
-    {
-        lock_guard<mutex> locker(d->needSwitchPlaylistMutex);
-        if (d->needSwitchPlaylist > 0) {
-            SwitchPlaylist(d->switchPlaylistTo);
-            --d->needSwitchPlaylist;
-        }
-    }
-
-    // refresh top layer as needed
-    {
-        d->layerStack.top().RefreshViews(false);
-    }
-}
-
-void MainUi::OnResize()
-{
-    d->bgWindow.OnResize();
-
-    d->layerStack.top().ShowViews(false);
-    UpdateTopLayout();
-}
-
-/* update the layout of top layer */
-void MainUi::UpdateTopLayout()
-{
-    const int w = d->bgWindow.Width();
-    const int h = d->bgWindow.Height();
-
-    d->layerStack.top().ShowViews(true);
-
-    View::mask_t mask = d->layerStack.top().mask;
-    switch (mask) {
-        case View::MaskHelp:
-        {
-            d->helpView.MoveTo(0, 0);
-            d->helpView.Resize(w, h);
-        }
-            break;
-
-        case View::MaskPlaylist | View::MaskStatus:
-        {
-            int x = 0, y = 0;
-            int hStatus = d->statusView.MinHeight();
-            int hPlaylist = h - hStatus;
-
-            PlaylistView& playlist = d->playlistView[d->iPlaylist];
-            playlist.MoveTo(x, y);
-            playlist.Resize(w, hPlaylist);
-            y += hPlaylist;
-
-            d->statusView.MoveTo(x, y);
-            d->statusView.Resize(w, hStatus);
-        }
-            break;
-
-        case View::MaskExplorer | View::MaskPlaylist | View::MaskStatus:
-        {
-            int wExplorer = w/2;
-            int wPlaylist = w - wExplorer;
-            int hStatus = d->statusView.MinHeight();
-            int hExplorer = h - hStatus;
-            int x = 0, y = 0;
-
-            d->explorerView.MoveTo(x, y);
-            d->explorerView.Resize(wExplorer, hExplorer);
-            x += wExplorer;
-
-            PlaylistView& playlist = d->playlistView[d->iPlaylist];
-            playlist.MoveTo(x, y);
-            playlist.Resize(wPlaylist, hExplorer);
-            x = 0; y += hExplorer;
-
-            d->statusView.MoveTo(x, y);
-            d->statusView.Resize(w, hStatus);
-        }
-            break;
-
-        default:
-            break;
-    }
-
-    d->layerStack.top().RefreshViews(true);
-}
-
-/* on same layer */
-void MainUi::ShowOrHideExplorer()
-{
-    LayerInfo& layer = d->layerStack.top();
-    layer.focused.top()->SetFocus(false);
-    if (d->explorerView.IsShown()) {
-        // remove view
-        d->explorerView.Show(false);
-        layer.mask &= ~View::MaskExplorer;
-        layer.views.erase(&d->explorerView);
-        layer.focused.pop();
-        layer.focused.top() = d->playlistView + d->iPlaylist;
-        layer.focused.top()->SetFocus(true);
-    } else {
-        // add view
-        layer.mask |= View::MaskExplorer;
-        layer.views.insert(&d->explorerView);
-        layer.focused.push(&d->explorerView);
-    }
-    layer.focused.top()->SetFocus(true);
-    UpdateTopLayout();
-}
-
-/* between different layers */
-void MainUi::ShowOrHideHelp()
-{
-    bool helpViewShown = d->helpView.IsShown();
-    d->layerStack.top().ShowViews(false);
-    d->layerStack.top().focused.top()->SetFocus(false);
-    if (helpViewShown) {
-        // drop layer
-        d->layerStack.pop();
-    } else {
-        // push layer
-        LayerInfo layer;
-        layer.mask = View::MaskHelp;
-        layer.focused.push(&d->helpView);
-        layer.views.insert(&d->helpView);
-        d->layerStack.push(layer);
-    }
-    d->layerStack.top().focused.top()->SetFocus(true);
-    UpdateTopLayout();
-}
-
-// on same layer
-void MainUi::SwitchFocus()
-{
-    if (!d->explorerView.IsShown())
-        return;
-
-    LayerInfo& layer = d->layerStack.top();
-    IView* focused = layer.focused.top();
-    layer.focused.top()->SetFocus(false);
-    layer.focused.top() = 
-        (focused == (IView*)&d->explorerView) ? 
-        (IView*)(d->playlistView+d->iPlaylist) : 
-        (IView*)&d->explorerView;
-    layer.focused.top()->SetFocus(true);
-
-    // NOTE: avoid refresh status view 
-    //layer.RefreshViews();
-    d->explorerView.Refresh();
-    d->playlistView[d->iPlaylist].Refresh();
-}
-
-void MainUi::SwitchPlaylist(int n)
-{
-    if (n == d->iPlaylist)
-        return;
-    int oldn = d->iPlaylist;
-    d->iPlaylist = n;
-
-    d->playlistView[oldn].Show(false);
-
-    LayerInfo& layer = d->layerStack.top();
-    layer.views.erase(d->playlistView+oldn);
-    layer.views.insert(d->playlistView+n);
-    if (d->playlistView[oldn].HasFocus()) {
-        d->playlistView[oldn].SetFocus(false);
-        layer.focused.top() = d->playlistView + n;
-        layer.focused.top()->SetFocus(true);
-    }
-
-    UpdateTopLayout();
-
-    // tell server
-    ClientPlaylistHandler& handle = d->client.PlaylistHandler();
-    handle.Switch(n);
+    return impl->Exec();
 }
