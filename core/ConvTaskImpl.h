@@ -1,5 +1,7 @@
 #pragma once
 
+#include <thread>
+
 #include <plugin/IDecoder.h>
 #include <plugin/IEncoder.h>
 

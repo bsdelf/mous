@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <thread>
 #include <vector>
 
 #include <core/Plugin.h>
