@@ -429,7 +429,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
         return;
 
     int encoderIndex = dlgEncoders.GetSelectedIndex();
-    IConvTask* newTask = m_ConvFactory.CreateTask(item, encoderNames[encoderIndex]);
+    ConvTask* newTask = m_ConvFactory.CreateTask(item, encoderNames[encoderIndex]);
     if (newTask == nullptr)
         return;
 
@@ -446,7 +446,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
     dlgOption.exec();
 
     if (dlgOption.result() != QDialog::Accepted) {
-        IConvTask::Free(newTask);
+        delete newTask;
         return;
     }
 

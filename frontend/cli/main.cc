@@ -12,7 +12,7 @@ using namespace std;
 #include <util/PluginOption.h>
 #include <core/MediaLoader.h>
 #include <core/PluginManager.h>
-#include <core/IConvTask.h>
+#include <core/ConvTask.h>
 #include <core/ConvTaskFactory.h>
 using namespace mous;
 

@@ -7,7 +7,7 @@
 #include <core/PluginManager.h>
 #include <core/MediaLoader.h>
 #include <core/Player.h>
-#include <core/IConvTask.h>
+#include <core/ConvTask.h>
 #include <core/ConvTaskFactory.h>
 #include <core/TagParserFactory.h>
 #include <util/MediaItem.h>

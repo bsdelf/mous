@@ -10,7 +10,7 @@ using namespace std;
 #include <scx/FileInfo.hpp>
 using namespace scx;
 
-#include "core/IConvTask.h"
+#include "core/ConvTask.h"
 using namespace mous;
 
 int cmd_dec(int argc, char** argv)
@@ -54,7 +54,7 @@ int cmd_dec(int argc, char** argv)
             }
 
             // do it!
-            IConvTask* task = ctx.conv_factory.CreateTask(media_list[mi], wav_enc);
+            ConvTask* task = ctx.conv_factory.CreateTask(media_list[mi], wav_enc);
             task->Run(outname);
 
             while (!task->IsFinished()) {
@@ -67,7 +67,7 @@ int cmd_dec(int argc, char** argv)
                 usleep(200);
             }
             printf("\ndone!\n");
-            IConvTask::Free(task);
+            delete task;
         }
 
         printf("\n");

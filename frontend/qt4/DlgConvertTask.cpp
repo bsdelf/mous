@@ -1,10 +1,10 @@
 #include "DlgConvertTask.h"
 #include "ui_DlgConvertTask.h"
 #include "FrmProgressBar.h"
-#include "core/IConvTask.h"
+#include <core/ConvTask.h>
 using namespace mous;
 
-Q_DECLARE_METATYPE(IConvTask*)
+Q_DECLARE_METATYPE(ConvTask*)
 
 DlgConvertTask::DlgConvertTask(QWidget *parent) :
     QDialog(parent),
@@ -24,7 +24,7 @@ DlgConvertTask::~DlgConvertTask()
     delete ui;
 }
 
-void DlgConvertTask::AddTask(IConvTask * newTask, const QString &output)
+void DlgConvertTask::AddTask(ConvTask * newTask, const QString &output)
 {
     QListWidgetItem* item = new QListWidgetItem();
     FrmProgressBar* bar = new FrmProgressBar();
@@ -47,7 +47,7 @@ void DlgConvertTask::SlotUpdateProgress()
     for (int i = 0; i < ui->listAllTask->count(); ++i) {
         QListWidgetItem* item = ui->listAllTask->item(i);
         FrmProgressBar* bar = (FrmProgressBar*)ui->listAllTask->itemWidget(item);
-        IConvTask* task = item->data(Qt::UserRole).value<IConvTask*>();
+        ConvTask* task = item->data(Qt::UserRole).value<ConvTask*>();
 
         bar->SetProgress(task->Progress()*100);
 
@@ -57,7 +57,7 @@ void DlgConvertTask::SlotUpdateProgress()
             ui->listAllTask->takeItem(ui->listAllTask->row(item));
             delete item;
             delete bar;
-            IConvTask::Free(task);
+            delete task;
         }
     }
 
@@ -75,12 +75,12 @@ void DlgConvertTask::SlotCancelTask(void* key)
     disconnect(bar, 0, this, 0);
 
     QVariant var(item->data(Qt::UserRole));
-    IConvTask* task = var.value<IConvTask*>();
+    ConvTask* task = var.value<ConvTask*>();
     task->Cancel();
 
     ui->listAllTask->removeItemWidget(item);
     ui->listAllTask->takeItem(ui->listAllTask->row(item));
     delete item;
     delete bar;
-    IConvTask::Free(task);
+    delete task;
 }

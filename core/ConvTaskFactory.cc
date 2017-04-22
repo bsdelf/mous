@@ -52,7 +52,7 @@ std::vector<std::string> ConvTaskFactory::EncoderNames() const
     return impl->EncoderNames();
 }
 
-IConvTask* ConvTaskFactory::CreateTask(const MediaItem& item, const std::string& encoder) const
+ConvTask* ConvTaskFactory::CreateTask(const MediaItem& item, const std::string& encoder) const
 {
     return impl->CreateTask(item, encoder);
 }

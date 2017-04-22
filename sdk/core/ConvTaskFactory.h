@@ -5,7 +5,7 @@
 #include <string>
 
 #include <core/Plugin.h>
-#include <core/IConvTask.h>
+#include <core/ConvTask.h>
 #include <util/MediaItem.h>
 
 namespace mous {
@@ -29,7 +29,7 @@ public:
     void UnregisterAll();
 
     std::vector<std::string> EncoderNames() const;
-    IConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const;
+    ConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const;
 
 private:
     std::unique_ptr<Impl> impl;

@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include <core/ConvTaskFactory.h>
-#include <core/IConvTask.h>
+#include <core/ConvTask.h>
 #include <core/Plugin.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IEncoder.h>
@@ -96,7 +96,7 @@ public:
         return list;
     }
 
-    IConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const
+    ConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const
     {
         const Plugin* decAgent = nullptr;
         const std::string& suffix = scx::ToLower(scx::FileHelper::FileSuffix(item.url));
@@ -112,9 +112,9 @@ public:
             encAgent = encAgentIter->second;
         }
 
-        IConvTask* task = nullptr;
+        ConvTask* task = nullptr;
         if (decAgent != nullptr && encAgent != nullptr) {
-            task = IConvTask::Create(item, decAgent, encAgent);
+            task = new ConvTask(item, decAgent, encAgent);
         }
         return task;
     }
