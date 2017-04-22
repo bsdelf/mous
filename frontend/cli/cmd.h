@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include "core/PluginManager.h"
-#include "core/MediaLoader.h"
-#include "core/TagParserFactory.h"
-#include "core/IConvTaskFactory.h"
+#include <core/PluginManager.h>
+#include <core/MediaLoader.h>
+#include <core/TagParserFactory.h>
+#include <core/ConvTaskFactory.h>
 
 struct mous_ctx
 {
@@ -16,7 +16,7 @@ struct mous_ctx
 
     mous::MediaLoader loader;
     mous::TagParserFactory parser_factory;
-    mous::IConvTaskFactory* conv_factory;
+    mous::ConvTaskFactory conv_factory;
 
     plugin_list_t dec_agents;
     plugin_list_t enc_agents;

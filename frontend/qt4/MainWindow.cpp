@@ -77,8 +77,6 @@ void MainWindow::closeEvent(QCloseEvent*)
 
 void MainWindow::InitMousCore()
 {
-    m_ConvFactory = IConvTaskFactory::Create();
-
     m_PluginManager.LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
     //const vector<string>& pathList = m_PluginManager.PluginPaths();
 
@@ -102,8 +100,8 @@ void MainWindow::InitMousCore()
     m_Player.SetBufferCount(102);
     m_Player.SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
 
-    m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
-    m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
+    m_ConvFactory.RegisterDecoderPlugin(decoderAgentList);
+    m_ConvFactory.RegisterEncoderPlugin(encoderAgentList);
 
     m_ParserFactory.RegisterTagParserPlugin(tagAgentList);
 
@@ -125,11 +123,9 @@ void MainWindow::ClearMousCore()
 
     m_Player.UnregisterAll();
     m_MediaLoader.UnregisterAll();
-    m_ConvFactory->UnregisterAll();
+    m_ConvFactory.UnregisterAll();
     m_ParserFactory.UnregisterAll();
     m_PluginManager.UnloadAll();
-
-    IConvTaskFactory::Free(m_ConvFactory);
 }
 
 void MainWindow::InitMyUi()
@@ -414,7 +410,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 {
     //==== show encoders
-    vector<string> encoderNames = m_ConvFactory->EncoderNames();
+    vector<string> encoderNames = m_ConvFactory.EncoderNames();
     if (encoderNames.empty())
         return;
     QStringList list;
@@ -433,7 +429,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
         return;
 
     int encoderIndex = dlgEncoders.GetSelectedIndex();
-    IConvTask* newTask = m_ConvFactory->CreateTask(item, encoderNames[encoderIndex]);
+    IConvTask* newTask = m_ConvFactory.CreateTask(item, encoderNames[encoderIndex]);
     if (newTask == nullptr)
         return;
 

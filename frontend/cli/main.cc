@@ -8,12 +8,12 @@
 #include <string>
 using namespace std;
 
-#include "util/MediaItem.h"
-#include "util/PluginOption.h"
-#include "core/MediaLoader.h"
-#include "core/PluginManager.h"
-#include "core/IConvTask.h"
-#include "core/IConvTaskFactory.h"
+#include <util/MediaItem.h>
+#include <util/PluginOption.h>
+#include <core/MediaLoader.h>
+#include <core/PluginManager.h>
+#include <core/IConvTask.h>
+#include <core/ConvTaskFactory.h>
 using namespace mous;
 
 #include <scx/FileInfo.hpp>
@@ -128,9 +128,8 @@ int main(int argc, char** argv)
     // setup parser factory
     ctx.parser_factory.RegisterTagParserPlugin(ctx.tag_agents);
     // setup conv factory
-    ctx.conv_factory = IConvTaskFactory::Create();
-    ctx.conv_factory->RegisterDecoderPlugin(ctx.dec_agents);
-    ctx.conv_factory->RegisterEncoderPlugin(ctx.enc_agents);
+    ctx.conv_factory.RegisterDecoderPlugin(ctx.dec_agents);
+    ctx.conv_factory.RegisterEncoderPlugin(ctx.enc_agents);
 
     // match command
     {
@@ -152,8 +151,7 @@ int main(int argc, char** argv)
 
     // cleanup
     ctx.loader.UnregisterAll();
-    ctx.conv_factory->UnregisterAll();
-    IConvTaskFactory::Free(ctx.conv_factory);
+    ctx.conv_factory.UnregisterAll();
 
     ctx.mgr.UnloadAll();
 

@@ -17,7 +17,7 @@ int cmd_dec(int argc, char** argv)
 {
     // find wav encoder
     string wav_enc;
-    const vector<string>& encoders = ctx.conv_factory->EncoderNames();
+    const vector<string>& encoders = ctx.conv_factory.EncoderNames();
     for (size_t i = 0; i < encoders.size(); ++i) {
         if (scx::ToLower(encoders[i]).find("wav") != string::npos)
             wav_enc = encoders[i];
@@ -54,7 +54,7 @@ int cmd_dec(int argc, char** argv)
             }
 
             // do it!
-            IConvTask* task = ctx.conv_factory->CreateTask(media_list[mi], wav_enc);
+            IConvTask* task = ctx.conv_factory.CreateTask(media_list[mi], wav_enc);
             task->Run(outname);
 
             while (!task->IsFinished()) {

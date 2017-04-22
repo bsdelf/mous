@@ -8,7 +8,7 @@
 #include <core/MediaLoader.h>
 #include <core/Player.h>
 #include <core/IConvTask.h>
-#include <core/IConvTaskFactory.h>
+#include <core/ConvTaskFactory.h>
 #include <core/TagParserFactory.h>
 #include <util/MediaItem.h>
 using namespace mous;
@@ -98,7 +98,7 @@ private:
     PluginManager m_PluginManager;
     MediaLoader m_MediaLoader;
     Player m_Player;
-    IConvTaskFactory* m_ConvFactory = nullptr;
+    ConvTaskFactory m_ConvFactory;
     TagParserFactory m_ParserFactory;
     QMutex m_PlayerMutex { QMutex::Recursive };
 
