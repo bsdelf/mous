@@ -2,13 +2,13 @@
 %%QT4%%bin/mous-qt
 %%SDK%%include/mous/charset/CharsetConvInf.h
 %%SDK%%include/mous/charset/ICharsetConv.h
-%%SDK%%include/mous/core/IConvTask.h
-%%SDK%%include/mous/core/IConvTaskFactory.h
+%%SDK%%include/mous/core/ConvTask.h
+%%SDK%%include/mous/core/ConvTaskFactory.h
 %%SDK%%include/mous/core/MediaLoader.h
 %%SDK%%include/mous/core/Player.h
 %%SDK%%include/mous/core/Plugin.h
 %%SDK%%include/mous/core/PluginManager.h
-%%SDK%%include/mous/core/ITagParserFactory.h
+%%SDK%%include/mous/core/TagParserFactory.h
 %%SDK%%include/mous/plugin/IDecoder.h
 %%SDK%%include/mous/plugin/IEncoder.h
 %%SDK%%include/mous/plugin/IEventWatcher.h
