@@ -12,8 +12,7 @@ using namespace std;
 
 #include <scx/Conv.hpp>
 #include <scx/FileHelper.hpp>
-#include <scx/LPVBuffer.hpp>
-#include <scx/SemVar.hpp>
+#include <scx/Mailbox.hpp>
 using namespace scx;
 
 #include <core/Plugin.h>
@@ -21,33 +20,11 @@ using namespace scx;
 #include <plugin/IRenderer.h>
 
 namespace mous {
-
 struct UnitBuffer
 {
-    char* data;
+    std::unique_ptr<char[]> data;
     uint32_t used;
-    uint32_t max;
-
     uint32_t unitCount;
-
-    UnitBuffer()
-      : data(nullptr)
-      , used(0)
-      , max(0)
-      , unitCount(0)
-    {
-    }
-
-    ~UnitBuffer()
-    {
-        if (data != nullptr) {
-            delete[] data;
-        }
-        data = nullptr;
-        used = 0;
-        max = 0;
-        unitCount = 0;
-    }
 };
 
 struct DecoderPluginNode
@@ -56,91 +33,143 @@ struct DecoderPluginNode
     IDecoder* decoder;
 };
 
+enum : std::size_t
+{
+    // mail contents
+    TYPE = 0,
+    DATA = 1,
+    FROM = 2,
+
+    // worker status
+    IDLE = 1u << 0,
+    RUNNING = 1u << 1,
+
+    // mail type
+    PROCEED = 1u << 2,
+    SUSPEND = 1u << 3,
+    DECODE = 1u << 4,
+    RENDER = 1u << 5,
+    QUIT = 1u << 6
+};
+
 class Player::Impl
 {
+  using Mailbox = scx::Mailbox<int, UnitBuffer>;
+  using Mail = Mailbox::Mail;
+
   public:
     Impl()
     {
-        m_UnitBuffers.AllocBuffer(5);
+        m_DecoderThread = std::thread([this]() {
+            int status = IDLE;
+            int quit = false;
 
-        m_ThreadForDecoder = std::thread([this]() {
-            while (true) {
-                m_SemWakeDecoder.Wait();
-                if (m_StopDecoder) {
-                    break;
+            while (!quit) {
+                auto mail = m_DecoderMailbox.Take();
+
+                const int opcode = status | std::get<TYPE>(mail);
+
+                switch (opcode) {
+                    case IDLE | QUIT:
+                    case RUNNING | QUIT: {
+                        quit = true;
+                    } break;
+
+                    case IDLE | PROCEED: {
+                        status = RUNNING;
+                    } break;
+
+                    case IDLE | DECODE: {
+                        std::get<TYPE>(mail) = 0;
+                        m_BufferMailbox.PushBack(std::move(mail));
+                    } break;
+
+                    case IDLE | SUSPEND:
+                    case RUNNING | SUSPEND: {
+                        status = IDLE;
+                    } break;
+
+                    case RUNNING | DECODE: {
+                        auto& buf = std::get<DATA>(mail);
+
+                        if (m_DecoderIndex < m_UnitEnd) {
+                            m_Decoder->DecodeUnit(buf.data.get(), buf.used, buf.unitCount);
+                            m_DecoderIndex += buf.unitCount;
+
+                            std::get<TYPE>(mail) = RENDER;
+                            m_RendererMailbox.PushBack(std::move(mail));
+
+                            if (m_DecoderIndex >= m_UnitEnd) {
+                                status = IDLE;
+                            }
+                        } else {
+                            std::get<TYPE>(mail) = 0;
+                            m_BufferMailbox.PushBack(std::move(mail));
+                        }
+                    } break;
+
+                    default: {
+                        // unexpected
+                    } break;
                 }
-
-                m_SemDecoderBegin.Clear();
-                m_SemDecoderEnd.Clear();
-
-                m_SemDecoderBegin.Post();
-
-                for (UnitBuffer* buf = nullptr;;) {
-                    if (m_PauseDecoder) {
-                        break;
-                    }
-
-                    buf = m_UnitBuffers.TakeFree();
-                    if (m_SuspendDecoder) {
-                        break;
-                    }
-
-                    assert(buf != nullptr);
-                    assert(buf->data != nullptr);
-
-                    m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
-                    m_DecoderIndex += buf->unitCount;
-                    m_UnitBuffers.RecycleFree();
-
-                    if (m_DecoderIndex >= m_UnitEnd) {
-                        m_SuspendDecoder = true;
-                        break;
-                    }
-                }
-
-                m_SemDecoderEnd.Post();
             }
         });
 
-        m_ThreadForRenderer = std::thread([this]() {
-            while (true) {
-                m_SemWakeRenderer.Wait();
-                if (m_StopRenderer) {
-                    break;
-                }
+        m_RendererThread = std::thread([this]() {
+            int status = IDLE;
+            int quit = false;
 
-                m_SemRendererBegin.Clear();
-                m_SemRendererEnd.Clear();
+            while (!quit) {
+                auto mail = m_RendererMailbox.Take();
 
-                m_SemRendererBegin.Post();
+                const int opcode = status | std::get<TYPE>(mail);
 
-                for (UnitBuffer* buf = nullptr;;) {
-                    buf = m_UnitBuffers.TakeData();
-                    if (m_SuspendRenderer) {
-                        break;
-                    }
+                switch (opcode) {
+                    case IDLE | QUIT:
+                    case RUNNING | QUIT: {
+                        quit = true;
+                    } break;
 
-                    assert(buf != nullptr);
-                    assert(buf->data != nullptr);
+                    case IDLE | PROCEED: {
+                        status = RUNNING;
+                    } break;
 
-                    // avoid busy write
-                    if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok) {
-                        ::usleep(10 * 1000);
-                    }
-                    m_RendererIndex += buf->unitCount;
-                    m_UnitBuffers.RecycleData();
+                    case IDLE | RENDER: {
+                        std::get<TYPE>(mail) = 0;
+                        m_BufferMailbox.PushBack(std::move(mail));
+                    } break;
 
-                    if (m_RendererIndex >= m_UnitEnd) {
-                        m_SuspendRenderer = true;
-                        break;
-                    }
-                }
+                    case IDLE | SUSPEND:
+                    case RUNNING | SUSPEND: {
+                        status = IDLE;
+                    } break;
 
-                m_SemRendererEnd.Post();
+                    case RUNNING | RENDER: {
+                        auto& buf = std::get<DATA>(mail);
 
-                if (m_RendererIndex >= m_UnitEnd) {
-                    m_Status = PlayerStatus::Stopped;
-                    std::thread([this]() { m_SigFinished(); }).detach();
+                        if (m_RendererIndex < m_UnitEnd) {
+                            if (m_Renderer->Write(buf.data.get(), buf.used) != ErrorCode::Ok) {
+                                // avoid busy write
+                                ::usleep(10 * 1000);
+                            }
+                            m_RendererIndex += buf.unitCount;
+
+                            std::get<TYPE>(mail) = DECODE;
+                            m_DecoderMailbox.PushBack(std::move(mail));
+
+                            if (m_RendererIndex >= m_UnitEnd) {
+                                status = IDLE;
+                                std::thread([this]() { m_SigFinished(); }).detach();
+                            }
+                        } else {
+                            std::get<TYPE>(mail) = 0;
+                            m_BufferMailbox.PushBack(std::move(mail));
+                        }
+                    } break;
+
+                    default: {
+                        // unexpected
+                    } break;
                 }
             }
         });
@@ -150,19 +179,17 @@ class Player::Impl
     {
         Close();
 
-        m_StopDecoder = true;
-        m_StopRenderer = true;
-        m_SemWakeDecoder.Post();
-        m_SemWakeRenderer.Post();
+        m_DecoderMailbox.PushFront(Mail{QUIT});
+        m_RendererMailbox.PushFront(Mail{QUIT});
 
-        if (m_ThreadForDecoder.joinable()) {
-            m_ThreadForDecoder.join();
+        if (m_DecoderThread.joinable()) {
+            m_DecoderThread.join();
         }
-        if (m_ThreadForRenderer.joinable()) {
-            m_ThreadForRenderer.join();
+        if (m_RendererThread.joinable()) {
+            m_RendererThread.join();
         }
 
-        m_UnitBuffers.ClearBuffer();
+        m_BufferMailbox.Clear();
 
         UnregisterAll();
     }
@@ -227,17 +254,20 @@ class Player::Impl
     {
         vector<string> list;
         list.reserve(m_DecoderPluginMap.size());
-        for (const auto& entry : m_DecoderPluginMap)
+        for (const auto& entry : m_DecoderPluginMap) {
             list.push_back(entry.first);
+        }
         return list;
     }
 
-    int BufferCount() const { return m_UnitBuffers.BufferCount(); }
+    int BufferCount() const
+    {
+        return m_BufferCount;
+    }
 
     void SetBufferCount(int count)
     {
-        m_UnitBuffers.ClearBuffer();
-        m_UnitBuffers.AllocBuffer(count);
+        m_BufferCount = count;
     }
 
     int Volume() const { return m_Renderer != nullptr ? m_Renderer->VolumeLevel() : -1; }
@@ -272,21 +302,14 @@ class Player::Impl
             m_DecodeFile = path;
         }
 
-        uint32_t maxBytesPerUnit = m_Decoder->MaxBytesPerUnit();
-        for (size_t i = 0; i < m_UnitBuffers.BufferCount(); ++i) {
-            UnitBuffer* buf = m_UnitBuffers.RawItemAt(i);
-            buf->used = 0;
-            if (buf->max < maxBytesPerUnit) {
-                if (buf->data != nullptr) {
-                    delete[] buf->data;
-                    // cout << "free unit buf:" << buf->max << endl;
-                }
-                buf->data = new char[maxBytesPerUnit];
-                buf->max = maxBytesPerUnit;
-                // cout << "alloc unit buf:" << buf->max << endl;
-            }
-        }
+        const uint32_t maxBytesPerUnit = m_Decoder->MaxBytesPerUnit();
         // cout << "unit buf size:" << maxBytesPerUnit << endl;
+
+        m_BufferMailbox.Clear();
+        for (size_t i = 0; i < m_BufferCount; ++i) {
+            UnitBuffer buf = {std::make_unique<char[]>(maxBytesPerUnit), 0, 0};
+            m_BufferMailbox.PushBack(Mail{0, std::move(buf)});
+        }
 
         m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
 
@@ -367,19 +390,17 @@ class Player::Impl
         m_UnitBeg = beg;
         m_UnitEnd = end;
 
-        m_DecoderIndex = m_UnitBeg;
         m_RendererIndex = m_UnitBeg;
+        m_RendererMailbox.PushBack(Mail{PROCEED});
 
+        m_DecoderIndex = m_UnitBeg;
         m_Decoder->SetUnitIndex(m_UnitBeg);
-
-        m_UnitBuffers.ResetPV();
-
-        m_SuspendRenderer = false;
-        m_SemWakeRenderer.Post();
-        m_SuspendDecoder = false;
-        m_SemWakeDecoder.Post();
-        m_SemRendererBegin.Wait();
-        m_SemDecoderBegin.Wait();
+        m_DecoderMailbox.PushBack(Mail{PROCEED});
+        while (!m_BufferMailbox.Empty()) {
+            auto mail = m_BufferMailbox.Take();
+            std::get<TYPE>(mail) = DECODE;
+            m_DecoderMailbox.PushBack(std::move(mail));
+        }
 
         m_Status = PlayerStatus::Playing;
     }
@@ -390,39 +411,25 @@ class Player::Impl
             return;
         }
 
-        // suspend renderer
-        if (!m_SuspendRenderer) {
-            m_SuspendRenderer = true;
-            m_UnitBuffers.RecycleFree();
-        }
-        m_SemRendererEnd.Wait();
-
-        // suspend decoder
-        if (!m_SuspendDecoder) {
-            m_SuspendDecoder = true;
-            m_UnitBuffers.RecycleData();
-        }
-        m_SemDecoderEnd.Wait();
-
-        m_UnitBuffers.ResetPV();
+        m_DecoderMailbox.PushFront(Mail{SUSPEND});
+        m_RendererMailbox.PushFront(Mail{SUSPEND});
+        m_BufferMailbox.Wait(m_BufferCount);
 
         m_Status = PlayerStatus::Paused;
     }
 
     void Resume()
     {
+        m_RendererMailbox.PushBack(Mail{PROCEED});
+
         m_DecoderIndex = m_RendererIndex;
         m_Decoder->SetUnitIndex(m_DecoderIndex);
-
-        m_UnitBuffers.ResetPV();
-
-        // resume renderer & decoder
-        m_SuspendRenderer = false;
-        m_SemWakeRenderer.Post();
-        m_SuspendDecoder = false;
-        m_SemWakeDecoder.Post();
-        m_SemRendererBegin.Wait();
-        m_SemDecoderBegin.Wait();
+        m_DecoderMailbox.PushBack(Mail{PROCEED});
+        while (!m_BufferMailbox.Empty()) {
+            auto mail = m_BufferMailbox.Take();
+            std::get<TYPE>(mail) = DECODE;
+            m_DecoderMailbox.PushBack(std::move(mail));
+        }
 
         m_Status = PlayerStatus::Playing;
     }
@@ -489,19 +496,19 @@ class Player::Impl
 
     void PauseDecoder()
     {
-        // cout << "data:" << m_UnitBuffers.DataCount() << endl;
-        // cout << "free:" << m_UnitBuffers.FreeCount() << endl;
-
+        /*
         if (!m_PauseDecoder) {
             m_PauseDecoder = true;
         }
         m_SemDecoderEnd.Wait();
 
         m_Decoder->Close();
+        */
     }
 
     void ResumeDecoder()
     {
+        /*
         // cout << "data:" << m_UnitBuffers.DataCount() << endl;
         // cout << "free:" << m_UnitBuffers.FreeCount() << endl;
 
@@ -511,6 +518,7 @@ class Player::Impl
         m_PauseDecoder = false;
         m_SemWakeDecoder.Post();
         m_SemDecoderBegin.Wait();
+        */
     }
 
     int32_t BitRate() const { return (m_Decoder != nullptr) ? m_Decoder->BitRate() : -1; }
@@ -634,25 +642,17 @@ class Player::Impl
   private:
     EmPlayerStatus m_Status = PlayerStatus::Closed;
 
-    string m_DecodeFile;
-    bool m_StopDecoder = false;
-    bool m_SuspendDecoder = true;
-    bool m_PauseDecoder = false;
+    std::string m_DecodeFile;
+
     IDecoder* m_Decoder = nullptr;
-    std::thread m_ThreadForDecoder;
-    scx::SemVar m_SemWakeDecoder;
-    scx::SemVar m_SemDecoderBegin;
-    scx::SemVar m_SemDecoderEnd;
-
-    bool m_StopRenderer = false;
-    bool m_SuspendRenderer = true;
     IRenderer* m_Renderer = nullptr;
-    std::thread m_ThreadForRenderer;
-    scx::SemVar m_SemWakeRenderer;
-    scx::SemVar m_SemRendererBegin;
-    scx::SemVar m_SemRendererEnd;
+    std::thread m_DecoderThread;
+    std::thread m_RendererThread;
+    Mailbox m_DecoderMailbox;
+    Mailbox m_RendererMailbox;
 
-    scx::LPVBuffer<UnitBuffer> m_UnitBuffers;
+    Mailbox m_BufferMailbox;
+    int m_BufferCount = 5;
 
     uint64_t m_UnitBeg = 0;
     uint64_t m_UnitEnd = 0;
@@ -663,7 +663,6 @@ class Player::Impl
     double m_UnitPerMs = 0;
 
     const Plugin* m_RendererPlugin = nullptr;
-
     std::map<std::string, DecoderPluginNode> m_DecoderPluginMap;
 
     scx::Signal<void(void)> m_SigFinished;
