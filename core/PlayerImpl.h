@@ -1,10 +1,9 @@
 #pragma once
 
 #include <assert.h>
-#include <unistd.h>
 
 #include <algorithm>
-#include <future>
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <thread>
@@ -150,7 +149,8 @@ class Player::Impl
                         if (m_RendererIndex < m_UnitEnd) {
                             if (m_Renderer->Write(buf.data.get(), buf.used) != ErrorCode::Ok) {
                                 // avoid busy write
-                                ::usleep(10 * 1000);
+                                const int64_t delay = buf.unitCount / m_UnitPerMs * 1e6;
+                                std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
                             }
                             m_RendererIndex += buf.unitCount;
 
