@@ -15,7 +15,7 @@ class PluginManager::Impl
         const auto& files = Dir::ListDir(dir);
 
         for (size_t i = 0; i < files.size(); ++i) {
-            if (files[i].substr(0, 3) == "lib") {
+            if (files[i].compare(0, 3, "lib") == 0) {
                 std::string full = dir + "/" + files[i];
                 if (FileInfo(full).Type() == FileType::Regular) {
                     LoadPlugin(full);
