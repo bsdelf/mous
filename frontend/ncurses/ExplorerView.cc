@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <utility>
 
-#include <scx/Conv.hpp>
 #include <scx/CharsetHelper.hpp>
 #include <scx/Env.hpp>
 #include <scx/FileInfo.hpp>
@@ -114,7 +113,7 @@ void ExplorerView::Refresh()
             }
             if (!item.cacheOk) {
                 string& str = item.sizeCache;
-                str = NumToStr(size) + *hint;
+                str = std::to_string(size) + *hint;
                 if (str.size() < 5)
                     str = string(5 - str.size(), ' ') + str;
             }

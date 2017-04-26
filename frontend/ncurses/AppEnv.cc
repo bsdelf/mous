@@ -3,7 +3,6 @@
 #include <iostream>
 using namespace std;
 
-#include <scx/Conv.hpp>
 #include <scx/Env.hpp>
 #include <scx/Dir.hpp>
 #include <scx/FileInfo.hpp>
@@ -92,7 +91,7 @@ bool AppEnv::LoadContent()
         return false;
 
     serverIp = config[Field::ServerIp];
-    serverPort = StrToNum<int>(config[Field::ServerPort]);
+    serverPort = std::stoi(config[Field::ServerPort]);
     ifNotUtf8 = config[Field::IfNotUtf8];
 
     return true;

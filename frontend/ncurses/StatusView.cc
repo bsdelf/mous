@@ -6,7 +6,6 @@
 using namespace std;
 
 #include <scx/CharsetHelper.hpp>
-#include <scx/Conv.hpp>
 #include <scx/FileInfo.hpp>
 
 inline static string FormatTime(int ms)
@@ -95,7 +94,7 @@ void StatusView::Refresh()
         string dur = FormatTime(m_PlayerStatus.duration);
         string bps = FormatBitRate(m_PlayerStatus.bitRate);
         string strBps = " Kbps";
-        string rate = NumToStr(m_PlayerStatus.sampleRate);
+        string rate = std::to_string(m_PlayerStatus.sampleRate);
         string strRate = " Hz";
 
         d.AttrSet(Attr::Bold);

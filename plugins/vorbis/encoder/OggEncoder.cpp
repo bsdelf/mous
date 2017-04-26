@@ -1,5 +1,4 @@
 #include "OggEncoder.h"
-#include <scx/Conv.hpp>
 
 OggEncoder::OggEncoder():
     m_OutputFile(nullptr),

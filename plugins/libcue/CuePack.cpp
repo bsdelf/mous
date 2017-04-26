@@ -3,7 +3,6 @@
 #include <cstdio>
 
 #include <scx/FileHelper.hpp>
-#include <scx/Conv.hpp>
 using namespace scx;
 
 #include "util/MediaItem.h"
@@ -52,7 +51,7 @@ void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& items) const
 
     const auto rem_get_num = [](unsigned int i, Rem* rem, int defa) {
         const char* buf = rem_get(i, rem);
-        return buf ? StrToNum<int>(buf) : defa;
+        return buf ? std::stoi(buf) : defa;
     };
 
     Cdtext* cdt = cd_get_cdtext(cd);

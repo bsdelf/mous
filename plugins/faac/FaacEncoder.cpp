@@ -1,7 +1,6 @@
 #include "FaacEncoder.h"
 #include <stdlib.h>
 #include <string.h>
-#include <scx/Conv.hpp>
 
 FaacEncoder::FaacEncoder():
     m_Mp4File(MP4_INVALID_FILE_HANDLE),
@@ -352,7 +351,7 @@ void FaacEncoder::UpdateMediaTag()
     MP4TagsSetAlbum(tag, m_MediaTag->album.c_str());
     MP4TagsSetComments(tag, m_MediaTag->comment.c_str());
     MP4TagsSetGenre(tag, m_MediaTag->genre.c_str());
-    MP4TagsSetReleaseDate(tag, scx::NumToStr(m_MediaTag->year).c_str());
+    MP4TagsSetReleaseDate(tag, std::to_string(m_MediaTag->year).c_str());
     MP4TagTrack track = { static_cast<uint16_t>(m_MediaTag->track), 0 };
     MP4TagsSetTrack(tag, &track);
 

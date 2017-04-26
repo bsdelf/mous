@@ -41,7 +41,7 @@ int cmd_dec(int argc, char** argv)
             // output file name
             const char* outname = 
                 (media_list.size() == 1 || media_list[mi].tag.title.empty()) ?
-                (info.BaseName() + "." + NumToStr(mi) + ".wav").c_str() :
+                (info.BaseName() + "." + std::to_string(mi) + ".wav").c_str() :
                 (media_list[mi].tag.title + ".wav").c_str(); 
                  
             printf("save to: %s\n", outname);

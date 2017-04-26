@@ -8,7 +8,6 @@
 #include <vector>
 using namespace std;
 
-#include <scx/Conv.hpp>
 #include <util/MediaItem.h>
 
 #include "BgWindow.h"
@@ -210,7 +209,7 @@ class MainUi::Impl
             case '3':
             case '4':
             case '5':
-                SwitchPlaylist(StrToNum<int>(string(1, (char)key)));
+                SwitchPlaylist(std::stoi(string(1, (char)key)));
                 break;
 
             case 'q':

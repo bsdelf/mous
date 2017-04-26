@@ -1,5 +1,4 @@
 #include "LameEncoder.h"
-#include <scx/Conv.hpp>
 
 LameEncoder::LameEncoder()
 {
@@ -56,8 +55,8 @@ EmErrorCode LameEncoder::OpenOutput(const std::string& path)
         id3tag_set_album(m_gfp, m_MediaTag->album.c_str());
         id3tag_set_comment(m_gfp, m_MediaTag->comment.c_str());
         id3tag_set_genre(m_gfp, m_MediaTag->genre.c_str());
-        id3tag_set_year(m_gfp, scx::NumToStr(m_MediaTag->year).c_str());
-        id3tag_set_track(m_gfp, scx::NumToStr(m_MediaTag->track).c_str());
+        id3tag_set_year(m_gfp, std::to_string(m_MediaTag->year).c_str());
+        id3tag_set_track(m_gfp, std::to_string(m_MediaTag->track).c_str());
     }
     int ret = ::lame_init_params(m_gfp);
     if (ret < 0)
