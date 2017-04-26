@@ -179,8 +179,8 @@ class Player::Impl
     {
         Close();
 
-        m_DecoderMailbox.PushFront(Mail{QUIT});
-        m_RendererMailbox.PushFront(Mail{QUIT});
+        m_DecoderMailbox.EmplaceFront(QUIT);
+        m_RendererMailbox.EmplaceFront(QUIT);
 
         if (m_DecoderThread.joinable()) {
             m_DecoderThread.join();
@@ -308,7 +308,7 @@ class Player::Impl
         m_BufferMailbox.Clear();
         for (size_t i = 0; i < m_BufferCount; ++i) {
             UnitBuffer buf = {std::make_unique<char[]>(maxBytesPerUnit), 0, 0};
-            m_BufferMailbox.PushBack(Mail{0, std::move(buf)});
+            m_BufferMailbox.EmplaceBack(0, std::move(buf));
         }
 
         m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
@@ -391,11 +391,11 @@ class Player::Impl
         m_UnitEnd = end;
 
         m_RendererIndex = m_UnitBeg;
-        m_RendererMailbox.PushBack(Mail{PROCEED});
+        m_RendererMailbox.EmplaceBack(PROCEED);
 
         m_DecoderIndex = m_UnitBeg;
         m_Decoder->SetUnitIndex(m_UnitBeg);
-        m_DecoderMailbox.PushBack(Mail{PROCEED});
+        m_DecoderMailbox.EmplaceBack(PROCEED);
         while (!m_BufferMailbox.Empty()) {
             auto mail = m_BufferMailbox.Take();
             std::get<TYPE>(mail) = DECODE;
@@ -411,8 +411,8 @@ class Player::Impl
             return;
         }
 
-        m_DecoderMailbox.PushFront(Mail{SUSPEND});
-        m_RendererMailbox.PushFront(Mail{SUSPEND});
+        m_DecoderMailbox.EmplaceFront(SUSPEND);
+        m_RendererMailbox.EmplaceFront(SUSPEND);
         m_BufferMailbox.Wait(m_BufferCount);
 
         m_Status = PlayerStatus::Paused;
@@ -420,11 +420,11 @@ class Player::Impl
 
     void Resume()
     {
-        m_RendererMailbox.PushBack(Mail{PROCEED});
+        m_RendererMailbox.EmplaceBack(PROCEED);
 
         m_DecoderIndex = m_RendererIndex;
         m_Decoder->SetUnitIndex(m_DecoderIndex);
-        m_DecoderMailbox.PushBack(Mail{PROCEED});
+        m_DecoderMailbox.EmplaceBack(PROCEED);
         while (!m_BufferMailbox.Empty()) {
             auto mail = m_BufferMailbox.Take();
             std::get<TYPE>(mail) = DECODE;

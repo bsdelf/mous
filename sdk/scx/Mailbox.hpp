@@ -27,7 +27,15 @@ class Mailbox
     void PushBack(T&& mail)
     {
         std::lock_guard<std::mutex> locker(_mutex);
-        _queue.emplace_front(std::forward<T>(mail));
+        _queue.emplace_back(std::forward<T>(mail));
+        _condition.notify_all();
+    }
+
+    template<typename... Args>
+    void EmplaceBack(Args&&... args)
+    {
+        std::lock_guard<std::mutex> locker(_mutex);
+        _queue.emplace_back(std::forward<Args>(args)...);
         _condition.notify_all();
     }
 
@@ -35,7 +43,15 @@ class Mailbox
     void PushFront(T&& mail)
     {
         std::lock_guard<std::mutex> locker(_mutex);
-        _queue.emplace_back(std::forward<T>(mail));
+        _queue.emplace_front(std::forward<T>(mail));
+        _condition.notify_all();
+    }
+
+    template<typename... Args>
+    void EmplaceFront(Args&&... args)
+    {
+        std::lock_guard<std::mutex> locker(_mutex);
+        _queue.emplace_front(std::forward<Args>(args)...);
         _condition.notify_all();
     }
 
@@ -43,8 +59,8 @@ class Mailbox
     {
         std::unique_lock<std::mutex> locker(_mutex);
         _condition.wait(locker, [this] { return not _queue.empty(); });
-        auto mail = std::move(_queue.back());
-        _queue.pop_back();
+        auto mail = std::move(_queue.front());
+        _queue.pop_front();
         return mail;
     }
 
@@ -54,8 +70,8 @@ class Mailbox
         if (_queue.empty()) {
             return Mail();
         }
-        auto mail = std::move(_queue.back());
-        _queue.pop_back();
+        auto mail = std::move(_queue.front());
+        _queue.pop_front();
         return mail;
     }
 
