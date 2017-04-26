@@ -71,6 +71,5 @@ void CoreAudioRenderer::SetVolumeLevel(int avg)
 
 std::vector<const BaseOption*> CoreAudioRenderer::Options() const
 {
-    std::vector<const BaseOption*> list(0);
-    return list;
+    return {};
 }
