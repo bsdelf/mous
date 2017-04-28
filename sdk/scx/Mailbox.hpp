@@ -27,7 +27,7 @@ class Mailbox
     void PushBack(T&& mail)
     {
         std::lock_guard<std::mutex> locker(_mutex);
-        _queue.emplace_back(std::forward<T>(mail));
+        _queue.push_back(std::forward<T>(mail));
         _condition.notify_all();
     }
 
@@ -43,7 +43,7 @@ class Mailbox
     void PushFront(T&& mail)
     {
         std::lock_guard<std::mutex> locker(_mutex);
-        _queue.emplace_front(std::forward<T>(mail));
+        _queue.push_front(std::forward<T>(mail));
         _condition.notify_all();
     }
 
