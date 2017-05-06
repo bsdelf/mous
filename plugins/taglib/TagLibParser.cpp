@@ -28,10 +28,7 @@ static string StringToStdString(const String& str)
     }
 }
 
-TagLibParser::TagLibParser():
-    m_pFileRef(nullptr),
-    m_pTag(nullptr),
-    m_pProp(nullptr)
+TagLibParser::TagLibParser()
 {
     m_DumpHandlers["mp3"] = &DumpMp3Cover;
     m_DumpHandlers["m4a"] = &DumpMp4Cover;
@@ -48,10 +45,7 @@ TagLibParser::~TagLibParser()
 
 vector<string> TagLibParser::FileSuffix() const
 {
-    vector<string> list;
-    list.clear();
-    list.push_back("*");
-    return list;
+    return { "*" };
 }
 
 EmErrorCode TagLibParser::Open(const string& path)

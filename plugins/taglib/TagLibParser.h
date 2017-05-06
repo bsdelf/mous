@@ -65,9 +65,9 @@ private:
 private:
     std::string m_FileName;
 
-    FileRef* m_pFileRef;
-    Tag* m_pTag;
-    AudioProperties* m_pProp;
+    FileRef* m_pFileRef = nullptr;
+    Tag* m_pTag = nullptr;
+    AudioProperties* m_pProp = nullptr;
 
     std::unordered_map<std::string, FnDumpCover> m_DumpHandlers;
     std::unordered_map<std::string, FnStoreCover> m_StoreHandlers;
