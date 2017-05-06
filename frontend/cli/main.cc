@@ -150,8 +150,9 @@ int main(int argc, char** argv)
     }
 
     // cleanup
-    ctx.loader.UnregisterAll();
     ctx.conv_factory.UnregisterAll();
+    ctx.parser_factory.UnregisterAll();
+    ctx.loader.UnregisterAll();
 
     ctx.mgr.UnloadAll();
 
