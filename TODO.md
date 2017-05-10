@@ -7,9 +7,10 @@ Bug:
 
 Core:
 
-- 实现 filter 接口
-- 播放状态接口
-- 更可靠的 player 实现？
+- Redesign and refactor the entire plugin infrastructure
+- Profile the performance and overhead of inter-thread communication based on mailbox
+- Implement filter plugin interface
+- Implement player statistics plugin interface
 
 Plugin:
 
