@@ -245,7 +245,7 @@ uint64_t FaadDecoder::UnitCount() const
     return m_SampleCount;
 }
 
-EmAudioMode FaadDecoder::AudioMode() const
+AudioMode FaadDecoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }

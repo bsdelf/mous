@@ -24,7 +24,7 @@ vector<string> WavDecoder::FileSuffix() const
     return { "wav" };
 }
 
-EmErrorCode WavDecoder::Open(const std::string& url)
+ErrorCode WavDecoder::Open(const std::string& url)
 {
     m_InputStream.open(url.c_str(), ios::binary);
     if (!m_InputStream.is_open())
@@ -73,7 +73,7 @@ bool WavDecoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode WavDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode WavDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     m_InputStream.read(data, m_BlockLength);
     used = m_InputStream.gcount();
@@ -81,7 +81,7 @@ EmErrorCode WavDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
     return ErrorCode::Ok;
 }
 
-EmErrorCode WavDecoder::SetUnitIndex(uint64_t index)
+ErrorCode WavDecoder::SetUnitIndex(uint64_t index)
 {
     if ((size_t)index > m_TotalBlocks)
         return ErrorCode::DecoderOutOfRange;
@@ -106,7 +106,7 @@ uint64_t WavDecoder::UnitCount() const
     return m_TotalBlocks;
 }
 
-EmAudioMode WavDecoder::AudioMode() const
+AudioMode WavDecoder::AudioMode() const
 {
     return m_WavHeader.channels == 1 ? AudioMode::Mono : AudioMode::Stereo;
 }

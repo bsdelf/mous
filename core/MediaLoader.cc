@@ -54,7 +54,7 @@ std::vector<std::string> MediaLoader::SupportedSuffixes() const
     return impl->SupportedSuffixes();
 }
 
-EmErrorCode MediaLoader::LoadMedia(const std::string& path, std::deque<MediaItem>& list) const
+ErrorCode MediaLoader::LoadMedia(const std::string& path, std::deque<MediaItem>& list) const
 {
     return impl->LoadMedia(path, list);
 }

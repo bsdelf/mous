@@ -7,8 +7,7 @@
  */
 namespace mous {
 
-namespace PluginType {
-enum e
+enum class PluginType: uint8_t
 {
     None = 0,
     Decoder,
@@ -19,8 +18,6 @@ enum e
     Filter,
     EventWatcher
 };
-}
-typedef PluginType::e EmPluginType;
 
 struct PluginInfo
 {
@@ -35,7 +32,7 @@ const char* const StrGetPluginInfo = "MousGetPluginInfo";
 const char* const StrCreateObject = "MousCreateObject";
 const char* const StrFreeObject = "MousFreeObject";
 
-inline const char* ToString(EmPluginType type) 
+inline const char* ToString(PluginType type)
 {
     switch (type) {
         case PluginType::None:

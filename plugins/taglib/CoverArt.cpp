@@ -17,19 +17,19 @@ using namespace scx;
 #include <taglib/attachedpictureframe.h>
 using namespace TagLib;
 
-static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf);
-static bool StoreID3v2Cover(ID3v2::Tag* idtag, EmCoverFormat fmt, const char* buf, size_t len);
+static CoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf);
+static bool StoreID3v2Cover(ID3v2::Tag* idtag, CoverFormat fmt, const char* buf, size_t len);
 
 /*======== dump ========*/
-EmCoverFormat DumpMp3Cover(const string& path, vector<char>& buf)
+CoverFormat DumpMp3Cover(const string& path, vector<char>& buf)
 {
     TagLib::MPEG::File file(path.c_str(), false);
     return DumpID3v2Cover(file.ID3v2Tag(), buf);
 }
 
-EmCoverFormat DumpMp4Cover(const string& path, vector<char>& buf)
+CoverFormat DumpMp4Cover(const string& path, vector<char>& buf)
 {
-    EmCoverFormat format = CoverFormat::None;
+    CoverFormat format = CoverFormat::None;
 
     TagLib::MP4::File file(path.c_str(), false);
     MP4::Tag* mp4tag = file.tag();
@@ -76,9 +76,9 @@ EmCoverFormat DumpMp4Cover(const string& path, vector<char>& buf)
     return format;
 }
 
-static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
+static CoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
 {
-    EmCoverFormat format = CoverFormat::None;
+    CoverFormat format = CoverFormat::None;
 
     if (idtag == nullptr) {
         //cout << "no id3v2 tag found!" << endl;
@@ -118,7 +118,7 @@ static EmCoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, vector<char>& buf)
 }
 
 /*======== store ========*/
-bool StoreMp3Cover(const string& path, EmCoverFormat fmt, const char* buf, size_t len)
+bool StoreMp3Cover(const string& path, CoverFormat fmt, const char* buf, size_t len)
 {
     TagLib::MPEG::File file(path.c_str(), false);
     if (StoreID3v2Cover(file.ID3v2Tag(), fmt, buf, len)) {
@@ -132,7 +132,7 @@ bool StoreMp3Cover(const string& path, EmCoverFormat fmt, const char* buf, size_
     return false;
 }
 
-bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_t len)
+bool StoreMp4Cover(const string& path, CoverFormat fmt, const char* buf, size_t len)
 {
     TagLib::MP4::File file(path.c_str(), false);
     MP4::Tag* mp4tag = file.tag();
@@ -174,7 +174,7 @@ bool StoreMp4Cover(const string& path, EmCoverFormat fmt, const char* buf, size_
     return mp4tag->save();
 }
 
-static bool StoreID3v2Cover(ID3v2::Tag* idtag, EmCoverFormat fmt, const char* buf, size_t len)
+static bool StoreID3v2Cover(ID3v2::Tag* idtag, CoverFormat fmt, const char* buf, size_t len)
 {
     if (idtag == nullptr) {
         //cout << "no id3v2 tag found!" << endl;

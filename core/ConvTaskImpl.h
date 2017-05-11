@@ -52,7 +52,7 @@ public:
         m_Canceled = false;
 
         m_WorkThread = std::thread([this, output]() {
-            EmErrorCode err;
+            ErrorCode err;
 
             err = m_Decoder->Open(m_Item.url);
             if (err != ErrorCode::Ok) {

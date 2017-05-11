@@ -88,7 +88,7 @@ uint64_t MacDecoder::UnitCount() const
     return m_BlockCount;
 }
 
-EmAudioMode MacDecoder::AudioMode() const
+AudioMode MacDecoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }

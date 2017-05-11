@@ -8,15 +8,12 @@
 
 namespace mous {
 
-namespace CoverFormat {
-    enum e
-    {
-        None = 0,
-        JPEG,
-        PNG,
-    };
-}
-typedef CoverFormat::e EmCoverFormat;
+enum class CoverFormat : uint8_t
+{
+    None = 0,
+    JPEG,
+    PNG,
+};
 
 class ITagParser
 {
@@ -25,7 +22,7 @@ public:
 
     virtual std::vector<std::string> FileSuffix() const = 0;
     
-    virtual EmErrorCode Open(const std::string& path) = 0;
+    virtual ErrorCode Open(const std::string& path) = 0;
     virtual void Close() = 0;
 
     // read tag
@@ -50,8 +47,8 @@ public:
     virtual void SetTrack(int32_t track) { }
 
     // cover art
-    virtual EmCoverFormat DumpCoverArt(std::vector<char>& buf) { buf.clear(); return CoverFormat::None; }
-    virtual bool StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len) { return false; }
+    virtual CoverFormat DumpCoverArt(std::vector<char>& buf) { buf.clear(); return CoverFormat::None; }
+    virtual bool StoreCoverArt(CoverFormat fmt, const char* buf, size_t len) { return false; }
 
     // audio property
     virtual bool HasAudioProperty() const { return false; }

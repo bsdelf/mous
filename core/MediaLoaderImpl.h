@@ -85,7 +85,7 @@ class MediaLoader::Impl
         return list;
     }
 
-    EmErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const
+    ErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const
     {
         list.clear();
 
@@ -96,7 +96,7 @@ class MediaLoader::Impl
     }
 
   private:
-    EmErrorCode TryUnpack(const std::string& path, std::deque<MediaItem>& list) const
+    ErrorCode TryUnpack(const std::string& path, std::deque<MediaItem>& list) const
     {
         // Find MediaPack.
         const std::string& suffix = ToLower(FileHelper::FileSuffix(path));
@@ -114,7 +114,7 @@ class MediaLoader::Impl
         return ErrorCode::Ok;
     }
 
-    EmErrorCode TryParseTag(std::deque<MediaItem>& list) const
+    ErrorCode TryParseTag(std::deque<MediaItem>& list) const
     {
         for (auto& item : list) {
             // Find TagParser.

@@ -48,7 +48,7 @@ vector<string> TagLibParser::FileSuffix() const
     return { "*" };
 }
 
-EmErrorCode TagLibParser::Open(const string& path)
+ErrorCode TagLibParser::Open(const string& path)
 {
     m_FileName = path;
 
@@ -225,7 +225,7 @@ void TagLibParser::SetTrack(int32_t track)
         m_pTag->setTrack(track);
 }
 
-EmCoverFormat TagLibParser::DumpCoverArt(vector<char>& buf)
+CoverFormat TagLibParser::DumpCoverArt(vector<char>& buf)
 {
     if (m_FileName.empty())
         return CoverFormat::None;
@@ -238,7 +238,7 @@ EmCoverFormat TagLibParser::DumpCoverArt(vector<char>& buf)
         return CoverFormat::None;
 }
 
-bool TagLibParser::StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len)
+bool TagLibParser::StoreCoverArt(CoverFormat fmt, const char* buf, size_t len)
 {
     if (m_FileName.empty())
         return false;

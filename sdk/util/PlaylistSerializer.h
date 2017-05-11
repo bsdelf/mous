@@ -158,7 +158,7 @@ private:
 
         int mode;
         buf >> mode;
-        list.m_Mode = (EmPlaylistMode)mode;
+        list.m_Mode = (PlaylistMode)mode;
 
         int count;
         buf >> count;

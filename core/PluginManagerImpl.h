@@ -26,7 +26,7 @@ class PluginManager::Impl
         return indexedPlugins.size();
     }
 
-    EmErrorCode LoadPlugin(const std::string& path)
+    ErrorCode LoadPlugin(const std::string& path)
     {
         indexedPlugins[path] = new Plugin(path);
         return ErrorCode::Ok;
@@ -51,7 +51,7 @@ class PluginManager::Impl
         indexedPlugins.clear();
     }
 
-    std::vector<const Plugin*> PluginAgents(EmPluginType type) const
+    std::vector<const Plugin*> PluginAgents(PluginType type) const
     {
         std::vector<const Plugin*> list;
         list.reserve(indexedPlugins.size());

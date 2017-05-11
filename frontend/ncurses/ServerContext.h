@@ -25,7 +25,7 @@ struct ServerContext
     typedef Playlist<MediaItem> playlist_t;
     vector<playlist_t> playlists;
 
-    EmPlaylistMode playMode;
+    PlaylistMode playMode;
 
     int usedPlaylist;
     int selectedPlaylist;
@@ -51,7 +51,7 @@ public:
     const MediaItem* ItemInPlaying() const;
 
 private:
-    void SetPlayMode(EmPlaylistMode mode);
+    void SetPlayMode(PlaylistMode mode);
 
     void ClosePlayer();
     bool PlayItem(const MediaItem& item);

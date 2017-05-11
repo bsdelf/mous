@@ -15,7 +15,7 @@ Plugin::~Plugin()
 {
 }
 
-EmPluginType Plugin::Type() const
+PluginType Plugin::Type() const
 {
     return impl->type;
 }

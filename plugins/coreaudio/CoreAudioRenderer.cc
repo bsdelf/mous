@@ -21,7 +21,7 @@ CoreAudioRenderer::~CoreAudioRenderer()
     op_mixer_ops.exit();
 }
 
-EmErrorCode CoreAudioRenderer::Open()
+ErrorCode CoreAudioRenderer::Open()
 {
     int maxVol = 0;
     op_mixer_ops.open(&maxVol);
@@ -33,7 +33,7 @@ void CoreAudioRenderer::Close()
     op_mixer_ops.close();
 }
 
-EmErrorCode CoreAudioRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+ErrorCode CoreAudioRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     op_pcm_ops.drop();
     op_pcm_ops.close();
@@ -44,7 +44,7 @@ EmErrorCode CoreAudioRenderer::Setup(int32_t& channels, int32_t& sampleRate, int
     return ErrorCode::Ok;
 }
 
-EmErrorCode CoreAudioRenderer::Write(const char* buf, uint32_t len)
+ErrorCode CoreAudioRenderer::Write(const char* buf, uint32_t len)
 {
     op_pcm_ops.write(buf, static_cast<int>(len));
     while (1) {

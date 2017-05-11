@@ -20,8 +20,8 @@
 
 namespace mous {
 
-namespace PlaylistMode {
-enum e {
+enum class PlaylistMode : uint8_t
+{
     Normal,
     Repeat,
     Shuffle,
@@ -30,31 +30,28 @@ enum e {
     Top,
 };
 
-inline static std::string ToString(e mode)
+inline static std::string ToString(PlaylistMode mode)
 {
     switch (mode) {
-        case Normal:
+        case PlaylistMode::Normal:
             return "Normal";
 
-        case Repeat:
+        case PlaylistMode::Repeat:
             return "Repeat";
 
-        case Shuffle:
+        case PlaylistMode::Shuffle:
             return "Shuffle";
 
-        case ShuffleRepeat:
+        case PlaylistMode::ShuffleRepeat:
             return "Shuffle Repeat";
 
-        case RepeatOne:
+        case PlaylistMode::RepeatOne:
             return "Repeat One";
 
         default:
             return "";
     }
 }
-
-}
-typedef PlaylistMode::e EmPlaylistMode;
 
 template <typename item_t>
 class PlaylistSerializer;
@@ -71,14 +68,11 @@ public:
     Playlist() = default;
     ~Playlist() = default;
 
-    void SetMode(EmPlaylistMode mode)
+    void SetMode(PlaylistMode mode)
     {
-        using namespace std;
-        using namespace PlaylistMode;
-
         if (m_SeqIndex >= 0 && (size_t)m_SeqIndex < m_ItemQueue.size())  {
-            set<EmPlaylistMode> normalSet { Normal, Repeat, RepeatOne };
-            set<EmPlaylistMode> shuffleSet { Shuffle, ShuffleRepeat };
+            std::set<PlaylistMode> normalSet { PlaylistMode::Normal, PlaylistMode::Repeat, PlaylistMode::RepeatOne };
+            std::set<PlaylistMode> shuffleSet { PlaylistMode::Shuffle, PlaylistMode::ShuffleRepeat };
 
             // normal <=> shuffle
             if (MOUS_HAS(normalSet, m_Mode) && MOUS_HAS(shuffleSet, mode)) {
@@ -91,7 +85,7 @@ public:
         m_Mode = mode;
     }
 
-    EmPlaylistMode Mode() const
+    PlaylistMode Mode() const
     {
         return m_Mode;
     }
@@ -141,16 +135,15 @@ public:
     bool JumpTo(int index)
     {
         if (index >= 0 && (size_t)index < m_ItemQueue.size()) {
-            using namespace PlaylistMode;
             switch (m_Mode) {
-                case Normal:
-                case Repeat:
-                case RepeatOne:
+                case PlaylistMode::Normal:
+                case PlaylistMode::Repeat:
+                case PlaylistMode::RepeatOne:
                     m_SeqIndex = index;
                     break;
 
-                case Shuffle:
-                case ShuffleRepeat:
+                case PlaylistMode::Shuffle:
+                case PlaylistMode::ShuffleRepeat:
                     m_SeqIndex = MOUS_FIND(m_SeqShuffleQueue, index) - m_SeqShuffleQueue.begin();
                     break;
 
@@ -166,19 +159,17 @@ public:
     /* current index */
     int CurrentIndex() const
     {
-        using namespace PlaylistMode;
-
         if (m_SeqIndex < 0)
             return -1;
 
         switch (m_Mode) {
-            case Normal:
-            case Repeat:
-            case RepeatOne:
+            case PlaylistMode::Normal:
+            case PlaylistMode::Repeat:
+            case PlaylistMode::RepeatOne:
                 return m_SeqIndex;
 
-            case Shuffle:
-            case ShuffleRepeat:
+            case PlaylistMode::Shuffle:
+            case PlaylistMode::ShuffleRepeat:
                 return m_SeqShuffleQueue[m_SeqIndex];
 
             default:
@@ -207,9 +198,7 @@ public:
         if (m_ItemQueue.size() < 2)
             return;
 
-        using namespace std;
-
-        sort(oldPos.begin(), oldPos.end());
+        std::sort(oldPos.begin(), oldPos.end());
 
         int realNewPos = newPos;
         for (size_t i = 0; i < oldPos.size(); ++i) {
@@ -218,7 +207,7 @@ public:
         }
 
         // backup & remove & insert
-        deque<item_t> tmpList(oldPos.size());
+        std::deque<item_t> tmpList(oldPos.size());
         for (size_t i = 0; i < oldPos.size(); ++i) {
             tmpList[i] = m_ItemQueue[oldPos[i]];
         }
@@ -230,7 +219,7 @@ public:
                 || m_Mode == PlaylistMode::ShuffleRepeat) ? 
             m_SeqShuffleQueue[m_SeqIndex] : m_SeqIndex;
 
-        const auto iter = find(oldPos.begin(), oldPos.end(), seqIndex);
+        const auto iter = std::find(oldPos.begin(), oldPos.end(), seqIndex);
         if (iter != oldPos.end()) {
             seqIndex = realNewPos + (iter - oldPos.begin());
         } else {
@@ -428,7 +417,7 @@ private:
     }
 
 private:
-    EmPlaylistMode m_Mode = PlaylistMode::Normal;
+    PlaylistMode m_Mode = PlaylistMode::Normal;
 
     std::deque<item_t> m_ItemQueue;
 

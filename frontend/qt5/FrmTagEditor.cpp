@@ -305,7 +305,7 @@ void FrmTagEditor::SlotChangeCoverArt()
 
     // check format
     QString suffix = QFileInfo(fileName).suffix();
-    EmCoverFormat fmt = CoverFormat::None;
+    CoverFormat fmt = CoverFormat::None;
     if (suffix == "jpg") {
         fmt = CoverFormat::JPEG;
     } else if (suffix == "png") {

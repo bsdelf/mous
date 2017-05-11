@@ -1,9 +1,10 @@
 #pragma once
 
+#include <inttypes.h>
+
 namespace mous {
 
-namespace AudioMode {
-enum e
+enum class AudioMode : uint8_t
 {
     None,
     Mono,
@@ -11,10 +12,8 @@ enum e
     JointStero,
     DualChannel
 };
-}
-typedef AudioMode::e EmAudioMode;
 
-inline const char* ToString(EmAudioMode mode)
+inline const char* ToString(AudioMode mode)
 {
     switch (mode) {
         case AudioMode::None:

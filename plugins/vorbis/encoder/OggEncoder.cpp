@@ -40,7 +40,7 @@ const char* OggEncoder::FileSuffix() const
     return "ogg";
 }
 
-EmErrorCode OggEncoder::OpenOutput(const std::string& path)
+ErrorCode OggEncoder::OpenOutput(const std::string& path)
 {
     m_OutputFile = ::fopen(path.c_str(), "wb+");
     if (m_OutputFile == nullptr)
@@ -68,7 +68,7 @@ void OggEncoder::CloseOutput()
     }
 }
 
-EmErrorCode OggEncoder::Encode(char* buf, uint32_t len)
+ErrorCode OggEncoder::Encode(char* buf, uint32_t len)
 {
     /*
     if (ret >= 0) {
@@ -81,7 +81,7 @@ EmErrorCode OggEncoder::Encode(char* buf, uint32_t len)
     return ErrorCode::EncoderFailedToEncode;
 }
 
-EmErrorCode OggEncoder::Flush()
+ErrorCode OggEncoder::Flush()
 {
     /*
     int ret = lame_encode_flush(m_gfp, m_EncodeBuffer, m_EncodeBufferSize);

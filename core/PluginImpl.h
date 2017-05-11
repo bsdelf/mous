@@ -7,7 +7,7 @@
 
 namespace mous {
 
-using FnPluginType = EmPluginType (*)(void);
+using FnPluginType = PluginType (*)(void);
 using FnPluginInfo = const PluginInfo* (*)(void);
 using FnCreateObject = void* (*)(void);
 using FnFreeObject = void (*)(void*);
@@ -20,7 +20,7 @@ class Plugin::Impl
     FnPluginInfo GetPluginInfo = nullptr;
     FnCreateObject CreateObject = nullptr;
     FnFreeObject FreeObject = nullptr;
-    EmPluginType type = PluginType::None;
+    PluginType type = PluginType::None;
 
     explicit Impl(const std::string& path)
     {

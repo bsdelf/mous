@@ -19,7 +19,7 @@ vector<string> WmaDecoder::FileSuffix() const
     return { "wma" };
 }
 
-EmErrorCode WmaDecoder::Open(const std::string& url)
+ErrorCode WmaDecoder::Open(const std::string& url)
 {
     m_FormatCtx = nullptr;
     int err = av_open_input_file(&m_FormatCtx, url.c_str(), nullptr, 0, nullptr);
@@ -68,7 +68,7 @@ bool WmaDecoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode WmaDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode WmaDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     used = 0;
     unitCount = 0;
@@ -110,7 +110,7 @@ EmErrorCode WmaDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
     }
 }
 
-EmErrorCode WmaDecoder::SetUnitIndex(uint64_t index)
+ErrorCode WmaDecoder::SetUnitIndex(uint64_t index)
 {
     if (index < m_UnitCount) {
         m_UnitIndex = index;
@@ -136,7 +136,7 @@ uint64_t WmaDecoder::UnitCount() const
     return m_UnitCount;
 }
 
-EmAudioMode WmaDecoder::AudioMode() const
+AudioMode WmaDecoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }

@@ -19,7 +19,7 @@ OssRenderer::~OssRenderer()
     Close();
 }
 
-EmErrorCode OssRenderer::Open()
+ErrorCode OssRenderer::Open()
 {
     if (m_PrevPath != m_OptDevicePath.userVal)
         m_PrevPath = m_OptDevicePath.userVal;
@@ -40,7 +40,7 @@ void OssRenderer::Close()
     m_IsOpened = false;
 }
 
-EmErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+ErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     if (m_IsOpened
             && channels == m_Channels
@@ -50,7 +50,7 @@ EmErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& 
     }
 
     Close();
-    EmErrorCode ret = Open();
+    ErrorCode ret = Open();
     if (ret != ErrorCode::Ok)
         return ret;
 
@@ -90,7 +90,7 @@ EmErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& 
     return ErrorCode::Ok;
 }
 
-EmErrorCode OssRenderer::Write(const char* buf, uint32_t len)
+ErrorCode OssRenderer::Write(const char* buf, uint32_t len)
 {
     for (int off = 0, nw = 0, left = len; left > 0; left -= nw, off += nw) {
         nw = ::write(m_Fd, buf+off, left);

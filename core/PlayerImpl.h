@@ -194,7 +194,7 @@ class Player::Impl
         UnregisterAll();
     }
 
-    EmPlayerStatus Status() const { return m_Status; }
+    PlayerStatus Status() const { return m_Status; }
 
     void RegisterDecoderPlugin(const Plugin* pAgent)
     {
@@ -279,7 +279,7 @@ class Player::Impl
         }
     }
 
-    EmErrorCode Open(const string& path)
+    ErrorCode Open(const string& path)
     {
         string suffix = ToLower(FileHelper::FileSuffix(path));
         // cout << "Suffix:" << suffix << endl;
@@ -294,7 +294,7 @@ class Player::Impl
             return ErrorCode::PlayerNoRenderer;
         }
 
-        EmErrorCode err = m_Decoder->Open(path);
+        ErrorCode err = m_Decoder->Open(path);
         if (err != ErrorCode::Ok) {
             // cout << "FATAL: failed to open!" << endl;
             return err;
@@ -321,7 +321,7 @@ class Player::Impl
         // cout << "bitsPerSamle:" << bitsPerSamle << endl;
         err = m_Renderer->Setup(channels, samleRate, bitsPerSamle);
         if (err != ErrorCode::Ok) {
-            cout << "FATAL: failed to set renderer:" << err << endl;
+            cout << "FATAL: failed to set renderer:" << static_cast<uint8_t>(err) << endl;
             cout << "       channels:" << channels << endl;
             cout << "       samleRate:" << samleRate << endl;
             cout << "       bitsPerSamle:" << bitsPerSamle << endl;
@@ -537,7 +537,7 @@ class Player::Impl
 
     uint64_t CurrentMs() const { return m_RendererIndex / m_UnitPerMs; }
 
-    EmAudioMode AudioMode() const { return (m_Decoder != nullptr) ? m_Decoder->AudioMode() : AudioMode::None; }
+    enum AudioMode AudioMode() const { return (m_Decoder != nullptr) ? m_Decoder->AudioMode() : AudioMode::None; }
 
     std::vector<PluginOption> DecoderPluginOption() const
     {
@@ -640,7 +640,7 @@ class Player::Impl
     }
 
   private:
-    EmPlayerStatus m_Status = PlayerStatus::Closed;
+    PlayerStatus m_Status = PlayerStatus::Closed;
 
     std::string m_DecodeFile;
 

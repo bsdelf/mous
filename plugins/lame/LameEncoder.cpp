@@ -30,7 +30,7 @@ const char* LameEncoder::FileSuffix() const
     return "mp3";
 }
 
-EmErrorCode LameEncoder::OpenOutput(const std::string& path)
+ErrorCode LameEncoder::OpenOutput(const std::string& path)
 {
     m_OutputFile = ::fopen(path.c_str(), "wb+");
 
@@ -78,7 +78,7 @@ void LameEncoder::CloseOutput()
     }
 }
 
-EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
+ErrorCode LameEncoder::Encode(char* buf, uint32_t len)
 {
     // prepare buffer
     int samplesPerChannel = 
@@ -103,7 +103,7 @@ EmErrorCode LameEncoder::Encode(char* buf, uint32_t len)
     return ErrorCode::EncoderFailedToEncode;
 }
 
-EmErrorCode LameEncoder::Flush()
+ErrorCode LameEncoder::Flush()
 {
     int ret = lame_encode_flush(m_gfp, m_Buffer.data(), m_Buffer.size());
     if (ret >= 0) {

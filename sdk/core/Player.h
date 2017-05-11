@@ -15,16 +15,13 @@
 
 namespace mous {
 
-namespace PlayerStatus {
-enum e
+enum class PlayerStatus : uint8_t
 {
     Closed,
     Playing,
     Paused,
-    Stopped,
+    Stopped
 };
-}
-using EmPlayerStatus = PlayerStatus::e;
 
 class Player
 {
@@ -35,7 +32,7 @@ public:
     ~Player();
 
 public:
-    EmPlayerStatus Status() const;
+    PlayerStatus Status() const;
 
     void RegisterDecoderPlugin(const Plugin* pAgent);
     void RegisterDecoderPlugin(std::vector<const Plugin*>& agents);
@@ -54,7 +51,7 @@ public:
     int Volume() const;
     void SetVolume(int level);
 
-    EmErrorCode Open(const std::string& path);
+    ErrorCode Open(const std::string& path);
     void Close();
     std::string FileName() const;
 
@@ -76,7 +73,7 @@ public:
     uint64_t RangeDuration() const;
     uint64_t OffsetMs() const;
     uint64_t CurrentMs() const;
-    EmAudioMode AudioMode() const;
+    enum AudioMode AudioMode() const;
 
     std::vector<PluginOption> DecoderPluginOption() const;
     PluginOption RendererPluginOption() const;

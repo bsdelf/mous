@@ -536,7 +536,7 @@ void SimplePlaylistView::SlotPlayModeMenu(QAction* action)
     int index = m_PlayModeGroup.actions().indexOf(action);
     if (index < 0)
         return;
-    m_Playlist.SetMode((EmPlaylistMode)index);
+    m_Playlist.SetMode((PlaylistMode)index);
 }
 
 void SimplePlaylistView::SlotShortcutCopy()

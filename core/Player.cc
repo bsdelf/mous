@@ -14,7 +14,7 @@ Player::~Player()
 {
 }
 
-EmPlayerStatus Player::Status() const
+PlayerStatus Player::Status() const
 {
     return impl->Status();
 }
@@ -74,7 +74,7 @@ void Player::SetVolume(int level)
     return impl->SetVolume(level);
 }
 
-EmErrorCode Player::Open(const string& path)
+ErrorCode Player::Open(const string& path)
 {
     return impl->Open(path);
 }
@@ -169,7 +169,7 @@ uint64_t Player::CurrentMs() const
     return impl->CurrentMs();
 }
 
-EmAudioMode Player::AudioMode() const
+AudioMode Player::AudioMode() const
 {
     return impl->AudioMode();
 }

@@ -29,7 +29,7 @@ public:
 
     virtual vector<string> FileSuffix() const;
     
-    virtual EmErrorCode Open(const string& path);
+    virtual ErrorCode Open(const string& path);
     virtual void Close();
 
     virtual bool HasTag() const;
@@ -51,16 +51,16 @@ public:
     virtual void SetYear(int32_t year);
     virtual void SetTrack(int32_t track);
 
-    virtual EmCoverFormat DumpCoverArt(vector<char>& buf);
-    virtual bool StoreCoverArt(EmCoverFormat fmt, const char* buf, size_t len);
+    virtual CoverFormat DumpCoverArt(vector<char>& buf);
+    virtual bool StoreCoverArt(CoverFormat fmt, const char* buf, size_t len);
 
     virtual bool HasAudioProperty() const;
     virtual int32_t Duration() const;
     virtual int32_t BitRate() const;
 
 private:
-    typedef EmCoverFormat (*FnDumpCover)(const string& path, vector<char>& buf);
-    typedef bool (*FnStoreCover)(const string& path, EmCoverFormat fmt, const char* buf, size_t len);
+    typedef CoverFormat (*FnDumpCover)(const string& path, vector<char>& buf);
+    typedef bool (*FnStoreCover)(const string& path, CoverFormat fmt, const char* buf, size_t len);
 
 private:
     std::string m_FileName;

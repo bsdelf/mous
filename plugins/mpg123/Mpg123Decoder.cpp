@@ -31,7 +31,7 @@ vector<string> Mpg123Decoder::FileSuffix() const
     return { "mp3" };
 }
 
-EmErrorCode Mpg123Decoder::Open(const std::string& url)
+ErrorCode Mpg123Decoder::Open(const std::string& url)
 {
     if (m_pHandle == nullptr)
         return ErrorCode::DecoderFailedToInit;
@@ -75,7 +75,7 @@ bool Mpg123Decoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode Mpg123Decoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode Mpg123Decoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     mpg123_frameinfo info;
     mpg123_info(m_pHandle, &info);
@@ -96,7 +96,7 @@ EmErrorCode Mpg123Decoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unit
     }
 }
 
-EmErrorCode Mpg123Decoder::SetUnitIndex(uint64_t index)
+ErrorCode Mpg123Decoder::SetUnitIndex(uint64_t index)
 {
     if (index < m_UnitCount) {
         m_UnitIndex = index;
@@ -122,7 +122,7 @@ uint64_t Mpg123Decoder::UnitCount() const
     return m_UnitCount;
 }
 
-EmAudioMode Mpg123Decoder::AudioMode() const
+AudioMode Mpg123Decoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }

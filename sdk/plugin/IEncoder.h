@@ -17,11 +17,11 @@ public:
 
     virtual const char* FileSuffix() const = 0;
 
-    virtual EmErrorCode OpenOutput(const std::string& path) = 0;
+    virtual ErrorCode OpenOutput(const std::string& path) = 0;
     virtual void CloseOutput() = 0;
 
-    virtual EmErrorCode Encode(char* dat, uint32_t len) = 0;
-    virtual EmErrorCode Flush() = 0;
+    virtual ErrorCode Encode(char* dat, uint32_t len) = 0;
+    virtual ErrorCode Flush() = 0;
 
     // these will be called before OpenOutput()
     virtual void SetChannels(int32_t channels) = 0;

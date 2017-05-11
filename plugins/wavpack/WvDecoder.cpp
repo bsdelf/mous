@@ -13,7 +13,7 @@ vector<string> WvDecoder::FileSuffix() const
     return { "wv" };
 }
 
-EmErrorCode WvDecoder::Open(const std::string& url)
+ErrorCode WvDecoder::Open(const std::string& url)
 {
     m_Ctx = WavpackOpenFileInput(url.c_str(), nullptr, 0, 0);
     if (m_Ctx == nullptr)
@@ -50,7 +50,7 @@ bool WvDecoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode WvDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode WvDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_UnitIndex < m_UnitCount) {
         unitCount = 1;
@@ -75,7 +75,7 @@ EmErrorCode WvDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCoun
     return ErrorCode::DecoderOutOfRange;
 }
 
-EmErrorCode WvDecoder::SetUnitIndex(uint64_t index)
+ErrorCode WvDecoder::SetUnitIndex(uint64_t index)
 {
     if (index < m_UnitCount && WavpackSeekSample(m_Ctx, index*m_Channels) == 0) {
         m_UnitIndex = index;
@@ -100,7 +100,7 @@ uint64_t WvDecoder::UnitCount() const
     return m_UnitCount;
 }
 
-EmAudioMode WvDecoder::AudioMode() const
+AudioMode WvDecoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }

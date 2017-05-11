@@ -1,9 +1,10 @@
 #pragma once
 
+#include <inttypes.h>
+
 namespace mous {
 
-namespace ErrorCode {
-enum e
+enum class ErrorCode : uint8_t
 {
     Ok = 0,
 
@@ -41,8 +42,6 @@ enum e
     PlaylistHitBegin,
     PlaylistHitEnd
 };
-}
-typedef ErrorCode::e EmErrorCode;
 
 /*
 const char* const ErrorMsg[] = {

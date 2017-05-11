@@ -21,7 +21,7 @@ size_t PluginManager::LoadPluginDir(const std::string& dir)
     return impl->LoadPluginDir(dir);
 }
 
-EmErrorCode PluginManager::LoadPlugin(const std::string& path)
+ErrorCode PluginManager::LoadPlugin(const std::string& path)
 {
     return impl->LoadPlugin(path);
 }
@@ -36,7 +36,7 @@ void PluginManager::UnloadAll()
     return impl->UnloadAll();
 }
 
-std::vector<const Plugin*> PluginManager::PluginAgents(EmPluginType type) const
+std::vector<const Plugin*> PluginManager::PluginAgents(PluginType type) const
 {
     return impl->PluginAgents(type);
 }

@@ -255,7 +255,7 @@ void Session::PlayerPlayMode(BufObj& buf)
         }
         case 0:
         {
-            string mode = PlaylistMode::ToString(m_Context->playMode);
+            string mode = mous::ToString(m_Context->playMode);
             SEND_PLAYER_PACKET(<< (char)Op::Player::PlayMode << mode);
         }
             break;
@@ -282,7 +282,7 @@ void Session::PlayerSync(BufObj& buf)
 
     lock_guard<mutex> locker(m_Context->mtx);
 
-    EmPlayerStatus status = m_Context->player.Status();
+    PlayerStatus status = m_Context->player.Status();
     int nowRunning = status == PlayerStatus::Playing ? 1 : 0;
 
     int mask = BINARY_MASK(running, nowRunning);

@@ -122,7 +122,7 @@ void ServerContext::Restore()
     buf >> mode >> used >> selected;
     buf.TakeArray(selectedItem);
 
-    playMode = (EmPlaylistMode)mode;
+    playMode = (PlaylistMode)mode;
     usedPlaylist = used;
     selectedPlaylist = selected;
 
@@ -138,8 +138,8 @@ void ServerContext::NextPlayMode()
 {
     int mode = static_cast<int>(playMode) + 1;
     if (mode >= static_cast<int>(PlaylistMode::Top))
-        mode = PlaylistMode::Normal;
-    SetPlayMode(static_cast<EmPlaylistMode>(mode));
+        mode = static_cast<int>(PlaylistMode::Normal);
+    SetPlayMode(static_cast<PlaylistMode>(mode));
 }
 
 bool ServerContext::PlayAt(int iList, int iItem)
@@ -202,7 +202,7 @@ bool ServerContext::PlayItem(const MediaItem& item)
     return true;
 }
 
-void ServerContext::SetPlayMode(EmPlaylistMode mode)
+void ServerContext::SetPlayMode(PlaylistMode mode)
 {
     playMode = mode;
     for (auto& list: playlists) {

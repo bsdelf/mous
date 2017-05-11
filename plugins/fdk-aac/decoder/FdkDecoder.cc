@@ -17,7 +17,7 @@ vector<string> FdkDecoder::FileSuffix() const
     return { "m4a", "mp4" };
 }
 
-EmErrorCode FdkDecoder::Open(const string& url)
+ErrorCode FdkDecoder::Open(const string& url)
 {
     // check for mp4 file
     m_ismp4 = false;
@@ -42,7 +42,7 @@ EmErrorCode FdkDecoder::Open(const string& url)
     return m_ismp4 ? OpenMP4(url) : OpenAAC(url);
 }
 
-EmErrorCode FdkDecoder::OpenMP4(const string& url)
+ErrorCode FdkDecoder::OpenMP4(const string& url)
 {
     // mp4v2
     m_mp4 = MP4Read(url.c_str());
@@ -101,7 +101,7 @@ EmErrorCode FdkDecoder::OpenMP4(const string& url)
     return ErrorCode::Ok;
 }
 
-EmErrorCode FdkDecoder::OpenAAC(const string& url)
+ErrorCode FdkDecoder::OpenAAC(const string& url)
 {
     return ErrorCode::DecoderFailedToOpen;
 }
@@ -123,13 +123,13 @@ bool FdkDecoder::IsFormatVaild() const
     return false;
 }
 
-EmErrorCode FdkDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode FdkDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return m_ismp4 ? 
         DecodeMp4Unit(data, used, unitCount) : DecodeAacUnit(data, used, unitCount);
 }
 
-EmErrorCode FdkDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode FdkDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     // read sample
     uint8_t* pbytes = m_samplebuff.data();
@@ -169,12 +169,12 @@ EmErrorCode FdkDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& unit
     return ErrorCode::Ok;
 }
 
-EmErrorCode FdkDecoder::DecodeAacUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode FdkDecoder::DecodeAacUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return ErrorCode::Ok;
 }
 
-EmErrorCode FdkDecoder::SetUnitIndex(uint64_t index)
+ErrorCode FdkDecoder::SetUnitIndex(uint64_t index)
 {
     m_sampleid = index + 1;
     return ErrorCode::Ok;
@@ -195,7 +195,7 @@ uint64_t FdkDecoder::UnitCount() const
     return m_nsamples;
 }
 
-EmAudioMode FdkDecoder::AudioMode() const
+AudioMode FdkDecoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }

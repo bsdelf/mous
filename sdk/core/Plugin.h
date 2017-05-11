@@ -13,7 +13,7 @@ public:
     explicit Plugin(const std::string& path);
     ~Plugin();
 
-    EmPluginType Type() const;
+    PluginType Type() const;
     const PluginInfo* Info() const;
     void* CreateObject() const;
     void FreeObject(void* inf) const;

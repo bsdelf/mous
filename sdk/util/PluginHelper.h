@@ -7,7 +7,7 @@
  */
 #define MOUS_DEF_PLUGIN(type, p_info, obj_t)\
 extern "C" {\
-    EmPluginType MousGetPluginType() {  \
+    PluginType MousGetPluginType() {    \
         return type;                    \
     }                                   \
     \

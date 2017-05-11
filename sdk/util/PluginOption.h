@@ -8,19 +8,19 @@ namespace mous {
 
 struct PluginOption
 {
-    EmPluginType pluginType = PluginType::None;
+    PluginType pluginType = PluginType::None;
     const PluginInfo* pluginInfo = nullptr;
     std::vector<const BaseOption*> options;
 
     PluginOption() = default;
 
-    PluginOption(EmPluginType type, const PluginInfo* info):
+    PluginOption(PluginType type, const PluginInfo* info):
         pluginType(type),
         pluginInfo(info)
     {
     }
 
-    PluginOption(EmPluginType type, const PluginInfo* info, std::vector<const BaseOption*>&& options):
+    PluginOption(PluginType type, const PluginInfo* info, std::vector<const BaseOption*>&& options):
         pluginType(type),
         pluginInfo(info),
         options(options)

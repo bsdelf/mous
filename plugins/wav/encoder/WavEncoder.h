@@ -40,11 +40,11 @@ public:
 
     virtual const char* FileSuffix() const;
 
-    virtual EmErrorCode OpenOutput(const std::string& path);
+    virtual ErrorCode OpenOutput(const std::string& path);
     virtual void CloseOutput();
 
-    virtual EmErrorCode Encode(char* buf, uint32_t len);
-    virtual EmErrorCode Flush();
+    virtual ErrorCode Encode(char* buf, uint32_t len);
+    virtual ErrorCode Flush();
 
     virtual void SetChannels(int32_t channels);
     virtual void SetSampleRate(int32_t sampleRate);

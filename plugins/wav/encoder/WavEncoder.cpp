@@ -23,7 +23,7 @@ const char* WavEncoder::FileSuffix() const
     return "wav";
 }
 
-EmErrorCode WavEncoder::OpenOutput(const std::string& path)
+ErrorCode WavEncoder::OpenOutput(const std::string& path)
 {
     m_OutputFile.open(path.c_str(), ios::binary | ios::out );
     if (!m_OutputFile.is_open())
@@ -47,13 +47,13 @@ void WavEncoder::CloseOutput()
         m_OutputFile.close();
 }
 
-EmErrorCode WavEncoder::Encode(char* buf, uint32_t len)
+ErrorCode WavEncoder::Encode(char* buf, uint32_t len)
 {
     m_OutputFile.write(buf, len);
     return ErrorCode::Ok;
 }
 
-EmErrorCode WavEncoder::Flush()
+ErrorCode WavEncoder::Flush()
 {
     return ErrorCode::Ok;
 }

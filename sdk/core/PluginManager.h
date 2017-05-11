@@ -18,11 +18,11 @@ public:
     ~PluginManager();
 
     size_t LoadPluginDir(const std::string& dir);
-    EmErrorCode LoadPlugin(const std::string& path);
+    ErrorCode LoadPlugin(const std::string& path);
     void UnloadPlugin(const std::string& path);
     void UnloadAll();
 
-    std::vector<const Plugin*> PluginAgents(EmPluginType) const;
+    std::vector<const Plugin*> PluginAgents(PluginType) const;
     std::vector<std::string> PluginPaths() const;
     const PluginInfo* QueryPluginInfo(const std::string& path) const;
 

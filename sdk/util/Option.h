@@ -7,8 +7,8 @@
 
 namespace mous {
 
-namespace OptionType {
-enum e {
+enum class OptionType : uint8_t
+{
     None = 0,
 
     Int,            // int32_t
@@ -25,10 +25,8 @@ enum e {
 
     Grouped
 };
-}
-typedef OptionType::e EmOptionType;
 
-inline const char* ToString(EmOptionType type)
+inline const char* ToString(OptionType type)
 {
     switch (type) {
         case OptionType::None:
@@ -69,10 +67,10 @@ inline const char* ToString(EmOptionType type)
 
 struct BaseOption
 {
-    const EmOptionType type;
+    const OptionType type;
     std::string desc;
 
-    explicit BaseOption(EmOptionType _type):
+    explicit BaseOption(OptionType _type):
         type(_type)
     {
     }

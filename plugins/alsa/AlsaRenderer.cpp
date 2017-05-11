@@ -19,7 +19,7 @@ AlsaRenderer::~AlsaRenderer()
     Close();
 }
 
-EmErrorCode AlsaRenderer::Open()
+ErrorCode AlsaRenderer::Open()
 {
     int ret = snd_pcm_open(&m_PcmHandle, m_DeviceName.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (ret != 0)
@@ -37,7 +37,7 @@ void AlsaRenderer::Close()
     }
 }
 
-EmErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+ErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     m_Channels.val = channels;
     m_SampleRate.val = sampleRate;
@@ -64,7 +64,7 @@ EmErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t&
     return ok ? ErrorCode::Ok : ErrorCode::RendererFailedToSetup;
 }
 
-EmErrorCode AlsaRenderer::Write(const char* buf, uint32_t len)
+ErrorCode AlsaRenderer::Write(const char* buf, uint32_t len)
 {
     int off = 0;
     int leftFrames = (len + m_FrameLength - 1) / m_FrameLength;

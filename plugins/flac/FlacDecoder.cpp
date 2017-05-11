@@ -16,7 +16,7 @@ vector<string> FlacDecoder::FileSuffix() const
     return { "flac" };
 }
 
-EmErrorCode FlacDecoder::Open(const string& url)
+ErrorCode FlacDecoder::Open(const string& url)
 {
     FLAC__stream_decoder_set_md5_checking(m_pDecoder, false);
     FLAC__stream_decoder_init_file(
@@ -57,7 +57,7 @@ bool FlacDecoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     m_dctx.buf = data;
     m_dctx.buf_used = 0;
@@ -74,7 +74,7 @@ EmErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCo
     return ErrorCode::Ok;
 }
 
-EmErrorCode FlacDecoder::SetUnitIndex(uint64_t index)
+ErrorCode FlacDecoder::SetUnitIndex(uint64_t index)
 {
     m_SampleIndex = index;
     FLAC__stream_decoder_seek_absolute(m_pDecoder, m_SampleIndex);
@@ -96,7 +96,7 @@ uint64_t FlacDecoder::UnitCount() const
     return m_SampleCount;
 }
 
-EmAudioMode FlacDecoder::AudioMode() const
+AudioMode FlacDecoder::AudioMode() const
 {
     return AudioMode::Stereo;
 }

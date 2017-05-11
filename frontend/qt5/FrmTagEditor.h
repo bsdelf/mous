@@ -62,7 +62,7 @@ private:
 
     QPixmap m_CurrentImage;
     QLabel* m_LabelImage;
-    EmCoverFormat m_CurrentImgFmt;
+    CoverFormat m_CurrentImgFmt;
     vector<char> m_CurrentImgData;
     QString m_OldImagePath;
 

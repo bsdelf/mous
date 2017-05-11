@@ -12,11 +12,11 @@ public:
 public:
     virtual ~OssRenderer();
 
-    virtual EmErrorCode Open();
+    virtual ErrorCode Open();
     virtual void Close();
 
-    virtual EmErrorCode Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample);
-    virtual EmErrorCode Write(const char* buf, uint32_t len);
+    virtual ErrorCode Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample);
+    virtual ErrorCode Write(const char* buf, uint32_t len);
 
     virtual int VolumeLevel() const;
     virtual void SetVolumeLevel(int level);
