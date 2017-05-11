@@ -1,46 +1,48 @@
 #pragma once
 
-#include <vector>
+#include <cinttypes>
 #include <memory>
-#include <functional>
+#include <utility>
+#include <vector>
 
 namespace scx {
 
+namespace signal {
+
 template<class>
-class Signal;
+class MuteSignal;
 
 template<class R, class... P>
-class Signal<R (P...)> {
-private:
+class MuteSignal<R(P...)>
+{
+    using RawFunction = R (*)(P...);
+
+  private:
     struct Slot;
 
-public:
-    Signal() = default;
-    ~Signal() = default;
+  public:
+    MuteSignal() = default;
+    ~MuteSignal() = default;
 
-    Signal(const Signal&) = delete;
-    Signal(Signal&&) = delete;
-    Signal& operator=(const Signal&) = delete;
-    Signal& operator=(Signal&&) = delete;
-
-    template<class... Args>
-    void Connect(Args... args) {
-        Connect(std::move(MakeSlot(args...)));
-    }
-
-    void Connect(std::unique_ptr<Slot>&& slot) {
-        _slots.emplace_back(std::move(slot));
-    }
+    MuteSignal(const MuteSignal&) = delete;
+    MuteSignal(MuteSignal&&) = delete;
+    MuteSignal& operator=(const MuteSignal&) = delete;
+    MuteSignal& operator=(MuteSignal&&) = delete;
 
     template<class... Args>
-    bool Disconnect(Args... args) {
-        return Disconnect(MakeSlot(args...));
+    uintptr_t Connect(Args&&... args)
+    {
+        auto slot = MakeSlot(std::forward<Args>(args)...);
+        auto id = reinterpret_cast<uintptr_t>(slot.get());
+        _slots.push_back(std::move(slot));
+        return id;
     }
 
-    bool Disconnect(const std::unique_ptr<Slot>& slot) {
-        auto ps = static_cast<const Slot*>(slot.get());
+    bool Disconnect(uintptr_t id)
+    {
         for (size_t i = 0; i < _slots.size(); ++i) {
-            if (_slots[i]->EqualTo(ps)) {
+            auto thatId = reinterpret_cast<uintptr_t>(_slots[i].get());
+            if (thatId == id) {
                 _slots.erase(_slots.begin() + i);
                 return true;
             }
@@ -48,166 +50,209 @@ public:
         return false;
     }
 
-    bool Disconnect(const void* o) {
-        bool y = false;
-        _slots.erase(std::remove_if(_slots.begin(), _slots.end(), [&y, o](const auto& slot) {
-            if (slot->Object() == o) {
-                y = true;
-                return true;
+    bool Disconnect(RawFunction fn)
+    {
+        bool hit = false;
+        EraseIf([&hit, fn](const auto& slot) {
+            if (slot->type == SlotType::RawFunction) {
+                auto that = static_cast<RawFunctionSlot*>(slot.get());
+                if (that->fn == fn) {
+                    hit = true;
+                    return true;
+                }
             }
             return false;
-        }), _slots.end());
-        return y;
+        });
+        return hit;
     }
 
-    void Clear() {
-        _slots.clear();
+    template<class O>
+    bool Disconnect(O* obj)
+    {
+        bool hit = false;
+        EraseIf([&hit, obj](const auto& slot) {
+            if (slot->type == SlotType::MemberFunction) {
+                auto that = dynamic_cast<MemberFunctionSlot<O>*>(slot.get());
+                if (that && that->obj == obj) {
+                    hit = true;
+                    return true;
+                }
+            }
+            return false;
+        });
+        return hit;
     }
 
-    void operator()(P... p) const {
-        for (size_t i = 0; i < _slots.size(); ++i) {
-            _slots[i]->Invoke(p...);
-        }
+    template<class F, class O>
+    bool Disconnect(F fn, O* obj)
+    {
+        bool hit = false;
+        EraseIf([&hit, fn, obj](const auto& slot) {
+            if (slot->type == SlotType::MemberFunction) {
+                auto that = dynamic_cast<SignedMemberFunctionSlot<F, O>*>(slot.get());
+                if (that && that->obj == obj && that->fn == fn) {
+                    hit = true;
+                    return true;
+                }
+            }
+            return false;
+        });
+        return hit;
     }
 
-    auto Empty() const {
-        return _slots.empty();
-    }
+    void Clear() { _slots.clear(); }
 
-    auto Size() const {
-        return _slots.size();
-    }
+    auto Empty() const { return _slots.empty(); }
 
-private:
+    auto Size() const { return _slots.size(); }
+
+  protected:
     std::vector<std::unique_ptr<Slot>> _slots;
 
-    struct Slot {
-        virtual ~Slot() { }
-        virtual char Type() const = 0;
+  private:
+    template<typename Pred>
+    void EraseIf(Pred&& pred)
+    {
+        _slots.erase(std::remove_if(_slots.begin(), _slots.end(), std::forward<Pred>(pred)), _slots.end());
+    }
+
+    enum class SlotType : uint8_t
+    {
+        Function,
+        RawFunction,
+        MemberFunction
+    };
+
+    struct Slot
+    {
+        explicit Slot(SlotType type)
+          : type(type)
+        {
+        }
+
+        virtual ~Slot() {}
         virtual R Invoke(P...) const = 0;
-        virtual const void* Object() const = 0;
-        virtual bool EqualTo(const Slot*) const = 0;
+
+        const SlotType type;
     };
 
-    struct PtrSlot: public Slot {
-        typedef R (*ptr_t)(P...);
-
-        explicit PtrSlot(ptr_t p): ptr(p) { }
-
-        virtual char Type() const { return 'p'; }
-
-        virtual R Invoke(P... p) const { return ptr(p...); }
-
-        virtual const void* Object() const { return nullptr; }
-
-        virtual bool EqualTo(const Slot* slot) const {
-            if (Type() == slot->Type()) {
-                const PtrSlot* ps = static_cast<const PtrSlot*>(slot);
-                return (ptr == ps->ptr);
-            }
-            return false;
-        }
-        
-    private:
-        ptr_t ptr;
-    };
-
-    template<class O>
-    struct MemSlot: public Slot {
-        typedef R (O::*fn_t)(P...);
-
-        MemSlot(fn_t f, O* o): fn(f), obj(o) { }
-
-        virtual char Type() const { return 'm'; }
-
-        virtual R Invoke(P... p) const { return (obj->*fn)(p...); }
-
-        virtual const void* Object() const { return obj; }
-
-        virtual bool EqualTo(const Slot* slot) const {
-            if (Type() == slot->Type()) {
-                const MemSlot* ms = static_cast<const MemSlot*>(slot);
-                return (obj == ms->obj && fn == ms->fn);
-            }
-            return false;
+    template<class F>
+    struct FunctionSlot : public Slot
+    {
+        FunctionSlot(const F& fn)
+          : Slot(SlotType::Function)
+          , fn(fn)
+        {
         }
 
-    private:
-        fn_t fn;
-        O* obj;
-    };
-
-    template<class O>
-    struct ConstSlot: public Slot {
-        typedef R (O::*fn_t)(P...) const;
-
-        ConstSlot(fn_t f, const O* o): fn(f), obj(o) { }
-
-        virtual char Type() const { return 'c'; }
-
-        virtual R Invoke(P... p) const { return (obj->*fn)(p...); }
-
-        virtual const void* Object() const { return obj; }
-
-        virtual bool EqualTo(const Slot* slot) const {
-            if (Type() == slot->Type()) {
-                const ConstSlot* cs = static_cast<const ConstSlot*>(slot);
-                return (obj == cs->obj && fn == cs->fn);
-            }
-            return false;
+        FunctionSlot(F&& fn)
+          : Slot(SlotType::Function)
+          , fn(std::move(fn))
+        {
         }
 
-    private:
-        fn_t fn;
-        const O* obj;
+        R Invoke(P... p) const final { return fn(p...); }
+
+        F const fn;
     };
 
-    struct FnSlot: public Slot {
-        typedef std::function<R (P...)> fn_t;
+    struct RawFunctionSlot : public Slot
+    {
+        explicit RawFunctionSlot(RawFunction fn)
+          : Slot(SlotType::RawFunction)
+          , fn(fn)
+        {
+        }
 
-        explicit FnSlot(const fn_t& f): fn(f) { }
+        R Invoke(P... p) const final { return fn(p...); }
 
-        virtual char Type() const { return 'f'; }
-
-        virtual R Invoke(P... p) const { return fn(p...); }
-
-        virtual const void* Object() const { return nullptr; }
-
-        virtual bool EqualTo(const Slot* slot) const { return (slot == this); }
-
-    private:
-        const fn_t fn;
+        RawFunction const fn;
     };
 
     template<class O>
-    static const void* MakeSlot(O* o) {
-        return o;
-    }
+    struct MemberFunctionSlot : public Slot
+    {
+        explicit MemberFunctionSlot(O* obj)
+          : Slot(SlotType::MemberFunction)
+          , obj(obj)
+        {
+        }
 
-    template<class O>
-    static const void* MakeSlot(const O* o) {
-        return o;
-    }
+        O* const obj;
+    };
 
-    static std::unique_ptr<Slot> MakeSlot(R (*p)(P...)) {
-        return std::make_unique<PtrSlot>(p);
-    }
+    template<class F, class O>
+    struct SignedMemberFunctionSlot : public MemberFunctionSlot<O>
+    {
+        SignedMemberFunctionSlot(F fn, O* obj)
+          : MemberFunctionSlot<O>(obj)
+          , fn(fn)
+        {
+        }
 
-    template<class O>
-    static std::unique_ptr<Slot> MakeSlot(R (O::*f)(P...), O* o) {
-        return std::make_unique<MemSlot<O>>(f, o);
-    }
+        R Invoke(P... p) const final { return (this->obj->*fn)(p...); }
 
-    template<class O>
-    static std::unique_ptr<Slot> MakeSlot(R (O::*f)(P...) const, const O* o) {
-        return std::make_unique<ConstSlot<O>>(f, o);
+        F const fn;
+    };
+
+    static auto MakeSlot(RawFunction f) { return std::make_unique<RawFunctionSlot>(f); }
+
+    template<class F, class O>
+    static auto MakeSlot(F f, O* o)
+    {
+        return std::make_unique<SignedMemberFunctionSlot<F, O>>(f, o);
     }
 
     template<class F>
-    static std::unique_ptr<Slot> MakeSlot(const F& f) {
-        return std::make_unique<FnSlot>(f);
+    static auto MakeSlot(F&& f)
+    {
+        return std::make_unique<FunctionSlot<std::decay_t<F>>>(std::forward<F>(f));
     }
 };
 
-}
+template<class R>
+class LastValueCollector
+{
+  public:
+    void operator+=(const R& val) { this->val = val; }
 
+    void operator+=(R&& val) { this->val = std::move(val); }
+
+    R& operator()() { return val; }
+
+  private:
+    R val;
+};
+
+} // namespace signal
+
+template<class, template<class> class Collector = signal::LastValueCollector>
+class Signal;
+
+template<class R, class... P, template<class> class Collector>
+class Signal<R(P...), Collector> : public signal::MuteSignal<R(P...)>
+{
+  public:
+    R operator()(P... p) const
+    {
+        Collector<R> collector;
+        for (size_t i = 0; i < this->_slots.size(); ++i) {
+            collector += this->_slots[i]->Invoke(p...);
+        }
+        return std::move(collector());
+    }
+};
+
+template<class... P>
+class Signal<void(P...)> : public signal::MuteSignal<void(P...)>
+{
+  public:
+    void operator()(P... p) const
+    {
+        for (size_t i = 0; i < this->_slots.size(); ++i) {
+            this->_slots[i]->Invoke(p...);
+        }
+    }
+};
+
+} // namespace scx

@@ -1,21 +1,21 @@
 #pragma once
 
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
+#include "FileInfo.hpp"
+#include <stack>
 #include <string>
 #include <vector>
-#include <stack>
-#include "FileInfo.hpp"
 
 namespace scx {
 
 class Dir
 {
-public:
+  public:
     static bool ChDir(const std::string& path)
     {
         FileInfo file(path);
@@ -25,20 +25,14 @@ public:
             return false;
     }
 
-    static bool ChDirUp()
-    {
-        return ChDir("..");
-    }
+    static bool ChDirUp() { return ChDir(".."); }
 
     static bool Rename(const std::string& oldName, const std::string& newName)
     {
         return rename(oldName.c_str(), newName.c_str()) == 0;
     }
 
-    static bool Remove(const std::string& path)
-    {
-        return remove(path.c_str()) == 0;
-    }
+    static bool Remove(const std::string& path) { return remove(path.c_str()) == 0; }
 
     static bool MakeDir(const std::string& path, mode_t mode)
     {
@@ -53,10 +47,10 @@ public:
         if (mode & 0700)
             mode |= S_IRWXU;
 
-        for (size_t pos = 0; ; ++pos) {
+        for (size_t pos = 0;; ++pos) {
             pos = path.find('/', pos);
-            string parent = path.substr(0, pos != string::npos ? pos+1 : path.size());
-            //printf("%s\n", parent.c_str());
+            string parent = path.substr(0, pos != string::npos ? pos + 1 : path.size());
+            // printf("%s\n", parent.c_str());
 
             FileInfo info(parent);
             if (info.Exists()) {
@@ -80,13 +74,11 @@ public:
     {
         std::vector<std::string> list;
         DIR* dir = ::opendir(path.c_str());
-        for (struct dirent* d; (d = ::readdir(dir)) != nullptr; ) {
+        for (struct dirent* d; (d = ::readdir(dir)) != nullptr;) {
             list.push_back(d->d_name);
         }
         ::closedir(dir);
         return list;
     }
 };
-
 }
-

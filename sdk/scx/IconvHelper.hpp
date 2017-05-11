@@ -9,10 +9,15 @@ namespace scx {
 
 namespace IconvHelper {
 
-static inline bool ConvFromTo(const std::string& from, const std::string& wanted, 
-        const char* srcBuf, size_t srcLen, std::string& dest, std::vector<char>& workBuf)
+static inline bool
+ConvFromTo(const std::string& from,
+           const std::string& wanted,
+           const char* srcBuf,
+           size_t srcLen,
+           std::string& dest,
+           std::vector<char>& workBuf)
 {
-    typedef size_t (*StdIconv)(iconv_t, const char**, size_t*, char**, size_t*);
+    using StdIconv = size_t (*)(iconv_t, const char**, size_t*, char**, size_t*);
     StdIconv std_iconv = (StdIconv)iconv;
 
     if (from.empty() || wanted.empty())
@@ -27,7 +32,7 @@ static inline bool ConvFromTo(const std::string& from, const std::string& wanted
     char* outBuf;
     size_t outLeft;
     if (srcLen > workBuf.size()) {
-        workBuf.resize(srcLen*3+4);
+        workBuf.resize(srcLen * 3 + 4);
     }
     outBuf = &workBuf[0];
     outLeft = workBuf.size();
@@ -56,7 +61,7 @@ static inline bool ConvFromTo(const std::string& from, const std::string& wanted
         outLeft = workBuf.size();
 
         iconv_close(cd);
-    } while(true);
+    } while (true);
 
     if (ok) {
         dest.assign(&workBuf[0], workBuf.size() - outLeft);
@@ -65,14 +70,11 @@ static inline bool ConvFromTo(const std::string& from, const std::string& wanted
     return ok;
 }
 
-static inline bool ConvFromTo(const std::string& from, const std::string& wanted, 
-        const char* srcBuf, size_t srcLen, std::string& dest)
+static inline bool
+ConvFromTo(const std::string& from, const std::string& wanted, const char* srcBuf, size_t srcLen, std::string& dest)
 {
     std::vector<char> workBuf;
     return ConvFromTo(from, wanted, srcBuf, srcLen, dest, workBuf);
 }
-
-
 }
 }
-

@@ -7,19 +7,17 @@
 
 namespace scx {
 
-template <typename item_t>
+template<typename item_t>
 class PVBuffer
 {
-public:
-    PVBuffer():
-        m_FreeListSemVar(0),
-        m_DataListSemVar(0)
+  public:
+    PVBuffer()
+      : m_FreeListSemVar(0)
+      , m_DataListSemVar(0)
     {
     }
 
-    ~PVBuffer()
-    {
-    }
+    ~PVBuffer() {}
 
     void AllocBuffer(size_t bufCount)
     {
@@ -29,7 +27,7 @@ public:
         for (size_t i = 0; i < bufCount; ++i) {
             m_BufferQueue[i] = new item_t;
             m_FreeQueue[i] = m_BufferQueue[i];
-            m_FreeListSemVar.Post(); 
+            m_FreeListSemVar.Post();
         }
 
         m_DataListSemVar.Clear();
@@ -52,14 +50,14 @@ public:
     /**
      * This method should be called after both customer and producer
      * has been suspended by TakeFree()/TakeData().
-     * After calling this method, 
+     * After calling this method,
      * the producer will begin to work again, then the customer.
      */
     void ResetPV()
     {
         const size_t bufCount = m_BufferQueue.size();
 
-        // No mutex here, 
+        // No mutex here,
         // because we assume both thread has been suspended.
         m_DataQueue.clear();
         m_DataListSemVar.Clear();
@@ -67,42 +65,30 @@ public:
         // Lock the FreeQueue first,
         // because after SemVar::Post() the producer will begin to work,
         // and it will take the first item in FreeQueue.
-        //m_FreeListMutex.Lock();
+        // m_FreeListMutex.Lock();
         m_FreeQueue.resize(bufCount);
         m_FreeListSemVar.Clear();
         for (size_t i = 0; i < bufCount; ++i) {
             m_FreeQueue[i] = m_BufferQueue[i];
             m_FreeListSemVar.Post();
         }
-        //m_FreeListMutex.Unlock();
+        // m_FreeListMutex.Unlock();
     }
 
-    size_t BufferCount() const
-    {
-        return m_BufferQueue.size();
-    }
+    size_t BufferCount() const { return m_BufferQueue.size(); }
 
-    size_t FreeCount() const
-    {
-        return m_FreeListSemVar.Value();
-    }
+    size_t FreeCount() const { return m_FreeListSemVar.Value(); }
 
-    size_t DataCount() const
-    {
-        return m_DataListSemVar.Value();
-    }
+    size_t DataCount() const { return m_DataListSemVar.Value(); }
 
     /**
      * This method can be used for initialize buffer.
      */
-    item_t* RawItemAt(size_t i)
-    {
-        return m_BufferQueue[i];
-    }
+    item_t* RawItemAt(size_t i) { return m_BufferQueue[i]; }
 
     item_t* TakeFree()
     {
-        m_FreeListSemVar.Wait(); 
+        m_FreeListSemVar.Wait();
         m_FreeListMutex.lock();
         item_t* pItem = m_FreeQueue.front();
         m_FreeQueue.pop_front();
@@ -120,7 +106,7 @@ public:
 
     item_t* TakeData()
     {
-        m_DataListSemVar.Wait(); 
+        m_DataListSemVar.Wait();
         m_DataListMutex.lock();
         item_t* pItem = m_DataQueue.front();
         m_DataQueue.pop_front();
@@ -165,7 +151,7 @@ public:
         m_DataListMutex.unlock();
     }
 
-private:
+  private:
     std::deque<item_t*> m_BufferQueue;
 
     std::deque<item_t*> m_FreeQueue;
@@ -176,6 +162,4 @@ private:
     std::mutex m_DataListMutex;
     SemVar m_DataListSemVar;
 };
-
 }
-

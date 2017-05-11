@@ -1,78 +1,57 @@
 #pragma once
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/param.h>
 #include <stdlib.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <string>
 
 namespace scx {
 
 namespace FileType {
-    enum e
-    {
-        None = 0,
-        Regular,
-        Directory,
-        CharacterSpecial,
-        Block,
-        Pipe,
-        Link,
-        Socket,
-        Other
-    };
+enum e
+{
+    None = 0,
+    Regular,
+    Directory,
+    CharacterSpecial,
+    Block,
+    Pipe,
+    Link,
+    Socket,
+    Other
+};
 
-    static const char* Name[] = {
-        "None",
-        "Regular",
-        "Directory",
-        "Character Special",
-        "Block",
-        "Pipe/FIFO",
-        "Link",
-        "Socket",
-        "Other"
-    };
+static const char* Name[] = { "None", "Regular", "Directory", "Character Special", "Block", "Pipe/FIFO",
+                              "Link", "Socket",  "Other" };
 
-    static inline std::string ToString(e type)
-    {
-        return Name[type];
-    }
-
+static inline std::string
+ToString(e type)
+{
+    return Name[type];
 }
-typedef FileType::e EmFileType;
+}
+using EmFileType = FileType::e;
 
 class FileInfo
 {
-public:
-    explicit FileInfo(const std::string& file):
-        m_name(file),
-        m_exists(false),
-        m_type(FileType::None)
+  public:
+    explicit FileInfo(const std::string& file)
+      : m_name(file)
+      , m_exists(false)
+      , m_type(FileType::None)
     {
         CheckFileType();
     }
-    
-    std::string Name() const
-    {
-        return m_name;
-    }
 
-    bool Exists() const
-    {
-        return m_exists;
-    }
+    std::string Name() const { return m_name; }
 
-    EmFileType Type() const
-    {
-        return m_type;
-    }
+    bool Exists() const { return m_exists; }
 
-    off_t Size() const
-    {
-        return m_exists ? m_stat.st_size : -1;
-    }
+    EmFileType Type() const { return m_type; }
+
+    off_t Size() const { return m_exists ? m_stat.st_size : -1; }
 
     // NOTE: too strict
     bool IsAbs() const
@@ -84,8 +63,8 @@ public:
             return false;
 
         std::string name(m_name);
-        while (name.size() >= 2 && name[name.size()-1] == '/')
-            name.erase(name.size()-1, '/');
+        while (name.size() >= 2 && name[name.size() - 1] == '/')
+            name.erase(name.size() - 1, '/');
         return (name == AbsFilePath());
     }
 
@@ -115,7 +94,7 @@ public:
 
         std::string name(AbsFilePath());
         size_t pos = name.find_last_of('/');
-        return (pos == std::string::npos) ? name : name.substr(pos+1);
+        return (pos == std::string::npos) ? name : name.substr(pos + 1);
     }
 
     std::string Suffix() const
@@ -124,19 +103,19 @@ public:
             return "";
 
         size_t pos = m_name.find_last_of('.');
-        return (pos == std::string::npos) ? "" : m_name.substr(pos+1);
+        return (pos == std::string::npos) ? "" : m_name.substr(pos + 1);
     }
 
-private:
+  private:
     bool NotRegularFile() const
     {
         if (m_name.empty())
             return true;
         if (m_exists && m_type == FileType::Directory)
             return true;
-        if (m_name[m_name.size()-1] == '/')
+        if (m_name[m_name.size() - 1] == '/')
             return true;
-        
+
         return false;
     }
 
@@ -168,12 +147,10 @@ private:
         }
     }
 
-private:
+  private:
     struct stat m_stat;
     std::string m_name;
     bool m_exists = false;
     EmFileType m_type = FileType::None;
 };
-
 }
-

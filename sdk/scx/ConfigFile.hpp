@@ -1,23 +1,19 @@
 #pragma once
 
-#include <string>
 #include <fstream>
 #include <map>
-#include <vector>
 #include <sstream>
+#include <string>
+#include <vector>
 
 namespace scx {
 
 class ConfigFile
 {
-public:
-    ConfigFile()
-    {
-    }
+  public:
+    ConfigFile() {}
 
-    ~ConfigFile()
-    {
-    }
+    ~ConfigFile() {}
 
     bool Load(const std::string& file, char comment = '#')
     {
@@ -34,8 +30,8 @@ public:
         stream << infile.rdbuf();
         const string& buf = stream.str();
         infile.close();
-        
-        for (size_t off = 0; ; ) {
+
+        for (size_t off = 0;;) {
             // find line
             size_t lineEnd = buf.find('\n', off);
             if (lineEnd == string::npos) {
@@ -73,18 +69,18 @@ public:
 
                 // valid or bad line
                 if (eqPos != string::npos) {
-                    key = buf.substr(off, eqPos-off);
-                    val = buf.substr(eqPos+1, lineEnd-(eqPos+1));
+                    key = buf.substr(off, eqPos - off);
+                    val = buf.substr(eqPos + 1, lineEnd - (eqPos + 1));
                 } else {
                     iskv = false;
-                    key = buf.substr(off, lineEnd-off);
+                    key = buf.substr(off, lineEnd - off);
                 }
             } else {
-                key = buf.substr(off, lineEnd-off);
+                key = buf.substr(off, lineEnd - off);
             }
 
             m_Lines.emplace_back(iskv, key, val);
-            off = lineEnd+1;
+            off = lineEnd + 1;
         }
 
         m_File = file;
@@ -129,10 +125,7 @@ public:
         m_Index.clear();
     }
 
-    size_t LineCount() const
-    {
-        return m_Lines.size();
-    }
+    size_t LineCount() const { return m_Lines.size(); }
 
     size_t KeyCount() const
     {
@@ -165,7 +158,7 @@ public:
             if (m_Lines[i].iskv)
                 list.push_back(m_Lines[i].key);
         }
-        
+
         return list;
     }
 
@@ -197,7 +190,7 @@ public:
         }
         if (val == nullptr) {
             m_Lines.emplace_back(true, key);
-            val = &(m_Lines[m_Lines.size()-1].val);
+            val = &(m_Lines[m_Lines.size() - 1].val);
         }
         return *val;
     }
@@ -218,10 +211,7 @@ public:
         m_Index.clear();
     }
 
-    void AppendComment(const std::string& txt)
-    {
-        m_Lines.emplace_back(false, txt);
-    }
+    void AppendComment(const std::string& txt) { m_Lines.emplace_back(false, txt); }
 
     // Build index can imporve performance when searching key.
     // However, after call Remove(), the index will be cleard.
@@ -235,27 +225,26 @@ public:
         }
     }
 
-private:
+  private:
     struct Line
     {
         bool iskv;
         std::string key;
         std::string val;
 
-        explicit Line(bool _iskv, 
-                const std::string& _key,
-                const std::string& _val = ""):
-            iskv(_iskv), key(_key), val(_val)
-        { }
+        explicit Line(bool _iskv, const std::string& _key, const std::string& _val = "")
+          : iskv(_iskv)
+          , key(_key)
+          , val(_val)
+        {
+        }
     };
 
-private:
+  private:
     std::string m_File;
     std::vector<Line> m_Lines;
     mutable std::string m_Invaild;
 
     std::map<std::string, size_t> m_Index;
 };
-
 }
-

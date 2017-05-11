@@ -3,10 +3,10 @@
 #include <string>
 
 #include <locale.h>
-#include <string.h>
-#include <stdlib.h>
-#include <wchar.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wchar.h>
 
 #ifdef USE_PINYINTABLE_DATA // load pinyin table from external file
 #include <fstream>
@@ -18,25 +18,25 @@ namespace scx {
 
 class PinYinCompare
 {
-private:
-    template<size_t S, typename T=void>
+  private:
+    template<size_t S, typename T = void>
     struct Key;
 
     template<typename T>
     struct Key<2, T>
     {
-        typedef unsigned short type;
+        using type = unsigned short;
     };
 
     template<typename T>
     struct Key<4, T>
     {
-        typedef unsigned int type;
+        using type = unsigned int;
     };
 
-    typedef Key<sizeof(wchar_t)>::type key_t;
+    using key_t = Key<sizeof(wchar_t)>::type;
 
-public:
+  public:
 #ifdef USE_PINYINTABLE_DATA
     bool Init(const std::string& path)
     {
@@ -50,16 +50,13 @@ public:
                 continue;
             key_t key = ::strtol(line.substr(0, 4).c_str(), nullptr, 16);
             size_t end = line.find('\t', 5);
-            m_table[key] = line.substr(5, end == std::string::npos ? std::string::npos : end-5);
+            m_table[key] = line.substr(5, end == std::string::npos ? std::string::npos : end - 5);
         }
         file.close();
         return (m_count != 0);
     }
 
-    size_t Count() const
-    {
-        return m_count;
-    }
+    size_t Count() const { return m_count; }
 #endif
     /* compare only first character */
     bool CmpUtf8FirstChar(const std::string& a, const std::string& b) const
@@ -136,7 +133,7 @@ public:
                 return false;
             else if (!hit1 && !hit2)
                 break;
-            
+
             const auto& snd1 = m_table[key1];
             const auto& snd2 = m_table[key2];
 #ifdef USE_PINYINTABLE_DATA
@@ -156,7 +153,7 @@ public:
         return ::strcoll(bytes1, bytes2) < 0;
     }
 
-private:
+  private:
 #ifdef USE_PINYINTABLE_DATA
     constexpr static const size_t TABLE_SIZE = 0xff00;
     std::string m_table[TABLE_SIZE];
@@ -166,6 +163,4 @@ private:
     const char* const* m_table = scx::PinYinTable;
 #endif
 };
-
 }
-
