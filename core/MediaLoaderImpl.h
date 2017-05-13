@@ -7,7 +7,7 @@
 using namespace scx;
 
 #include <core/Plugin.h>
-#include <plugin/IMediaPack.h>
+#include <plugin/ISheetParser.h>
 #include <plugin/ITagParser.h>
 #include <util/MediaItem.h>
 
@@ -16,17 +16,17 @@ namespace mous {
 class MediaLoader::Impl
 {
   public:
-    void RegisterMediaPackPlugin(const Plugin* pAgent)
+    void RegisterSheetParserPlugin(const Plugin* pAgent)
     {
-        if (pAgent->Type() == PluginType::MediaPack) {
-            AddMediaPack(pAgent);
+        if (pAgent->Type() == PluginType::SheetParser) {
+            AddSheetParser(pAgent);
         }
     }
 
-    void RegisterMediaPackPlugin(std::vector<const Plugin*>& agents)
+    void RegisterSheetParserPlugin(std::vector<const Plugin*>& agents)
     {
         for (auto agent : agents) {
-            RegisterMediaPackPlugin(agent);
+            RegisterSheetParserPlugin(agent);
         }
     }
 
@@ -47,8 +47,8 @@ class MediaLoader::Impl
     void UnregisterPlugin(const Plugin* pAgent)
     {
         switch (pAgent->Type()) {
-            case PluginType::MediaPack:
-                RemoveMediaPack(pAgent);
+            case PluginType::SheetParser:
+                RemoveSheetParser(pAgent);
                 break;
 
             case PluginType::TagParser:
@@ -78,8 +78,8 @@ class MediaLoader::Impl
     std::vector<std::string> SupportedSuffixes() const
     {
         std::vector<std::string> list;
-        list.reserve(indexedMediaPacks.size());
-        for (const auto& entry : indexedMediaPacks) {
+        list.reserve(indexedSheetParsers.size());
+        for (const auto& entry : indexedSheetParsers) {
             list.push_back(entry.first);
         }
         return list;
@@ -98,17 +98,17 @@ class MediaLoader::Impl
   private:
     ErrorCode TryUnpack(const std::string& path, std::deque<MediaItem>& list) const
     {
-        // Find MediaPack.
+        // Find SheetParser.
         const std::string& suffix = ToLower(FileHelper::FileSuffix(path));
-        auto iter = indexedMediaPacks.find(suffix);
+        auto iter = indexedSheetParsers.find(suffix);
 
-        if (iter == indexedMediaPacks.end()) {
+        if (iter == indexedSheetParsers.end()) {
             // General Media
             list.emplace_back(path);
         } else {
-            // MediaPack
-            IMediaPack* pack = iter->second;
-            pack->DumpMedia(path, list, &indexedMediaPacks);
+            // SheetParser
+            ISheetParser* parser = iter->second;
+            parser->DumpMedia(path, list);
         }
 
         return ErrorCode::Ok;
@@ -171,38 +171,38 @@ class MediaLoader::Impl
         return ErrorCode::Ok;
     }
 
-    void AddMediaPack(const Plugin* pAgent)
+    void AddSheetParser(const Plugin* pAgent)
     {
         // Register agent.
-        IMediaPack* pPack = (IMediaPack*)pAgent->CreateObject();
-        indexedObjects.emplace(pAgent, pPack);
+        ISheetParser* sheetParser = (ISheetParser*)pAgent->CreateObject();
+        indexedObjects.emplace(pAgent, sheetParser);
 
-        // Register MediaPack.
-        for (const std::string& item : pPack->FileSuffix()) {
+        // Register SheetParser.
+        for (const std::string& item : sheetParser->FileSuffix()) {
             const std::string& suffix = ToLower(item);
-            auto iter = indexedMediaPacks.find(suffix);
-            if (iter == indexedMediaPacks.end()) {
-                indexedMediaPacks.emplace(suffix, pPack);
+            auto iter = indexedSheetParsers.find(suffix);
+            if (iter == indexedSheetParsers.end()) {
+                indexedSheetParsers.emplace(suffix, sheetParser);
             }
         }
     }
 
-    void RemoveMediaPack(const Plugin* pAgent)
+    void RemoveSheetParser(const Plugin* pAgent)
     {
         auto iter = indexedObjects.find(pAgent);
         if (iter != indexedObjects.end()) {
-            // Unregister MediaPack.
-            IMediaPack* pPack = (IMediaPack*)iter->second;
-            for (const std::string& item : pPack->FileSuffix()) {
+            // Unregister SheetParser.
+            ISheetParser* sheetParser = (ISheetParser*)iter->second;
+            for (const std::string& item : sheetParser->FileSuffix()) {
                 const std::string& suffix = ToLower(item);
-                auto iter = indexedMediaPacks.find(suffix);
-                if (iter != indexedMediaPacks.end()) {
-                    indexedMediaPacks.erase(iter);
+                auto iter = indexedSheetParsers.find(suffix);
+                if (iter != indexedSheetParsers.end()) {
+                    indexedSheetParsers.erase(iter);
                 }
             }
 
             // Unregister Plugin.
-            pAgent->FreeObject(pPack);
+            pAgent->FreeObject(sheetParser);
             indexedObjects.erase(iter);
         }
     }
@@ -210,15 +210,15 @@ class MediaLoader::Impl
     void AddTagParser(const Plugin* pAgent)
     {
         // Register Plugin.
-        ITagParser* pParser = (ITagParser*)pAgent->CreateObject();
-        indexedObjects.emplace(pAgent, pParser);
+        ITagParser* tagParser = (ITagParser*)pAgent->CreateObject();
+        indexedObjects.emplace(pAgent, tagParser);
 
         // Register TagParser.
-        for (const std::string& item : pParser->FileSuffix()) {
+        for (const std::string& item : tagParser->FileSuffix()) {
             const std::string& suffix = ToLower(item);
             auto iter = indexedTagParsers.find(suffix);
             if (iter == indexedTagParsers.end()) {
-                indexedTagParsers.emplace(suffix, pParser);
+                indexedTagParsers.emplace(suffix, tagParser);
             }
         }
     }
@@ -228,8 +228,8 @@ class MediaLoader::Impl
         auto iter = indexedObjects.find(pAgent);
         if (iter != indexedObjects.end()) {
             // Unregister TagParser.
-            ITagParser* pParser = (ITagParser*)iter->second;
-            for (const std::string& item : pParser->FileSuffix()) {
+            ITagParser* tagParser = (ITagParser*)iter->second;
+            for (const std::string& item : tagParser->FileSuffix()) {
                 const std::string& suffix = ToLower(item);
                 auto iter = indexedTagParsers.find(suffix);
                 if (iter != indexedTagParsers.end()) {
@@ -238,14 +238,14 @@ class MediaLoader::Impl
             }
 
             // Unregister Plugin.
-            pAgent->FreeObject(pParser);
+            pAgent->FreeObject(tagParser);
             indexedObjects.erase(iter);
         }
     }
 
   private:
     std::unordered_map<const Plugin*, void*> indexedObjects;
-    std::unordered_map<std::string, IMediaPack*> indexedMediaPacks;
+    std::unordered_map<std::string, ISheetParser*> indexedSheetParsers;
     std::unordered_map<std::string, ITagParser*> indexedTagParsers;
 
 };

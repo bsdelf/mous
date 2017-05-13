@@ -45,10 +45,10 @@ bool ServerContext::Init()
     //PluginAgentArray encoders;
     //mgr.DumpPluginAgent(encoders, PluginType::Encoder);
     PluginAgentArray renderers = mgr.PluginAgents(PluginType::Renderer);
-    PluginAgentArray mediaPacks = mgr.PluginAgents(PluginType::MediaPack);
+    PluginAgentArray sheetParsers = mgr.PluginAgents(PluginType::SheetParser);
     PluginAgentArray tagParsers = mgr.PluginAgents(PluginType::TagParser);
 
-    loader.RegisterMediaPackPlugin(mediaPacks);
+    loader.RegisterSheetParserPlugin(sheetParsers);
     loader.RegisterTagParserPlugin(tagParsers);
 
     player.RegisterRendererPlugin(renderers[0]);

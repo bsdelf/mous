@@ -19,8 +19,8 @@ public:
     MediaLoader();
     ~MediaLoader();
 
-    void RegisterMediaPackPlugin(const Plugin* pAgent);
-    void RegisterMediaPackPlugin(std::vector<const Plugin*>& agents);
+    void RegisterSheetParserPlugin(const Plugin* pAgent);
+    void RegisterSheetParserPlugin(std::vector<const Plugin*>& agents);
 
     void RegisterTagParserPlugin(const Plugin* pAgent);
     void RegisterTagParserPlugin(std::vector<const Plugin*>& agents);

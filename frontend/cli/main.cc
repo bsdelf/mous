@@ -75,16 +75,16 @@ int cmd_plugin(int, char**)
                info->version);
     }
 
-    printf("Decoders:   %zu\n"
-           "Endocers:   %zu\n"
-           "Renderers:  %zu\n"
-           "MediaPacks: %zu\n"
-           "TagParsers: %zu\n",
+    printf("Decoder:     %zu\n"
+           "Endocer:     %zu\n"
+           "Renderer:    %zu\n"
+           "SheetParser: %zu\n"
+           "TagParser:   %zu\n",
            ctx.dec_agents.size(),
            ctx.enc_agents.size(),
            ctx.red_agents.size(),
-           ctx.pack_agents.size(),
-           ctx.tag_agents.size());
+           ctx.sheet_parser_agents.size(),
+           ctx.tag_parser_agents.size());
 
     return 0;
 }
@@ -114,8 +114,8 @@ int main(int argc, char** argv)
     ctx.dec_agents = ctx.mgr.PluginAgents(PluginType::Decoder);
     ctx.enc_agents = ctx.mgr.PluginAgents(PluginType::Encoder);
     ctx.red_agents = ctx.mgr.PluginAgents(PluginType::Renderer);
-    ctx.pack_agents = ctx.mgr.PluginAgents(PluginType::MediaPack);
-    ctx.tag_agents = ctx.mgr.PluginAgents(PluginType::TagParser);
+    ctx.sheet_parser_agents = ctx.mgr.PluginAgents(PluginType::SheetParser);
+    ctx.tag_parser_agents = ctx.mgr.PluginAgents(PluginType::TagParser);
     if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
         printf("need more plugins!\n");
         cmd_plugin(0, nullptr);
@@ -123,10 +123,10 @@ int main(int argc, char** argv)
     }
 
     // setup media loader
-    ctx.loader.RegisterMediaPackPlugin(ctx.pack_agents);
-    ctx.loader.RegisterTagParserPlugin(ctx.tag_agents);
+    ctx.loader.RegisterSheetParserPlugin(ctx.sheet_parser_agents);
+    ctx.loader.RegisterTagParserPlugin(ctx.tag_parser_agents);
     // setup parser factory
-    ctx.parser_factory.RegisterTagParserPlugin(ctx.tag_agents);
+    ctx.parser_factory.RegisterTagParserPlugin(ctx.tag_parser_agents);
     // setup conv factory
     ctx.conv_factory.RegisterDecoderPlugin(ctx.dec_agents);
     ctx.conv_factory.RegisterEncoderPlugin(ctx.enc_agents);

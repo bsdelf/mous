@@ -81,11 +81,11 @@ void MainWindow::InitMousCore()
     //const vector<string>& pathList = m_PluginManager.PluginPaths();
 
     vector<const Plugin*> packAgentList = 
-        m_PluginManager.PluginAgents(PluginType::MediaPack);
+        m_PluginManager.PluginAgents(PluginType::SheetParser);
     vector<const Plugin*> tagAgentList = 
         m_PluginManager.PluginAgents(PluginType::TagParser);
 
-    m_MediaLoader.RegisterMediaPackPlugin(packAgentList);
+    m_MediaLoader.RegisterSheetParserPlugin(packAgentList);
     m_MediaLoader.RegisterTagParserPlugin(tagAgentList);
 
     vector<const Plugin*> decoderAgentList =
@@ -108,7 +108,7 @@ void MainWindow::InitMousCore()
     m_FrmTagEditor.SetPlayer(&m_Player);
     m_FrmTagEditor.SetTagParserFactory(&m_ParserFactory);
 
-    qDebug() << ">> MediaPack count:" << packAgentList.size();
+    qDebug() << ">> SheetParser count:" << packAgentList.size();
     qDebug() << ">> TagParser count:" << tagAgentList.size();
     qDebug() << ">> Decoder count:" << decoderAgentList.size();
     qDebug() << ">> Encoder count:" << encoderAgentList.size();

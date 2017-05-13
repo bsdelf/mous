@@ -13,10 +13,8 @@ enum class PluginType: uint8_t
     Decoder,
     Encoder,
     Renderer,
-    MediaPack,
-    TagParser,
-    Filter,
-    EventWatcher
+    SheetParser,
+    TagParser
 };
 
 struct PluginInfo
@@ -47,17 +45,11 @@ inline const char* ToString(PluginType type)
         case PluginType::Renderer:
             return "Renderer";
 
-        case PluginType::MediaPack:
-            return "MediaPack";
+        case PluginType::SheetParser:
+            return "SheetParser";
 
         case PluginType::TagParser:
             return "TagParser";
-
-        case PluginType::Filter:
-            return "Filter";
-
-        case PluginType::EventWatcher:
-            return "EventWatcher";
 
         default:
             return "Unknown";

@@ -13,7 +13,7 @@
 %%SDK%%include/mous/plugin/IEncoder.h
 %%SDK%%include/mous/plugin/IEventWatcher.h
 %%SDK%%include/mous/plugin/IFilter.h
-%%SDK%%include/mous/plugin/IMediaPack.h
+%%SDK%%include/mous/plugin/ISheetParser.h
 %%SDK%%include/mous/plugin/IRenderer.h
 %%SDK%%include/mous/plugin/ITagParser.h
 %%SDK%%include/mous/scx/BufObj.hpp

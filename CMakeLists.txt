@@ -377,15 +377,15 @@ if(WITH_TAGLIB_PLUGIN)
     target_link_libraries(TagLibParser ${TAGLIB} ${ICONV})
 endif()
 
-# CuePack plugin
+# CueParser plugin
 if(WITH_CUE_PLUGIN)
     find_library(LIBCUE cue)
     if(NOT LIBCUE)
         message(FATAL_ERROR "libcue not found")
     endif()
     file(GLOB CUE_PACK_SRC plugins/libcue/*)
-    add_library(CuePack SHARED ${CUE_PACK_SRC})
-    target_link_libraries(CuePack ${LIBCUE})
+    add_library(CueParser SHARED ${CUE_PACK_SRC})
+    target_link_libraries(CueParser ${LIBCUE})
 endif()
 
 # PlayerStatistics plugin

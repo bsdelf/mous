@@ -85,13 +85,13 @@ void MainWindow::InitMousCore()
     m_PluginManager.LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
     //const vector<string>& pathList = m_PluginManager.PluginPaths();
 
-    vector<const Plugin*> packAgentList = 
-        m_PluginManager.PluginAgents(PluginType::MediaPack);
-    vector<const Plugin*> tagAgentList = 
+    vector<const Plugin*> sheetParserAgentList = 
+        m_PluginManager.PluginAgents(PluginType::SheetParser);
+    vector<const Plugin*> tagParserAgentList = 
         m_PluginManager.PluginAgents(PluginType::TagParser);
 
-    m_MediaLoader->RegisterMediaPackPlugin(packAgentList);
-    m_MediaLoader->RegisterTagParserPlugin(tagAgentList);
+    m_MediaLoader->RegisterSheetParserPlugin(sheetParserAgentList);
+    m_MediaLoader->RegisterTagParserPlugin(tagParserAgentList);
 
     vector<const Plugin*> decoderAgentList =
         m_PluginManager.PluginAgents(PluginType::Decoder);
@@ -108,13 +108,13 @@ void MainWindow::InitMousCore()
     m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
     m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
 
-    m_ParserFactory->RegisterTagParserPlugin(tagAgentList);
+    m_ParserFactory->RegisterTagParserPlugin(tagParserAgentList);
 
     m_FrmTagEditor.SetPlayer(m_Player);
     m_FrmTagEditor.SetTagParserFactory(m_ParserFactory);
 
-    qDebug() << ">> MediaPack count:" << packAgentList.size();
-    qDebug() << ">> TagParser count:" << tagAgentList.size();
+    qDebug() << ">> SheetParser count:" << sheetParserAgentList.size();
+    qDebug() << ">> TagParser count:" << tagParserAgentList.size();
     qDebug() << ">> Decoder count:" << decoderAgentList.size();
     qDebug() << ">> Encoder count:" << encoderAgentList.size();
     qDebug() << ">> Renderer count:" << rendererAgentList.size();

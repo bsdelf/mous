@@ -14,14 +14,14 @@ MediaLoader::~MediaLoader()
 {
 }
 
-void MediaLoader::RegisterMediaPackPlugin(const Plugin* pAgent)
+void MediaLoader::RegisterSheetParserPlugin(const Plugin* pAgent)
 {
-    return impl->RegisterMediaPackPlugin(pAgent);
+    return impl->RegisterSheetParserPlugin(pAgent);
 }
 
-void MediaLoader::RegisterMediaPackPlugin(std::vector<const Plugin*>& agents)
+void MediaLoader::RegisterSheetParserPlugin(std::vector<const Plugin*>& agents)
 {
-    return impl->RegisterMediaPackPlugin(agents);
+    return impl->RegisterSheetParserPlugin(agents);
 }
 
 void MediaLoader::RegisterTagParserPlugin(const Plugin* pAgent)

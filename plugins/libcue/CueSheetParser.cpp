@@ -1,4 +1,4 @@
-#include "CuePack.h"
+#include "CueSheetParser.h"
 
 #include <cstdio>
 
@@ -7,23 +7,22 @@ using namespace scx;
 
 #include "util/MediaItem.h"
 
-CuePack::CuePack()
+CueSheetParser::CueSheetParser()
 {
 
 }
 
-CuePack::~CuePack()
+CueSheetParser::~CueSheetParser()
 {
 
 }
 
-vector<string> CuePack::FileSuffix() const
+vector<string> CueSheetParser::FileSuffix() const
 {
     return { "cue" };
 }
 
-void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& items,
-    const std::unordered_map<std::string, IMediaPack*>* pMap) const
+void CueSheetParser::DumpMedia(const std::string& path, std::deque<MediaItem>& items) const
 {
     FILE* file = fopen(path.c_str(), "r");
     if (!file) return;
@@ -34,15 +33,14 @@ void CuePack::DumpMedia(const std::string& path, std::deque<MediaItem>& items,
     cd_delete(cd);
 }
 
-void CuePack::DumpStream(const std::string& stream, std::deque<MediaItem>& items,
-    const std::unordered_map<std::string, IMediaPack*>* pMap) const
+void CueSheetParser::DumpStream(const std::string& stream, std::deque<MediaItem>& items) const
 {
     Cd* cd = cue_parse_string(stream.c_str());
     DumpCue("", cd, items);
     cd_delete(cd);
 }
 
-void CuePack::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& items) const
+void CueSheetParser::DumpCue(const string& dir, Cd* cd, deque<MediaItem>& items) const
 {
     const auto cdtext_get_str = [](enum Pti pti, const Cdtext* cdt, const string& defa) {
         const char* buf = cdtext_get(pti, cdt);

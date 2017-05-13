@@ -1,4 +1,4 @@
-#include "CuePack.h"
+#include "CueSheetParser.h"
 #include <util/PluginHelper.h>
 
 static const PluginInfo info = {
@@ -8,4 +8,4 @@ static const PluginInfo info = {
     2
 };
 
-MOUS_DEF_PLUGIN(PluginType::MediaPack, &info, CuePack);
+MOUS_DEF_PLUGIN(PluginType::SheetParser, &info, CueSheetParser);

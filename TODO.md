@@ -19,7 +19,7 @@ Plugin:
 - 音效插件
 - 音量均衡插件
 - 播放统计插件
-- APE/FLAC 内嵌 CUE 的 MediaPack 插件
+- APE/FLAC 内嵌 CUE
 - 支持除了 FrontCover 之外的封面，flac，ape 等格式的封面
 - libresample
 

@@ -21,8 +21,8 @@ struct mous_ctx
     plugin_list_t dec_agents;
     plugin_list_t enc_agents;
     plugin_list_t red_agents;
-    plugin_list_t tag_agents;
-    plugin_list_t pack_agents;
+    plugin_list_t tag_parser_agents;
+    plugin_list_t sheet_parser_agents;
 };
 
 extern mous_ctx ctx;
