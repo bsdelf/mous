@@ -25,13 +25,9 @@
 %%SDK%%include/mous/scx/FileHelper.hpp
 %%SDK%%include/mous/scx/FileInfo.hpp
 %%SDK%%include/mous/scx/IconvHelper.hpp
-%%SDK%%include/mous/scx/LPVBuffer.hpp
 %%SDK%%include/mous/scx/Mailbox.hpp
-%%SDK%%include/mous/scx/PVBuffer.hpp
 %%SDK%%include/mous/scx/PinYinCompare.hpp
 %%SDK%%include/mous/scx/PinYinTable.hpp
-%%SDK%%include/mous/scx/RunTimer.hpp
-%%SDK%%include/mous/scx/SemVar.hpp
 %%SDK%%include/mous/scx/Signal.hpp
 %%SDK%%include/mous/scx/Singleton.hpp
 %%SDK%%include/mous/scx/Socket.hpp
