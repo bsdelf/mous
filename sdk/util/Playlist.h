@@ -327,7 +327,12 @@ public:
         return m_ItemQueue[index];
     }
 
-    std::deque<item_t> Items() const
+    const std::deque<item_t>& Items() const
+    {
+        return m_ItemQueue;
+    }
+
+    std::deque<item_t>& Items()
     {
         return m_ItemQueue;
     }
