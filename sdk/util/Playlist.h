@@ -185,13 +185,6 @@ public:
         AdjustShuffleRange(true);
     }
 
-    void Insert(int index, const item_t& item)
-    {
-        m_ItemQueue.insert(m_ItemQueue.begin()+index, item);
-        AdjustSeqPosition();
-        AdjustShuffleRange();
-    }
-
     void Move(int oldPos, int newPos)
     {
         Move(std::vector<int>(1, oldPos), newPos);
@@ -214,7 +207,7 @@ public:
         // backup & remove & insert
         std::deque<item_t> tmpList(oldPos.size());
         for (size_t i = 0; i < oldPos.size(); ++i) {
-            tmpList[i] = m_ItemQueue[oldPos[i]];
+            tmpList[i] = std::move(m_ItemQueue[oldPos[i]]);
         }
         Remove(oldPos);
         Insert(realNewPos, tmpList);
@@ -247,6 +240,20 @@ public:
             MOUS_FIND(m_SeqShuffleQueue, seqIndex) - m_SeqShuffleQueue.begin() : seqIndex;
     }
 
+    void Insert(int index, const item_t& item)
+    {
+        m_ItemQueue.insert(m_ItemQueue.begin()+index, item);
+        AdjustSeqPosition();
+        AdjustShuffleRange();
+    }
+
+    void Insert(int index, item_t&& item)
+    {
+        m_ItemQueue.insert(m_ItemQueue.begin()+index, std::move(item));
+        AdjustSeqPosition();
+        AdjustShuffleRange();
+    }
+
     template<class Array>
     void Insert(int index, const Array& array)
     {
@@ -258,6 +265,13 @@ public:
     void Append(const item_t& item)
     {
         m_ItemQueue.push_back(item);
+        AdjustSeqPosition();
+        AdjustShuffleRange();
+    }
+
+    void Append(item_t&& item)
+    {
+        m_ItemQueue.push_back(std::move(item));
         AdjustSeqPosition();
         AdjustShuffleRange();
     }
