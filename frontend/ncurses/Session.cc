@@ -477,8 +477,7 @@ void Session::PlaylistMove(BufObj& buf)
         int newPos = direct > 0 ? iItem+2 : iItem-1;
         if (newPos >= 0 && newPos <= total) {
             if (newPos >= 0 && iItem <= total) {
-                vector<int> oldPos(1, iItem);
-                m_Context->playlists[iList].Move(oldPos, newPos);
+                m_Context->playlists[iList].Move(iItem, newPos);
             }
         }
     }

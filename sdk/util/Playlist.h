@@ -192,6 +192,11 @@ public:
         AdjustShuffleRange();
     }
 
+    void Move(int oldPos, int newPos)
+    {
+        Move(std::vector<int>(1, oldPos), newPos);
+    }
+
     template<class Array>
     void Move(Array oldPos, int newPos)
     {

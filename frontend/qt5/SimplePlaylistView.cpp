@@ -680,7 +680,7 @@ void SimplePlaylistView::SlotShortcutUndo()
                 const ListRow& listRow = BuildListRow(item);
                 m_ItemModel.removeRow(moveInsertPos + i);
                 m_ItemModel.insertRow(action.srcItemList[i].first, listRow.fields);
-                m_Playlist.Move(vector<int>(1, moveInsertPos + i), action.srcItemList[i].first);
+                m_Playlist.Move(moveInsertPos + i, action.srcItemList[i].first);
             }
         }
             break;
