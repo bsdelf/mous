@@ -99,8 +99,7 @@ void ClientPlayerHandler::Handle(char* buf, int len)
 void ClientPlayerHandler::StartSync()
 {
     m_Status.playing = false;
-    m_SyncSchedule.Start();
-    m_SyncSchedule.Add([this] {
+    m_Periodic.Add([this] {
         unique_lock<mutex> locker(m_MutexWaitSyncReply);
 
         if (m_WaitSyncReply) {
@@ -118,7 +117,7 @@ void ClientPlayerHandler::StartSync()
 
 void ClientPlayerHandler::StopSync()
 {
-    m_SyncSchedule.Stop();
+    // m_Periodic.Clear();
 }
 
 void ClientPlayerHandler::QueryVolume()

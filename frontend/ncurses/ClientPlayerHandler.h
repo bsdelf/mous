@@ -6,7 +6,7 @@
 #include <mutex>
 
 #include <scx/Signal.hpp>
-#include <scx/TaskSchedule.hpp>
+#include <scx/Periodic.h>
 using namespace scx;
 
 #include <util/MediaItem.h>
@@ -98,6 +98,6 @@ private:
     bool m_WaitSyncReply;
     std::mutex m_MutexWaitSyncReply;
 
-    TaskSchedule m_SyncSchedule;
+    Periodic m_Periodic;
 };
 
