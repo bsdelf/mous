@@ -9,8 +9,8 @@
 #include <plugin/IEncoder.h>
 #include <util/MediaItem.h>
 
-#include <scx/Conv.hpp>
-#include <scx/FileHelper.hpp>
+#include <scx/Conv.h>
+#include <scx/FileHelper.h>
 
 namespace mous {
 

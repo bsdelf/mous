@@ -4,7 +4,7 @@
 #include <fstream>
 using namespace std;
 
-#include <scx/FileInfo.hpp>
+#include <scx/FileInfo.h>
 using namespace scx;
 
 using namespace mous;

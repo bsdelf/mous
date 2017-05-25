@@ -9,9 +9,9 @@
 #include <thread>
 using namespace std;
 
-#include <scx/Conv.hpp>
-#include <scx/FileHelper.hpp>
-#include <scx/Mailbox.hpp>
+#include <scx/Conv.h>
+#include <scx/FileHelper.h>
+#include <scx/Mailbox.h>
 using namespace scx;
 
 #include <core/Plugin.h>

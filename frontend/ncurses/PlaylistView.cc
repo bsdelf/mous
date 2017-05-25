@@ -4,7 +4,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include <scx/CharsetHelper.hpp>
+#include <scx/CharsetHelper.h>
 using namespace scx;
 
 PlaylistView::PlaylistView()

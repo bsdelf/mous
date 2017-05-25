@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <scx/BufObj.hpp>
+#include <scx/BufObj.h>
 
 using namespace std;
 using namespace scx;

@@ -15,6 +15,7 @@ namespace scx {
 class Periodic
 {
   private:
+    // TODO: use std::scoped_lock in the future
     using MutexLockGuard = std::lock_guard<std::mutex>;
 
     using MutexUniqueLock = std::unique_lock<std::mutex>;
@@ -96,58 +97,73 @@ class Periodic
 
         _thread = std::thread([this] {
             while (!_to_exit) {
-                MutexUniqueLock active_lock(_active_mutex);
-
                 // wait until deadline or pending actions occur
                 {
                     MutexUniqueLock pending_lock(_pending_mutex);
 
                     auto pred = [this] { return !_pending_actions.empty(); };
+
+                    MutexUniqueLock active_lock(_active_mutex);
                     if (_active_tasks.empty()) {
                         active_lock.unlock();
                         _active_condition.notify_all();
                         _pending_condition.wait(pending_lock, std::move(pred));
-                        active_lock.lock();
                     } else {
                         const auto& deadline = _active_tasks.front()->Deadline();
+                        active_lock.unlock();
                         _pending_condition.wait_until(pending_lock, deadline, std::move(pred));
                     }
+                }
 
-                    if (_to_clear) {
-                        _pending_actions.clear();
-                        pending_lock.unlock();
-                        _pending_condition.notify_all();
+                // clear pending actions and active tasks
+                if (_to_clear) {
+                    _pending_mutex.lock();
+                    _pending_actions.clear(); // noexcept
+                    _pending_mutex.unlock();
+                    _pending_condition.notify_all();
 
-                        _active_tasks.clear();
-                        active_lock.unlock();
-                        _active_condition.notify_all();
+                    _active_mutex.lock();
+                    _active_tasks.clear(); // noexcept
+                    _active_mutex.unlock();
+                    _active_condition.notify_all();
 
-                        _to_clear = false;
-                        continue;
-                    }
+                    _to_clear = false;
+                    continue;
+                }
 
-                    if (_to_exit) {
-                        break;
-                    }
+                // exit after potential clear
+                if (_to_exit) {
+                    break;
+                }
 
-                    const bool should_rebuild = !_pending_actions.empty();
+                MutexLockGuard lock(_active_mutex);
 
-                    for (size_t ip = 0; ip < _pending_actions.size(); ++ip) {
-                        auto& action = _pending_actions[ip];
-                        if (action.new_task) {
-                            _active_tasks.push_back(std::move(action.new_task));
-                        } else if (action.obsoleted_task) {
-                            for (size_t ia = 0; ia < _active_tasks.size(); ++ia) {
-                                if (_active_tasks[ia].get() == action.obsoleted_task) {
-                                    _active_tasks.erase(_active_tasks.begin() + ia);
-                                    break;
+                // proceed pending actions
+                {
+                    bool should_rebuild = false;
+
+                    {
+                        MutexLockGuard lock(_pending_mutex);
+
+                        for (size_t ip = 0; ip < _pending_actions.size(); ++ip) {
+                            auto& action = _pending_actions[ip];
+                            if (action.new_task) {
+                                should_rebuild = true;
+                                _active_tasks.push_back(std::move(action.new_task));
+                            } else if (action.obsoleted_task) {
+                                for (size_t ia = 0; ia < _active_tasks.size(); ++ia) {
+                                    if (_active_tasks[ia].get() == action.obsoleted_task) {
+                                        should_rebuild = true;
+                                        _active_tasks.erase(_active_tasks.begin() + ia);
+                                        break;
+                                    }
                                 }
                             }
                         }
+
+                        _pending_actions.clear();
                     }
 
-                    _pending_actions.clear();
-                    pending_lock.unlock();
                     _pending_condition.notify_all();
 
                     if (should_rebuild && !std::is_heap(_active_tasks.begin(), _active_tasks.end(), Task::Compare)) {
@@ -157,10 +173,11 @@ class Periodic
 
                 // proceed expired tasks
                 const auto max = _active_tasks.size();
+
                 for (size_t i = 0; i < max; ++i) {
                     const auto& task = _active_tasks.front();
-                    const auto& now = std::chrono::steady_clock::now();
-                    if (task->Deadline() > now) {
+
+                    if (task->Deadline() > std::chrono::steady_clock::now()) {
                         break;
                     }
 
@@ -172,6 +189,7 @@ class Periodic
                         _active_tasks.erase(_active_tasks.end() - i - 1);
                     }
                 }
+
                 if (!std::is_heap(_active_tasks.begin(), _active_tasks.end(), Task::Compare)) {
                     std::make_heap(_active_tasks.begin(), _active_tasks.end(), Task::Compare);
                 }

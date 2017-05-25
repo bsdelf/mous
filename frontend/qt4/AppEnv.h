@@ -2,7 +2,7 @@
 #define APPENV_H
 
 #include <QString>
-#include <scx/Singleton.hpp>
+#include <scx/Singleton.h>
 
 struct AppEnv
 {

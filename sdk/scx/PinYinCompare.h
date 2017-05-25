@@ -11,7 +11,7 @@
 #ifdef USE_PINYINTABLE_DATA // load pinyin table from external file
 #include <fstream>
 #else
-#include "PinYinTable.hpp"
+#include "PinYinTable.h"
 #endif
 
 namespace scx {

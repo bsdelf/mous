@@ -2,8 +2,8 @@
 #include <util/PlaylistSerializer.h>
 using namespace mous;
 
-#include "scx/BufObj.hpp"
-#include "scx/Conv.hpp"
+#include "scx/BufObj.h"
+#include "scx/Conv.h"
 using namespace scx;
 
 #include <iostream>

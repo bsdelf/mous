@@ -7,7 +7,7 @@
 #include <deque>
 #include <set>
 
-#include <scx/Signal.hpp>
+#include <scx/Signal.h>
 
 class ExplorerView: public IView
 {

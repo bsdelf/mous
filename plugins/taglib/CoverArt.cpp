@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include <scx/Conv.hpp>
+#include <scx/Conv.h>
 using namespace scx;
 
 //#include <iostream>

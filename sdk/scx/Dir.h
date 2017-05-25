@@ -6,10 +6,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "FileInfo.hpp"
 #include <stack>
 #include <string>
 #include <vector>
+
+#include "FileInfo.h"
 
 namespace scx {
 
@@ -81,4 +82,4 @@ class Dir
         return list;
     }
 };
-}
+} // namespace scx

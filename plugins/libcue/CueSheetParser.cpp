@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#include <scx/FileHelper.hpp>
+#include <scx/FileHelper.h>
 using namespace scx;
 
 #include "util/MediaItem.h"

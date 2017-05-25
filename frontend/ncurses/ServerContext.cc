@@ -4,8 +4,8 @@
 #include <sstream>
 using namespace std;
 
-#include <scx/BufObj.hpp>
-#include <scx/Signal.hpp>
+#include <scx/BufObj.h>
+#include <scx/Signal.h>
 using namespace scx;
 
 #include <util/PlaylistSerializer.h>

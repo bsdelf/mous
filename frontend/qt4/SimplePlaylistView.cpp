@@ -10,8 +10,8 @@ using namespace std;
 #include <core/MediaLoader.h>
 using namespace mous;
 
-#include <scx/IconvHelper.hpp>
-#include <scx/CharsetHelper.hpp>
+#include <scx/IconvHelper.h>
+#include <scx/CharsetHelper.h>
 using namespace scx;
 
 #include "UiHelper.hpp"

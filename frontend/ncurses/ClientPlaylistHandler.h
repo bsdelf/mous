@@ -4,7 +4,7 @@
 #include <deque>
 using namespace std;
 
-#include <scx/Signal.hpp>
+#include <scx/Signal.h>
 using namespace scx;
 
 #include <util/MediaItem.h>

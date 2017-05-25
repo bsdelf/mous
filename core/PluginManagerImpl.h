@@ -1,7 +1,7 @@
 #pragma once
 
-#include "scx/Dir.hpp"
-#include "scx/FileInfo.hpp"
+#include "scx/Dir.h"
+#include "scx/FileInfo.h"
 using namespace scx;
 
 #include <unordered_map>

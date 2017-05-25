@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <scx/Singleton.hpp>
+#include <scx/Singleton.h>
 
 struct AppEnv
 {

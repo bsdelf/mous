@@ -1,42 +1,43 @@
 #pragma once
 
+#include <assert.h>
 #include <inttypes.h>
 #include <string.h>
-#include <assert.h>
 
-#include <string>
-#include <vector>
+#include <algorithm>
 #include <deque>
 #include <list>
-#include <queue>
-#include <stack>
-#include <set>
 #include <map>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
 #include <utility>
-#include <algorithm>
+#include <vector>
 
 namespace scx {
 
 class BufObj
 {
-public:
-    typedef uint32_t stlsize_t;
+  public:
+    using stlsize_t = uint32_t;
 
-public:
+  public:
     static bool IsBigEndian()
     {
-        union {
+        union
+        {
             uint32_t i;
             char c[4];
         } big = { 0x01020304 };
         return (big.c[0] == 0x01);
     }
 
-public:
+  public:
     BufObj() = default;
 
-    explicit BufObj(void* b):
-        buf(static_cast<char*>(b))
+    explicit BufObj(void* b)
+      : buf(static_cast<char*>(b))
     {
     }
 
@@ -46,20 +47,11 @@ public:
         off = 0;
     }
 
-    void* Buffer()
-    {
-        return static_cast<void*>(buf);
-    }
+    void* Buffer() { return static_cast<void*>(buf); }
 
-    void ResetOffset()
-    {
-        off = 0;
-    }
+    void ResetOffset() { off = 0; }
 
-    uint32_t Offset() const
-    {
-        return off;
-    }
+    uint32_t Offset() const { return off; }
 
     /* POD */
     template<typename T>
@@ -75,20 +67,11 @@ public:
     }
 
     /* string */
-    inline BufObj& operator<<(const char* str)
-    {
-        return PutString(str);
-    }
+    inline BufObj& operator<<(const char* str) { return PutString(str); }
 
-    inline BufObj& operator<<(const std::string& str)
-    {
-        return PutString(str);
-    }
+    inline BufObj& operator<<(const std::string& str) { return PutString(str); }
 
-    inline BufObj& operator>>(std::string& str)
-    {
-        return TakeString(str);
-    }
+    inline BufObj& operator>>(std::string& str) { return TakeString(str); }
 
     /* vector<POD> */
     template<typename T, typename A>
@@ -201,7 +184,7 @@ public:
     {
         stlsize_t size = m.size();
         PutRaw(size);
-        for (const auto& e: m) {
+        for (const auto& e : m) {
             (*this) << e.first;
             (*this) << e.second;
         }
@@ -214,7 +197,8 @@ public:
         stlsize_t size;
         TakeRaw(size);
         for (stlsize_t i = 0; i < size; ++i) {
-            K k; T t;
+            K k;
+            T t;
             (*this) >> k;
             (*this) >> t;
             m[std::move(k)] = std::move(t);
@@ -231,7 +215,7 @@ public:
             len = strlen(data);
         }
         if (buf != nullptr)
-            ::memcpy(buf+off, data, len);
+            ::memcpy(buf + off, data, len);
         off += len;
         return *this;
     }
@@ -239,7 +223,7 @@ public:
     BufObj& TakeChars(char* data, size_t len)
     {
         if (buf != nullptr)
-            ::memcpy(data, buf+off, len);
+            ::memcpy(data, buf + off, len);
         off += len;
         return *this;
     }
@@ -249,7 +233,7 @@ public:
         stlsize_t size = str.size();
         PutRaw(size);
         if (buf != nullptr)
-            ::memcpy(buf+off, str.data(), size);
+            ::memcpy(buf + off, str.data(), size);
         off += size;
         return *this;
     }
@@ -259,7 +243,7 @@ public:
         stlsize_t size = 0;
         TakeRaw(size);
         if (buf != nullptr)
-            str.assign(buf+off, size);
+            str.assign(buf + off, size);
         off += size;
         return *this;
     }
@@ -293,7 +277,7 @@ public:
     BufObj& PutList(const L& l)
     {
         PutRaw((stlsize_t)l.size());
-        for (const auto& e: l) {
+        for (const auto& e : l) {
             (*this) << e;
         }
         return *this;
@@ -305,7 +289,7 @@ public:
         stlsize_t size = 0;
         TakeRaw(size);
         l.resize(size);
-        for (auto& e: l) {
+        for (auto& e : l) {
             (*this) >> e;
         }
         return *this;
@@ -316,7 +300,7 @@ public:
     BufObj& PutRaw(T t)
     {
         if (buf != nullptr)
-            ::memcpy(buf+off, &t, sizeof(T));
+            ::memcpy(buf + off, &t, sizeof(T));
         off += sizeof(T);
         return *this;
     }
@@ -325,7 +309,7 @@ public:
     BufObj& TakeRaw(T& t)
     {
         if (buf != nullptr)
-            ::memcpy(&t, buf+off, sizeof(T));
+            ::memcpy(&t, buf + off, sizeof(T));
         else
             ::memset(&t, 0, sizeof(T));
         off += sizeof(T);
@@ -336,16 +320,14 @@ public:
     const T& Fetch(bool moveNext = false)
     {
         assert(buf != nullptr);
-        const T& t = *(T*)(buf+off);
+        const T& t = *(T*)(buf + off);
         if (moveNext)
             off += sizeof(T);
         return t;
     }
 
-private:
+  private:
     char* buf = nullptr;
     uint32_t off = 0;
 };
-
 }
-

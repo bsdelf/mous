@@ -8,8 +8,8 @@
 #include <deque>
 using namespace std;
 
-#include <scx/Signal.hpp>
-#include <scx/FileInfo.hpp>
+#include <scx/Signal.h>
+#include <scx/FileInfo.h>
 using namespace scx;
 
 #include "util/Playlist.h"

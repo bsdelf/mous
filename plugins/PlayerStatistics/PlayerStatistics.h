@@ -3,7 +3,7 @@
 
 #include <plugin/IEventWatcher.h>
 #include <core/IPlayer.h>
-#include <scx/Signal.hpp>
+#include <scx/Signal.h>
 using namespace mous;
 
 class PlayerStatistics: public IEventWatcher

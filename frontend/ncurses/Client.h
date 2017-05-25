@@ -6,8 +6,8 @@
 #include <thread>
 using namespace std;
 
-#include <scx/Signal.hpp>
-#include <scx/Socket.hpp>
+#include <scx/Signal.h>
+#include <scx/Socket.h>
 using namespace scx;
 
 #include "ClientPlayerHandler.h"

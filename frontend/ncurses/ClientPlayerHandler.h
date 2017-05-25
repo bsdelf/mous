@@ -5,7 +5,7 @@
 #include <functional>
 #include <mutex>
 
-#include <scx/Signal.hpp>
+#include <scx/Signal.h>
 #include <scx/Periodic.h>
 using namespace scx;
 

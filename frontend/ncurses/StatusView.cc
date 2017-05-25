@@ -5,8 +5,8 @@
 #include <string>
 using namespace std;
 
-#include <scx/CharsetHelper.hpp>
-#include <scx/FileInfo.hpp>
+#include <scx/CharsetHelper.h>
+#include <scx/FileInfo.h>
 
 inline static string FormatTime(int ms)
 {

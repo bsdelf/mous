@@ -16,7 +16,7 @@ using namespace std;
 #include <core/ConvTaskFactory.h>
 using namespace mous;
 
-#include <scx/FileInfo.hpp>
+#include <scx/FileInfo.h>
 using namespace scx;
 
 #include "cmd.h"

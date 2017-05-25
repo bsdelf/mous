@@ -5,9 +5,9 @@
 
 #include <vector>
 
-#include <scx/Conv.hpp>
-#include <scx/FileHelper.hpp>
-#include <scx/IconvHelper.hpp>
+#include <scx/Conv.h>
+#include <scx/FileHelper.h>
+#include <scx/IconvHelper.h>
 using namespace scx;
 
 #include "CoverArt.h"

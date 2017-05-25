@@ -6,8 +6,8 @@
 #include <fstream>
 using namespace std;
 
-#include <scx/Conv.hpp>
-#include <scx/FileInfo.hpp>
+#include <scx/Conv.h>
+#include <scx/FileInfo.h>
 using namespace scx;
 
 #include "core/ConvTask.h"

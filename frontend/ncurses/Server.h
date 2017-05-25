@@ -5,7 +5,7 @@
 #include <memory>
 using namespace std;
 
-#include <scx/Socket.hpp>
+#include <scx/Socket.h>
 using namespace scx;
 
 struct ServerContext;

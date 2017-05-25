@@ -5,7 +5,7 @@
 #include <sstream>
 #include <limits>
 
-#include <scx/BufObj.hpp>
+#include <scx/BufObj.h>
 
 #include "Playlist.h"
 

@@ -3,10 +3,10 @@
 #include <iostream>
 using namespace std;
 
-#include <scx/Env.hpp>
-#include <scx/Dir.hpp>
-#include <scx/FileInfo.hpp>
-#include <scx/ConfigFile.hpp>
+#include <scx/Env.h>
+#include <scx/Dir.h>
+#include <scx/FileInfo.h>
+#include <scx/ConfigFile.h>
 using namespace scx;
 
 namespace Path {

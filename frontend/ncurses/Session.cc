@@ -5,8 +5,8 @@
 #include <algorithm>
 using namespace std;
 
-#include <scx/CharsetHelper.hpp>
-#include <scx/IconvHelper.hpp>
+#include <scx/CharsetHelper.h>
+#include <scx/IconvHelper.h>
 using namespace scx;
 
 #include "AppEnv.h"

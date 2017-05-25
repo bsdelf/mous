@@ -11,7 +11,7 @@
 #include <util/AudioMode.h>
 #include <util/PluginOption.h>
 
-#include <scx/Signal.hpp>
+#include <scx/Signal.h>
 
 namespace mous {
 

@@ -2,8 +2,8 @@
 
 #include <unordered_map>
 
-#include <scx/Conv.hpp>
-#include <scx/FileHelper.hpp>
+#include <scx/Conv.h>
+#include <scx/FileHelper.h>
 using namespace scx;
 
 #include <core/Plugin.h>

@@ -10,20 +10,18 @@ namespace scx {
 namespace IconvHelper {
 
 static inline bool
-ConvFromTo(const std::string& from,
-           const std::string& wanted,
+ConvFromTo(const std::string& srcEncoding,
+           const std::string& destEncoding,
            const char* srcBuf,
            size_t srcLen,
            std::string& dest,
            std::vector<char>& workBuf)
 {
-    using StdIconv = size_t (*)(iconv_t, const char**, size_t*, char**, size_t*);
-    StdIconv std_iconv = (StdIconv)iconv;
+    if (srcEncoding.empty() || destEncoding.empty() || srcEncoding == destEncoding)
+        return false;
 
-    if (from.empty() || wanted.empty())
-        return false;
-    if (from == wanted)
-        return false;
+    using iconv_fn = size_t (*)(iconv_t, const char**, size_t*, char**, size_t*);
+    const iconv_fn do_iconv = (iconv_fn)iconv;
 
     bool ok = true;
     const char* inBuf = srcBuf;
@@ -34,20 +32,19 @@ ConvFromTo(const std::string& from,
     if (srcLen > workBuf.size()) {
         workBuf.resize(srcLen * 3 + 4);
     }
-    outBuf = &workBuf[0];
+    outBuf = workBuf.data();
     outLeft = workBuf.size();
 
-    size_t converted = 0;
     do {
-        iconv_t cd = iconv_open(wanted.c_str(), from.c_str());
+        iconv_t cd = iconv_open(destEncoding.c_str(), srcEncoding.c_str());
         if (cd == (iconv_t)-1) {
             ok = false;
             break;
         }
 
         errno = 0;
-        converted = std_iconv(cd, &inBuf, &inLeft, &outBuf, &outLeft);
-        if (converted != (size_t)-1) {
+        size_t nbytes = do_iconv(cd, &inBuf, &inLeft, &outBuf, &outLeft);
+        if (nbytes != (size_t)-1) {
             break;
         } else if (errno != E2BIG) {
             ok = false;
@@ -57,24 +54,24 @@ ConvFromTo(const std::string& from,
         inLeft = srcLen;
 
         workBuf.resize(workBuf.size() * 2);
-        outBuf = &workBuf[0];
+        outBuf = workBuf.data();
         outLeft = workBuf.size();
 
         iconv_close(cd);
     } while (true);
 
     if (ok) {
-        dest.assign(&workBuf[0], workBuf.size() - outLeft);
+        dest.assign(workBuf.data(), workBuf.size() - outLeft);
     }
 
     return ok;
 }
 
 static inline bool
-ConvFromTo(const std::string& from, const std::string& wanted, const char* srcBuf, size_t srcLen, std::string& dest)
+ConvFromTo(const std::string& srcEncoding, const std::string& destEncoding, const char* srcBuf, size_t srcLen, std::string& dest)
 {
     std::vector<char> workBuf;
-    return ConvFromTo(from, wanted, srcBuf, srcLen, dest, workBuf);
+    return ConvFromTo(srcEncoding, destEncoding, srcBuf, srcLen, dest, workBuf);
 }
 }
 }

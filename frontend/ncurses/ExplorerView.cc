@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <utility>
 
-#include <scx/CharsetHelper.hpp>
-#include <scx/Env.hpp>
-#include <scx/FileInfo.hpp>
-#include <scx/Dir.hpp>
-#include <scx/PinYinCompare.hpp>
+#include <scx/CharsetHelper.h>
+#include <scx/Env.h>
+#include <scx/FileInfo.h>
+#include <scx/Dir.h>
+#include <scx/PinYinCompare.h>
 
 #include "AppEnv.h"
 

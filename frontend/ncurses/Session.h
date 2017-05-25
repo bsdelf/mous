@@ -1,7 +1,7 @@
 #pragma once
 
-#include <scx/Socket.hpp>
-#include <scx/BufObj.hpp>
+#include <scx/Socket.h>
+#include <scx/BufObj.h>
 using namespace scx;
 
 #include <thread>

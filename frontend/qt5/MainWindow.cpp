@@ -12,7 +12,7 @@ using namespace sqt;
 
 #include <unistd.h> // for usleep()
 
-#include <scx/Signal.hpp>
+#include <scx/Signal.h>
 using namespace scx;
 
 #include <util/MediaItem.h>
