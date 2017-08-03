@@ -47,3 +47,4 @@ ncurses server side:
 
 - Introduce the concept of protocol parser
 - Use asynchronous I/O + worker instead of multi-threaded mode
+- Tag each packet with UUID and match ack with command id
