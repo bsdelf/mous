@@ -34,19 +34,19 @@ int cmd_img(int argc, char** argv)
 
             FileInfo info(file);
             if (info.Exists()) {
-                printf("file already exist! overwrite? [n/y]\n");
+                printf("file already exist! overwrite? [n/y] ");
                 char ch;
                 scanf("%c", &ch);
                 if (ch == 'y') {
-                    ofstream outfile(file);
-                    outfile.write(buf.data(), buf.size());
-                    outfile.close();
+                    return 0;
                 }
             }
+
+            ofstream outfile(file);
+            outfile.write(buf.data(), buf.size());
+            outfile.close();
         }
         parser->Close();
-
-        printf("\n");
     }
 
     return 0;
