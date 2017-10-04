@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 
     if (argc < 2) {
         cmd_help(0, nullptr);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     // check plugin path then load it
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
         || dir_info.Type() != FileType::Directory
         || pluginDir.empty()) {
         printf("bad plugin directory!\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
     ctx.mgr.LoadPluginDir(pluginDir);
 
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
     if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
         printf("need more plugins!\n");
         cmd_plugin(0, nullptr);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     // setup media loader
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 
     ctx.mgr.UnloadAll();
 
-    exit(ret);
+    exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 /*
