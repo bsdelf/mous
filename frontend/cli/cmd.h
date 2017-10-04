@@ -1,5 +1,4 @@
-#ifndef _MOUS_CLI_CMD_H_
-#define _MOUS_CLI_CMD_H_
+#pragma once
 
 #include <vector>
 
@@ -33,5 +32,3 @@ extern int cmd_img(int, char**);
 extern int cmd_info(int, char**);
 extern int cmd_plugin(int, char**);
 extern int cmd_help(int, char**);
-
-#endif
