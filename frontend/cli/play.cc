@@ -46,10 +46,6 @@ void on_finished()
     //printf("finished!\n");
 }
 
-void do_playing()
-{
-}
-
 int cmd_play(int argc, char* argv[])
 {
     int rval = 0;
@@ -103,8 +99,6 @@ int cmd_play(int argc, char* argv[])
 
     // begin to play
     {
-        printf("[n(next)/q(quit)/p(pause)/r(replay)] [enter]\n");
-
         on_finished();
         thread th = thread([] {
             while (!QUIT) {
@@ -120,43 +114,6 @@ int cmd_play(int argc, char* argv[])
                 usleep(200*1000);
             }
         });
-
-        /*
-        bool paused;
-        for (char ch = ' '; ch != 'q'; ) {
-            cin >> ch;
-
-            MutexLocker locker(&PLAYER_MUTEX);
-            switch (ch) {
-            case 'n':
-                on_finished();
-                break;
-
-            case 'q':
-                PLAYER.Close();
-                break;
-
-            case 'p':
-                if (paused) {
-                    PLAYER.Resume();
-                    paused = false;
-                } else {
-                    PLAYER.Pause();
-                    paused = true;
-                }
-                break;
-
-            case 'r':
-                PLAYER.Pause();
-                if (item.hasRange) {
-                    PLAYER.Play(item.msBeg, item.msEnd);
-                } else {
-                    PLAYER.Play();
-                }
-                break;
-            }
-        }
-        */
 
         if (th.joinable())
             th.join();
