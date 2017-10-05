@@ -66,12 +66,10 @@ int cmd_plugin(int, char**)
         printf("#%02zu %s\n"
                "    %s\n"
                "    %s\n"
-               "    %s\n"
                "    %d\n",
                i+1, path_list[i].c_str(),
                info->name,
                info->desc,
-               info->author,
                info->version);
     }
 
