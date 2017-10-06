@@ -16,6 +16,8 @@ using namespace scx;
 #include "core/Player.h"
 using namespace mous;
 
+#include "ctx.h"
+
 static bool QUIT = false;
 static mutex PLAYER_MUTEX;
 
@@ -52,8 +54,8 @@ int cmd_play(int argc, char* argv[])
 
     // init player
     PLAYER.SigFinished()->Connect(&on_finished);
-    PLAYER.RegisterRendererPlugin(ctx.red_agents[0]);
-    PLAYER.RegisterDecoderPlugin(ctx.dec_agents);
+    PLAYER.RegisterRendererPlugin(ctx.outputPlugins[0]);
+    PLAYER.RegisterDecoderPlugin(ctx.decoderPlugins);
     PLAYLIST = new Playlist<MediaItem>();
     PLAYLIST->SetMode(PlaylistMode::Normal);
 

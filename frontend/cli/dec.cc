@@ -1,5 +1,3 @@
-#include "cmd.h"
-
 #include <unistd.h>
 #include <stdio.h>
 
@@ -13,11 +11,14 @@ using namespace scx;
 #include "core/ConvTask.h"
 using namespace mous;
 
+#include "cmd.h"
+#include "ctx.h"
+
 int cmd_dec(int argc, char** argv)
 {
     // find wav encoder
     string wav_enc;
-    const vector<string>& encoders = ctx.conv_factory.EncoderNames();
+    const vector<string>& encoders = ctx.convertTaskFactory.EncoderNames();
     for (size_t i = 0; i < encoders.size(); ++i) {
         if (scx::ToLower(encoders[i]).find("wav") != string::npos)
             wav_enc = encoders[i];
@@ -54,7 +55,7 @@ int cmd_dec(int argc, char** argv)
             }
 
             // do it!
-            ConvTask* task = ctx.conv_factory.CreateTask(media_list[mi], wav_enc);
+            ConvTask* task = ctx.convertTaskFactory.CreateTask(media_list[mi], wav_enc);
             task->Run(outname);
 
             while (!task->IsFinished()) {

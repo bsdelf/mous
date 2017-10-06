@@ -9,7 +9,7 @@ using namespace std;
 #include <scx/FileInfo.h>
 using namespace scx;
 
-using namespace mous;
+#include "ctx.h"
 
 static string ms2str(size_t ms)
 {

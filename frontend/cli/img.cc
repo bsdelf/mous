@@ -7,7 +7,7 @@ using namespace std;
 #include <scx/FileInfo.h>
 using namespace scx;
 
-using namespace mous;
+#include "ctx.h"
 
 int cmd_img(int argc, char** argv)
 {
@@ -18,7 +18,7 @@ int cmd_img(int argc, char** argv)
             continue;
         }
 
-        ITagParser* parser = ctx.parser_factory.CreateParser(argv[i]);
+        ITagParser* parser = ctx.tagParserFactory.CreateParser(argv[i]);
         if (parser == nullptr) {
             printf("no parser!\n");
             continue;

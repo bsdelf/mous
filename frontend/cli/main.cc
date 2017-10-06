@@ -8,24 +8,10 @@
 #include <string>
 using namespace std;
 
-#include <util/MediaItem.h>
-#include <util/PluginOption.h>
-#include <core/MediaLoader.h>
-#include <core/PluginManager.h>
-#include <core/ConvTask.h>
-#include <core/ConvTaskFactory.h>
-using namespace mous;
-
-#include <scx/FileInfo.h>
-using namespace scx;
-
+#include "ctx.h"
 #include "cmd.h"
 
-namespace Path {
-    const char* const PluginRoot = "/lib/mous/";
-};
-
-mous_ctx ctx;
+Context ctx;
 
 struct cmd_action_t
 {
@@ -60,9 +46,9 @@ int cmd_help(int, char**)
 
 int cmd_plugin(int, char**)
 {
-    const vector<string>& path_list = ctx.mgr.PluginPaths();
+    const vector<string>& path_list = ctx.pluginManager.PluginPaths();
     for (size_t i = 0; i < path_list.size(); ++i) {
-        const PluginInfo* info = ctx.mgr.QueryPluginInfo(path_list[i]);
+        const PluginInfo* info = ctx.pluginManager.QueryPluginInfo(path_list[i]);
         printf("#%02zu %s\n"
                "    %s\n"
                "    %s\n"
@@ -78,11 +64,11 @@ int cmd_plugin(int, char**)
            "Renderer:    %zu\n"
            "SheetParser: %zu\n"
            "TagParser:   %zu\n",
-           ctx.dec_agents.size(),
-           ctx.enc_agents.size(),
-           ctx.red_agents.size(),
-           ctx.sheet_parser_agents.size(),
-           ctx.tag_parser_agents.size());
+           ctx.decoderPlugins.size(),
+           ctx.encoderPlugins.size(),
+           ctx.outputPlugins.size(),
+           ctx.sheetParserPlugins.size(),
+           ctx.tagParserPlugins.size());
 
     return 0;
 }
@@ -96,38 +82,6 @@ int main(int argc, char** argv)
         cmd_help(0, nullptr);
         exit(EXIT_FAILURE);
     }
-
-    // check plugin path then load it
-    FileInfo dir_info(string(CMAKE_INSTALL_PREFIX) + Path::PluginRoot);
-    const string pluginDir(dir_info.AbsFilePath());
-    if (!dir_info.Exists() 
-        || dir_info.Type() != FileType::Directory
-        || pluginDir.empty()) {
-        printf("bad plugin directory!\n");
-        exit(EXIT_FAILURE);
-    }
-    ctx.mgr.LoadPluginDir(pluginDir);
-
-    // get plugin agents and check if we have enough
-    ctx.dec_agents = ctx.mgr.PluginAgents(PluginType::Decoder);
-    ctx.enc_agents = ctx.mgr.PluginAgents(PluginType::Encoder);
-    ctx.red_agents = ctx.mgr.PluginAgents(PluginType::Renderer);
-    ctx.sheet_parser_agents = ctx.mgr.PluginAgents(PluginType::SheetParser);
-    ctx.tag_parser_agents = ctx.mgr.PluginAgents(PluginType::TagParser);
-    if (ctx.dec_agents.empty() || ctx.red_agents.empty()) {
-        printf("need more plugins!\n");
-        cmd_plugin(0, nullptr);
-        exit(EXIT_FAILURE);
-    }
-
-    // setup media loader
-    ctx.loader.RegisterSheetParserPlugin(ctx.sheet_parser_agents);
-    ctx.loader.RegisterTagParserPlugin(ctx.tag_parser_agents);
-    // setup parser factory
-    ctx.parser_factory.RegisterTagParserPlugin(ctx.tag_parser_agents);
-    // setup conv factory
-    ctx.conv_factory.RegisterDecoderPlugin(ctx.dec_agents);
-    ctx.conv_factory.RegisterEncoderPlugin(ctx.enc_agents);
 
     // match command
     {
@@ -147,45 +101,5 @@ int main(int argc, char** argv)
         }
     }
 
-    // cleanup
-    ctx.conv_factory.UnregisterAll();
-    ctx.parser_factory.UnregisterAll();
-    ctx.loader.UnregisterAll();
-
-    ctx.mgr.UnloadAll();
-
     exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
-
-/*
-void PrintPluginOption(vector<PluginOption>& list)
-{
-    for (size_t i = 0; i < list.size(); ++i) {
-        PluginOption& opt = list[i];
-        cout << ">>>> index:" << i+1 << endl;
-        cout << "\tplugin type: " << ToString(opt.pluginType)<< endl;
-        for (size_t io = 0; io < opt.options.size(); ++io) {
-            cout << "\t\t option type: " << ToString(opt.options[io]->type) << endl;
-            cout << "\t\t option desc: " << opt.options[io]->desc << endl;
-        }
-    }
-}
-*/
-
-    // Show player options 
-    /*
-    {
-        vector<PluginOption> list;
-        cout << ">> Player decoder plugin options:" << endl;
-        player->DecoderPluginOption(list);
-        PrintPluginOption(list);
-        cout << ">> Player renderer plugin options:" << endl;
-        PluginOption opt;
-        player->RendererPluginOption(opt);
-        list.resize(1);
-        list[0] = opt;
-        PrintPluginOption(list);
-    }
-    */
-
-
