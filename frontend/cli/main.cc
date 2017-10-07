@@ -6,12 +6,9 @@
 
 #include <vector>
 #include <string>
-using namespace std;
 
 #include "ctx.h"
 #include "cmd.h"
-
-Context ctx;
 
 struct cmd_action_t
 {
@@ -46,7 +43,7 @@ int cmd_help(int, char**)
 
 int cmd_plugin(int, char**)
 {
-    const vector<string>& path_list = ctx.pluginManager.PluginPaths();
+    const std::vector<std::string>& path_list = ctx.pluginManager.PluginPaths();
     for (size_t i = 0; i < path_list.size(); ++i) {
         const PluginInfo* info = ctx.pluginManager.QueryPluginInfo(path_list[i]);
         printf("#%02zu %s\n"

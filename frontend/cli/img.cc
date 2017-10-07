@@ -1,13 +1,11 @@
-#include "cmd.h"
-
 #include <stdio.h>
 #include <fstream>
-using namespace std;
 
 #include <scx/FileInfo.h>
 using namespace scx;
 
 #include "ctx.h"
+#include "cmd.h"
 
 int cmd_img(int argc, char** argv)
 {
@@ -24,7 +22,7 @@ int cmd_img(int argc, char** argv)
             continue;
         }
 
-        vector<char> buf;
+        std::vector<char> buf;
         parser->Open(argv[i]);
         parser->DumpCoverArt(buf);
         printf("cover art size: %zu\n", buf.size());
@@ -42,7 +40,7 @@ int cmd_img(int argc, char** argv)
                 }
             }
 
-            ofstream outfile(file);
+            std::ofstream outfile(file);
             outfile.write(buf.data(), buf.size());
             outfile.close();
         }

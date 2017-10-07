@@ -1,25 +1,23 @@
-#include "cmd.h"
-
 #include <unistd.h>
 #include <stdio.h>
 
 #include <thread>
 #include <mutex>
 #include <deque>
-using namespace std;
 
 #include <scx/Signal.h>
 #include <scx/FileInfo.h>
 using namespace scx;
 
-#include "util/Playlist.h"
-#include "core/Player.h"
+#include <util/Playlist.h>
+#include <core/Player.h>
 using namespace mous;
 
 #include "ctx.h"
+#include "cmd.h"
 
 static bool QUIT = false;
-static mutex PLAYER_MUTEX;
+static std::mutex PLAYER_MUTEX;
 
 static Player PLAYER;
 static Playlist<MediaItem>* PLAYLIST = nullptr;
@@ -34,7 +32,7 @@ void on_finished()
 
         printf("playing: \"%s\"\n", item.url.c_str());
 
-        lock_guard<mutex> locker(PLAYER_MUTEX);
+        std::lock_guard<std::mutex> locker(PLAYER_MUTEX);
         if (PLAYER.Status() != PlayerStatus::Closed)
             PLAYER.Close();
         PLAYER.Open(item.url);
@@ -84,7 +82,7 @@ int cmd_play(int argc, char* argv[])
 
     // build playlist
     for (int i = 0; i < argc; ++i) {
-        deque<MediaItem> media_list;
+        std::deque<MediaItem> media_list;
         FileInfo info(argv[i]);
         if (info.Exists() && (info.Type() != FileType::Directory)) {
             ctx.loader.LoadMedia(argv[i], media_list);
@@ -102,7 +100,7 @@ int cmd_play(int argc, char* argv[])
     // begin to play
     {
         on_finished();
-        thread th = thread([] {
+        auto th = std::thread([] {
             while (!QUIT) {
                 PLAYER_MUTEX.lock();
                 uint64_t ms = PLAYER.OffsetMs();

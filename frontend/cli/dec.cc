@@ -2,13 +2,12 @@
 #include <stdio.h>
 
 #include <fstream>
-using namespace std;
 
 #include <scx/Conv.h>
 #include <scx/FileInfo.h>
 using namespace scx;
 
-#include "core/ConvTask.h"
+#include <core/ConvTask.h>
 using namespace mous;
 
 #include "cmd.h"
@@ -17,10 +16,10 @@ using namespace mous;
 int cmd_dec(int argc, char** argv)
 {
     // find wav encoder
-    string wav_enc;
-    const vector<string>& encoders = ctx.convertTaskFactory.EncoderNames();
+    std::string wav_enc;
+    const std::vector<std::string>& encoders = ctx.convertTaskFactory.EncoderNames();
     for (size_t i = 0; i < encoders.size(); ++i) {
-        if (scx::ToLower(encoders[i]).find("wav") != string::npos)
+        if (ToLower(encoders[i]).find("wav") != std::string::npos)
             wav_enc = encoders[i];
     }
     if (wav_enc.empty()) {
@@ -34,7 +33,7 @@ int cmd_dec(int argc, char** argv)
             continue;
 
         // load media file
-        deque<MediaItem> media_list;
+        std::deque<MediaItem> media_list;
         ctx.loader.LoadMedia(argv[i], media_list);
 
         // convert each track

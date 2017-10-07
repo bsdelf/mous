@@ -1,22 +1,20 @@
-#include "cmd.h"
-
 #include <stdio.h>
 #include <iomanip>
 #include <sstream>
 #include <deque>
-using namespace std;
 
 #include <scx/FileInfo.h>
 using namespace scx;
 
 #include "ctx.h"
+#include "cmd.h"
 
-static string ms2str(size_t ms)
+static std::string ms2str(size_t ms)
 {
     int min = ms/1000/60;
     int sec = ms/1000%60;
-    stringstream stream;
-    stream << setfill('0') << setw(2) << min << ":" << setfill('0') << setw(2) << sec;
+    std::stringstream stream;
+    stream << std::setfill('0') << std::setw(2) << min << ":" << std::setfill('0') << std::setw(2) << sec;
     return stream.str();
 }
 
@@ -48,7 +46,7 @@ int cmd_info(int argc, char** argv)
 
         // tag info
         {
-            deque<MediaItem> media_list;
+            std::deque<MediaItem> media_list;
             ctx.loader.LoadMedia(argv[i], media_list);
             for (auto& item: media_list) {
                 // duration

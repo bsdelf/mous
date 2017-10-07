@@ -13,10 +13,10 @@ using namespace mous;
 
 struct Context
 {
+    using PluginPtrVector = std::vector<const Plugin*>;
+
     Context();
     ~Context();
-
-    typedef std::vector<const Plugin*> PluginPtrVector;
 
     PluginManager pluginManager;
 

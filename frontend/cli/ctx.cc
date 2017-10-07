@@ -5,12 +5,14 @@ using namespace scx;
 
 #include "ctx.h"
 
-const char* const PluginRoot = "/lib/mous/";
+static const char* const PLUGIN_ROOT = "/lib/mous/";
+
+Context ctx;
 
 Context::Context()
 {
     // check plugin path then load it
-    FileInfo dir_info(std::string(CMAKE_INSTALL_PREFIX) + PluginRoot);
+    FileInfo dir_info(std::string(CMAKE_INSTALL_PREFIX) + PLUGIN_ROOT);
     const std::string pluginDir(dir_info.AbsFilePath());
     if (!dir_info.Exists() 
         || dir_info.Type() != FileType::Directory
