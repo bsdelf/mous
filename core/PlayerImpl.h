@@ -21,9 +21,9 @@ using namespace scx;
 namespace mous {
 struct UnitBuffer
 {
-    std::unique_ptr<char[]> data;
     uint32_t used;
     uint32_t unitCount;
+    char data[];
 };
 
 struct DecoderPluginNode
@@ -53,7 +53,7 @@ enum : std::size_t
 
 class Player::Impl
 {
-  using Mailbox = scx::Mailbox<int, UnitBuffer>;
+  using Mailbox = scx::Mailbox<int, UnitBuffer*>;
   using Mail = Mailbox::Mail;
 
   public:
@@ -92,8 +92,8 @@ class Player::Impl
                         auto& buf = std::get<DATA>(mail);
 
                         if (m_DecoderIndex < m_UnitEnd) {
-                            m_Decoder->DecodeUnit(buf.data.get(), buf.used, buf.unitCount);
-                            m_DecoderIndex += buf.unitCount;
+                            m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
+                            m_DecoderIndex += buf->unitCount;
 
                             std::get<TYPE>(mail) = RENDER;
                             m_RendererMailbox.PushBack(std::move(mail));
@@ -147,12 +147,12 @@ class Player::Impl
                         auto& buf = std::get<DATA>(mail);
 
                         if (m_RendererIndex < m_UnitEnd) {
-                            if (m_Renderer->Write(buf.data.get(), buf.used) != ErrorCode::Ok) {
+                            if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok) {
                                 // avoid busy write
-                                const int64_t delay = buf.unitCount / m_UnitPerMs * 1e6;
+                                const int64_t delay = buf->unitCount / m_UnitPerMs * 1e6;
                                 std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
                             }
-                            m_RendererIndex += buf.unitCount;
+                            m_RendererIndex += buf->unitCount;
 
                             std::get<TYPE>(mail) = DECODE;
                             m_DecoderMailbox.PushBack(std::move(mail));
@@ -306,9 +306,11 @@ class Player::Impl
         // cout << "unit buf size:" << maxBytesPerUnit << endl;
 
         m_BufferMailbox.Clear();
+        m_Buffer = std::make_unique<char[]>(m_BufferCount * (sizeof(UnitBuffer) + maxBytesPerUnit));
         for (size_t i = 0; i < m_BufferCount; ++i) {
-            UnitBuffer buf = {std::make_unique<char[]>(maxBytesPerUnit), 0, 0};
-            m_BufferMailbox.EmplaceBack(0, std::move(buf));
+            auto ptr = m_Buffer.get() + (sizeof(UnitBuffer) + maxBytesPerUnit) * i;
+            UnitBuffer* unitBuffer = reinterpret_cast<UnitBuffer*>(ptr);
+            m_BufferMailbox.EmplaceBack(0, unitBuffer);
         }
 
         m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
@@ -653,6 +655,7 @@ class Player::Impl
 
     Mailbox m_BufferMailbox;
     int m_BufferCount = 5;
+    std::unique_ptr<char[]> m_Buffer;
 
     uint64_t m_UnitBeg = 0;
     uint64_t m_UnitEnd = 0;
