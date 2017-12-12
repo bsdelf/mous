@@ -14,7 +14,9 @@ Core:
 
 Plugin:
 
-- libmad 解码
+- sndio output
+- PulseAudio output
+- libmad decoder
 - MP4 插件的 AAC 支持
 - 音效插件
 - 音量均衡插件
