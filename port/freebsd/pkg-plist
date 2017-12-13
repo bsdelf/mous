@@ -50,7 +50,6 @@ lib/libMousCore.so
 %%FAAD%%lib/mous/libFaadDecoder.so
 %%FLACDECODER%%lib/mous/libFlacDecoder.so
 %%LAME%%lib/mous/libLameEncoder.so
-%%MAC4%%lib/mous/libMac4Decoder.so
 %%MAC%%lib/mous/libMacDecoder.so
 %%MPG123%%lib/mous/libMpg123Decoder.so
 %%OSS%%lib/mous/libOssRenderer.so
