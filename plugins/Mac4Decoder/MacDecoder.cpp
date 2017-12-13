@@ -12,7 +12,7 @@ vector<string> MacDecoder::FileSuffix() const
     return { "ape" };
 }
 
-EmErrorCode MacDecoder::Open(const string& url)
+ErrorCode MacDecoder::Open(const string& url)
 {
     int err = ERROR_SUCCESS;
 
@@ -52,7 +52,7 @@ bool MacDecoder::IsFormatVaild() const
     return true;
 }
 
-EmErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
+ErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_BlockIndex < m_BlockCount) {
         m_BitRate = m_pDecompress->GetInfo(APE_DECOMPRESS_CURRENT_BITRATE);
@@ -88,7 +88,7 @@ EmErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCou
     return ErrorCode::DecoderOutOfRange;
 }
 
-EmErrorCode MacDecoder::SetUnitIndex(uint64_t index)
+ErrorCode MacDecoder::SetUnitIndex(uint64_t index)
 {
     m_pDecompress->Seek(index);
     m_BlockIndex = index;

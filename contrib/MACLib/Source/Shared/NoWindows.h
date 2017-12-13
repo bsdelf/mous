@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #ifndef _WIN32
 
 #ifndef APE_NOWINDOWS_H

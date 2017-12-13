@@ -297,10 +297,10 @@ if(WITH_MAC4_DECODER)
     file(GLOB MAC4_LIB_SRC  contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp contrib/MACLib/Source/MACLib/Assembly/*.cpp)
     file(GLOB MAC4_DECODER_SRC plugins/Mac4Decoder/*)
 
-    set_source_files_properties(${MAC4_DECODER_SRC} ${MAC4_LIB_SRC }
+    set_source_files_properties(${MAC4_DECODER_SRC} ${MAC4_LIB_SRC}
         COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/contrib/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM ${MAC_FLAG}")
 
-    add_library(Mac4Decoder SHARED ${MAC4_DECODER_SRC} ${MAC4_LIB_SRC } ${MAC4_SRC_ASM})
+    add_library(Mac4Decoder SHARED ${MAC4_DECODER_SRC} ${MAC4_LIB_SRC} ${MAC4_SRC_ASM})
     target_link_libraries(Mac4Decoder)
 endif()
 
