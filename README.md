@@ -54,7 +54,7 @@
 | wv codec | wavpack |
 | ogg codec | libvorbis |
 | flac codec |flac |
-| ape encoding | yasm |
+| ape decoding | - |
 | wma decoding | - |
 | alsa output | - |
 | oss output | - |
