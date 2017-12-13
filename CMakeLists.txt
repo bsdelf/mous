@@ -58,7 +58,6 @@ option(WITH_QT4_FRONTEND "Build Qt frontend" off)
 option(WITH_NCURSES_FRONTEND "Build ncurses frontend" off)
 
 #==== Optional ====#
-option(WITH_ASSEMBLY "Enable Assembly Optimize" on)
 option(WITH_SDK "Install SDK" off)
 
 option(WITH_OSS_RENDERER "OSS Output" off)
@@ -70,7 +69,6 @@ option(WITH_WAV_DECODER "WAV Decoder" on)
 option(WITH_WAV_ENCODER "WAV Encoder" on)
 option(WITH_WMA_DECODER "WMA Decoder" off)
 option(WITH_MAC_DECODER "MAC Decoder" off)
-option(WITH_MAC4_DECODER "MAC4.11 Decoder" off)
 option(WITH_MPG123_DECODER "MPG123 Decoder" off)
 option(WITH_VORBIS_DECODER "Ogg Decoder" off)
 option(WITH_VORBIS_ENCODER "Ogg Encoder" off)
@@ -270,38 +268,21 @@ endif()
 
 # Mac plugin
 if(WITH_MAC_DECODER)
-    file(GLOB MAC_DECODER_SRC plugins/MacDecoder/*)
-    add_library(MacDecoder SHARED ${MAC_DECODER_SRC})
-    target_link_libraries(MacDecoder -lmac)
-endif()
-
-# Mac4 plugin(still buggy)
-if(WITH_MAC4_DECODER)
-    if(WITH_ASSEMBLY)
-        enable_language(ASM_NASM)
-        set(CMAKE_ASM_NASM_COMPILER "yasm")
-
-        if(BITNESS EQUAL 64)
-            file(GLOB MAC4_SRC_ASM deps/MACLib/Source/MACLib/Assembly/x86_64_mmx.asm)
-            set(YASM_FLAG " -m amd64")
-            set(MAC_FLAG " -DENABLE_ASSEMBLY -DARCH_X86_64")
-        else()
-            file(GLOB MAC4_SRC_ASM deps/MACLib/Source/MACLib/Assembly/x86_mmx.asm)
-            set(YASM_FLAG " -m x86")
-            set(MAC_FLAG " -DENABLE_ASSEMBLY -DARCH_X86")
-        endif()
-
-        set_source_files_properties(${MAC4_SRC_ASM} COMPILE_FLAGS "-f elf ${YASM_FLAG}") 
-    endif()
-
-    file(GLOB MAC4_LIB_SRC  deps/MACLib/Source/MACLib/*.cpp deps/MACLib/Source/Shared/*.cpp deps/MACLib/Source/MACLib/Assembly/*.cpp)
-    file(GLOB MAC4_DECODER_SRC plugins/Mac4Decoder/*)
-
-    set_source_files_properties(${MAC4_DECODER_SRC} ${MAC4_LIB_SRC}
-        COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/deps/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM ${MAC_FLAG}")
-
-    add_library(Mac4Decoder SHARED ${MAC4_DECODER_SRC} ${MAC4_LIB_SRC} ${MAC4_SRC_ASM})
-    target_link_libraries(Mac4Decoder)
+    file(GLOB MAC_SDK_SRC
+        deps/MAC_SDK/Source/MACLib/*.cpp
+        deps/MAC_SDK/Source/MACLib/Old/*.cpp
+        deps/MAC_SDK/Source/Shared/GlobalFunctions.cpp
+        deps/MAC_SDK/Source/Shared/CircleBuffer.cpp
+        deps/MAC_SDK/Source/Shared/StdLibFileIO.cpp
+        deps/MAC_SDK/Source/Shared/CharacterHelper.cpp
+    )
+    file(GLOB MAC_DECODER_SRC plugins/mac/*)
+    #set_source_files_properties(${MAC_DECODER_SRC} ${MAC_SDK_SRC}
+    #    COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/deps/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM ${MAC_FLAG}")
+    add_library(MacDecoder SHARED ${MAC_DECODER_SRC} ${MAC_SDK_SRC})
+    set_target_properties(MacDecoder PROPERTIES 
+        COMPILE_FLAGS "-DPLATFORM_LINUX -I${MOUS_SOURCE_DIR}/deps/MAC_SDK/Source/Shared")
+    target_link_libraries(MacDecoder)
 endif()
 
 # Flac plugin

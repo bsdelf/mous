@@ -1,0 +1,279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9262f906-baf9-434e-8723-cff847242875}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Options">
+      <UniqueIdentifier>{dd5fb7c0-7154-40d1-b050-6c8cb36c3414}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Helpers">
+      <UniqueIdentifier>{76bfeade-0bb1-4d18-a9c3-abf29e05baf9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Controls">
+      <UniqueIdentifier>{e8b3e3b0-2459-486d-aa50-8879de0cbe70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Format">
+      <UniqueIdentifier>{eecadf0b-6792-4255-8f96-77f8c88da065}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{8dccbe00-f8c2-4076-a473-acd315e021bd}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Options %28h%29">
+      <UniqueIdentifier>{77a7ffd7-0577-44df-b0e2-3b344ef18b90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Helpers %28h%29">
+      <UniqueIdentifier>{1e200381-c973-4662-9095-98c919b2259b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Controls %28h%29">
+      <UniqueIdentifier>{5c29d4a9-ab66-4654-b1d4-722e4016d770}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Format %28h%29">
+      <UniqueIdentifier>{fc32508c-2def-41c7-9f95-c752026c3fc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{d7ac9a5a-3020-496f-8b3f-b362b6fee592}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\MAC\AboutDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\APEInfoDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\APEInfoFormatDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MAC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACConsole.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACFileArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACProcessFiles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\APLHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\IntArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\Markup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\StringArrayEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\HyperLink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\MACStatusBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\FolderDialog.cpp">
+      <Filter>Source Files\Format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\FormatAPE.cpp">
+      <Filter>Source Files\Format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\FormatArray.cpp">
+      <Filter>Source Files\Format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\FormatPlugin.cpp">
+      <Filter>Source Files\Format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\FormatPluginConfigureDlg.cpp">
+      <Filter>Source Files\Format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\FormatPluginInfoDlg.cpp">
+      <Filter>Source Files\Format</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\OptionsViewDlg.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\OptionsAdvancedDlg.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\OptionsDlg.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\OptionsGeneralDlg.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\OptionsOutputDlg.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\OptionsProcessingDlg.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MAC\OptionsTreeCtrl.cpp">
+      <Filter>Source Files\Options</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\MAC\MAC.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\MAC\AboutDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\APEInfoDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\APEInfoFormatDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MAC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACConsole.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACFileArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACProcessFiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\APLHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\Filename.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\FolderDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\IntArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\Markup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\StringArrayEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\HyperLink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\MACStatusBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\Format.h">
+      <Filter>Header Files\Format %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\FormatAPE.h">
+      <Filter>Header Files\Format %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\FormatArray.h">
+      <Filter>Header Files\Format %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\FormatPlugin.h">
+      <Filter>Header Files\Format %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\FormatPluginConfigureDlg.h">
+      <Filter>Header Files\Format %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\FormatPluginInfoDlg.h">
+      <Filter>Header Files\Format %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsAdvancedDlg.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsDlg.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsGeneralDlg.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsOutputDlg.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsProcessingDlg.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsShared.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsTreeCtrl.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MAC\OptionsViewDlg.h">
+      <Filter>Header Files\Options %28h%29</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\MAC\res\MAC.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\MAC\res\Monkey_Watermark.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\MAC\res\Options_Icons.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\MAC\res\Options_Tree.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\MAC\res\Toolbar_Full.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\MAC\res\Toolbar_Small.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\MAC\res\Tree_Icons.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\MAC\res\MAC.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\..\..\MAC\res\Completion Sound.wav" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Winamp">
+      <UniqueIdentifier>{767a9ddb-e860-49d5-824a-b5f0023dc931}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CoolEdit">
+      <UniqueIdentifier>{90908c88-ff6f-4bc8-8de5-299a0585888f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Info">
+      <UniqueIdentifier>{f1c16eb7-954a-4950-96e3-33ffab62d346}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Winamp %28h%29">
+      <UniqueIdentifier>{8f791667-f5bc-4a58-8ba4-98f776552ae3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CoolEdit %28h%29">
+      <UniqueIdentifier>{3a0c3b7f-e9da-4b4a-9517-7285ff7ec9ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Info %28h%29">
+      <UniqueIdentifier>{a1e5c59d-10f9-4f78-82b4-c0cc44604be5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\MACDll\MACDll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\MACDllApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\WinampSettingsDlg.cpp">
+      <Filter>Source Files\Winamp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\Winamp2.cpp">
+      <Filter>Source Files\Winamp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\..\Shared\APEInfoDialog.cpp">
+      <Filter>Source Files\Info</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\..\Shared\WAVInfoDialog.cpp">
+      <Filter>Source Files\Info</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\CoolEdit.cpp">
+      <Filter>Source Files\CoolEdit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\CEEncoder.cpp">
+      <Filter>Source Files\CoolEdit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MACDll\CEDecoder.cpp">
+      <Filter>Source Files\CoolEdit</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\MACDll\MACDll.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\..\..\MACDll\res\MACDll.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\MACDll\MACDll.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\MACDllApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\WinampSettingsDlg.h">
+      <Filter>Header Files\Winamp %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\Winamp2.h">
+      <Filter>Header Files\Winamp %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\..\Shared\WAVInfoDialog.h">
+      <Filter>Header Files\Info %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\..\Shared\APEInfoDialog.h">
+      <Filter>Header Files\Info %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\Filters.h">
+      <Filter>Header Files\CoolEdit %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\In2.h">
+      <Filter>Header Files\Winamp %28h%29</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MACDll\Out.h">
+      <Filter>Header Files\CoolEdit %28h%29</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\MACDll\res\Compression Level.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\MACDll\res\MAC.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\..\MACDll\MACDll.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
