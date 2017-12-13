@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
 include_directories(BEFORE sdk)
-include_directories(BEFORE contrib)
+include_directories(BEFORE deps)
 
 #==== threading ====#
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -260,7 +260,7 @@ endif()
 
 # Wma plugin
 if(WITH_WMA_DECODER)
-    file(GLOB FFWMA_SRC contrib/ffmpeg-strip-wma/*.c)
+    file(GLOB FFWMA_SRC deps/ffmpeg-strip-wma/*.c)
     file(GLOB WMA_DECODER_SRC plugins/WmaDecoder/*)
     add_library(WmaDecoder SHARED ${FFWMA_SRC} ${WMA_DECODER_SRC})
     set_target_properties(WmaDecoder PROPERTIES 
@@ -282,11 +282,11 @@ if(WITH_MAC4_DECODER)
         set(CMAKE_ASM_NASM_COMPILER "yasm")
 
         if(BITNESS EQUAL 64)
-            file(GLOB MAC4_SRC_ASM contrib/MACLib/Source/MACLib/Assembly/x86_64_mmx.asm)
+            file(GLOB MAC4_SRC_ASM deps/MACLib/Source/MACLib/Assembly/x86_64_mmx.asm)
             set(YASM_FLAG " -m amd64")
             set(MAC_FLAG " -DENABLE_ASSEMBLY -DARCH_X86_64")
         else()
-            file(GLOB MAC4_SRC_ASM contrib/MACLib/Source/MACLib/Assembly/x86_mmx.asm)
+            file(GLOB MAC4_SRC_ASM deps/MACLib/Source/MACLib/Assembly/x86_mmx.asm)
             set(YASM_FLAG " -m x86")
             set(MAC_FLAG " -DENABLE_ASSEMBLY -DARCH_X86")
         endif()
@@ -294,11 +294,11 @@ if(WITH_MAC4_DECODER)
         set_source_files_properties(${MAC4_SRC_ASM} COMPILE_FLAGS "-f elf ${YASM_FLAG}") 
     endif()
 
-    file(GLOB MAC4_LIB_SRC  contrib/MACLib/Source/MACLib/*.cpp contrib/MACLib/Source/Shared/*.cpp contrib/MACLib/Source/MACLib/Assembly/*.cpp)
+    file(GLOB MAC4_LIB_SRC  deps/MACLib/Source/MACLib/*.cpp deps/MACLib/Source/Shared/*.cpp deps/MACLib/Source/MACLib/Assembly/*.cpp)
     file(GLOB MAC4_DECODER_SRC plugins/Mac4Decoder/*)
 
     set_source_files_properties(${MAC4_DECODER_SRC} ${MAC4_LIB_SRC}
-        COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/contrib/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM ${MAC_FLAG}")
+        COMPILE_FLAGS "-O2 -fno-strict-aliasing -I${MOUS_SOURCE_DIR}/deps/MACLib/Source/Shared -DBUILD_CROSS_PLATFORM ${MAC_FLAG}")
 
     add_library(Mac4Decoder SHARED ${MAC4_DECODER_SRC} ${MAC4_LIB_SRC} ${MAC4_SRC_ASM})
     target_link_libraries(Mac4Decoder)
