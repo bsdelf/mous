@@ -86,12 +86,12 @@ void FrmTagEditor::RestoreUiStatus()
     ui->splitter->restoreState(env->tagEditorSplitterState);
 }
 
-void FrmTagEditor::SetPlayer(IPlayer *player)
+void FrmTagEditor::SetPlayer(Player *player)
 {
     m_Player = player;
 }
 
-void FrmTagEditor::SetTagParserFactory(const ITagParserFactory *factory)
+void FrmTagEditor::SetTagParserFactory(const TagParserFactory *factory)
 {
     if (m_ParserFactory == nullptr && m_ParserFactory != nullptr && m_CurrentParser != nullptr) {
         m_CurrentParser->Close();
@@ -259,7 +259,7 @@ void FrmTagEditor::SlotHideLabelFailed()
 
 void FrmTagEditor::SlotSaveImageAs()
 {
-    qDebug() << m_CurrentImgFmt;
+    qDebug() << (uint8_t)m_CurrentImgFmt;
     qDebug() << m_CurrentImgData.size();
 
     // check format & has data

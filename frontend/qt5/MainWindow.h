@@ -3,11 +3,11 @@
 #include <QtWidgets>
 
 #include <core/PluginManager.h>
-#include <core/IMediaLoader.h>
-#include <core/IPlayer.h>
-#include <core/IConvTask.h>
-#include <core/IConvTaskFactory.h>
-#include <core/ITagParserFactory.h>
+#include <core/MediaLoader.h>
+#include <core/Player.h>
+#include <core/ConvTask.h>
+#include <core/ConvTaskFactory.h>
+#include <core/TagParserFactory.h>
 #include <util/MediaItem.h>
 using namespace mous;
 
@@ -94,10 +94,10 @@ private:
     const int m_UpdateInterval = 500;
 
     PluginManager m_PluginManager;
-    IMediaLoader* m_MediaLoader = nullptr;
-    IPlayer* m_Player = nullptr;
-    IConvTaskFactory* m_ConvFactory = nullptr;
-    ITagParserFactory* m_ParserFactory = nullptr;
+    MediaLoader* m_MediaLoader = nullptr;
+    Player* m_Player = nullptr;
+    ConvTaskFactory* m_ConvFactory = nullptr;
+    TagParserFactory* m_ParserFactory = nullptr;
     QMutex m_PlayerMutex { QMutex::Recursive };
 
     IPlaylistView* m_UsedPlaylistView = nullptr;

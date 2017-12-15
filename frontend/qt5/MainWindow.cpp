@@ -77,10 +77,10 @@ void MainWindow::closeEvent(QCloseEvent*)
 
 void MainWindow::InitMousCore()
 {
-    m_MediaLoader = IMediaLoader::Create();
-    m_Player = IPlayer::Create();
-    m_ConvFactory = IConvTaskFactory::Create();
-    m_ParserFactory = ITagParserFactory::Create();
+    m_MediaLoader = new MediaLoader();
+    m_Player = new Player();
+    m_ConvFactory = new ConvTaskFactory();
+    m_ParserFactory = new TagParserFactory();
 
     m_PluginManager.LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
     //const vector<string>& pathList = m_PluginManager.PluginPaths();
@@ -132,10 +132,10 @@ void MainWindow::ClearMousCore()
     m_ParserFactory->UnregisterAll();
     m_PluginManager.UnloadAll();
 
-    IMediaLoader::Free(m_MediaLoader);
-    IPlayer::Free(m_Player);
-    IConvTaskFactory::Free(m_ConvFactory);
-    ITagParserFactory::Free(m_ParserFactory);
+    delete m_MediaLoader;
+    delete m_Player;
+    delete m_ConvFactory;
+    delete m_ParserFactory;
 }
 
 void MainWindow::InitMyUi()
@@ -269,7 +269,7 @@ void MainWindow::SlotBtnPlay()
 {
     QMutexLocker locker(&m_PlayerMutex);
 
-    qDebug() << m_Player->Status();
+    qDebug() << (int)m_Player->Status();
 
     switch (m_Player->Status()) {
     case PlayerStatus::Closed:
@@ -439,7 +439,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
         return;
 
     int encoderIndex = dlgEncoders.GetSelectedIndex();
-    IConvTask* newTask = m_ConvFactory->CreateTask(item, encoderNames[encoderIndex]);
+    ConvTask* newTask = m_ConvFactory->CreateTask(item, encoderNames[encoderIndex]);
     if (newTask == nullptr)
         return;
 
@@ -456,7 +456,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
     dlgOption.exec();
 
     if (dlgOption.result() != QDialog::Accepted) {
-        IConvTask::Free(newTask);
+        delete newTask;
         return;
     }
 

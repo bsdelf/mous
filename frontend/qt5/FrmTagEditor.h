@@ -3,8 +3,8 @@
 #include <QtWidgets>
 
 #include <util/MediaItem.h>
-#include <core/IPlayer.h>
-#include <core/ITagParserFactory.h>
+#include <core/Player.h>
+#include <core/TagParserFactory.h>
 using namespace mous;
 
 #include <string>
@@ -25,8 +25,8 @@ public:
     void SaveUiStatus();
     void RestoreUiStatus();
 
-    void SetPlayer(mous::IPlayer* player);
-    void SetTagParserFactory(const mous::ITagParserFactory* factory);
+    void SetPlayer(mous::Player* player);
+    void SetTagParserFactory(const mous::TagParserFactory* factory);
     void WaitForLoadFinished();
     void LoadMediaItem(const mous::MediaItem& item);
 
@@ -55,8 +55,8 @@ private slots:
 private:
     Ui::FrmTagEditor *ui;
 
-    mous::IPlayer* m_Player;
-    const mous::ITagParserFactory* m_ParserFactory;    
+    mous::Player* m_Player;
+    const mous::TagParserFactory* m_ParserFactory;    
     mous::ITagParser* m_CurrentParser;
     mous::MediaItem m_CurrentItem;
 

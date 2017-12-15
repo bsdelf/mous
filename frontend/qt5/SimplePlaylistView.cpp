@@ -5,7 +5,7 @@ using namespace std;
 
 #include <util/MediaItem.h>
 #include <util/PlaylistSerializer.h>
-#include <core/IMediaLoader.h>
+#include <core/MediaLoader.h>
 using namespace mous;
 
 #include <scx/IconvHelper.h>
@@ -216,7 +216,7 @@ SimplePlaylistView::~SimplePlaylistView()
 }
 
 /* IPlayListView interfaces */
-void SimplePlaylistView::SetMediaLoader(const IMediaLoader* loader)
+void SimplePlaylistView::SetMediaLoader(const MediaLoader* loader)
 {
     m_MediaLoader = loader;
 }

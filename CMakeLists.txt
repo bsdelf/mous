@@ -66,7 +66,7 @@ find_library(LIB_VORBIS vorbis)
 find_library(LIB_VORBISENC vorbisenc)
 find_library(LIB_VORBISFILE vorbisfile)
 find_library(LIB_WAVPACK wavpack)
-find_package(Qt4 COMPONENTS QtCore QtGui)
+find_package(Qt5 COMPONENTS Widgets)
 if(LIB_ICONV)
     message(STATUS "iconv: ${LIB_ICONV}")
 else()
@@ -76,10 +76,11 @@ endif()
 
 #==== UI ====#
 option(WITH_UI_CLI "Build CLI application" ON)
-if(Qt4)
-    set(TRY_UI_QT4 ON)
+if(Qt5_DIR)
+    set(TRY_UI_QT5 ON)
 endif()
-option(WITH_UI_QT4 "Build Qt4 application" ${TRY_UI_QT4})
+message(STATUS "Qt5:" ${Qt5})
+option(WITH_APP_QT5 "Build Qt5 application" ${TRY_UI_QT5})
 if(LIB_NCURSES)
     set(TRY_UI_NCURSES ON)
 endif()
@@ -195,34 +196,33 @@ if(WITH_UI_NCURSES)
     endif()
 endif()
 
-if(WITH_UI_QT4)
-    include(${QT_USE_FILE})
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-    set(EXE_MOUS_QT_MOC_HEADERS)
-    file(GLOB EXE_MOUS_QT_HEADERS frontend/qt4/*.h frontend/qt4/*.hpp)
-    foreach(header ${EXE_MOUS_QT_HEADERS})
+if(WITH_APP_QT5)
+    # src
+    file(GLOB APP_QT5_SRC frontend/qt5/*.cpp)
+    # moc
+    file(GLOB APP_QT5_HEADERS frontend/qt5/*.h frontend/qt5/*.hpp)
+    set(APP_QT5_MOC_FILES)
+    foreach(header ${APP_QT5_HEADERS})
         file(STRINGS "${header}" lines REGEX "Q_OBJECT")
         if(lines)
-            list(APPEND EXE_MOUS_QT_MOC_HEADERS "${header}")
+            list(APPEND APP_QT5_MOC_FILES "${header}")
         endif()
     endforeach()
-    QT4_WRAP_CPP(EXE_MOUS_QT_WCPP ${EXE_MOUS_QT_MOC_HEADERS})
-
-    file(GLOB EXE_MOUS_QT_UI frontend/qt4/*.ui)
-    QT4_WRAP_UI(EXE_MOUS_QT_WUI ${EXE_MOUS_QT_UI})
-
-    file(GLOB EXE_MOUS_QT_QRC frontend/qt4/*.qrc)
-    QT4_ADD_RESOURCES(EXE_MOUS_QT_RES ${EXE_MOUS_QT_QRC})
-
-    file(GLOB EXE_MOUS_QT_TS frontend/qt4/*.ts)
-    QT4_ADD_TRANSLATION(EXE_MOUS_QT_QM ${EXE_MOUS_QT_TS})
-
-    file(GLOB EXE_MOUS_QT_SOURCES frontend/qt4/*.cpp)
-    add_executable(mous-qt ${EXE_MOUS_QT_SOURCES}
-        ${EXE_MOUS_QT_WCPP} ${EXE_MOUS_QT_WUI} ${EXE_MOUS_QT_RES} ${EXE_MOUS_QT_QM})
+    qt5_wrap_cpp(APP_QT5_MOC ${APP_QT5_MOC_FILES})
+    # ui
+    file(GLOB APP_QT5_UI_FILES frontend/qt5/*.ui)
+    qt5_wrap_ui(APP_QT5_UI ${APP_QT5_UI_FILES})
+    # qrc
+    file(GLOB APP_QT5_QRC_FILES frontend/qt5/*.qrc)
+    qt5_add_resources(APP_QT5_QRC ${APP_QT5_QRC_FILES})
+    # ts
+    #file(GLOB APP_QT5_TS_FILES frontend/qt5/*.ts)
+    #qt5_add_translation(APP_QT5_TS ${APP_QT5_TS_FILES})
+    # build
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    add_executable(mous-qt ${APP_QT5_SRC} ${APP_QT5_MOC} ${APP_QT5_UI} ${APP_QT5_QRC} ${APP_QT5_TS})
     add_dependencies(mous-qt MousCore)
-    target_link_libraries(mous-qt MousCore ${QT_LIBRARIES} ${LIB_ICONV})
+    target_link_libraries(mous-qt MousCore Qt5::Widgets ${LIB_ICONV})
 endif()
 
 if(WITH_PLUGIN_OSS)
