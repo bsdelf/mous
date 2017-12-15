@@ -70,7 +70,7 @@ const char* FaacEncoder::FileSuffix() const
     return "m4a";
 }
 
-EmErrorCode FaacEncoder::OpenOutput(const std::string& path)
+ErrorCode FaacEncoder::OpenOutput(const std::string& path)
 {
     if (m_BitsPerSample != 16)
         return ErrorCode::EncoderFailedToOpen;
@@ -165,7 +165,7 @@ void FaacEncoder::CloseOutput()
     m_FileName.clear();
 }
 
-EmErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
+ErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
 {
     int used = 0;
     int rest = len;
@@ -208,7 +208,7 @@ EmErrorCode FaacEncoder::Encode(char* buf, uint32_t len)
     return ErrorCode::Ok;
 }
 
-EmErrorCode FaacEncoder::Flush()
+ErrorCode FaacEncoder::Flush()
 {
     // this maybe unnecessary
     int need = m_InputBufferSize - m_InputBufferUsed;
