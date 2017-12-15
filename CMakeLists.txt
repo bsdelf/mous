@@ -53,35 +53,34 @@ endif()
 set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Install path prefix")
 add_definitions(-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 
-#==== Frontend ====#
-option(WITH_QT4_FRONTEND "Build Qt frontend" OFF)
-option(WITH_NCURSES_FRONTEND "Build ncurses frontend" OFF)
-
-#==== Optional ====#
+#==== UI ====#
+option(WITH_UI_QT4 "Build Qt4 application" OFF)
+option(WITH_UI_NCURSES "Build ncurses application" OFF)
+#==== SDK ====#
 option(WITH_SDK "Install SDK" OFF)
-
-option(WITH_ALSA_RENDERER "ALSA output" OFF)
-option(WITH_AO_RENDERER "Libao output" OFF)
-option(WITH_CORE_AUDIO_RENDERER "Core Audio Output" OFF)
-option(WITH_OSS_RENDERER "OSS Output" OFF)
-
-option(WITH_WAV_DECODER "WAV Decoder" ON)
-option(WITH_WAV_ENCODER "WAV Encoder" ON)
-option(WITH_WMA_DECODER "WMA Decoder" OFF)
-option(WITH_MAC_DECODER "MAC Decoder" OFF)
-option(WITH_MPG123_DECODER "MPG123 Decoder" OFF)
-option(WITH_VORBIS_DECODER "Ogg Decoder" OFF)
-option(WITH_VORBIS_ENCODER "Ogg Encoder" OFF)
-option(WITH_LAME_ENCODER "LAME Encoder" OFF)
-option(WITH_FLAC_DECODER "FLAC Decoder" OFF)
-option(WITH_FLAC_ENCODER "FLAC Encoder" OFF)
-option(WITH_FDK_DECODER "Fdk Decoder" OFF)
-option(WITH_FAAD_DECODER "FAAD Decoder" OFF)
-option(WITH_FAAC_ENCODER "FAAC Encoder" OFF)
-option(WITH_WV_DECODER "WavPack Decoder" OFF)
-
-option(WITH_TAGLIB_PLUGIN "TagLib Plugin" ON)
-option(WITH_CUE_PLUGIN "CUE Sheet Plugin" ON)
+#==== Utils ====#
+option(WITH_PLUGIN_LIBCUE "CUE Sheet plugin" ON)
+option(WITH_PLUGIN_TAGLIB "TagLib plugin" ON)
+#==== Outputs ====#
+option(WITH_PLUGIN_ALSA "ALSA output" OFF)
+option(WITH_PLUGIN_LIBAO "Libao output" OFF)
+option(WITH_PLUGIN_COREAUDIO "Core Audio output" OFF)
+option(WITH_PLUGIN_OSS "OSS output" OFF)
+#==== Codecs ====#
+option(WITH_PLUGIN_FAAC "FAAC encoder" OFF)
+option(WITH_PLUGIN_FAAD "FAAD2 decoder" OFF)
+option(WITH_PLUGIN_FDK_AAC "FDK AAC decoder" OFF)
+option(WITH_PLUGIN_FLAC_DECODER "FLAC decoder" OFF)
+option(WITH_PLUGIN_FLAC_ENCODER "FLAC encoder" OFF)
+option(WITH_PLUGIN_LAME "LAME encoder" OFF)
+option(WITH_PLUGIN_MAC_DECODER "MAC decoder" OFF)
+option(WITH_PLUGIN_MPG123 "mpg123 decoder" OFF)
+option(WITH_PLUGIN_VORBIS_DECODER "Ogg vorbis decoder" OFF)
+option(WITH_PLUGIN_VORBIS_ENCODER "Ogg vorbis encoder" OFF)
+option(WITH_PLUGIN_WAV_DECODER "WAV decoder" ON)
+option(WITH_PLUGIN_WAV_ENCODER "WAV encoder" ON)
+option(WITH_PLUGIN_WAVPACK "WavPack decoder" OFF)
+option(WITH_PLUGIN_WMA_DECODER "WMA decoder" OFF)
 
 #option(WithPluginPlayerStatistics "Player activity statistics" ON)
 
@@ -119,7 +118,7 @@ elseif(LINUX)
 endif()
 
 # mous-ncurses
-if(WITH_NCURSES_FRONTEND)
+if(WITH_UI_NCURSES)
     find_library(NCURSES NAMES ncursesw ncurses)
     if(NOT NCURSES)
         message(FATAL_ERROR "ncurses/ncursesw not found")
@@ -136,7 +135,7 @@ if(WITH_NCURSES_FRONTEND)
 endif()
 
 # mous-qt
-if(WITH_QT4_FRONTEND)
+if(WITH_UI_QT4)
     find_package(Qt4 REQUIRED QtCore QtGui)
 
     include(${QT_USE_FILE})
@@ -169,21 +168,21 @@ if(WITH_QT4_FRONTEND)
 endif()
 
 # OSS plugin
-if(WITH_OSS_RENDERER)
+if(WITH_PLUGIN_OSS)
     file(GLOB OSS_RENDERER_SRC plugins/oss/*)
     add_library(OssRenderer SHARED ${OSS_RENDERER_SRC})
     target_link_libraries(OssRenderer)
 endif()
 
 # ALSA plugin
-if(WITH_ALSA_RENDERER)
+if(WITH_PLUGIN_ALSA)
     file(GLOB ALSA_RENDERER_SRC plugins/alsa/*)
     add_library(AlsaRenderer SHARED ${ALSA_RENDERER_SRC})
     target_link_libraries(AlsaRenderer -lasound)
 endif()
 
 # Core Audio plugin
-if(WITH_CORE_AUDIO_RENDERER)
+if(WITH_PLUGIN_COREAUDIO)
     find_library(AUDIO_UNIT AudioUnit)
     find_library(AUDIO_TOOLBOX AudioToolbox)
     find_library(CORE_AUDIO CoreAudio)
@@ -193,7 +192,7 @@ if(WITH_CORE_AUDIO_RENDERER)
 endif()
 
 # AO plugin
-if(WITH_AO_RENDERER)
+if(WITH_PLUGIN_LIBAO)
     find_library(LIBAO ao)
     if(NOT LIBAO)
         message(FATAL_ERROR "libao not found")
@@ -204,17 +203,17 @@ if(WITH_AO_RENDERER)
 endif()
 
 # WAV plugin
-if(WITH_WAV_DECODER)
+if(WITH_PLUGIN_WAV_DECODER)
     file(GLOB WAV_DECODER_SRC plugins/wav/decoder/*)
     add_library(WavDecoder SHARED ${WAV_DECODER_SRC})
 endif()
-if(WITH_WAV_ENCODER)
+if(WITH_PLUGIN_WAV_ENCODER)
     file(GLOB WAV_ENCODER_SRC plugins/wav/encoder/*)
     add_library(WavEncoder SHARED ${WAV_ENCODER_SRC})
 endif()
 
 # MPG123 & Lame plugin
-if(WITH_MPG123_DECODER)
+if(WITH_PLUGIN_MPG123)
     find_library(MPG123 mpg123)
     if(NOT MPG123)
         message(FATAL_ERROR "mpg123 not found")
@@ -223,7 +222,7 @@ if(WITH_MPG123_DECODER)
     add_library(Mpg123Decoder SHARED ${MPG123_DECODER_SRC})
     target_link_libraries(Mpg123Decoder ${MPG123})
 endif()
-if(WITH_LAME_ENCODER)
+if(WITH_PLUGIN_LAME)
     find_library(LAME mp3lame)
     if(NOT LAME)
         message(FATAL_ERROR "lame not found")
@@ -234,7 +233,7 @@ if(WITH_LAME_ENCODER)
 endif()
 
 # Ogg plugin
-if(WITH_VORBIS_DECODER)
+if(WITH_PLUGIN_VORBIS_DECODER)
     find_library(VORBISFILE vorbisfile)
     if(NOT VORBISFILE)
         message(FATAL_ERROR "libogg not found")
@@ -243,7 +242,7 @@ if(WITH_VORBIS_DECODER)
     add_library(VorbisDecoder SHARED ${VORBIS_DECODER_SRC})
     target_link_libraries(VorbisDecoder ${VORBISFILE})
 endif()
-if(WITH_VORBIS_ENCODER)
+if(WITH_PLUGIN_VORBIS_ENCODER)
     find_library(VORBIS vorbis)
     find_library(VORBISFILE vorbisfile)
     find_library(VORBISENC vorbisenc)
@@ -257,7 +256,7 @@ if(WITH_VORBIS_ENCODER)
 endif()
 
 # Wma plugin
-if(WITH_WMA_DECODER)
+if(WITH_PLUGIN_WMA_DECODER)
     file(GLOB FFWMA_SRC deps/ffmpeg-strip-wma/*.c)
     file(GLOB WMA_DECODER_SRC plugins/WmaDecoder/*)
     add_library(WmaDecoder SHARED ${FFWMA_SRC} ${WMA_DECODER_SRC})
@@ -267,7 +266,7 @@ if(WITH_WMA_DECODER)
 endif()
 
 # Mac plugin
-if(WITH_MAC_DECODER)
+if(WITH_PLUGIN_MAC_DECODER)
     file(GLOB MAC_SDK_SRC
         deps/MAC_SDK/Source/MACLib/*.cpp
         deps/MAC_SDK/Source/MACLib/Old/*.cpp
@@ -284,7 +283,7 @@ if(WITH_MAC_DECODER)
 endif()
 
 # Flac plugin
-if(WITH_FLAC_DECODER)
+if(WITH_PLUGIN_FLAC_DECODER)
     find_library(FLAC FLAC)
     if(NOT FLAC)
         message(FATAL_ERROR "flac not found")
@@ -295,7 +294,7 @@ if(WITH_FLAC_DECODER)
 endif()
 
 # WavPack plugin
-if(WITH_WV_DECODER)
+if(WITH_PLUGIN_WAVPACK)
     find_library(WAVPACK wavpack)
     if(NOT WAVPACK)
         message(FATAL_ERROR "wavpack not found")
@@ -306,7 +305,7 @@ if(WITH_WV_DECODER)
 endif()
 
 # FDK-AAC plugins
-if(WITH_FDK_DECODER)
+if(WITH_PLUGIN_FDK_AAC)
     find_library(FDK_AAC fdk-aac)
     if(NOT FDK_AAC)
         message(FATAL_ERROR "fdk-aac not found")
@@ -321,7 +320,7 @@ if(WITH_FDK_DECODER)
 endif()
 
 # FAAD & FAAC plugin
-if(WITH_FAAD_DECODER)
+if(WITH_PLUGIN_FAAD)
     find_library(FAAD faad)
     find_library(MP4FF mp4ff)
     if(NOT FAAD OR NOT MP4FF)
@@ -331,7 +330,7 @@ if(WITH_FAAD_DECODER)
     add_library(FaadDecoder SHARED ${FAAD_DECODER_SRC})
     target_link_libraries(FaadDecoder ${FAAD} ${MP4FF})
 endif()
-if(WITH_FAAC_ENCODER)
+if(WITH_PLUGIN_FAAC)
     find_library(FAAC faac)
     if(NOT FAAC)
         message(FATAL_ERROR "faac not found")
@@ -346,7 +345,7 @@ if(WITH_FAAC_ENCODER)
 endif()
 
 # TagLib plugin
-if(WITH_TAGLIB_PLUGIN)
+if(WITH_PLUGIN_TAGLIB)
     find_library(TAGLIB tag)
     if(NOT TAGLIB)
         message(FATAL_ERROR "taglib not found")
@@ -357,7 +356,7 @@ if(WITH_TAGLIB_PLUGIN)
 endif()
 
 # CueParser plugin
-if(WITH_CUE_PLUGIN)
+if(WITH_PLUGIN_LIBCUE)
     find_library(LIBCUE cue)
     if(NOT LIBCUE)
         message(FATAL_ERROR "libcue not found")
@@ -380,12 +379,12 @@ install(TARGETS MousCore
 
 install(TARGETS mous-cli RUNTIME DESTINATION bin)
 
-if(WITH_NCURSES_FRONTEND)
+if(WITH_UI_NCURSES)
     install(TARGETS mous-ncurses
         RUNTIME DESTINATION bin)
 endif()
 
-if(WITH_QT4_FRONTEND)
+if(WITH_UI_QT4)
     install(TARGETS mous-qt
         RUNTIME DESTINATION bin)
     install(
