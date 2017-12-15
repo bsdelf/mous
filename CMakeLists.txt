@@ -66,7 +66,22 @@ find_library(LIB_VORBIS vorbis)
 find_library(LIB_VORBISENC vorbisenc)
 find_library(LIB_VORBISFILE vorbisfile)
 find_library(LIB_WAVPACK wavpack)
-find_package(Qt5 COMPONENTS Widgets)
+if(APPLE)
+    find_program(PROG_BREW brew)
+    if(PROG_BREW)
+        execute_process(
+            COMMAND ${PROG_BREW} --prefix qt5
+            ERROR_QUIET
+            TIMEOUT 5
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            OUTPUT_VARIABLE PATH_QT5_PREFIX)
+        if(EXISTS "${PATH_QT5_PREFIX}/lib/cmake/Qt5")
+            set(Qt5_DIR "${PATH_QT5_PREFIX}/lib/cmake/Qt5")
+        endif()
+    endif()
+    unset(PROG_BREW CACHE)
+endif()
+find_package(Qt5 QUIET COMPONENTS Widgets)
 if(LIB_ICONV)
     message(STATUS "iconv: ${LIB_ICONV}")
 else()
@@ -76,11 +91,10 @@ endif()
 
 #==== UI ====#
 option(WITH_UI_CLI "Build CLI application" ON)
-if(Qt5_DIR)
-    set(TRY_UI_QT5 ON)
+if(Qt5Widgets_DIR)
+    set(TRY_APP_QT5 ON)
 endif()
-message(STATUS "Qt5:" ${Qt5})
-option(WITH_APP_QT5 "Build Qt5 application" ${TRY_UI_QT5})
+option(WITH_APP_QT5 "Build Qt5 application" ${TRY_APP_QT5})
 if(LIB_NCURSES)
     set(TRY_UI_NCURSES ON)
 endif()
@@ -197,9 +211,9 @@ if(WITH_UI_NCURSES)
 endif()
 
 if(WITH_APP_QT5)
-    # src
+    #==== src ====#
     file(GLOB APP_QT5_SRC frontend/qt5/*.cpp)
-    # moc
+    #==== moc ====#
     file(GLOB APP_QT5_HEADERS frontend/qt5/*.h frontend/qt5/*.hpp)
     set(APP_QT5_MOC_FILES)
     foreach(header ${APP_QT5_HEADERS})
@@ -209,19 +223,19 @@ if(WITH_APP_QT5)
         endif()
     endforeach()
     qt5_wrap_cpp(APP_QT5_MOC ${APP_QT5_MOC_FILES})
-    # ui
+    #==== ui ====#
     file(GLOB APP_QT5_UI_FILES frontend/qt5/*.ui)
     qt5_wrap_ui(APP_QT5_UI ${APP_QT5_UI_FILES})
-    # qrc
+    #==== qrc ====#
     file(GLOB APP_QT5_QRC_FILES frontend/qt5/*.qrc)
     qt5_add_resources(APP_QT5_QRC ${APP_QT5_QRC_FILES})
-    # ts
+    #==== ts ====#
     #file(GLOB APP_QT5_TS_FILES frontend/qt5/*.ts)
     #qt5_add_translation(APP_QT5_TS ${APP_QT5_TS_FILES})
-    # build
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    #==== build ====#
     add_executable(mous-qt ${APP_QT5_SRC} ${APP_QT5_MOC} ${APP_QT5_UI} ${APP_QT5_QRC} ${APP_QT5_TS})
     add_dependencies(mous-qt MousCore)
+    target_include_directories(mous-qt PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(mous-qt MousCore Qt5::Widgets ${LIB_ICONV})
 endif()
 
@@ -362,7 +376,7 @@ if(WITH_UI_NCURSES)
         RUNTIME DESTINATION bin)
 endif()
 
-if(WITH_UI_QT4)
+if(WITH_APP_QT5)
     install(TARGETS mous-qt
         RUNTIME DESTINATION bin)
     install(
