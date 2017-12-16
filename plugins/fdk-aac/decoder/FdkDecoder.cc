@@ -182,7 +182,12 @@ ErrorCode FdkDecoder::SetUnitIndex(uint64_t index)
 
 uint32_t FdkDecoder::MaxBytesPerUnit() const
 {
-    return m_samplebuff.size() * m_channels * (m_bits / 8);
+    /* Frame size of decoded PCM signal
+     * 1024 or 960 for AAC-LC
+     * 2048 or 1920 for HE-AAC (v2)
+     * 512 or 480 for AAC-LD and AAC-ELD
+     */
+    return 2048 * m_channels;
 }
 
 uint64_t FdkDecoder::UnitIndex() const
