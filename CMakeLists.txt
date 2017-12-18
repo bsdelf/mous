@@ -138,11 +138,11 @@ option(WITH_PLUGIN_ALSA "ALSA output" ${TRY_PLUGIN_ALSA})
 option(WITH_PLUGIN_LIBAO "Libao output" OFF)
 
 #==== Codecs ====#
-if(LIB_FAAC AND LIB_MP4V2 AND FALSE)
+if(LIB_FAAC AND LIB_MP4V2)
     set(TRY_PLUGIN_FAAC ON)
 endif()
 option(WITH_PLUGIN_FAAC "FAAC encoder" ${TRY_PLUGIN_FAAC})
-if(LIB_FAAD AND LIB_MP4FF AND FALSE)
+if(LIB_FAAD AND LIB_MP4FF)
     set(TRY_PLUGIN_FAAD ON)
 endif()
 option(WITH_PLUGIN_FAAD "FAAD2 decoder" ${TRY_PLUGIN_FAAD})
@@ -172,9 +172,9 @@ if(LIB_WAVPACK)
     set(TRY_PLUGIN_WAVPACK ON)
 endif()
 option(WITH_PLUGIN_WAVPACK "WavPack decoder" ${TRY_PLUGIN_WAVPACK})
-option(WITH_PLUGIN_WMA_DECODER "WMA decoder" OFF)
+option(WITH_PLUGIN_WMA "WMA decoder" OFF)
 
-#option(WithPluginPlayerStatistics "Player activity statistics" ON)
+#option(WITH_PLUGIN_STATS "Player activity statistics" ON)
 
 #==== Output Dir ====#
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/plugins)
@@ -197,6 +197,7 @@ if(LINUX)
     set(LIB_MOUS_CORE_EXTRA -ld)
 endif()
 target_link_libraries(MousCore Threads::Threads ${LIB_MOUS_CORE_EXTRA})
+install(TARGETS MousCore LIBRARY DESTINATION lib)
 
 if(WITH_APP_CLI)
     file(GLOB_RECURSE APP_CLI_SRC apps/cli/*)
@@ -206,6 +207,7 @@ if(WITH_APP_CLI)
         set(LIB_MOUS_CLI_EXTRA -ldl -lrt)
     endif()
     target_link_libraries(mous-cli MousCore ${LIB_MOUS_CLI_EXTRA})
+    install(TARGETS mous-cli RUNTIME DESTINATION bin)
 endif()
 
 if(WITH_APP_NCURSES)
@@ -216,6 +218,7 @@ if(WITH_APP_NCURSES)
         set(LIB_MOUS_NCURSES_EXTRA -ldl -lrt)
     endif()
     target_link_libraries(mous-ncurses MousCore Threads::Threads ${LIB_NCURSES} ${LIB_ICONV} ${LIB_MOUS_NCURSES_EXTRA})
+    install(TARGETS mous-ncurses RUNTIME DESTINATION bin)
 endif()
 
 if(WITH_APP_QT5)
@@ -245,6 +248,11 @@ if(WITH_APP_QT5)
     add_dependencies(mous-qt MousCore)
     target_include_directories(mous-qt PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(mous-qt MousCore Qt5::Widgets ${LIB_ICONV})
+    install(TARGETS mous-qt RUNTIME DESTINATION bin)
+    install(
+        CODE "file(GLOB TRANSLATION_FILES \"${PROJECT_BINARY_DIR}/*.qm\")"
+        CODE "file(INSTALL \${TRANSLATION_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/mous/qt)"
+    )
 endif()
 
 if(WITH_PLUGIN_SNDIO)
@@ -254,29 +262,29 @@ if(WITH_PLUGIN_SNDIO)
 endif()
 
 if(WITH_PLUGIN_OSS)
-    file(GLOB OSS_RENDERER_SRC plugins/oss/*)
-    add_library(OssRenderer SHARED ${OSS_RENDERER_SRC})
-    target_link_libraries(OssRenderer)
+    file(GLOB PLUGIN_OSS_SRC plugins/oss/*)
+    add_library(OssRenderer SHARED ${PLUGIN_OSS_SRC})
 endif()
 
 if(WITH_PLUGIN_ALSA)
-    file(GLOB ALSA_RENDERER_SRC plugins/alsa/*)
-    add_library(AlsaRenderer SHARED ${ALSA_RENDERER_SRC})
+    file(GLOB PLUGIN_ALSA_SRC plugins/alsa/*)
+    add_library(AlsaRenderer SHARED ${PLUGIN_ALSA_SRC})
     target_link_libraries(AlsaRenderer -lasound)
 endif()
 
 if(WITH_PLUGIN_COREAUDIO)
-    file(GLOB_RECURSE CORE_AUDIO_RENDERER_SRC plugins/coreaudio/*)
-    add_library(CoreAudioRenderer SHARED ${CORE_AUDIO_RENDERER_SRC})
+    file(GLOB_RECURSE PLUGIN_COREAUDIO_SRC plugins/coreaudio/*)
+    add_library(CoreAudioRenderer SHARED ${PLUGIN_COREAUDIO_SRC})
     target_link_libraries(CoreAudioRenderer ${LIB_AUDIO_UNIT} ${LIB_AUDIO_TOOLBOX} ${LIB_CORE_AUDIO})
 endif()
 
 if(WITH_PLUGIN_LIBAO)
-    file(GLOB AO_RENDERER_SRC plugins/libao/*)
-    add_library(AoRenderer SHARED ${AO_RENDERER_SRC})
+    file(GLOB PLUGIN_LIBAO_SRC plugins/libao/*)
+    add_library(AoRenderer SHARED ${PLUGIN_LIBAO_SRC})
     target_link_libraries(AoRenderer ${LIB_AO})
 endif()
 
+# TODO: merge decoder and encoder to stand-alone plugin
 if(WITH_PLUGIN_WAV)
     file(GLOB WAV_DECODER_SRC plugins/wav/decoder/*)
     add_library(WavDecoder SHARED ${WAV_DECODER_SRC})
@@ -285,17 +293,18 @@ if(WITH_PLUGIN_WAV)
 endif()
 
 if(WITH_PLUGIN_MPG123)
-    file(GLOB MPG123_DECODER_SRC plugins/mpg123/*)
-    add_library(Mpg123Decoder SHARED ${MPG123_DECODER_SRC})
+    file(GLOB PLUGIN_MPG123_SRC plugins/mpg123/*)
+    add_library(Mpg123Decoder SHARED ${PLUGIN_MPG123_SRC})
     target_link_libraries(Mpg123Decoder ${LIB_MPG123})
 endif()
 
 if(WITH_PLUGIN_LAME)
-    file(GLOB LAME_ENCODER_SRC plugins/lame/*)
-    add_library(LameEncoder SHARED ${LAME_ENCODER_SRC})
+    file(GLOB PLUGIN_LAME_SRC plugins/lame/*)
+    add_library(LameEncoder SHARED ${PLUGIN_LAME_SRC})
     target_link_libraries(LameEncoder ${LIB_LAME})
 endif()
 
+# TODO: merge decoder and encoder to stand-alone plugin
 if(WITH_PLUGIN_OGG_VORBIS)
     file(GLOB VORBIS_DECODER_SRC plugins/vorbis/decoder/*)
     add_library(VorbisDecoder SHARED ${VORBIS_DECODER_SRC})
@@ -303,15 +312,6 @@ if(WITH_PLUGIN_OGG_VORBIS)
     file(GLOB VORBIS_ENCODER_SRC plugins/vorbis/encoder/*)
     add_library(VorbisEncoder SHARED ${VORBIS_ENCODER_SRC})
     target_link_libraries(VorbisEncoder ${LIB_OGG} ${LIB_VORBIS} ${LIB_VORBISFILE} ${LIB_VORBISENC})
-endif()
-
-if(WITH_PLUGIN_WMA_DECODER)
-    file(GLOB FFWMA_SRC deps/ffmpeg-strip-wma/*.c)
-    file(GLOB WMA_DECODER_SRC plugins/WmaDecoder/*)
-    add_library(WmaDecoder SHARED ${FFWMA_SRC} ${WMA_DECODER_SRC})
-    set_target_properties(WmaDecoder PROPERTIES 
-        COMPILE_FLAGS "-fno-strict-aliasing -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE")
-    target_link_libraries(WmaDecoder)
 endif()
 
 if(WITH_PLUGIN_MAC)
@@ -323,91 +323,82 @@ if(WITH_PLUGIN_MAC)
         deps/MAC_SDK/Source/Shared/StdLibFileIO.cpp
         deps/MAC_SDK/Source/Shared/CharacterHelper.cpp
     )
-    file(GLOB MAC_DECODER_SRC plugins/mac/*)
-    add_library(MacDecoder SHARED ${MAC_DECODER_SRC} ${MAC_SDK_SRC})
+    file(GLOB PLUGIN_MAC_SRC plugins/mac/*)
+    add_library(MacDecoder SHARED ${PLUGIN_MAC_SRC} ${MAC_SDK_SRC})
     set_target_properties(MacDecoder PROPERTIES 
         COMPILE_FLAGS "-DPLATFORM_LINUX -I${PROJECT_SOURCE_DIR}/deps/MAC_SDK/Source/Shared")
     target_link_libraries(MacDecoder)
 endif()
 
 if(WITH_PLUGIN_FLAC)
-    file(GLOB FLAC_DECODER_SRC plugins/flac/*)
-    add_library(FlacDecoder SHARED ${FLAC_DECODER_SRC})
+    file(GLOB PLUGIN_FLAC_SRC plugins/flac/*)
+    add_library(FlacDecoder SHARED ${PLUGIN_FLAC_SRC})
     target_link_libraries(FlacDecoder ${LIB_FLAC})
 endif()
 
 if(WITH_PLUGIN_WAVPACK)
-    file(GLOB WV_DECODER_SRC plugins/wavpack/*)
-    add_library(WvDecoder SHARED ${WV_DECODER_SRC})
+    file(GLOB PLUGIN_WAVPACK_SRC plugins/wavpack/*)
+    add_library(WvDecoder SHARED ${PLUGIN_WAVPACK_SRC})
     target_link_libraries(WvDecoder ${LIB_WAVPACK})
 endif()
 
 if(WITH_PLUGIN_FDK_AAC)
-    file(GLOB FDK_DECODER_SRC plugins/fdk-aac/decoder/*)
-    add_library(FdkDecoder SHARED ${FDK_DECODER_SRC})
+    file(GLOB PLUGIN_FDK_AAC_SRC plugins/fdk-aac/decoder/*)
+    add_library(FdkDecoder SHARED ${PLUGIN_FDK_AAC_SRC})
     target_link_libraries(FdkDecoder ${LIB_FDK_AAC} ${LIB_MP4V2})
 endif()
 
-if(WITH_PLUGIN_FAAD)
-    file(GLOB FAAD_DECODER_SRC plugins/faad/*)
-    add_library(FaadDecoder SHARED ${FAAD_DECODER_SRC})
+# FIXME: broken
+if(WITH_PLUGIN_FAAD AND FALSE)
+    file(GLOB PLUGIN_FAAD_SRC plugins/faad/*)
+    add_library(FaadDecoder SHARED ${PLUGIN_FAAD_SRC})
     target_link_libraries(FaadDecoder ${LIB_FAAD} ${LIB_MP4FF})
 endif()
 
-if(WITH_PLUGIN_FAAC)
-    file(GLOB FAAC_ENCODER_SRC plugins/faac/*)
-    add_library(FaacEncoder SHARED ${FAAC_ENCODER_SRC})
+# FIXME: broken
+if(WITH_PLUGIN_FAAC AND FALSE)
+    file(GLOB PLUGIN_FAAC_SRC plugins/faac/*)
+    add_library(FaacEncoder SHARED ${PLUGIN_FAAC_SRC})
     target_link_libraries(FaacEncoder ${LIB_FAAC} ${LIB_MP4V2})
 endif()
 
+# FIXME: broken
+if(WITH_PLUGIN_WMA AND FALSE)
+    file(GLOB FFWMA_SRC deps/ffmpeg-strip-wma/*.c)
+    file(GLOB PLUGIN_WMA_SRC plugins/wma/*)
+    add_library(WmaDecoder SHARED ${FFWMA_SRC} ${WMA_DECODER_SRC})
+    set_target_properties(WmaDecoder PROPERTIES 
+        COMPILE_FLAGS "-fno-strict-aliasing -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE")
+    target_link_libraries(WmaDecoder)
+endif()
+
 if(WITH_PLUGIN_TAGLIB)
-    file(GLOB TAGLIB_PARSER_SRC plugins/taglib/*)
-    add_library(TagLibParser SHARED ${TAGLIB_PARSER_SRC})
+    file(GLOB PLUGIN_TAGLIB_SRC plugins/taglib/*)
+    add_library(TagLibParser SHARED ${PLUGIN_TAGLIB_SRC})
     target_link_libraries(TagLibParser ${LIB_TAGLIB} ${LIB_ICONV})
 endif()
 
 if(WITH_PLUGIN_LIBCUE)
-    file(GLOB CUE_PACK_SRC plugins/libcue/*)
-    add_library(CueParser SHARED ${CUE_PACK_SRC})
+    file(GLOB PLUGIN_LIBCUE_SRC plugins/libcue/*)
+    add_library(CueParser SHARED ${PLUGIN_LIBCUE_SRC})
     target_link_libraries(CueParser ${LIB_CUE})
 endif()
 
-# PlayerStatistics plugin
-#if(WithPluginPlayerStatistics)
-#    file(GLOB PLAYERSTATISTICS_SRC plugins/PlayerStatistics/*)
-#    add_library(PlayerStatistics SHARED ${PLAYERSTATISTICS_SRC})
-#    target_link_libraries(PlayerStatistics)
-#endif()
-
-#==== Install Targets ====#
-install(TARGETS MousCore
-        LIBRARY DESTINATION lib)
-
-install(TARGETS mous-cli RUNTIME DESTINATION bin)
-
-if(WITH_APP_NCURSES)
-    install(TARGETS mous-ncurses
-        RUNTIME DESTINATION bin)
-endif()
-
-if(WITH_APP_QT5)
-    install(TARGETS mous-qt
-        RUNTIME DESTINATION bin)
-    install(
-        CODE "file(GLOB TRANSLATION_FILES \"${PROJECT_BINARY_DIR}/*.qm\")"
-        CODE "file(INSTALL \${TRANSLATION_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/mous/qt)"
-    )
-endif()
-
-if(WITH_SDK)
-    file(GLOB HEAD_FILES "${PROJECT_SOURCE_DIR}/sdk/*")
-    install(DIRECTORY ${HEAD_FILES} DESTINATION include/mous)
+# FIXME: broken
+if(WITH_PLUGIN_STATS AND FALSE)
+    file(GLOB PLUGIN_STATS_SRC plugins/stats/*)
+    add_library(Stats SHARED ${PLUGIN_STATS_SRC})
 endif()
 
 install(
     CODE "file(GLOB PLUGIN_FILES \"${PROJECT_BINARY_DIR}/plugins/*\")"
     CODE "file(INSTALL \${PLUGIN_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/mous)"
 )
+
+if(WITH_SDK)
+    file(GLOB HEAD_FILES "${PROJECT_SOURCE_DIR}/sdk/*")
+    install(DIRECTORY ${HEAD_FILES} DESTINATION include/mous)
+endif()
 
 #file(GLOB RESOURCE_FILES "${PROJECT_SOURCE_DIR}/resource/*")
 #install(DIRECTORY ${RESOURCE_FILES} DESTINATION share/mous)
