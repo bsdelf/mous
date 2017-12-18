@@ -326,7 +326,7 @@ if(WITH_PLUGIN_MAC)
     file(GLOB MAC_DECODER_SRC plugins/mac/*)
     add_library(MacDecoder SHARED ${MAC_DECODER_SRC} ${MAC_SDK_SRC})
     set_target_properties(MacDecoder PROPERTIES 
-        COMPILE_FLAGS "-DPLATFORM_LINUX -I${MOUS_SOURCE_DIR}/deps/MAC_SDK/Source/Shared")
+        COMPILE_FLAGS "-DPLATFORM_LINUX -I${PROJECT_SOURCE_DIR}/deps/MAC_SDK/Source/Shared")
     target_link_libraries(MacDecoder)
 endif()
 
@@ -400,7 +400,7 @@ if(WITH_APP_QT5)
 endif()
 
 if(WITH_SDK)
-    file(GLOB HEAD_FILES "${MOUS_SOURCE_DIR}/sdk/*")
+    file(GLOB HEAD_FILES "${PROJECT_SOURCE_DIR}/sdk/*")
     install(DIRECTORY ${HEAD_FILES} DESTINATION include/mous)
 endif()
 
@@ -409,17 +409,30 @@ install(
     CODE "file(INSTALL \${PLUGIN_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/mous)"
 )
 
-#file(GLOB RESOURCE_FILES "${MOUS_SOURCE_DIR}/resource/*")
+#file(GLOB RESOURCE_FILES "${PROJECT_SOURCE_DIR}/resource/*")
 #install(DIRECTORY ${RESOURCE_FILES} DESTINATION share/mous)
 
 #==== Messages ====#
 message(STATUS "CMake Version:  " ${CMAKE_VERSION})
+message(STATUS "Processor:      " ${CMAKE_SYSTEM_PROCESSOR})
 message(STATUS "System Name:    " ${CMAKE_SYSTEM_NAME})
 message(STATUS "System Version: " ${CMAKE_SYSTEM_VERSION})
 message(STATUS "C Compiler:     " ${CMAKE_C_COMPILER})
 message(STATUS "C++ Compiler:   " ${CMAKE_CXX_COMPILER})
-message(STATUS "Processor:      " ${CMAKE_SYSTEM_PROCESSOR})
-message(STATUS "Build Type:     " ${CMAKE_BUILD_TYPE})
-message(STATUS "Project Root:   " ${MOUS_SOURCE_DIR})
+message(STATUS "Source Root:    " ${PROJECT_SOURCE_DIR})
 message(STATUS "Build Root:     " ${PROJECT_BINARY_DIR})
-message(STATUS "For Arch:       " ${BITNESS})
+message(STATUS "Build Type:     " ${CMAKE_BUILD_TYPE})
+
+function(print_options prefix)
+    get_cmake_property(VARIABLE_NAMES VARIABLES)
+    foreach(name ${VARIABLE_NAMES})
+        if("${name}" MATCHES "^WITH_${prefix}_[A-Z0-9_]+$" AND "${${name}}")
+            message(STATUS "${name}")
+        endif()
+    endforeach()
+endfunction(print_options)
+
+message(STATUS "----- Options -----")
+print_options("APP")
+print_options("PLUGIN")
+message(STATUS "-------------------")
