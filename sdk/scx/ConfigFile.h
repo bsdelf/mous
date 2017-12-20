@@ -87,11 +87,10 @@ class ConfigFile
         return true;
     }
 
-    bool Save(const std::string& _file = "") const
+    bool Save(std::string file = "") const
     {
         using namespace std;
 
-        string file(_file);
         if (file.empty()) {
             if (m_File.empty())
                 return false;
@@ -232,10 +231,10 @@ class ConfigFile
         std::string key;
         std::string val;
 
-        explicit Line(bool _iskv, const std::string& _key, const std::string& _val = "")
-          : iskv(_iskv)
-          , key(_key)
-          , val(_val)
+        explicit Line(bool iskv, const std::string& key, const std::string& val = "")
+          : iskv(iskv)
+          , key(key)
+          , val(val)
         {
         }
     };

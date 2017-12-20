@@ -23,13 +23,21 @@ enum e
     Other
 };
 
-static const char* Name[] = { "None", "Regular", "Directory", "Character Special", "Block", "Pipe/FIFO",
-                              "Link", "Socket",  "Other" };
-
-static inline std::string
+inline std::string
 ToString(e type)
 {
-    return Name[type];
+    const char* names[] = {
+        "None",
+        "Regular",
+        "Directory",
+        "Character Special",
+        "Block",
+        "Pipe/FIFO",
+        "Link",
+        "Socket",
+        "Other"
+    };
+    return names[type];
 }
 }
 using EmFileType = FileType::e;

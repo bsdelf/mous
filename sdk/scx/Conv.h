@@ -8,7 +8,7 @@
 namespace scx {
 
 template<typename num_t>
-static inline num_t
+inline num_t
 StrToNum(const std::string& str, std::ios_base& (*base)(std::ios_base&) = std::dec)
 {
     std::stringstream stream;
@@ -19,7 +19,7 @@ StrToNum(const std::string& str, std::ios_base& (*base)(std::ios_base&) = std::d
 }
 
 template<typename num_t>
-static inline std::string
+inline std::string
 NumToStr(const num_t& num, std::streamsize precision = 0, std::ios_base& (*base)(std::ios_base&) = std::dec)
 {
     std::stringstream stream;
@@ -29,7 +29,7 @@ NumToStr(const num_t& num, std::streamsize precision = 0, std::ios_base& (*base)
     return stream.str();
 }
 
-static inline std::string
+inline std::string
 ToLower(const std::string& str)
 {
     std::string lower;
@@ -38,7 +38,7 @@ ToLower(const std::string& str)
     return lower;
 }
 
-static inline std::string
+inline std::string
 ToUpper(const std::string& str)
 {
     std::string upper;
@@ -48,12 +48,12 @@ ToUpper(const std::string& str)
 }
 
 /*
-static inline bool IsLower(const string& str)
+inline bool IsLower(const string& str)
 {
     return true;
 }
 
-static inline bool IsUpper(const string& str)
+inline bool IsUpper(const string& str)
 {
     return true;
 }

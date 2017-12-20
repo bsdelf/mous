@@ -9,7 +9,7 @@ namespace scx {
 
 namespace IconvHelper {
 
-static inline bool
+inline bool
 ConvFromTo(const std::string& srcEncoding,
            const std::string& destEncoding,
            const char* srcBuf,
@@ -67,7 +67,7 @@ ConvFromTo(const std::string& srcEncoding,
     return ok;
 }
 
-static inline bool
+inline bool
 ConvFromTo(const std::string& srcEncoding, const std::string& destEncoding, const char* srcBuf, size_t srcLen, std::string& dest)
 {
     std::vector<char> workBuf;

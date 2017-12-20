@@ -40,19 +40,15 @@ class InetAddr
     }
 
     InetAddr(const std::string& ip, int port)
+        : InetAddr()
     {
-        bzero(&m_Addr, sizeof(m_Addr));
-        m_Addr.sin_family = AF_INET;
-        inet_pton(AF_INET, ip.c_str(), &m_Addr.sin_addr);
-        m_Addr.sin_port = htons(port);
+        Assign(ip, port);
     }
 
     explicit InetAddr(int port)
+        : InetAddr()
     {
-        bzero(&m_Addr, sizeof(m_Addr));
-        m_Addr.sin_family = AF_INET;
-        m_Addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        m_Addr.sin_port = htons(port);
+        Assign(port);
     }
 
     void Assign(const std::string& ip, int port)

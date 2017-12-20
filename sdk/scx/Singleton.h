@@ -11,20 +11,20 @@ class Singleton
   public:
     static std::shared_ptr<T> Instance()
     {
-        std::call_once(_flag, [] { _instance = std::make_shared<T>(); });
-        return _instance;
+        std::call_once(flag_, [] { instance_ = std::make_shared<T>(); });
+        return instance_;
     }
 
-    static void Cleanup() { _instance.reset(); }
+    static void Cleanup() { instance_.reset(); }
 
   private:
-    static std::once_flag _flag;
-    static std::shared_ptr<T> _instance;
+    static std::once_flag flag_;
+    static std::shared_ptr<T> instance_;
 };
 
 template<typename T>
-std::once_flag Singleton<T>::_flag;
+std::once_flag Singleton<T>::flag_;
 
 template<typename T>
-std::shared_ptr<T> Singleton<T>::_instance = nullptr;
+std::shared_ptr<T> Singleton<T>::instance_ = nullptr;
 }

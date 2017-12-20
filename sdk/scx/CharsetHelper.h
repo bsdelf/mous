@@ -13,7 +13,7 @@ namespace CharsetHelper {
 static const wchar_t bad_wchar = 0xFFFD;
 
 // depends on locale
-static inline std::string
+inline std::string
 WStringToMBStr(const std::wstring& str)
 {
     using namespace std;
@@ -28,7 +28,7 @@ WStringToMBStr(const std::wstring& str)
  * NOTE: call setlocale() before use this function
  * This function is equivalent to wcwidth() for multibyte characters.
  */
-static inline int
+inline int
 MBWidth(const char* c, bool useUtf8 = true)
 {
     wchar_t wc;
@@ -53,7 +53,7 @@ MBWidth(const char* c, bool useUtf8 = true)
     }
 }
 
-static inline int
+inline int
 MBStrWidth(const std::string& str)
 {
     int width = 0;
@@ -72,13 +72,13 @@ MBStrWidth(const std::string& str)
     return width;
 }
 
-static inline int
+inline int
 MBStrLen(const std::string& str)
 {
     return mbstowcs(nullptr, str.c_str(), str.size());
 }
 
-static inline std::string
+inline std::string
 MBSubStr(const std::string& str, int n, int ignoreN = 0)
 {
     const char* const s = str.c_str();
@@ -104,7 +104,7 @@ MBSubStr(const std::string& str, int n, int ignoreN = 0)
 
 // Another way is binary search algorithm
 // (Of course should based on MBSubStr(), not str.size()/2 !)
-static inline std::string
+inline std::string
 MBWidthStr(const std::string& str, int width)
 {
     const char* const s = str.c_str();
@@ -128,7 +128,7 @@ MBWidthStr(const std::string& str, int width)
 }
 
 // COPYRIGHT: http://stackoverflow.com/questions/1031645/how-to-detect-utf-8-in-plain-c
-static inline bool
+inline bool
 IsUtf8(const char* string)
 {
     if (string == nullptr)

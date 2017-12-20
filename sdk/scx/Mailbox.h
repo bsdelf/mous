@@ -26,52 +26,52 @@ class Mailbox
     template<typename T>
     void PushBack(T&& mail)
     {
-        std::lock_guard<std::mutex> locker(_mutex);
-        _queue.push_back(std::forward<T>(mail));
-        _condition.notify_all();
+        std::lock_guard<std::mutex> locker(mutex_);
+        queue_.push_back(std::forward<T>(mail));
+        condition_.notify_all();
     }
 
     template<typename... Args>
     void EmplaceBack(Args&&... args)
     {
-        std::lock_guard<std::mutex> locker(_mutex);
-        _queue.emplace_back(std::forward<Args>(args)...);
-        _condition.notify_all();
+        std::lock_guard<std::mutex> locker(mutex_);
+        queue_.emplace_back(std::forward<Args>(args)...);
+        condition_.notify_all();
     }
 
     template<typename T>
     void PushFront(T&& mail)
     {
-        std::lock_guard<std::mutex> locker(_mutex);
-        _queue.push_front(std::forward<T>(mail));
-        _condition.notify_all();
+        std::lock_guard<std::mutex> locker(mutex_);
+        queue_.push_front(std::forward<T>(mail));
+        condition_.notify_all();
     }
 
     template<typename... Args>
     void EmplaceFront(Args&&... args)
     {
-        std::lock_guard<std::mutex> locker(_mutex);
-        _queue.emplace_front(std::forward<Args>(args)...);
-        _condition.notify_all();
+        std::lock_guard<std::mutex> locker(mutex_);
+        queue_.emplace_front(std::forward<Args>(args)...);
+        condition_.notify_all();
     }
 
     auto Take()
     {
-        std::unique_lock<std::mutex> locker(_mutex);
-        _condition.wait(locker, [this] { return not _queue.empty(); });
-        auto mail = std::move(_queue.front());
-        _queue.pop_front();
+        std::unique_lock<std::mutex> locker(mutex_);
+        condition_.wait(locker, [this] { return not queue_.empty(); });
+        auto mail = std::move(queue_.front());
+        queue_.pop_front();
         return mail;
     }
 
     auto TryTake()
     {
-        std::unique_lock<std::mutex> locker(_mutex);
-        if (_queue.empty()) {
+        std::unique_lock<std::mutex> locker(mutex_);
+        if (queue_.empty()) {
             return Mail();
         }
-        auto mail = std::move(_queue.front());
-        _queue.pop_front();
+        auto mail = std::move(queue_.front());
+        queue_.pop_front();
         return mail;
     }
 
@@ -95,29 +95,29 @@ class Mailbox
 
     void Wait(size_t n)
     {
-        std::unique_lock<std::mutex> locker(_mutex);
-        _condition.wait(locker, [this, n] { return _queue.size() >= n; });
+        std::unique_lock<std::mutex> locker(mutex_);
+        condition_.wait(locker, [this, n] { return queue_.size() >= n; });
     }
 
     void Clear()
     {
-        std::lock_guard<std::mutex> locker(_mutex);
-        _queue.clear();
+        std::lock_guard<std::mutex> locker(mutex_);
+        queue_.clear();
     }
 
     void Shrink()
     {
-        std::lock_guard<std::mutex> locker(_mutex);
-        _queue.shrink_to_fit();
+        std::lock_guard<std::mutex> locker(mutex_);
+        queue_.shrink_to_fit();
     }
 
-    auto Size() const { return _queue.size(); }
+    auto Size() const { return queue_.size(); }
 
-    auto Empty() const { return _queue.empty(); }
+    auto Empty() const { return queue_.empty(); }
 
   private:
-    std::mutex _mutex;
-    std::condition_variable _condition;
-    std::deque<Mail> _queue;
+    std::mutex mutex_;
+    std::condition_variable condition_;
+    std::deque<Mail> queue_;
 };
 }
