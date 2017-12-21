@@ -14,7 +14,7 @@ Core:
 
 Plugin:
 
-- sndio output
+- Use AudioToolbox to decode, encode formats on macOS
 - PulseAudio output
 - libmad decoder
 - MP4 插件的 AAC 支持
