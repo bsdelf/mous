@@ -33,17 +33,17 @@ public:
     virtual uint64_t Duration() const;
 
 private:
-    mpg123_handle* m_pHandle;
+    mpg123_handle* handle_;
 
-    uint32_t m_MaxBytesPerUnit;
-    uint64_t m_UnitIndex;
-    uint64_t m_UnitCount;
+    uint32_t max_bytes_per_unit_;
+    uint64_t unit_index_;
+    uint64_t unit_count_;
 
-    int32_t m_Channels;
-    int32_t m_BitsPerSample;
-    int32_t m_SampleRate;
-    int32_t m_BitRate;
-    uint64_t m_Duration;
+    int32_t channels_;
+    int32_t bits_per_sample_;
+    int32_t sample_rate_;
+    int32_t bit_rate_;
+    uint64_t duration_;
 };
 
 #endif

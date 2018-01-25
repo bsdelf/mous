@@ -2,26 +2,25 @@
 
 #include <unistd.h> // for off_t
 #include <string.h>
+#include <cassert>
 
 Mpg123Decoder::Mpg123Decoder()
 {
-    int ret = mpg123_init();
-    mpg123_pars* pars = mpg123_new_pars(&ret);
-    const char** decoders = mpg123_supported_decoders();
-
-    m_pHandle = mpg123_parnew(pars, decoders[0], &ret);
+    int error = mpg123_init();
+    auto pars = mpg123_new_pars(&error);
+    auto decoders = mpg123_supported_decoders();
+    assert(decoders && decoders[0]);
+    handle_ = mpg123_parnew(pars, decoders[0], &error);
     mpg123_delete_pars(pars);
-
-    mpg123_param(m_pHandle, MPG123_FLAGS, MPG123_QUIET, 0);
-
-    m_MaxBytesPerUnit = mpg123_outblock(m_pHandle);
+    mpg123_param(handle_, MPG123_FLAGS, MPG123_QUIET, 0);
+    max_bytes_per_unit_ = mpg123_safe_buffer();
 }
 
 Mpg123Decoder::~Mpg123Decoder()
 {
-    if (m_pHandle != nullptr) {
-        mpg123_close(m_pHandle);
-        mpg123_delete(m_pHandle);
+    if (handle_ != nullptr) {
+        mpg123_close(handle_);
+        mpg123_delete(handle_);
     }
     mpg123_exit();
 }
@@ -33,41 +32,51 @@ vector<string> Mpg123Decoder::FileSuffix() const
 
 ErrorCode Mpg123Decoder::Open(const std::string& url)
 {
-    if (m_pHandle == nullptr)
+    if (!handle_) {
         return ErrorCode::DecoderFailedToInit;
+    }
 
-    if (mpg123_open(m_pHandle, url.c_str()) != MPG123_OK)
+    if (mpg123_open(handle_, url.c_str()) != MPG123_OK) {
         return ErrorCode::DecoderFailedToOpen;
+    }
 
-    mpg123_scan(m_pHandle);
-    mpg123_seek_frame(m_pHandle, 0, SEEK_END);
-    m_UnitCount = mpg123_tellframe(m_pHandle);
-    mpg123_seek_frame(m_pHandle, 0, SEEK_SET);
+    mpg123_scan(handle_);
+    mpg123_seek_frame(handle_, 0, SEEK_END);
+    unit_count_ = mpg123_tellframe(handle_);
+    mpg123_seek_frame(handle_, 0, SEEK_SET);
 
-    if (m_UnitCount <= 0)
+    if (unit_count_ <= 0) {
         return ErrorCode::DecoderFailedToOpen;
+    }
 
     long sampleRate;
     int channels;
     int encoding;
-    mpg123_getformat(m_pHandle, &sampleRate, &channels, &encoding);
+    mpg123_getformat(handle_, &sampleRate, &channels, &encoding);
 
-    m_Channels = channels;
-    m_SampleRate = sampleRate;
-    m_BitsPerSample = (encoding == MPG123_ENC_SIGNED_16) || 
-        (encoding = MPG123_ENC_UNSIGNED_16) || 
-        (encoding == MPG123_ENC_16) ? 16: 8;
+    channels_ = channels;
+    sample_rate_ = sampleRate;
+    switch (encoding) {
+        case MPG123_ENC_SIGNED_16:
+        case MPG123_ENC_UNSIGNED_16:
+        case MPG123_ENC_16:
+            bits_per_sample_ = 16;
+            break;
+        default:
+            bits_per_sample_ = 8;
+    }
 
-    m_Duration = mpg123_tpf(m_pHandle) * 1000.f * m_UnitCount;
-    m_UnitIndex = 0;
+    duration_ = mpg123_tpf(handle_) * 1000.f * unit_count_;
+    unit_index_ = 0;
 
     return ErrorCode::Ok;
 }
 
 void Mpg123Decoder::Close()
 {
-    if (m_pHandle != nullptr)
-        mpg123_close(m_pHandle);
+    if (handle_ != nullptr) {
+        mpg123_close(handle_);
+    }
 }
 
 bool Mpg123Decoder::IsFormatVaild() const
@@ -77,49 +86,48 @@ bool Mpg123Decoder::IsFormatVaild() const
 
 ErrorCode Mpg123Decoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
-    mpg123_frameinfo info;
-    mpg123_info(m_pHandle, &info);
-    m_BitRate = info.bitrate;
-
-    if (m_UnitIndex < m_UnitCount) {
-        unsigned char* _data;
-        size_t _len;
-        mpg123_decode_frame(m_pHandle, (off_t*)&m_UnitIndex, &_data, &_len);
-        memcpy(data, _data, _len);
-        used = _len;
-        unitCount = 1;
-        ++m_UnitIndex;
-        return ErrorCode::Ok;
-    } else {
+    if (unit_index_ >= unit_count_) {
         used = 0;
         return ErrorCode::DecoderOutOfRange;
     }
+
+    mpg123_frameinfo info;
+    mpg123_info(handle_, &info);
+    bit_rate_ = info.bitrate;
+
+    size_t _len;
+    mpg123_replace_buffer(handle_, reinterpret_cast<unsigned char*>(data), max_bytes_per_unit_);
+    mpg123_decode_frame(handle_, (off_t*)&unit_index_, nullptr, &_len);
+    used = _len;
+    unitCount = 1;
+    ++unit_index_;
+
+    return ErrorCode::Ok;
 }
 
 ErrorCode Mpg123Decoder::SetUnitIndex(uint64_t index)
 {
-    if (index < m_UnitCount) {
-        m_UnitIndex = index;
-        mpg123_seek_frame(m_pHandle, m_UnitIndex, SEEK_SET);
-        return ErrorCode::Ok;
-    } else {
+    if (index >= unit_count_) {
         return ErrorCode::DecoderOutOfRange;
     }
+    unit_index_ = index;
+    mpg123_seek_frame(handle_, unit_index_, SEEK_SET);
+    return ErrorCode::Ok;
 }
 
 uint32_t Mpg123Decoder::MaxBytesPerUnit() const
 {
-    return m_MaxBytesPerUnit;
+    return max_bytes_per_unit_;
 }
 
 uint64_t Mpg123Decoder::UnitIndex() const
 {
-    return m_UnitIndex;
+    return unit_index_;
 }
 
 uint64_t Mpg123Decoder::UnitCount() const
 {
-    return m_UnitCount;
+    return unit_count_;
 }
 
 AudioMode Mpg123Decoder::AudioMode() const
@@ -129,25 +137,25 @@ AudioMode Mpg123Decoder::AudioMode() const
 
 int32_t Mpg123Decoder::Channels() const
 {
-    return m_Channels;
+    return channels_;
 }
 
 int32_t Mpg123Decoder::BitsPerSample() const
 {
-    return m_BitsPerSample;
+    return bits_per_sample_;
 }
 
 int32_t Mpg123Decoder::SampleRate() const
 {
-    return m_SampleRate;
+    return sample_rate_;
 }
 
 int32_t Mpg123Decoder::BitRate() const
 {
-    return m_BitRate; 
+    return bit_rate_; 
 }
 
 uint64_t Mpg123Decoder::Duration() const
 {
-    return m_Duration;
+    return duration_;
 }
