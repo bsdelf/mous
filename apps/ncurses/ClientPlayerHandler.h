@@ -19,13 +19,12 @@ class ClientPlayerHandler
 public:
     struct PlayerStatus
     {
-        bool playing;
-
+        bool playing = false;
+        int32_t sampleRate = 0;
+        uint64_t duration = 0;
+        uint64_t pos = 0;
+        int32_t bitRate = 0;
         MediaItem item;
-        int32_t sampleRate;
-        uint64_t duration;
-        uint64_t pos;
-        int32_t bitRate;
     };
 
 private:
