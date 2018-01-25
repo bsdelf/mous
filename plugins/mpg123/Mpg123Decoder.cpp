@@ -7,11 +7,9 @@
 Mpg123Decoder::Mpg123Decoder()
 {
     int error = mpg123_init();
-    auto pars = mpg123_new_pars(&error);
     auto decoders = mpg123_supported_decoders();
     assert(decoders && decoders[0]);
-    handle_ = mpg123_parnew(pars, decoders[0], &error);
-    mpg123_delete_pars(pars);
+    handle_ = mpg123_parnew(nullptr, decoders[0], &error);
     mpg123_param(handle_, MPG123_FLAGS, MPG123_QUIET, 0);
     max_bytes_per_unit_ = mpg123_safe_buffer();
 }
