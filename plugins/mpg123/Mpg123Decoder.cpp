@@ -10,7 +10,7 @@ Mpg123Decoder::Mpg123Decoder()
     auto decoders = mpg123_supported_decoders();
     assert(decoders && decoders[0]);
     handle_ = mpg123_parnew(nullptr, decoders[0], &error);
-    mpg123_param(handle_, MPG123_FLAGS, MPG123_QUIET, 0);
+    mpg123_param(handle_, MPG123_FLAGS, MPG123_QUIET | MPG123_SKIP_ID3V2, 0);
     max_bytes_per_unit_ = mpg123_safe_buffer();
 }
 
