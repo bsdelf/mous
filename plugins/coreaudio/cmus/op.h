@@ -78,5 +78,6 @@ extern const struct output_plugin_ops op_pcm_ops;
 extern const struct output_plugin_opt op_pcm_options[];
 extern const int op_priority;
 extern const unsigned op_abi_version;
+extern void op_pcm_wait(uint32_t);
 
 #endif

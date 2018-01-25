@@ -3,8 +3,10 @@
 using namespace std;
 #include <unistd.h>
 
+extern "C" {
 #include "cmus/op.h"
 #include "cmus/mixer.h"
+}
 
 const char* program_name = "CoreAudioRenderer";
 
@@ -47,13 +49,7 @@ ErrorCode CoreAudioRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32
 ErrorCode CoreAudioRenderer::Write(const char* buf, uint32_t len)
 {
     op_pcm_ops.write(buf, static_cast<int>(len));
-    while (1) {
-        const int space = op_pcm_ops.buffer_space();
-        if (space >= len) {
-            break;
-        }
-        usleep(10*1000);
-    }
+    op_pcm_wait(len);
     return ErrorCode::Ok;
 }
 

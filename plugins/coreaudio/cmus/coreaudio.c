@@ -25,6 +25,7 @@
 #include <stdatomic.h>
 #include <AudioUnit/AudioUnit.h>
 #include <CoreAudio/CoreAudio.h>
+#include <pthread.h>
 
 #include "debug.h"
 #include "op.h"
@@ -104,6 +105,9 @@ static size_t coreaudio_ring_buffer_write_regions(coreaudio_ring_buffer_t *rbuf,
 static size_t coreaudio_ring_buffer_advance_write_index(coreaudio_ring_buffer_t *rbuf, size_t num_of_bytes);
 static size_t coreaudio_ring_buffer_read_regions(coreaudio_ring_buffer_t *rbuf, size_t num_of_bytes, char **data_ptr1, size_t *size_ptr1, char **data_ptr2, size_t *size_ptr2);
 static size_t coreaudio_ring_buffer_advance_read_index(coreaudio_ring_buffer_t *rbuf, size_t num_of_bytes);
+
+static pthread_mutex_t wait_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t wait_cond = PTHREAD_COND_INITIALIZER;
 
 static int coreaudio_ring_buffer_init(coreaudio_ring_buffer_t *rbuf, size_t num_of_bytes)
 {
@@ -270,6 +274,9 @@ static OSStatus coreaudio_play_callback(void *user_data,
 	buflist->mBuffers[0].mDataByteSize = coreaudio_ring_buffer_read(&coreaudio_ring_buffer,
 									buflist->mBuffers[0].mData,
 									count);
+	pthread_mutex_lock(&wait_mutex);
+	pthread_cond_signal(&wait_cond);
+	pthread_mutex_unlock(&wait_mutex);								
  	return noErr;
 }
 
@@ -950,7 +957,6 @@ const struct output_plugin_ops op_pcm_ops = {
 	.buffer_space = coreaudio_buffer_space,
 };
 
-
 const struct mixer_plugin_ops op_mixer_ops = {
 	.init       = coreaudio_mixer_dummy,
 	.exit       = coreaudio_mixer_dummy,
@@ -967,6 +973,15 @@ const struct output_plugin_opt op_pcm_options[] = {
 	OPT(coreaudio, sync_sample_rate),
 	{ NULL },
 };
+
+void op_pcm_wait(uint32_t len)
+{
+	pthread_mutex_lock(&wait_mutex);
+	while (coreaudio_buffer_space() < len) {
+		pthread_cond_wait(&wait_cond, &wait_mutex);
+	}
+	pthread_mutex_unlock(&wait_mutex);
+}
 
 const struct mixer_plugin_opt op_mixer_options[] = {
 	{ NULL },
