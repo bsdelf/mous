@@ -1,188 +1,116 @@
-# New ports collection makefile for:	mous
-# Date created:			15 Jan 2012
-# Whom:					Yanhui Shen <shen.elf@gmail.com>
+# $FreeBSD: head/audio/mous/Makefile $
 
-PORTNAME=		mous
-PORTVERSION=	1.0a
-CATEGORIES=		audio
-MASTER_SITES=	http://cloud.github.com/downloads/0x02/mous/
-DISTNAME=		${PORTNAME}-1.0a
+PORTNAME=	mous
+PORTVERSION=	2.0.0
+DISTVERSIONPREFIX= v
+CATEGORIES=	audio
+MASTER_SITES=	GH
 
-MAINTAINER=		shen.elf@gmail.com
-COMMENT=		A simple yet powerful audio player
+MAINTAINER=	shen.elf@gmail.com
+COMMENT=	Simple yet powerful audio player
 
-LICENSE=		BSD
-LICENSE_FILE=	${WRKSRC}/COPYRIGHT
+LICENSE=	BSD2CLAUSE
+LICENSE_FILE=	${WRKSRC}/LICENSE
 
-USE_BZIP2=		yes
-USE_CMAKE=		yes
-MAKE_JOBS_SAFE= no
+USES=		cmake:outsource compiler:c++14-lang
 
-OPTIONS=		SDK		"Install SDK" off\
-				ASSEMBLY "Enable assembly optimize" on \
-				NCURSES	"ncurses frontend" on \
-				QT4		"QT4 frontend" on \
-				OSS		"OSS output plugin(recommended)" on \
-				ALSA	"ALSA output plugin" off \
-				LIBAO	"libao output plugin" off \
-				TAGLIB	"TagLib plugin(recommended)" on \
-				LIBCUE	"libcue plugin(*.cue)" on \
-				WAVDECODER	"Decode Wav(*.wav)" on \
-				WAVENCODER	"Encode Wav" on \
-				FAAD	"faad plugin(*.m4a)" on \
-				FAAC	"faac plugin" on \
-				MPG123	"mpg123 plugin(*.mp3)" on \
-				LAME	"lame plugin " on \
-				WMA	"wma decoder plugin(*.wma)" on \
-				MAC4DECODER	"Newest mac4.11 decoder(*.ape)" on \
-				MACDECODER	"Old mac3.99 ape decoder(*.ape)" off \
-				FLACDECODER	"flac decoder(*.flac)" on
+USE_LDCONFIG=	yes
+USE_GITHUB=	yes
+GH_ACCOUNT=	bsdelf
+GH_TAGNAME=	v2.0.0
 
-.include <bsd.port.options.mk>
+OPTIONS_GROUP=	APPLICATION GENERIC_PLUGIN CODEC_PLUGIN
+OPTIONS_GROUP_APPLICATION=	CLI NCURSES QT5
+OPTIONS_GROUP_GENERIC_PLUGIN=	LIBCUE TAGLIB
+OPTIONS_GROUP_CODEC_PLUGIN=	FDK_AAC FLAC LAME MAC \
+				MPG123 VORBIS WAV WAVPACK
 
-.if defined(WITH_SDK)
-CMAKE_ARGS+= -DWithHeadFiles=1
-PLIST_SUB+= SDK=""
-.else
-CMAKE_ARGS+= -DWithHeadFiles=0
-PLIST_SUB+= SDK="@comment "
-.endif
-.if defined(WITH_ASSEMBLY)
-BUILD_DEPENDS+= ${LOCALBASE}/bin/yasm:${PORTSDIR}/devel/yasm
-CMAKE_ARGS+= -DWithAssembly=1
-.else
-CMAKE_ARGS+= -DWithAssembly=0
-.endif
-.if defined(WITH_NCURSES)
-USE_NCURSES= yes
-CMAKE_ARGS+= -DWithFrontendNcurses=1
-PLIST_SUB+= NCURSES=""
-.else
-CMAKE_ARGS+= -DWithFrontendNcurses=0
-PLIST_SUB+= NCURSES="@comment "
-.endif
-.if defined(WITH_QT4)
-USE_QT4= gui corelib moc_build rcc_build uic_build linguist_build
-CMAKE_ARGS+= -DWithFrontendQt=1
-PLIST_SUB+= QT4=""
-.else
-CMAKE_ARGS+= -DWithFrontendQt=0
-PLIST_SUB+= QT4="@comment "
-.endif
-.if defined(WITH_OSS)
-CMAKE_ARGS+= -DWithPluginOssRenderer=1
-PLIST_SUB+= OSS=""
-.else
-CMAKE_ARGS+= -DWithPluginOssRenderer=0
-PLIST_SUB+= OSS="@comment "
-.endif
-.if defined(WITH_ALSA)
-LIB_DEPENDS+= asound:${PORTSDIR}/audio/alsa-lib
-CMAKE_ARGS+= -DWithPluginAlsaRenderer=1
-PLIST_SUB+= ALSA=""
-.else
-CMAKE_ARGS+= -DWithPluginAlsaRenderer=0
-PLIST_SUB+= ALSA="@comment "
-.endif
-.if defined(WITH_LIBAO)
-LIB_DEPENDS+= libao:${PORTSDIR}/audio/libao
-CMAKE_ARGS+= -DWithPluginAoRenderer=1
-PLIST_SUB+= AO=""
-.else
-CMAKE_ARGS+= -DWithPluginAoRenderer=0
-PLIST_SUB+= AO="@comment "
-.endif
-.if defined(WITH_TAGLIB)
-LIB_DEPENDS+= tag:${PORTSDIR}/audio/taglib
-CMAKE_ARGS+= -DWithPluginTagLibParser=1
-PLIST_SUB+= TAGLIB=""
-.else
-CMAKE_ARGS+= -DWithPluginTagLibParser=0
-PLIST_SUB+= TAGLIB="@comment "
-.endif
-.if defined(WITH_LIBCUE)
-LIB_DEPENDS+= cue:${PORTSDIR}/textproc/libcue
-CMAKE_ARGS+= -DWithPluginCuePack=1
-PLIST_SUB+= CUE=""
-.else
-CMAKE_ARGS+= -DWithPluginCuePack=0
-PLIST_SUB+= CUE="@comment "
-.endif
-.if defined(WITH_WAVDECODER)
-CMAKE_ARGS+= -DWithPluginWavDecoder=1
-PLIST_SUB+= WAVDECODER=""
-.else
-CMAKE_ARGS+= -DWithPluginWavEncoder=0
-PLIST_SUB+= WAVDECODER="@comment "
-.endif
-.if defined(WITH_WAVENCODER)
-CMAKE_ARGS+= -DWithPluginWavEncoder=1
-PLIST_SUB+= WAVENCODER=""
-.else
-CMAKE_ARGS+= -DWithPluginWavEncoder=0
-PLIST_SUB+= WAVENCODER="@comment "
-.endif
-.if defined(WITH_FAAD)
-LIB_DEPENDS+= faad:${PORTSDIR}/audio/faad
-CMAKE_ARGS+= -DWithPluginFaadDecoder=1
-PLIST_SUB+= FAAD=""
-.else
-CMAKE_ARGS+= -DWithPluginFaadEncoder=0
-PLIST_SUB+= FAAD="@comment "
-.endif
-.if defined(WITH_FAAC)
-LIB_DEPENDS+= faac:${PORTSDIR}/audio/faac
-CMAKE_ARGS+= -DWithPluginFaacEncoder=1
-PLIST_SUB+= FAAC=""
-.else
-CMAKE_ARGS+= -DWithPluginFaacEncoder=0
-PLIST_SUB+= FAAC="@comment "
-.endif
-.if defined(WITH_MPG123)
-LIB_DEPENDS+= mpg123:${PORTSDIR}/audio/mpg123
-CMAKE_ARGS+= -DWithPluginMpg123Decoder=1
-PLIST_SUB+= MPG123=""
-.else
-CMAKE_ARGS+= -DWithPluginMpg123Decoder=0
-PLIST_SUB+= MPG123="@comment "
-.endif
-.if defined(WITH_LAME)
-LIB_DEPENDS+= mp3lame:${PORTSDIR}/audio/lame
-CMAKE_ARGS+= -DWithPluginLameEncoder=1
-PLIST_SUB+= LAME=""
-.else
-CMAKE_ARGS+= -DWithPluginLameEncoder=0
-PLIST_SUB+= LAME="@comment "
-.endif
-.if defined(WITH_WMA)
-CMAKE_ARGS+= -DWithPluginWmaDecoder=1
-PLIST_SUB+= WMA=""
-.else
-CMAKE_ARGS+= -DWithPluginWmaDecoder=0
-PLIST_SUB+= WMA="@comment "
-.endif
-.if defined(WITH_MAC4DECODER)
-CMAKE_ARGS+= -DWithPluginMac4Decoder=1
-PLIST_SUB+= MAC4=""
-.else
-CMAKE_ARGS+= -DWithPluginMac4Decoder=0
-PLIST_SUB+= MAC4="@comment "
-.endif
-.if defined(WITH_MACDECODER)
-LIB_DEPENDS+= mac:${PORTSDIR}/audio/mac
-CMAKE_ARGS+= -DWithPluginMacDecoder=1
-PLIST_SUB+= MAC=""
-.else
-CMAKE_ARGS+= -DWithPluginMacDecoder=0
-PLIST_SUB+= MAC="@comment "
-.endif
-.if defined(WITH_FLACDECODER)
-LIB_DEPENDS+= FLAC:${PORTSDIR}/audio/flac
-CMAKE_ARGS+= -DWithPluginFlacDecoder=1
-PLIST_SUB+= FLACDECODER=""
-.else
-CMAKE_ARGS+= -DWithPluginFlacDecoder=0
-PLIST_SUB+= FLACDECODER="@comment "
-.endif
+OPTIONS_RADIO=	OUTPUT_PLUGIN
+OPTIONS_RADIO_OUTPUT_PLUGIN=	OSS SNDIO
+
+OPTIONS_DEFAULT=	CLI NCURSES \
+			LIBCUE TAGLIB \
+			FDK_AAC FLAC LAME LIBCUE MAC \
+			MPG123 VORBIS WAV WAVPACK \
+			OSS
+
+OPTIONS_SUB=		yes
+
+CMAKE_ARGS+=	-DWITH_PLUGIN_ALSA=0 \
+		-DWITH_PLUGIN_LIBAO=0 \
+		-DWITH_PLUGIN_COREAUDIO=0 \
+		-DWITH_PLUGIN_FAAC=0 \
+		-DWITH_PLUGIN_FAAD=0 \
+		-DWITH_PLUGIN_WMA=0
+
+CLI_DESC=		Command line interface support
+CLI_CMAKE_ON=	-DWITH_APP_CLI=1
+CLI_CMAKE_OFF=	-DWITH_APP_CLI=0
+
+NCURSES_USE=		ncurses
+NCURSES_CMAKE_ON=	-DWITH_APP_NCURSES=1
+NCURSES_CMAKE_OFF=	-DWITH_APP_NCURSES=0
+
+QT5_USE=			qt5=core,gui,widgets,qmake_build
+QT5_CMAKE_ON=		-DWITH_APP_QT5=1
+QT5_CMAKE_OFF=		-DWITH_APP_QT5=0
+
+TAGLIB_DESC=		TagLib support
+TAGLIB_LIB_DEPENDS=	libtag.so:audio/taglib
+TAGLIB_CMAKE_ON=	-DWITH_PLUGIN_TAGLIB=1
+TAGLIB_CMAKE_OFF=	-DWITH_PLUGIN_TAGLIB=0
+
+OSS_CMAKE_ON=		-DWITH_PLUGIN_OSS=1
+OSS_CMAKE_OFF=		-DWITH_PLUGIN_OSS=0
+
+SNDIO_LIB_DEPENDS=	libsndio.so:audio/sndio
+SNDIO_CMAKE_ON=		-DWITH_PLUGIN_SNDIO=1
+SNDIO_CMAKE_OFF=	-DWITH_PLUGIN_SNDIO=0
+
+LIBCUE_DESC=	CUE sheet support
+LIBCUE_LIB_DEPENDS=	libcue.so:textproc/libcue
+LIBCUE_CMAKE_ON=	-DWITH_PLUGIN_LIBCUE=1
+LIBCUE_CMAKE_OFF=	-DWITH_PLUGIN_LIBCUE=0
+
+FDK_AAC_DESC=	FDK AAC codec support
+FDK_AAC_LIB_DEPENDS=	libfdk-aac.so:audio/fdk-aac \
+			libmp4v2.so:multimedia/mp4v2
+FDK_AAC_CMAKE_ON=	-DWITH_PLUGIN_FDK_AAC=1
+FDK_AAC_CMAKE_OFF=	-DWITH_PLUGIN_FDK_AAC=0
+
+FLAC_LIB_DEPENDS=	libFLAC.so:audio/flac
+FLAC_CMAKE_ON=		-DWITH_PLUGIN_FLAC=1
+FLAC_CMAKE_OFF=		-DWITH_PLUGIN_FLAC=0
+
+LAME_LIB_DEPENDS=	libmp3lame.so:audio/lame
+LAME_CMAKE_ON=		-DWITH_PLUGIN_LAME=1
+LAME_CMAKE_OFF=		-DWITH_PLUGIN_LAME=0
+
+MAC_DESC=	Monkey's Audio codec support
+MAC_CMAKE_ON=	-DWITH_PLUGIN_MAC=1
+MAC_CMAKE_OFF=	-DWITH_PLUGIN_MAC=0
+
+MPG123_LIB_DEPENDS=	libmpg123.so:audio/mpg123
+MPG123_CMAKE_ON=	-DWITH_PLUGIN_MPG123=1
+MPG123_CMAKE_OFF=	-DWITH_PLUGIN_MPG123=0
+
+VORBIS_LIB_DEPENDS=	libogg.so:audio/libogg \
+			libvorbis.so:audio/libvorbis\
+			libvorbisenc.so:audio/libvorbis\
+			libvorbisfile.so:audio/libvorbis
+VORBIS_CMAKE_ON=	-DWITH_PLUGIN_OGG_VORBIS=1
+VORBIS_CMAKE_OFF=	-DWITH_PLUGIN_OGG_VORBIS=0
+
+WAV_CMAKE_ON=	-DWITH_PLUGIN_WAV=1
+WAV_CMAKE_OFF=	-DWITH_PLUGIN_WAV=0
+
+WAVPACK_LIB_DEPENDS=	libwavpack.so:audio/wavpack
+WAVPACK_CMAKE_ON=	-DWITH_PLUGIN_WAVPACK=1
+WAVPACK_CMAKE_OFF=	-DWITH_PLUGIN_WAVPACK=0
+
+#post-patch:
+#	@${REINPLACE_CMD} -e 's|%%DATADIR%%|${DATADIR}|g' \
+#		-e 's|/usr/local|${LOCALBASE}|g' \
+#		${WRKSRC}/CMakeLists.txt
 
 .include <bsd.port.mk>
