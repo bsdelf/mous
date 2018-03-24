@@ -1,5 +1,4 @@
-# Created by: Yanhui Shen <shen.elf@gmail.com>
-# $FreeBSD: head/audio/mous/Makefile 464528 2018-03-14 19:41:24Z linimon $
+# $FreeBSD: head/audio/mous/Makefile $
 
 PORTNAME=	mous
 PORTVERSION=	2.0.0
@@ -13,7 +12,8 @@ COMMENT=	Simple yet powerful audio player
 LICENSE=	BSD2CLAUSE
 LICENSE_FILE=	${WRKSRC}/LICENSE
 
-USES+=		cmake:outsource
+USES=		cmake:outsource compiler:c++14-lang
+
 USE_LDCONFIG=	yes
 USE_GITHUB=	yes
 GH_ACCOUNT=	bsdelf
@@ -47,14 +47,13 @@ CLI_DESC=		Command line interface support
 CLI_CMAKE_ON=	-DWITH_APP_CLI=1
 CLI_CMAKE_OFF=	-DWITH_APP_CLI=0
 
-NCURSES_USES=		ncurses
+NCURSES_USE=		ncurses
 NCURSES_CMAKE_ON=	-DWITH_APP_NCURSES=1
 NCURSES_CMAKE_OFF=	-DWITH_APP_NCURSES=0
 
-QT4_USE=		QT4=corelib,gui,linguisttools_build
-QT4_USE+=		QT4=qmake_build,moc_build,rcc_build,uic_build
-QT4_CMAKE_ON=		-DWithFrontendQt=1
-QT4_CMAKE_OFF=		-DWithFrontendQt=0
+QT5_USE=			qt5=core,gui,widgets,qmake_build
+QT5_CMAKE_ON=		-DWITH_APP_QT5=1
+QT5_CMAKE_OFF=		-DWITH_APP_QT5=0
 
 TAGLIB_DESC=		TagLib support
 TAGLIB_LIB_DEPENDS=	libtag.so:audio/taglib

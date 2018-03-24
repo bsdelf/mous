@@ -7,7 +7,7 @@ lib/libMousCore.so
 %%FLAC%%lib/mous/libFlacDecoder.so
 %%LAME%%lib/mous/libLameEncoder.so
 %%MAC%%lib/mous/libMacDecoder.so
-%%VORBIS%%lib/mous/libOggDecoder.so
+%%VORBIS%%lib/mous/libVorbisDecoder.so
 %%MPG123%%lib/mous/libMpg123Decoder.so
 %%OSS%%lib/mous/libOssRenderer.so
 %%SNDIO%%lib/mous/libSndioOutput.so
