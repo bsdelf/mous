@@ -1,7 +1,7 @@
 # $FreeBSD: head/audio/mous/Makefile $
 
 PORTNAME=	mous
-PORTVERSION=	2.0.0
+PORTVERSION=	2.0.1
 DISTVERSIONPREFIX= v
 CATEGORIES=	audio
 MASTER_SITES=	GH
@@ -12,7 +12,7 @@ COMMENT=	Simple yet powerful audio player
 LICENSE=	BSD2CLAUSE
 LICENSE_FILE=	${WRKSRC}/LICENSE
 
-USES=		cmake:outsource compiler:c++14-lang
+USES=		cmake:outsource,noninja compiler:c++14-lang
 
 USE_LDCONFIG=	yes
 USE_GITHUB=	yes
@@ -108,9 +108,6 @@ WAVPACK_LIB_DEPENDS=	libwavpack.so:audio/wavpack
 WAVPACK_CMAKE_ON=	-DWITH_PLUGIN_WAVPACK=1
 WAVPACK_CMAKE_OFF=	-DWITH_PLUGIN_WAVPACK=0
 
-#post-patch:
-#	@${REINPLACE_CMD} -e 's|%%DATADIR%%|${DATADIR}|g' \
-#		-e 's|/usr/local|${LOCALBASE}|g' \
-#		${WRKSRC}/CMakeLists.txt
+INSTALL_TARGET=	install/strip
 
 .include <bsd.port.mk>

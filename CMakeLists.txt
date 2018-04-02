@@ -22,8 +22,6 @@ include_directories(BEFORE deps)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-SET(CMAKE_INSTALL_RPATH "\${CMAKE_INSTALL_PREFIX}/lib:\${CMAKE_INSTALL_PREFIX}/bin")
-
 #==== OS Check ====#
 if(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     set(FREEBSD true)
@@ -42,6 +40,7 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "Install path prefix")
+set(CMAKE_INSTALL_RPATH "\${CMAKE_INSTALL_PREFIX}/lib:\${CMAKE_INSTALL_PREFIX}/bin")
 add_definitions(-DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 
 #==== Detect ====#
@@ -259,29 +258,34 @@ if(WITH_PLUGIN_SNDIO)
     file(GLOB PLUGIN_SNDIO_SRC plugins/sndio/*)
     add_library(SndioOutput SHARED ${PLUGIN_SNDIO_SRC})
     target_link_libraries(SndioOutput -lsndio)
+    install(TARGETS SndioOutput LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_OSS)
     file(GLOB PLUGIN_OSS_SRC plugins/oss/*)
     add_library(OssRenderer SHARED ${PLUGIN_OSS_SRC})
+    install(TARGETS OssRenderer LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_ALSA)
     file(GLOB PLUGIN_ALSA_SRC plugins/alsa/*)
     add_library(AlsaRenderer SHARED ${PLUGIN_ALSA_SRC})
     target_link_libraries(AlsaRenderer -lasound)
+    install(TARGETS AlsaRenderer LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_COREAUDIO)
     file(GLOB_RECURSE PLUGIN_COREAUDIO_SRC plugins/coreaudio/*)
     add_library(CoreAudioRenderer SHARED ${PLUGIN_COREAUDIO_SRC})
     target_link_libraries(CoreAudioRenderer ${LIB_AUDIO_UNIT} ${LIB_AUDIO_TOOLBOX} ${LIB_CORE_AUDIO})
+    install(TARGETS CoreAudioRenderer LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_LIBAO)
     file(GLOB PLUGIN_LIBAO_SRC plugins/libao/*)
     add_library(AoRenderer SHARED ${PLUGIN_LIBAO_SRC})
     target_link_libraries(AoRenderer ${LIB_AO})
+    install(TARGETS AoRenderer LIBRARY DESTINATION lib/mous)
 endif()
 
 # TODO: merge decoder and encoder to stand-alone plugin
@@ -290,18 +294,21 @@ if(WITH_PLUGIN_WAV)
     add_library(WavDecoder SHARED ${WAV_DECODER_SRC})
     file(GLOB WAV_ENCODER_SRC plugins/wav/encoder/*)
     add_library(WavEncoder SHARED ${WAV_ENCODER_SRC})
+    install(TARGETS WavDecoder WavEncoder LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_MPG123)
     file(GLOB PLUGIN_MPG123_SRC plugins/mpg123/*)
     add_library(Mpg123Decoder SHARED ${PLUGIN_MPG123_SRC})
     target_link_libraries(Mpg123Decoder ${LIB_MPG123})
+    install(TARGETS Mpg123Decoder LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_LAME)
     file(GLOB PLUGIN_LAME_SRC plugins/lame/*)
     add_library(LameEncoder SHARED ${PLUGIN_LAME_SRC})
     target_link_libraries(LameEncoder ${LIB_LAME})
+    install(TARGETS LameEncoder LIBRARY DESTINATION lib/mous)
 endif()
 
 # TODO: merge decoder and encoder to stand-alone plugin
@@ -312,6 +319,7 @@ if(WITH_PLUGIN_OGG_VORBIS)
     file(GLOB VORBIS_ENCODER_SRC plugins/vorbis/encoder/*)
     add_library(VorbisEncoder SHARED ${VORBIS_ENCODER_SRC})
     target_link_libraries(VorbisEncoder ${LIB_OGG} ${LIB_VORBIS} ${LIB_VORBISFILE} ${LIB_VORBISENC})
+    install(TARGETS VorbisDecoder VorbisEncoder LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_MAC)
@@ -328,24 +336,28 @@ if(WITH_PLUGIN_MAC)
     set_target_properties(MacDecoder PROPERTIES 
         COMPILE_FLAGS "-DPLATFORM_LINUX -I${PROJECT_SOURCE_DIR}/deps/MAC_SDK/Source/Shared")
     target_link_libraries(MacDecoder)
+    install(TARGETS MacDecoder LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_FLAC)
     file(GLOB PLUGIN_FLAC_SRC plugins/flac/*)
     add_library(FlacDecoder SHARED ${PLUGIN_FLAC_SRC})
     target_link_libraries(FlacDecoder ${LIB_FLAC})
+    install(TARGETS FlacDecoder LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_WAVPACK)
     file(GLOB PLUGIN_WAVPACK_SRC plugins/wavpack/*)
     add_library(WvDecoder SHARED ${PLUGIN_WAVPACK_SRC})
     target_link_libraries(WvDecoder ${LIB_WAVPACK})
+    install(TARGETS WvDecoder LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_FDK_AAC)
     file(GLOB PLUGIN_FDK_AAC_SRC plugins/fdk-aac/decoder/*)
     add_library(FdkDecoder SHARED ${PLUGIN_FDK_AAC_SRC})
     target_link_libraries(FdkDecoder ${LIB_FDK_AAC} ${LIB_MP4V2})
+    install(TARGETS FdkDecoder LIBRARY DESTINATION lib/mous)
 endif()
 
 # FIXME: broken
@@ -353,6 +365,7 @@ if(WITH_PLUGIN_FAAD AND FALSE)
     file(GLOB PLUGIN_FAAD_SRC plugins/faad/*)
     add_library(FaadDecoder SHARED ${PLUGIN_FAAD_SRC})
     target_link_libraries(FaadDecoder ${LIB_FAAD} ${LIB_MP4FF})
+    install(TARGETS FaadDecoder LIBRARY DESTINATION lib/mous)
 endif()
 
 # FIXME: broken
@@ -360,6 +373,7 @@ if(WITH_PLUGIN_FAAC AND FALSE)
     file(GLOB PLUGIN_FAAC_SRC plugins/faac/*)
     add_library(FaacEncoder SHARED ${PLUGIN_FAAC_SRC})
     target_link_libraries(FaacEncoder ${LIB_FAAC} ${LIB_MP4V2})
+    install(TARGETS FaacEncoder LIBRARY DESTINATION lib/mous)
 endif()
 
 # FIXME: broken
@@ -370,30 +384,34 @@ if(WITH_PLUGIN_WMA AND FALSE)
     set_target_properties(WmaDecoder PROPERTIES 
         COMPILE_FLAGS "-fno-strict-aliasing -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE")
     target_link_libraries(WmaDecoder)
+    install(TARGETS WmaDecoder LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_TAGLIB)
     file(GLOB PLUGIN_TAGLIB_SRC plugins/taglib/*)
     add_library(TagLibParser SHARED ${PLUGIN_TAGLIB_SRC})
     target_link_libraries(TagLibParser ${LIB_TAGLIB} ${LIB_ICONV})
+    install(TARGETS TagLibParser LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_LIBCUE)
     file(GLOB PLUGIN_LIBCUE_SRC plugins/libcue/*)
     add_library(CueParser SHARED ${PLUGIN_LIBCUE_SRC})
     target_link_libraries(CueParser ${LIB_CUE})
+    install(TARGETS CueParser LIBRARY DESTINATION lib/mous)
 endif()
 
 # FIXME: broken
 if(WITH_PLUGIN_STATS AND FALSE)
     file(GLOB PLUGIN_STATS_SRC plugins/stats/*)
     add_library(Stats SHARED ${PLUGIN_STATS_SRC})
+    install(TARGETS Stats LIBRARY DESTINATION lib/mous)
 endif()
 
-install(
-    CODE "file(GLOB PLUGIN_FILES \"${PROJECT_BINARY_DIR}/plugins/*\")"
-    CODE "file(INSTALL \${PLUGIN_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/mous)"
-)
+#install(
+#    CODE "file(GLOB PLUGIN_FILES \"${PROJECT_BINARY_DIR}/plugins/*\")"
+#    CODE "file(INSTALL \${PLUGIN_FILES} TYPE SHARED_LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/mous)"
+#)
 
 if(WITH_SDK)
     file(GLOB HEAD_FILES "${PROJECT_SOURCE_DIR}/sdk/*")

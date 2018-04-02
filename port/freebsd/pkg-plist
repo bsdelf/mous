@@ -8,9 +8,11 @@ lib/libMousCore.so
 %%LAME%%lib/mous/libLameEncoder.so
 %%MAC%%lib/mous/libMacDecoder.so
 %%VORBIS%%lib/mous/libVorbisDecoder.so
+%%VORBIS%%lib/mous/libVorbisEncoder.so
 %%MPG123%%lib/mous/libMpg123Decoder.so
 %%OSS%%lib/mous/libOssRenderer.so
 %%SNDIO%%lib/mous/libSndioOutput.so
 %%TAGLIB%%lib/mous/libTagLibParser.so
 %%WAV%%lib/mous/libWavDecoder.so
 %%WAV%%lib/mous/libWavEncoder.so
+%%WAVPACK%%lib/mous/libWvDecoder.so
