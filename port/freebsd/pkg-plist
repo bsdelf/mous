@@ -1,7 +1,7 @@
-lib/libMousCore.so
 %%CLI%%bin/mous-cli
 %%NCURSES%%bin/mous-ncurses
 %%QT5%%bin/mous-qt
+lib/libMousCore.so
 %%LIBCUE%%lib/mous/libCueParser.so
 %%FDK_AAC%%lib/mous/libFdkDecoder.so
 %%FLAC%%lib/mous/libFlacDecoder.so
