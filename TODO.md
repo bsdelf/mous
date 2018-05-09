@@ -1,21 +1,24 @@
-Bug:
+Bugs:
 
 - ncurses 前端在进入权限不足的目录时崩溃
 - qt 前端保存的图片在 sony walkman 中不支持，tag 规范
 - qt 前端暂停后编辑 tag ，继续播放卡死
 - qt 前端格式转换对话框打开时，切歌崩溃
 
-Core:
+Architecture:
 
 - Redesign and refactor the entire plugin infrastructure
+- Plugin ABI compatible issue
 - Profile the performance and overhead of inter-thread communication based on mailbox
 - Implement filter plugin interface
 - Implement player statistics plugin interface
+- Support unit test
 
-Plugin:
+Features:
 
 - Use AudioToolbox to decode, encode formats on macOS
 - PulseAudio output
+- opus encoder and decoder
 - libmad decoder
 - MP4 插件的 AAC 支持
 - 音效插件
@@ -24,9 +27,6 @@ Plugin:
 - APE/FLAC 内嵌 CUE
 - 支持除了 FrontCover 之外的封面，flac，ape 等格式的封面
 - libresample
-
-SDK:
-
 - m3u 播放列表读取
 - 更好的播放列表序列化格式？
 
