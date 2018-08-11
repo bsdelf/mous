@@ -9,9 +9,9 @@ namespace mous {
 
 class ConvTask::Impl {
 public:
-    explicit Impl(const MediaItem& item,
-            const Plugin* decoderPlugin, 
-            const Plugin* encoderPlugin)
+    Impl(const MediaItem& item,
+         const Plugin* decoderPlugin,
+         const Plugin* encoderPlugin)
         : m_Item(item)
         , m_DecoderPlugin(decoderPlugin)
         , m_EncoderPlugin(encoderPlugin)
@@ -30,19 +30,17 @@ public:
 
     std::vector<const BaseOption*> DecoderOptions() const
     {
-        return m_Decoder != nullptr ?
-            m_Decoder->Options() : std::vector<const BaseOption*>();
+        return m_Decoder ? m_Decoder->Options() : std::vector<const BaseOption*>();
     }
 
     std::vector<const BaseOption*> EncoderOptions() const
     {
-        return m_Encoder != nullptr ?
-            m_Encoder->Options() : std::vector<const BaseOption*>();
+        return m_Encoder ? m_Encoder->Options() : std::vector<const BaseOption*>();
     }
 
     const char* EncoderFileSuffix() const
     {
-        return m_Encoder != nullptr ? m_Encoder->FileSuffix() : nullptr;
+        return m_Encoder ? m_Encoder->FileSuffix() : nullptr;
     }
 
     void Run(const std::string& output)
@@ -86,11 +84,13 @@ public:
                 unitBeg = m_Item.msBeg * unitPerMs;
                 unitEnd = (m_Item.msEnd != (uint64_t)-1 ? m_Item.msEnd : unitEnd) * unitPerMs;
 
-                if (unitBeg > m_Decoder->UnitCount())
+                if (unitBeg > m_Decoder->UnitCount()) {
                     unitBeg = m_Decoder->UnitCount();
+                }
 
-                if (unitEnd > m_Decoder->UnitCount())
+                if (unitEnd > m_Decoder->UnitCount()) {
                     unitEnd = m_Decoder->UnitCount();
+                }
             }
 
             unitOff = unitBeg;
@@ -116,8 +116,9 @@ public:
     void Cancel()
     {
         m_Canceled = true;
-        if (m_WorkThread.joinable())
+        if (m_WorkThread.joinable()) {
             m_WorkThread.join();
+        }
     }
 
     double Progress() const
