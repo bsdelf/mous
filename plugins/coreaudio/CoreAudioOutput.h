@@ -1,16 +1,15 @@
-#ifndef OSS_RENDERER_H
-#define OSS_RENDERER_H
+#pragma once
 
-#include <plugin/IRenderer.h>
+#include <plugin/IOutput.h>
 using namespace mous;
 
-class OssRenderer: public IRenderer
+class CoreAudioOutput: public IOutput
 {
 public:
-    OssRenderer();
+    CoreAudioOutput();
 
 public:
-    virtual ~OssRenderer();
+    virtual ~CoreAudioOutput();
 
     virtual ErrorCode Open();
     virtual void Close();
@@ -22,15 +21,5 @@ public:
     virtual void SetVolumeLevel(int level);
 
     virtual std::vector<const BaseOption*> Options() const;
-
-private:
-    std::string m_PrevPath;
-    int m_Fd = -1;
-    bool m_IsOpened = false;
-    int32_t m_Channels = -1;
-    int32_t m_SampleRate = -1;
-    int32_t m_BitsPerSample = -1;
-    StringOption m_OptDevicePath;
 };
 
-#endif

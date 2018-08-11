@@ -1,11 +1,11 @@
-#include "OssRenderer.h"
+#include "OssOutput.h"
 #include <util/PluginHelper.h>
 
 static const PluginInfo info = {
     "Yanhui Shen",
-    "OSS Renderer",
+    "OSS Output",
     "OSS is used on BSD system.",
     1
 };
 
-MOUS_DEF_PLUGIN(PluginType::Renderer, &info, OssRenderer);
+MOUS_DEF_PLUGIN(PluginType::Output, &info, OssOutput);

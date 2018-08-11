@@ -3,10 +3,10 @@
 #include <sndio.h>
 #include <stdio.h>
 
-#include <plugin/IRenderer.h>
+#include <plugin/IOutput.h>
 using namespace mous;
 
-class SndioOutput: public IRenderer
+class SndioOutput: public IOutput
 {
 public:
     virtual ~SndioOutput()
@@ -21,7 +21,7 @@ public:
         }
         handle_ = sio_open(SIO_DEVANY, SIO_PLAY, 0);
         sio_onvol(handle_, SndioOutput::OnVolumeChanged, this);
-        return handle_ ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
+        return handle_ ? ErrorCode::Ok : ErrorCode::OutputFailedToOpen;
     }
 
     virtual void Close()
@@ -59,13 +59,13 @@ public:
         ok = sio_setpar(handle_, &par);
         if (not ok) {
             printf("failed to set\n");
-            return ErrorCode::RendererFailedToSetup;
+            return ErrorCode::OutputFailedToSetup;
         }
 
         ok = sio_start(handle_);
         if (not ok) {
             printf("failed to start\n");
-            return ErrorCode::RendererFailedToSetup;
+            return ErrorCode::OutputFailedToSetup;
         }
 
         channels_ = par.pchan;
@@ -79,7 +79,7 @@ public:
     {
         auto nbytes = sio_write(handle_, buf, len);
         if (nbytes != len) {
-            return ErrorCode::RendererFailedToWrite;
+            return ErrorCode::OutputFailedToWrite;
         }
         return ErrorCode::Ok;
     }

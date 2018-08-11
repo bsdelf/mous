@@ -10,7 +10,7 @@ lib/libMousCore.so
 %%VORBIS%%lib/mous/libVorbisDecoder.so
 %%VORBIS%%lib/mous/libVorbisEncoder.so
 %%MPG123%%lib/mous/libMpg123Decoder.so
-%%OSS%%lib/mous/libOssRenderer.so
+%%OSS%%lib/mous/libOssOutput.so
 %%SNDIO%%lib/mous/libSndioOutput.so
 %%TAGLIB%%lib/mous/libTagLibParser.so
 %%WAV%%lib/mous/libWavDecoder.so

@@ -29,9 +29,9 @@ void Player::RegisterDecoderPlugin(vector<const Plugin*>& agents)
     return impl->RegisterDecoderPlugin(agents);
 }
 
-void Player::RegisterRendererPlugin(const Plugin* pAgent)
+void Player::RegisterOutputPlugin(const Plugin* pAgent)
 {
-    return impl->RegisterRendererPlugin(pAgent);
+    return impl->RegisterOutputPlugin(pAgent);
 }
 
 void Player::UnregisterPlugin(const Plugin* pAgent)
@@ -179,9 +179,9 @@ std::vector<PluginOption> Player::DecoderPluginOption() const
     return impl->DecoderPluginOption();
 }
 
-PluginOption Player::RendererPluginOption() const
+PluginOption Player::OutputPluginOption() const
 {
-    return impl->RendererPluginOption();
+    return impl->OutputPluginOption();
 }
 
 Signal<void (void)>* Player::SigFinished()

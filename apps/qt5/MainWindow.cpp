@@ -97,10 +97,10 @@ void MainWindow::InitMousCore()
         m_PluginManager.PluginAgents(PluginType::Decoder);
     vector<const Plugin*> encoderAgentList = 
         m_PluginManager.PluginAgents(PluginType::Encoder);
-    vector<const Plugin*> rendererAgentList =
-        m_PluginManager.PluginAgents(PluginType::Renderer);
+    vector<const Plugin*> outputAgentList =
+        m_PluginManager.PluginAgents(PluginType::Output);
 
-    m_Player->RegisterRendererPlugin(rendererAgentList[0]);
+    m_Player->RegisterOutputPlugin(outputAgentList[0]);
     m_Player->RegisterDecoderPlugin(decoderAgentList);
     m_Player->SetBufferCount(102);
     m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
@@ -117,7 +117,7 @@ void MainWindow::InitMousCore()
     qDebug() << ">> TagParser count:" << tagParserAgentList.size();
     qDebug() << ">> Decoder count:" << decoderAgentList.size();
     qDebug() << ">> Encoder count:" << encoderAgentList.size();
-    qDebug() << ">> Renderer count:" << rendererAgentList.size();
+    qDebug() << ">> Output count:" << outputAgentList.size();
 }
 
 void MainWindow::ClearMousCore()

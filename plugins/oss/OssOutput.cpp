@@ -1,4 +1,4 @@
-#include "OssRenderer.h"
+#include "OssOutput.h"
 #include <fcntl.h>  // open
 #include <unistd.h> // write
 #include <sys/ioctl.h>
@@ -8,27 +8,27 @@
 #include <iostream>
 using namespace std;
 
-OssRenderer::OssRenderer()
+OssOutput::OssOutput()
 {
     m_OptDevicePath.desc = "Output device.";
     m_OptDevicePath.userVal = m_OptDevicePath.defaultVal = "/dev/dsp";
 }
 
-OssRenderer::~OssRenderer()
+OssOutput::~OssOutput()
 {
     Close();
 }
 
-ErrorCode OssRenderer::Open()
+ErrorCode OssOutput::Open()
 {
     if (m_PrevPath != m_OptDevicePath.userVal)
         m_PrevPath = m_OptDevicePath.userVal;
     m_Fd = ::open(m_PrevPath.c_str(), O_WRONLY);
     m_IsOpened = (m_Fd < 0) ? false : true;
-    return (m_Fd >= 0 && m_IsOpened) ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
+    return (m_Fd >= 0 && m_IsOpened) ? ErrorCode::Ok : ErrorCode::OutputFailedToOpen;
 }
 
-void OssRenderer::Close()
+void OssOutput::Close()
 {
     if (!m_IsOpened || m_Fd < 0)
         return;
@@ -40,7 +40,7 @@ void OssRenderer::Close()
     m_IsOpened = false;
 }
 
-ErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+ErrorCode OssOutput::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     if (m_IsOpened
             && channels == m_Channels
@@ -64,7 +64,7 @@ ErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bi
     if (err == -1 || _channels != channels) {
         channels = _channels;
         cout << ::strerror(errno) << endl;
-        return ErrorCode::RendererBadChannels;
+        return ErrorCode::OutputBadChannels;
     }
 
     errno = 0;
@@ -72,7 +72,7 @@ ErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bi
     if (err == -1 || _sampleRate != sampleRate) {
         sampleRate = _sampleRate;
         cout << ::strerror(errno) << endl;
-        return ErrorCode::RendererBadSampleRate;
+        return ErrorCode::OutputBadSampleRate;
     }
 
     errno = 0;
@@ -80,7 +80,7 @@ ErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bi
     if (err == -1 || _bitsPerSample != bitsPerSample) {
         bitsPerSample = _bitsPerSample;
         cout << ::strerror(errno) << endl;
-        return ErrorCode::RendererBadBitsPerSample;
+        return ErrorCode::OutputBadBitsPerSample;
     }
 
     m_Channels = channels;
@@ -90,12 +90,12 @@ ErrorCode OssRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bi
     return ErrorCode::Ok;
 }
 
-ErrorCode OssRenderer::Write(const char* buf, uint32_t len)
+ErrorCode OssOutput::Write(const char* buf, uint32_t len)
 {
     for (int off = 0, nw = 0, left = len; left > 0; left -= nw, off += nw) {
         nw = ::write(m_Fd, buf+off, left);
         if (nw < 0)
-            return ErrorCode::RendererFailedToWrite;
+            return ErrorCode::OutputFailedToWrite;
     }
     return ErrorCode::Ok;
 }
@@ -108,7 +108,7 @@ ErrorCode OssRenderer::Write(const char* buf, uint32_t len)
 #define SNDCTL_DSP_SETPLAYVOL MIXER_WRITE(SOUND_MIXER_VOLUME)
 #endif
 
-int OssRenderer::VolumeLevel() const
+int OssOutput::VolumeLevel() const
 {
     // all=right|left 16bits
     int all = 0;
@@ -117,13 +117,13 @@ int OssRenderer::VolumeLevel() const
     return avg;
 }
 
-void OssRenderer::SetVolumeLevel(int avg)
+void OssOutput::SetVolumeLevel(int avg)
 {
     int all = (avg) | (avg << 8);
     ::ioctl(m_Fd, SNDCTL_DSP_SETPLAYVOL, &all);
 }
 
-std::vector<const BaseOption*> OssRenderer::Options() const
+std::vector<const BaseOption*> OssOutput::Options() const
 {
     return { &m_OptDevicePath };
 }

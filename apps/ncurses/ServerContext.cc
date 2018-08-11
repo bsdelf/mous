@@ -44,14 +44,14 @@ bool ServerContext::Init()
     PluginAgentArray decoders = mgr.PluginAgents(PluginType::Decoder);
     //PluginAgentArray encoders;
     //mgr.DumpPluginAgent(encoders, PluginType::Encoder);
-    PluginAgentArray renderers = mgr.PluginAgents(PluginType::Renderer);
+    PluginAgentArray outputs = mgr.PluginAgents(PluginType::Output);
     PluginAgentArray sheetParsers = mgr.PluginAgents(PluginType::SheetParser);
     PluginAgentArray tagParsers = mgr.PluginAgents(PluginType::TagParser);
 
     loader.RegisterSheetParserPlugin(sheetParsers);
     loader.RegisterTagParserPlugin(tagParsers);
 
-    player.RegisterRendererPlugin(renderers[0]);
+    player.RegisterOutputPlugin(outputs[0]);
     player.RegisterDecoderPlugin(decoders);
 
     return true;

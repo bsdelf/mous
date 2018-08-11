@@ -1,11 +1,11 @@
-#include "AoRenderer.h"
+#include "AoOutput.h"
 #include <util/PluginHelper.h>
 
 static const PluginInfo info = {
     "Yanhui Shen",
-    "AO Renderer",
+    "AO Output",
     "Portable audio output library.",
     1
 };
 
-MOUS_DEF_PLUGIN(PluginType::Renderer, &info, AoRenderer);
+MOUS_DEF_PLUGIN(PluginType::Output, &info, AoOutput);

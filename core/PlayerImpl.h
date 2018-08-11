@@ -16,7 +16,7 @@ using namespace scx;
 
 #include <core/Plugin.h>
 #include <plugin/IDecoder.h>
-#include <plugin/IRenderer.h>
+#include <plugin/IOutput.h>
 
 namespace mous {
 struct UnitBuffer
@@ -47,7 +47,7 @@ enum : std::size_t
     PROCEED = 1u << 2,
     SUSPEND = 1u << 3,
     DECODE = 1u << 4,
-    RENDER = 1u << 5,
+    OUTPUT = 1u << 5,
     QUIT = 1u << 6
 };
 
@@ -95,8 +95,8 @@ class Player::Impl
                             m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
                             m_DecoderIndex += buf->unitCount;
 
-                            std::get<TYPE>(mail) = RENDER;
-                            m_RendererMailbox.PushBack(std::move(mail));
+                            std::get<TYPE>(mail) = OUTPUT;
+                            m_OutputMailbox.PushBack(std::move(mail));
 
                             if (m_DecoderIndex >= m_UnitEnd) {
                                 status = IDLE;
@@ -114,12 +114,12 @@ class Player::Impl
             }
         });
 
-        m_RendererThread = std::thread([this]() {
+        m_OutputThread = std::thread([this]() {
             int status = IDLE;
             int quit = false;
 
             while (!quit) {
-                auto mail = m_RendererMailbox.Take();
+                auto mail = m_OutputMailbox.Take();
 
                 const int opcode = status | std::get<TYPE>(mail);
 
@@ -133,7 +133,7 @@ class Player::Impl
                         status = RUNNING;
                     } break;
 
-                    case IDLE | RENDER: {
+                    case IDLE | OUTPUT: {
                         std::get<TYPE>(mail) = 0;
                         m_BufferMailbox.PushBack(std::move(mail));
                     } break;
@@ -143,21 +143,21 @@ class Player::Impl
                         status = IDLE;
                     } break;
 
-                    case RUNNING | RENDER: {
+                    case RUNNING | OUTPUT: {
                         auto& buf = std::get<DATA>(mail);
 
-                        if (m_RendererIndex < m_UnitEnd) {
-                            if (m_Renderer->Write(buf->data, buf->used) != ErrorCode::Ok) {
+                        if (m_OutputIndex < m_UnitEnd) {
+                            if (m_Output->Write(buf->data, buf->used) != ErrorCode::Ok) {
                                 // avoid busy write
                                 const int64_t delay = buf->unitCount / m_UnitPerMs * 1e6;
                                 std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
                             }
-                            m_RendererIndex += buf->unitCount;
+                            m_OutputIndex += buf->unitCount;
 
                             std::get<TYPE>(mail) = DECODE;
                             m_DecoderMailbox.PushBack(std::move(mail));
 
-                            if (m_RendererIndex >= m_UnitEnd) {
+                            if (m_OutputIndex >= m_UnitEnd) {
                                 status = IDLE;
                                 std::thread([this]() { m_SigFinished(); }).detach();
                             }
@@ -180,13 +180,13 @@ class Player::Impl
         Close();
 
         m_DecoderMailbox.EmplaceFront(QUIT);
-        m_RendererMailbox.EmplaceFront(QUIT);
+        m_OutputMailbox.EmplaceFront(QUIT);
 
         if (m_DecoderThread.joinable()) {
             m_DecoderThread.join();
         }
-        if (m_RendererThread.joinable()) {
-            m_RendererThread.join();
+        if (m_OutputThread.joinable()) {
+            m_OutputThread.join();
         }
 
         m_BufferMailbox.Clear();
@@ -210,10 +210,10 @@ class Player::Impl
         }
     }
 
-    void RegisterRendererPlugin(const Plugin* pAgent)
+    void RegisterOutputPlugin(const Plugin* pAgent)
     {
-        if (pAgent->Type() == PluginType::Renderer) {
-            SetRendererPlugin(pAgent);
+        if (pAgent->Type() == PluginType::Output) {
+            SetOutputPlugin(pAgent);
         }
     }
 
@@ -224,8 +224,8 @@ class Player::Impl
                 RemoveDecoderPlugin(pAgent);
                 break;
 
-            case PluginType::Renderer:
-                UnsetRendererPlugin(pAgent);
+            case PluginType::Output:
+                UnsetOutputPlugin(pAgent);
                 break;
 
             default:
@@ -247,7 +247,7 @@ class Player::Impl
             RemoveDecoderPlugin(iter->second.agent);
         }
 
-        UnsetRendererPlugin(m_RendererPlugin);
+        UnsetOutputPlugin(m_OutputPlugin);
     }
 
     vector<string> SupportedSuffixes() const
@@ -270,12 +270,12 @@ class Player::Impl
         m_BufferCount = count;
     }
 
-    int Volume() const { return m_Renderer != nullptr ? m_Renderer->VolumeLevel() : -1; }
+    int Volume() const { return m_Output != nullptr ? m_Output->VolumeLevel() : -1; }
 
     void SetVolume(int level)
     {
-        if (m_Renderer != nullptr) {
-            m_Renderer->SetVolumeLevel(level);
+        if (m_Output != nullptr) {
+            m_Output->SetVolumeLevel(level);
         }
     }
 
@@ -290,8 +290,8 @@ class Player::Impl
             return ErrorCode::PlayerNoDecoder;
         }
 
-        if (m_Renderer == nullptr) {
-            return ErrorCode::PlayerNoRenderer;
+        if (m_Output == nullptr) {
+            return ErrorCode::PlayerNoOutput;
         }
 
         ErrorCode err = m_Decoder->Open(path);
@@ -321,9 +321,9 @@ class Player::Impl
         // cout << "channels:" << channels << endl;
         // cout << "samleRate:" << samleRate << endl;
         // cout << "bitsPerSamle:" << bitsPerSamle << endl;
-        err = m_Renderer->Setup(channels, samleRate, bitsPerSamle);
+        err = m_Output->Setup(channels, samleRate, bitsPerSamle);
         if (err != ErrorCode::Ok) {
-            cout << "FATAL: failed to set renderer:" << static_cast<uint8_t>(err) << endl;
+            cout << "FATAL: failed to set output:" << static_cast<uint8_t>(err) << endl;
             cout << "       channels:" << channels << endl;
             cout << "       samleRate:" << samleRate << endl;
             cout << "       bitsPerSamle:" << bitsPerSamle << endl;
@@ -392,8 +392,8 @@ class Player::Impl
         m_UnitBeg = beg;
         m_UnitEnd = end;
 
-        m_RendererIndex = m_UnitBeg;
-        m_RendererMailbox.EmplaceBack(PROCEED);
+        m_OutputIndex = m_UnitBeg;
+        m_OutputMailbox.EmplaceBack(PROCEED);
 
         m_DecoderIndex = m_UnitBeg;
         m_Decoder->SetUnitIndex(m_UnitBeg);
@@ -414,7 +414,7 @@ class Player::Impl
         }
 
         m_DecoderMailbox.EmplaceFront(SUSPEND);
-        m_RendererMailbox.EmplaceFront(SUSPEND);
+        m_OutputMailbox.EmplaceFront(SUSPEND);
         m_BufferMailbox.Wait(m_BufferCount);
 
         m_Status = PlayerStatus::Paused;
@@ -422,9 +422,9 @@ class Player::Impl
 
     void Resume()
     {
-        m_RendererMailbox.EmplaceBack(PROCEED);
+        m_OutputMailbox.EmplaceBack(PROCEED);
 
-        m_DecoderIndex = m_RendererIndex;
+        m_DecoderIndex = m_OutputIndex;
         m_Decoder->SetUnitIndex(m_DecoderIndex);
         m_DecoderMailbox.EmplaceBack(PROCEED);
         while (!m_BufferMailbox.Empty()) {
@@ -493,7 +493,7 @@ class Player::Impl
         m_Decoder->SetUnitIndex(unit);
 
         m_DecoderIndex = unit;
-        m_RendererIndex = unit;
+        m_OutputIndex = unit;
     }
 
     void PauseDecoder()
@@ -537,7 +537,7 @@ class Player::Impl
 
     uint64_t OffsetMs() const { return CurrentMs() - RangeBegin(); }
 
-    uint64_t CurrentMs() const { return m_RendererIndex / m_UnitPerMs; }
+    uint64_t CurrentMs() const { return m_OutputIndex / m_UnitPerMs; }
 
     enum AudioMode AudioMode() const { return (m_Decoder != nullptr) ? m_Decoder->AudioMode() : AudioMode::None; }
 
@@ -555,10 +555,10 @@ class Player::Impl
         return list;
     }
 
-    PluginOption RendererPluginOption() const
+    PluginOption OutputPluginOption() const
     {
-        if (m_RendererPlugin != nullptr && m_Renderer != nullptr) {
-            return { m_RendererPlugin->Type(), m_RendererPlugin->Info(), m_Renderer->Options() };
+        if (m_OutputPlugin != nullptr && m_Output != nullptr) {
+            return { m_OutputPlugin->Type(), m_OutputPlugin->Info(), m_Output->Options() };
         } else {
             return {};
         }
@@ -618,27 +618,27 @@ class Player::Impl
         }
     }
 
-    void SetRendererPlugin(const Plugin* pAgent)
+    void SetOutputPlugin(const Plugin* pAgent)
     {
-        if (pAgent == nullptr || m_RendererPlugin != nullptr) {
+        if (pAgent == nullptr || m_OutputPlugin != nullptr) {
             return;
         }
 
-        m_RendererPlugin = pAgent;
-        m_Renderer = (IRenderer*)pAgent->CreateObject();
-        m_Renderer->Open();
+        m_OutputPlugin = pAgent;
+        m_Output = (IOutput*)pAgent->CreateObject();
+        m_Output->Open();
     }
 
-    void UnsetRendererPlugin(const Plugin* pAgent)
+    void UnsetOutputPlugin(const Plugin* pAgent)
     {
-        if (pAgent != m_RendererPlugin || m_RendererPlugin == nullptr) {
+        if (pAgent != m_OutputPlugin || m_OutputPlugin == nullptr) {
             return;
         }
 
-        m_Renderer->Close();
-        m_RendererPlugin->FreeObject(m_Renderer);
-        m_Renderer = nullptr;
-        m_RendererPlugin = nullptr;
+        m_Output->Close();
+        m_OutputPlugin->FreeObject(m_Output);
+        m_Output = nullptr;
+        m_OutputPlugin = nullptr;
     }
 
   private:
@@ -647,11 +647,11 @@ class Player::Impl
     std::string m_DecodeFile;
 
     IDecoder* m_Decoder = nullptr;
-    IRenderer* m_Renderer = nullptr;
+    IOutput* m_Output = nullptr;
     std::thread m_DecoderThread;
-    std::thread m_RendererThread;
+    std::thread m_OutputThread;
     Mailbox m_DecoderMailbox;
-    Mailbox m_RendererMailbox;
+    Mailbox m_OutputMailbox;
 
     Mailbox m_BufferMailbox;
     int m_BufferCount = 5;
@@ -661,11 +661,11 @@ class Player::Impl
     uint64_t m_UnitEnd = 0;
 
     uint64_t m_DecoderIndex = 0;
-    uint64_t m_RendererIndex = 0;
+    uint64_t m_OutputIndex = 0;
 
     double m_UnitPerMs = 0;
 
-    const Plugin* m_RendererPlugin = nullptr;
+    const Plugin* m_OutputPlugin = nullptr;
     std::map<std::string, DecoderPluginNode> m_DecoderPluginMap;
 
     scx::Signal<void(void)> m_SigFinished;

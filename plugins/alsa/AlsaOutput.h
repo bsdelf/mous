@@ -1,8 +1,7 @@
-#ifndef ALSARENDERER_H
-#define ALSARENDERER_H
+#pragma once
 
 #include <alsa/asoundlib.h>
-#include <plugin/IRenderer.h>
+#include <plugin/IOutput.h>
 #include <string>
 using namespace std;
 using namespace mous;
@@ -15,11 +14,11 @@ struct Tuple
     T min;
 };
 
-class AlsaRenderer: public IRenderer
+class AlsaOutput: public IOutput
 {
 public:
-    AlsaRenderer();
-    virtual ~AlsaRenderer();
+    AlsaOutput();
+    virtual ~AlsaOutput();
 
     virtual ErrorCode Open();
     virtual void Close();

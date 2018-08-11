@@ -1,17 +1,16 @@
-#ifndef AORENDERER_H
-#define AORENDERER_H
+#pragma once
 
-#include <plugin/IRenderer.h>
+#include <plugin/IOutput.h>
 #include <string>
 #include <ao/ao.h>
 using namespace std;
 using namespace mous;
 
-class AoRenderer: public IRenderer
+class AoOutput: public IOutput
 {
 public:
-    AoRenderer();
-    virtual ~AoRenderer();
+    AoOutput();
+    virtual ~AoOutput();
 
     virtual ErrorCode Open();
     virtual void Close();
@@ -28,4 +27,3 @@ private:
     ao_sample_format m_Format;
 };
 
-#endif

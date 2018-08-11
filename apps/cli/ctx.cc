@@ -25,7 +25,7 @@ Context::Context()
     // get plugin agents and check if we have enough
     decoderPlugins = pluginManager.PluginAgents(PluginType::Decoder);
     encoderPlugins = pluginManager.PluginAgents(PluginType::Encoder);
-    outputPlugins = pluginManager.PluginAgents(PluginType::Renderer);
+    outputPlugins = pluginManager.PluginAgents(PluginType::Output);
     sheetParserPlugins = pluginManager.PluginAgents(PluginType::SheetParser);
     tagParserPlugins = pluginManager.PluginAgents(PluginType::TagParser);
     if (decoderPlugins.empty() || outputPlugins.empty()) {

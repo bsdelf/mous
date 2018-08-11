@@ -8,10 +8,10 @@
 
 namespace mous {
 
-class IRenderer
+class IOutput
 {
 public:
-    virtual ~IRenderer() { }
+    virtual ~IOutput() { }
 
     virtual ErrorCode Open() = 0;
     virtual void Close() = 0;

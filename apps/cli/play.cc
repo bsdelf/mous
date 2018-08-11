@@ -52,7 +52,7 @@ int cmd_play(int argc, char* argv[])
 
     // init player
     PLAYER.SigFinished()->Connect(&on_finished);
-    PLAYER.RegisterRendererPlugin(ctx.outputPlugins[0]);
+    PLAYER.RegisterOutputPlugin(ctx.outputPlugins[0]);
     PLAYER.RegisterDecoderPlugin(ctx.decoderPlugins);
     PLAYLIST = new Playlist<MediaItem>();
     PLAYLIST->SetMode(PlaylistMode::Normal);

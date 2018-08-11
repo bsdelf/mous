@@ -37,7 +37,7 @@ public:
     void RegisterDecoderPlugin(const Plugin* pAgent);
     void RegisterDecoderPlugin(std::vector<const Plugin*>& agents);
 
-    void RegisterRendererPlugin(const Plugin* pAgent);
+    void RegisterOutputPlugin(const Plugin* pAgent);
 
     void UnregisterPlugin(const Plugin* pAgent);
     void UnregisterPlugin(std::vector<const Plugin*>& agents);
@@ -76,7 +76,7 @@ public:
     enum AudioMode AudioMode() const;
 
     std::vector<PluginOption> DecoderPluginOption() const;
-    PluginOption RendererPluginOption() const;
+    PluginOption OutputPluginOption() const;
 
 public:
     scx::Signal<void (void)>* SigFinished();

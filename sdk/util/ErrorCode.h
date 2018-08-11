@@ -23,16 +23,16 @@ enum class ErrorCode : uint8_t
     EncoderFailedToEncode,
     EncoderFailedToFlush,
 
-    RendererFailedToOpen,
-    RendererFailedToSetup,
-    RendererFailedToWrite,
-    RendererBadChannels,
-    RendererBadSampleRate,
-    RendererBadBitsPerSample,
-    RendererIsNotSupported,
+    OutputFailedToOpen,
+    OutputFailedToSetup,
+    OutputFailedToWrite,
+    OutputBadChannels,
+    OutputBadSampleRate,
+    OutputBadBitsPerSample,
+    OutputIsNotSupported,
 
     PlayerNoDecoder,
-    PlayerNoRenderer,
+    PlayerNoOutput,
 
     TagPraserFailedToWrite,
 
@@ -53,7 +53,7 @@ const char* const ErrorMsg[] = {
     "Bad format!",
     "Format is not supported!",
 
-    "Renderer is not supported!",
+    "Output is not supported!",
 
     "File not found!",
     "Out of range!"

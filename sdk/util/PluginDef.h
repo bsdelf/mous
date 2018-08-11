@@ -12,7 +12,7 @@ enum class PluginType: uint8_t
     None = 0,
     Decoder,
     Encoder,
-    Renderer,
+    Output,
     SheetParser,
     TagParser
 };
@@ -42,8 +42,8 @@ inline const char* ToString(PluginType type)
         case PluginType::Encoder:
             return "Encoder";
 
-        case PluginType::Renderer:
-            return "Renderer";
+        case PluginType::Output:
+            return "Output";
 
         case PluginType::SheetParser:
             return "SheetParser";

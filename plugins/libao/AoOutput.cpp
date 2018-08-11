@@ -1,8 +1,8 @@
-#include "AoRenderer.h"
+#include "AoOutput.h"
 #include <iostream>
 #include <string.h>
 
-AoRenderer::AoRenderer():
+AoOutput::AoOutput():
     m_Driver(-1),
     m_Device(nullptr)
 {
@@ -28,22 +28,22 @@ AoRenderer::AoRenderer():
     }
 }
 
-AoRenderer::~AoRenderer()
+AoOutput::~AoOutput()
 {
     Close();
 
     ao_shutdown();
 }
 
-EmErrorCode AoRenderer::Open()
+EmErrorCode AoOutput::Open()
 {
     Close();
 
     m_Device = ao_open_live(m_Driver, &m_Format, nullptr);
-    return m_Device != nullptr ? ErrorCode::Ok : ErrorCode::RendererFailedToOpen;
+    return m_Device != nullptr ? ErrorCode::Ok : ErrorCode::OutputFailedToOpen;
 }
 
-void AoRenderer::Close()
+void AoOutput::Close()
 {
     if (m_Device != nullptr) {
         ao_close(m_Device);
@@ -51,27 +51,27 @@ void AoRenderer::Close()
     }
 }
 
-EmErrorCode AoRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+EmErrorCode AoOutput::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     memset(&m_Format, 0, sizeof(m_Format));
     m_Format.channels = channels;
     m_Format.bits = bitsPerSample;
     m_Format.rate = sampleRate;
     m_Format.byte_format = AO_FMT_LITTLE;
-    return Open() == ErrorCode::Ok ? ErrorCode::Ok : ErrorCode::RendererFailedToSetup;
+    return Open() == ErrorCode::Ok ? ErrorCode::Ok : ErrorCode::OutputFailedToSetup;
 }
 
-EmErrorCode AoRenderer::Write(const char* buf, uint32_t len)
+EmErrorCode AoOutput::Write(const char* buf, uint32_t len)
 {
     int ret = ao_play(m_Device, const_cast<char*>(buf), (uint_32)len);
-    return ret == 0 ? ErrorCode::Ok : ErrorCode::RendererFailedToWrite;
+    return ret == 0 ? ErrorCode::Ok : ErrorCode::OutputFailedToWrite;
 }
 
-int AoRenderer::VolumeLevel() const
+int AoOutput::VolumeLevel() const
 {
     return 0;
 }
 
-void AoRenderer::SetVolumeLevel(int level)
+void AoOutput::SetVolumeLevel(int level)
 {
 }

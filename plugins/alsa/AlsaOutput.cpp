@@ -1,10 +1,10 @@
-#include "AlsaRenderer.h"
+#include "AlsaOutput.h"
 #include <algorithm>
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
 
-AlsaRenderer::AlsaRenderer():
+AlsaOutput::AlsaOutput():
     m_DeviceName("default"),
     m_PcmHandle(nullptr),
     m_Dir(0),
@@ -14,21 +14,21 @@ AlsaRenderer::AlsaRenderer():
 {
 }
 
-AlsaRenderer::~AlsaRenderer()
+AlsaOutput::~AlsaOutput()
 {
     Close();
 }
 
-ErrorCode AlsaRenderer::Open()
+ErrorCode AlsaOutput::Open()
 {
     int ret = snd_pcm_open(&m_PcmHandle, m_DeviceName.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if (ret != 0)
-        return ErrorCode::RendererFailedToOpen;
+        return ErrorCode::OutputFailedToOpen;
 
     return ErrorCode::Ok;
 }
 
-void AlsaRenderer::Close()
+void AlsaOutput::Close()
 {
     if (m_PcmHandle != nullptr) {
         snd_pcm_drain(m_PcmHandle);
@@ -37,7 +37,7 @@ void AlsaRenderer::Close()
     }
 }
 
-ErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+ErrorCode AlsaOutput::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     m_Channels.val = channels;
     m_SampleRate.val = sampleRate;
@@ -61,10 +61,10 @@ ErrorCode AlsaRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& b
         ok = false;
     }
 
-    return ok ? ErrorCode::Ok : ErrorCode::RendererFailedToSetup;
+    return ok ? ErrorCode::Ok : ErrorCode::OutputFailedToSetup;
 }
 
-ErrorCode AlsaRenderer::Write(const char* buf, uint32_t len)
+ErrorCode AlsaOutput::Write(const char* buf, uint32_t len)
 {
     int off = 0;
     int leftFrames = (len + m_FrameLength - 1) / m_FrameLength;
@@ -82,7 +82,7 @@ ErrorCode AlsaRenderer::Write(const char* buf, uint32_t len)
                 usleep(100);
             if (written < 0) {
                 if ((written = snd_pcm_prepare(m_PcmHandle)) < 0)
-                    return ErrorCode::RendererFailedToWrite;
+                    return ErrorCode::OutputFailedToWrite;
             }
         } else if (written <= 0) {
             printf("writei error / short write\n");
@@ -92,16 +92,16 @@ ErrorCode AlsaRenderer::Write(const char* buf, uint32_t len)
     return ErrorCode::Ok;
 }
 
-int AlsaRenderer::VolumeLevel() const
+int AlsaOutput::VolumeLevel() const
 {
     return 0;
 }
 
-void AlsaRenderer::SetVolumeLevel(int level)
+void AlsaOutput::SetVolumeLevel(int level)
 {
 }
 
-bool AlsaRenderer::SetupHwParams()
+bool AlsaOutput::SetupHwParams()
 {
     snd_pcm_hw_params_t* params;
 
@@ -181,7 +181,7 @@ bool AlsaRenderer::SetupHwParams()
     return true;
 }
 
-void AlsaRenderer::SetupSwParams()
+void AlsaOutput::SetupSwParams()
 {
     snd_pcm_sw_params_t* params;
 

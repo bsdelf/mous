@@ -58,7 +58,7 @@ int cmd_plugin(int, char**)
 
     printf("Decoder:     %zu\n"
            "Endocer:     %zu\n"
-           "Renderer:    %zu\n"
+           "Output:    %zu\n"
            "SheetParser: %zu\n"
            "TagParser:   %zu\n",
            ctx.decoderPlugins.size(),

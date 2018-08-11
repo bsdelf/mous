@@ -8,4 +8,4 @@ static const PluginInfo info = {
     1
 };
 
-MOUS_DEF_PLUGIN(PluginType::Renderer, &info, SndioOutput);
+MOUS_DEF_PLUGIN(PluginType::Output, &info, SndioOutput);

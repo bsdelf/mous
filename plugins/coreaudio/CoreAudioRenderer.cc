@@ -1,4 +1,4 @@
-#include "CoreAudioRenderer.h"
+#include "CoreAudioOutput.h"
 #include <iostream>
 using namespace std;
 #include <unistd.h>
@@ -8,34 +8,34 @@ extern "C" {
 #include "cmus/mixer.h"
 }
 
-const char* program_name = "CoreAudioRenderer";
+const char* program_name = "CoreAudioOutput";
 
-CoreAudioRenderer::CoreAudioRenderer()
+CoreAudioOutput::CoreAudioOutput()
 {
     op_pcm_ops.init(); 
     op_mixer_ops.init();
 }
 
-CoreAudioRenderer::~CoreAudioRenderer()
+CoreAudioOutput::~CoreAudioOutput()
 {
     Close();
     op_pcm_ops.exit();
     op_mixer_ops.exit();
 }
 
-ErrorCode CoreAudioRenderer::Open()
+ErrorCode CoreAudioOutput::Open()
 {
     int maxVol = 0;
     op_mixer_ops.open(&maxVol);
     return ErrorCode::Ok;
 }
 
-void CoreAudioRenderer::Close()
+void CoreAudioOutput::Close()
 {
     op_mixer_ops.close();
 }
 
-ErrorCode CoreAudioRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
+ErrorCode CoreAudioOutput::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)
 {
     op_pcm_ops.drop();
     op_pcm_ops.close();
@@ -46,26 +46,26 @@ ErrorCode CoreAudioRenderer::Setup(int32_t& channels, int32_t& sampleRate, int32
     return ErrorCode::Ok;
 }
 
-ErrorCode CoreAudioRenderer::Write(const char* buf, uint32_t len)
+ErrorCode CoreAudioOutput::Write(const char* buf, uint32_t len)
 {
     op_pcm_ops.write(buf, static_cast<int>(len));
     op_pcm_wait(len);
     return ErrorCode::Ok;
 }
 
-int CoreAudioRenderer::VolumeLevel() const
+int CoreAudioOutput::VolumeLevel() const
 {
     int l, r;
     op_mixer_ops.get_volume(&l, &r);
     return (l + r) / 2;
 }
 
-void CoreAudioRenderer::SetVolumeLevel(int avg)
+void CoreAudioOutput::SetVolumeLevel(int avg)
 {
     op_mixer_ops.set_volume(avg, avg);
 }
 
-std::vector<const BaseOption*> CoreAudioRenderer::Options() const
+std::vector<const BaseOption*> CoreAudioOutput::Options() const
 {
     return {};
 }
