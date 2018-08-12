@@ -281,36 +281,31 @@ class Player::Impl
 
     ErrorCode Open(const string& path)
     {
-        string suffix = ToLower(FileHelper::FileSuffix(path));
-        // cout << "Suffix:" << suffix << endl;
-        auto iter = m_DecoderPluginMap.find(suffix);
-        if (iter != m_DecoderPluginMap.end()) {
-            m_Decoder = iter->second.decoder;
-        } else {
-            return ErrorCode::PlayerNoDecoder;
-        }
-
-        if (m_Output == nullptr) {
+        if (!m_Output) {
             return ErrorCode::PlayerNoOutput;
         }
 
+        string suffix = ToLower(FileHelper::FileSuffix(path));
+        auto iter = m_DecoderPluginMap.find(suffix);
+        if (iter == m_DecoderPluginMap.end()) {
+            return ErrorCode::PlayerNoDecoder;
+        }
+        m_Decoder = iter->second.decoder;
+
         ErrorCode err = m_Decoder->Open(path);
         if (err != ErrorCode::Ok) {
-            // cout << "FATAL: failed to open!" << endl;
             return err;
-        } else {
-            m_DecodeFile = path;
         }
+        m_DecodeFile = path;
 
+        // TODO: add log for buffer size and count
         const uint32_t maxBytesPerUnit = m_Decoder->MaxBytesPerUnit();
-        // cout << "unit buf size:" << maxBytesPerUnit << endl;
-
         m_BufferMailbox.Clear();
         m_Buffer = std::make_unique<char[]>(m_BufferCount * (sizeof(UnitBuffer) + maxBytesPerUnit));
         for (size_t i = 0; i < m_BufferCount; ++i) {
             auto ptr = m_Buffer.get() + (sizeof(UnitBuffer) + maxBytesPerUnit) * i;
-            UnitBuffer* unitBuffer = reinterpret_cast<UnitBuffer*>(ptr);
-            m_BufferMailbox.EmplaceBack(0, unitBuffer);
+            auto buf = reinterpret_cast<UnitBuffer*>(ptr);
+            m_BufferMailbox.EmplaceBack(0, buf);
         }
 
         m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
@@ -318,9 +313,7 @@ class Player::Impl
         int32_t channels = m_Decoder->Channels();
         int32_t samleRate = m_Decoder->SampleRate();
         int32_t bitsPerSamle = m_Decoder->BitsPerSample();
-        // cout << "channels:" << channels << endl;
-        // cout << "samleRate:" << samleRate << endl;
-        // cout << "bitsPerSamle:" << bitsPerSamle << endl;
+        // TODO: add log
         err = m_Output->Setup(channels, samleRate, bitsPerSamle);
         if (err != ErrorCode::Ok) {
             cout << "FATAL: failed to set output:" << static_cast<uint8_t>(err) << endl;
@@ -380,10 +373,7 @@ class Player::Impl
             end = total;
         }
 
-        // cout << "begin:" << beg << endl;
-        // cout << "end:" << end << endl;
-        // cout << "total:" << total << endl;
-
+        // TODO: add log for range and total
         PlayRange(beg, end);
     }
 
