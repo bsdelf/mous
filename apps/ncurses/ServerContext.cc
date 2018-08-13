@@ -9,6 +9,7 @@ using namespace std;
 using namespace scx;
 
 #include <util/PlaylistSerializer.h>
+#include <util/PluginScanner.h>
 using namespace mous;
 
 #include "AppEnv.h"
@@ -36,32 +37,29 @@ ServerContext::~ServerContext()
 bool ServerContext::Init()
 {
     const auto env = GlobalAppEnv::Instance();
-    if (!mgr.LoadPluginDir(env->pluginDir))
-        return false;
 
-    typedef vector<const Plugin*> PluginAgentArray;
+    const int nPlugins = PluginScanner()
+        .OnPlugin(PluginType::Decoder, [this](const std::shared_ptr<Plugin>& plugin) {
+            player.LoadDecoderPlugin(plugin);
+        })
+        .OnPlugin(PluginType::Output, [this](const std::shared_ptr<Plugin>& plugin) {
+            player.LoadOutputPlugin(plugin);
+        })
+        .OnPlugin(PluginType::SheetParser, [this](const std::shared_ptr<Plugin>& plugin) {
+            loader.LoadSheetParserPlugin(plugin);
+        })
+        .OnPlugin(PluginType::TagParser, [this](const std::shared_ptr<Plugin>& plugin) {
+            loader.LoadTagParserPlugin(plugin);
+        })
+        .Scan(env->pluginDir);
 
-    PluginAgentArray decoders = mgr.PluginAgents(PluginType::Decoder);
-    //PluginAgentArray encoders;
-    //mgr.DumpPluginAgent(encoders, PluginType::Encoder);
-    PluginAgentArray outputs = mgr.PluginAgents(PluginType::Output);
-    PluginAgentArray sheetParsers = mgr.PluginAgents(PluginType::SheetParser);
-    PluginAgentArray tagParsers = mgr.PluginAgents(PluginType::TagParser);
-
-    loader.RegisterSheetParserPlugin(sheetParsers);
-    loader.RegisterTagParserPlugin(tagParsers);
-
-    player.RegisterOutputPlugin(outputs[0]);
-    player.RegisterDecoderPlugin(decoders);
-
-    return true;
+    return nPlugins > 1;
 }
 
 void ServerContext::Cleanup()
 {
-    loader.UnregisterAll();
-    player.UnregisterAll();
-    mgr.UnloadAll();
+    loader.UnloadPlugin();
+    player.UnloadPlugin();
 }
 
 void ServerContext::Dump()

@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 
-#include <core/Plugin.h>
-#include <core/ConvTask.h>
+#include <util/Plugin.h>
 #include <util/MediaItem.h>
+#include <core/ConvTask.h>
 
 namespace mous {
 
@@ -18,15 +18,10 @@ public:
     ConvTaskFactory();
     ~ConvTaskFactory();
 
-    void RegisterDecoderPlugin(const Plugin* pAgent);
-    void RegisterDecoderPlugin(std::vector<const Plugin*>& agents);
-
-    void RegisterEncoderPlugin(const Plugin* pAgent);
-    void RegisterEncoderPlugin(std::vector<const Plugin*>& agents);
-
-    void UnregisterPlugin(const Plugin* pAgent);
-    void UnregisterPlugin(std::vector<const Plugin*>& agents);
-    void UnregisterAll();
+    void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin);
+    void LoadEncoderPlugin(const std::shared_ptr<Plugin>& plugin);
+    void UnloadPlugin(const std::string& path);
+    void UnloadPlugin();
 
     std::vector<std::string> EncoderNames() const;
     ConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const;

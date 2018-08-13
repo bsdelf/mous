@@ -27,12 +27,16 @@ ErrorCode CoreAudioOutput::Open()
 {
     int maxVol = 0;
     op_mixer_ops.open(&maxVol);
+    closed = false;
     return ErrorCode::Ok;
 }
 
 void CoreAudioOutput::Close()
 {
-    op_mixer_ops.close();
+    if (!closed) {
+        op_mixer_ops.close();
+        closed = true;
+    }
 }
 
 ErrorCode CoreAudioOutput::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bitsPerSample)

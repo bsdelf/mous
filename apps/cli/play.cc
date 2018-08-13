@@ -9,39 +9,28 @@
 #include <scx/FileInfo.h>
 using namespace scx;
 
-#include <util/Playlist.h>
-#include <core/Player.h>
-using namespace mous;
-
 #include "ctx.h"
 #include "cmd.h"
 
-static bool QUIT = false;
-static std::mutex PLAYER_MUTEX;
-
-static Player PLAYER;
-static Playlist<MediaItem>* PLAYLIST = nullptr;
-
 void on_finished()
 {
-    if (PLAYLIST == nullptr)
-        return;
-
-    if (PLAYLIST->HasNext(1)) {
-        const MediaItem& item = PLAYLIST->NextItem(1, true);
+    if (ctx->playlist.HasNext(1)) {
+        const MediaItem& item = ctx->playlist.NextItem(1, true);
 
         printf("playing: \"%s\"\n", item.url.c_str());
 
-        std::lock_guard<std::mutex> locker(PLAYER_MUTEX);
-        if (PLAYER.Status() != PlayerStatus::Closed)
-            PLAYER.Close();
-        PLAYER.Open(item.url);
-        if (item.hasRange)
-            PLAYER.Play(item.msBeg, item.msEnd);
-        else
-            PLAYER.Play();
+        std::lock_guard<std::mutex> locker(ctx->playerMutex);
+        if (ctx->player.Status() != PlayerStatus::Closed) {
+            ctx->player.Close();
+        }
+        ctx->player.Open(item.url);
+        if (item.hasRange) {
+            ctx->player.Play(item.msBeg, item.msEnd);
+        } else {
+            ctx->player.Play();
+        }
     } else {
-        QUIT = true;
+        ctx->playerQuit = true;
     }
     //printf("finished!\n");
 }
@@ -51,23 +40,20 @@ int cmd_play(int argc, char* argv[])
     int rval = 0;
 
     // init player
-    PLAYER.SigFinished()->Connect(&on_finished);
-    PLAYER.RegisterOutputPlugin(ctx.outputPlugins[0]);
-    PLAYER.RegisterDecoderPlugin(ctx.decoderPlugins);
-    PLAYLIST = new Playlist<MediaItem>();
-    PLAYLIST->SetMode(PlaylistMode::Normal);
+    ctx->player.SigFinished()->Connect(&on_finished);
+    ctx->playlist.SetMode(PlaylistMode::Normal);
 
     // parse arguments
     for (int ch = -1; (ch = getopt(argc, argv, "rs")) != -1; ) {
         switch (ch) {
         case 'r':
-            PLAYLIST->SetMode(PLAYLIST->Mode() != PlaylistMode::Shuffle ?
+            ctx->playlist.SetMode(ctx->playlist.Mode() != PlaylistMode::Shuffle ?
                               PlaylistMode::Repeat :
                               PlaylistMode::ShuffleRepeat);
             break;
             
         case 's':
-            PLAYLIST->SetMode(PLAYLIST->Mode() != PlaylistMode::Repeat ?
+            ctx->playlist.SetMode(ctx->playlist.Mode() != PlaylistMode::Repeat ?
                               PlaylistMode::Shuffle :
                               PlaylistMode::ShuffleRepeat);
             break;
@@ -85,13 +71,13 @@ int cmd_play(int argc, char* argv[])
         std::deque<MediaItem> media_list;
         FileInfo info(argv[i]);
         if (info.Exists() && (info.Type() != FileType::Directory)) {
-            ctx.loader.LoadMedia(argv[i], media_list);
-            PLAYLIST->Append(media_list);
+            ctx->mediaLoader.LoadMedia(argv[i], media_list);
+            ctx->playlist.Append(media_list);
         } else {
             printf("invaild file: %s\n", argv[i]);
         }
     }
-    if (PLAYLIST->Empty()) {
+    if (ctx->playlist.Empty()) {
         printf("playlist is empty!\n");
         rval = -1;
         goto LABEL_CLEANUP;
@@ -101,29 +87,25 @@ int cmd_play(int argc, char* argv[])
     {
         on_finished();
         auto th = std::thread([] {
-            while (!QUIT) {
-                PLAYER_MUTEX.lock();
-                uint64_t ms = PLAYER.OffsetMs();
-                int32_t rate = PLAYER.BitRate();
-                PLAYER_MUTEX.unlock();
-
+            while (!ctx->playerQuit) {
+                ctx->playerMutex.lock();
+                uint64_t ms = ctx->player.OffsetMs();
+                int32_t rate = ctx->player.BitRate();
+                ctx->playerMutex.unlock();
                 printf("\r%d kbps %02d:%02d.%d ",
-                        rate, (int)(ms/1000/60), (int)(ms/1000%60), (int)(ms%1000));
+                    rate, (int)(ms/1000/60), (int)(ms/1000%60), (int)(ms%1000));
                 fflush(stdout);
-
                 usleep(200*1000);
             }
         });
-
-        if (th.joinable())
+        if (th.joinable()) {
             th.join();
+        }
     }
 
     // cleanup
 LABEL_CLEANUP:
-    PLAYLIST->Clear();
-    delete PLAYLIST;
-    PLAYER.UnregisterAll();
+    ctx->playlist.Clear();
 
     return rval;
 }

@@ -1,21 +1,35 @@
 #pragma once
 
 #include <inttypes.h>
+#include <scx/Conv.h>
 
 /**
  * Plugin common definition.
  */
 namespace mous {
 
-enum class PluginType: uint8_t
+enum class PluginType: uint32_t
 {
     None = 0,
-    Decoder,
-    Encoder,
-    Output,
-    SheetParser,
-    TagParser
+    Decoder = 1u,
+    Encoder = 1u << 1,
+    Output = 1u << 2,
+    SheetParser = 1u << 3,
+    TagParser = 1u << 4
 };
+
+inline auto operator & (PluginType lhs, PluginType rhs) {
+    return static_cast<PluginType>(scx::ToUnderlying(lhs) & scx::ToUnderlying(rhs));
+}
+
+inline auto operator | (PluginType lhs, PluginType rhs) {
+    return static_cast<PluginType>(scx::ToUnderlying(lhs) | scx::ToUnderlying(rhs));
+}
+
+inline auto& operator |= (PluginType& lhs, PluginType rhs) {
+    lhs = static_cast<PluginType>(scx::ToUnderlying(lhs) | scx::ToUnderlying(rhs));
+    return lhs;
+}
 
 struct PluginInfo
 {

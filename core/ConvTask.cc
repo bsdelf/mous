@@ -5,8 +5,8 @@
 namespace mous {
 
 ConvTask::ConvTask(const MediaItem& item, 
-                   const Plugin* decoderPlugin, 
-                   const Plugin* encoderPlugin):
+                   const std::shared_ptr<Plugin>& decoderPlugin,
+                   const std::shared_ptr<Plugin>& encoderPlugin):
     impl(std::make_unique<Impl>(item, decoderPlugin, encoderPlugin))
 {
 }

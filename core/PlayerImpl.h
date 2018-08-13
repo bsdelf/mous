@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iostream>
 #include <map>
+#include <set>
 #include <thread>
 using namespace std;
 
@@ -14,7 +15,7 @@ using namespace std;
 #include <scx/Mailbox.h>
 using namespace scx;
 
-#include <core/Plugin.h>
+#include <util/Plugin.h>
 #include <plugin/IDecoder.h>
 #include <plugin/IOutput.h>
 
@@ -28,7 +29,7 @@ struct UnitBuffer
 
 struct DecoderPluginNode
 {
-    const Plugin* agent;
+    std::shared_ptr<Plugin> plugin;
     IDecoder* decoder;
 };
 
@@ -191,63 +192,72 @@ class Player::Impl
 
         m_BufferMailbox.Clear();
 
-        UnregisterAll();
+        UnloadPlugin();
     }
 
     PlayerStatus Status() const { return m_Status; }
 
-    void RegisterDecoderPlugin(const Plugin* pAgent)
+    void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        if (pAgent->Type() == PluginType::Decoder) {
-            AddDecoderPlugin(pAgent);
+        auto decoder = plugin->CreateObject<IDecoder*>();
+        if (!decoder) {
+            return;
+        }
+        const vector<string>& list = decoder->FileSuffix();
+        bool used = false;
+        for (const string& item : list) {
+            const string& suffix = ToLower(item);
+            auto iter = m_DecoderPluginMap.find(suffix);
+            if (iter == m_DecoderPluginMap.end()) {
+                m_DecoderPluginMap.emplace(suffix, DecoderPluginNode{ plugin, decoder });
+                used = true;
+            }
+        }
+        if (!used) {
+            plugin->FreeObject(decoder);
         }
     }
 
-    void RegisterDecoderPlugin(vector<const Plugin*>& agents)
+    void LoadOutputPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        for (const auto agent : agents) {
-            RegisterDecoderPlugin(agent);
+        m_Output = plugin->CreateObject<IOutput*>();
+        if (!m_Output) {
+            return;
         }
+        m_Output->Open();
+        m_OutputPlugin = plugin;
     }
 
-    void RegisterOutputPlugin(const Plugin* pAgent)
+    void UnloadPlugin(const std::string&)
     {
-        if (pAgent->Type() == PluginType::Output) {
-            SetOutputPlugin(pAgent);
-        }
+        // TODO
     }
 
-    void UnregisterPlugin(const Plugin* pAgent)
+    void UnloadPlugin()
     {
-        switch (pAgent->Type()) {
-            case PluginType::Decoder:
-                RemoveDecoderPlugin(pAgent);
-                break;
+        Close();
 
-            case PluginType::Output:
-                UnsetOutputPlugin(pAgent);
-                break;
-
-            default:
-                break;
+        if (m_Decoder) {
+            m_Decoder->Close();
         }
-    }
-
-    void UnregisterPlugin(vector<const Plugin*>& agents)
-    {
-        for (const auto agent : agents) {
-            UnregisterPlugin(agent);
+        std::set<IDecoder*> freed;
+        for (auto& kv: m_DecoderPluginMap) {
+            auto& node = kv.second;
+            if (freed.find(node.decoder) != freed.end()) {
+                continue;
+            }
+            node.plugin->FreeObject(node.decoder);
+            freed.insert(node.decoder);
         }
-    }
+        m_Decoder = nullptr;
+        m_DecoderPluginMap.clear();
 
-    void UnregisterAll()
-    {
-        while (!m_DecoderPluginMap.empty()) {
-            auto iter = m_DecoderPluginMap.begin();
-            RemoveDecoderPlugin(iter->second.agent);
+        if (m_Output) {
+            m_Output->Close();
+            m_OutputPlugin->FreeObject(m_Output);
+            m_Output = nullptr;
+            m_OutputPlugin = nullptr;
         }
-
-        UnsetOutputPlugin(m_OutputPlugin);
     }
 
     vector<string> SupportedSuffixes() const
@@ -539,7 +549,7 @@ class Player::Impl
 
         for (const auto entry : m_DecoderPluginMap) {
             auto node = entry.second;
-            list.emplace_back(node.agent->Type(), node.agent->Info(), node.decoder->Options());
+            list.emplace_back(node.plugin->Type(), node.plugin->Info(), node.decoder->Options());
         }
 
         return list;
@@ -555,81 +565,6 @@ class Player::Impl
     }
 
     Signal<void(void)>* SigFinished() { return &m_SigFinished; }
-
-  private:
-    void AddDecoderPlugin(const Plugin* pAgent)
-    {
-        // create Decoder & get suffix
-        IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
-        const vector<string>& list = pDecoder->FileSuffix();
-
-        // try add
-        bool usedAtLeastOnce = false;
-        for (const string& item : list) {
-            const string& suffix = ToLower(item);
-            auto iter = m_DecoderPluginMap.find(suffix);
-            if (iter == m_DecoderPluginMap.end()) {
-                m_DecoderPluginMap.emplace(suffix, DecoderPluginNode{ pAgent, pDecoder });
-                usedAtLeastOnce = true;
-            }
-        }
-
-        // clear if not used
-        if (!usedAtLeastOnce) {
-            pAgent->FreeObject(pDecoder);
-        }
-    }
-
-    void RemoveDecoderPlugin(const Plugin* pAgent)
-    {
-        // get suffix
-        IDecoder* pDecoder = (IDecoder*)pAgent->CreateObject();
-        const vector<string>& list = pDecoder->FileSuffix();
-        pAgent->FreeObject(pDecoder);
-
-        // find plugin
-        bool freedOnce = false;
-        for (const string& item : list) {
-            const string& suffix = ToLower(item);
-            auto iter = m_DecoderPluginMap.find(suffix);
-            if (iter != m_DecoderPluginMap.end()) {
-                const DecoderPluginNode& node = iter->second;
-                if (node.agent == pAgent) {
-                    if (!freedOnce) {
-                        if (node.decoder == m_Decoder) {
-                            Close();
-                        }
-                        pAgent->FreeObject(node.decoder);
-                        freedOnce = true;
-                    }
-                    m_DecoderPluginMap.erase(iter);
-                }
-            }
-        }
-    }
-
-    void SetOutputPlugin(const Plugin* pAgent)
-    {
-        if (pAgent == nullptr || m_OutputPlugin != nullptr) {
-            return;
-        }
-
-        m_OutputPlugin = pAgent;
-        m_Output = (IOutput*)pAgent->CreateObject();
-        m_Output->Open();
-    }
-
-    void UnsetOutputPlugin(const Plugin* pAgent)
-    {
-        if (pAgent != m_OutputPlugin || m_OutputPlugin == nullptr) {
-            return;
-        }
-
-        m_Output->Close();
-        m_OutputPlugin->FreeObject(m_Output);
-        m_Output = nullptr;
-        m_OutputPlugin = nullptr;
-    }
 
   private:
     PlayerStatus m_Status = PlayerStatus::Closed;
@@ -655,7 +590,7 @@ class Player::Impl
 
     double m_UnitPerMs = 0;
 
-    const Plugin* m_OutputPlugin = nullptr;
+    std::shared_ptr<Plugin> m_OutputPlugin = nullptr;
     std::map<std::string, DecoderPluginNode> m_DecoderPluginMap;
 
     scx::Signal<void(void)> m_SigFinished;

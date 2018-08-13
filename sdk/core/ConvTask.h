@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <core/Plugin.h>
+#include <util/Plugin.h>
 #include <util/MediaItem.h>
 #include <util/Option.h>
 
@@ -14,7 +14,7 @@ class ConvTask
     class Impl;
 
 public:
-    explicit ConvTask(const MediaItem& item, const Plugin* decoderPlugin, const Plugin* encoderPlugin);
+    ConvTask(const MediaItem& item, const std::shared_ptr<Plugin>& decoderPlugin, const std::shared_ptr<Plugin>& encoderPlugin);
     ~ConvTask();
 
     std::vector<const BaseOption*> DecoderOptions() const;

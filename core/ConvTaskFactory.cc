@@ -12,39 +12,24 @@ ConvTaskFactory::~ConvTaskFactory()
 {
 }
 
-void ConvTaskFactory::RegisterDecoderPlugin(const Plugin* plugin)
+void ConvTaskFactory::LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin)
 {
-    return impl->RegisterDecoderPlugin(plugin);
+    return impl->LoadDecoderPlugin(plugin);
 }
 
-void ConvTaskFactory::RegisterDecoderPlugin(std::vector<const Plugin*>& plugins)
+void ConvTaskFactory::LoadEncoderPlugin(const std::shared_ptr<Plugin>& plugin)
 {
-    return impl->RegisterDecoderPlugin(plugins);
+    return impl->LoadEncoderPlugin(plugin);
 }
 
-void ConvTaskFactory::RegisterEncoderPlugin(const Plugin* plugin)
+void ConvTaskFactory::UnloadPlugin(const std::string& path)
 {
-    return impl->RegisterEncoderPlugin(plugin);
+    return impl->UnloadPlugin(path);
 }
 
-void ConvTaskFactory::RegisterEncoderPlugin(std::vector<const Plugin*>& plugins)
+void ConvTaskFactory::UnloadPlugin()
 {
-    return impl->RegisterEncoderPlugin(plugins);
-}
-
-void ConvTaskFactory::UnregisterPlugin(const Plugin* plugin)
-{
-    return impl->UnregisterPlugin(plugin);
-}
-
-void ConvTaskFactory::UnregisterPlugin(std::vector<const Plugin*>& plugins)
-{
-    return impl->UnregisterPlugin(plugins);
-}
-
-void ConvTaskFactory::UnregisterAll()
-{
-    return impl->UnregisterAll();
+    return impl->UnloadPlugin();
 }
 
 std::vector<std::string> ConvTaskFactory::EncoderNames() const

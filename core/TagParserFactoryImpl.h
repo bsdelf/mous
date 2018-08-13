@@ -1,7 +1,6 @@
 #pragma once
 
-#include <unordered_map>
-
+#include <map>
 #include <scx/FileHelper.h>
 
 namespace mous {
@@ -10,90 +9,68 @@ class TagParserFactory::Impl {
 public:
     ~Impl()
     {
-        UnregisterAll();
+        UnloadPlugin();
     }
 
-    void RegisterTagParserPlugin(const Plugin* pAgent)
+    void LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
+        auto parser = plugin->CreateObject<ITagParser*>();
+        if (!parser) {
+            return;
+        }
         const auto& suffixList = parser->FileSuffix();
-        if (parser != nullptr) {
-            pAgent->FreeObject(parser);
-            for (const std::string& suffix: suffixList) {
-                auto iter = indexedPlugins.find(suffix);
-                if (iter == indexedPlugins.end()) {
-                    indexedPlugins.emplace(suffix, pAgent);
-                }
+        for (const std::string& suffix: suffixList) {
+            auto iter = plugins_.find(suffix);
+            if (iter == plugins_.end()) {
+                plugins_.emplace(suffix, plugin);
             }
         }
+        plugin->FreeObject(parser);
     }
 
-    void RegisterTagParserPlugin(std::vector<const Plugin*>& agents)
+    void UnloadPlugin(const std::string&)
     {
-        for (auto agent: agents) {
-            RegisterTagParserPlugin(agent);
-        }
+        // TODO
     }
 
-    void UnregisterPlugin(const Plugin* pAgent)
+    void UnloadPlugin()
     {
-        ITagParser* parser = static_cast<ITagParser*>(pAgent->CreateObject());
-        const auto& suffixList = parser->FileSuffix();
-        if (parser != nullptr) {
-            pAgent->FreeObject(parser);
-            for (const std::string& suffix: suffixList) {
-                auto iter = indexedPlugins.find(suffix);
-                if (iter != indexedPlugins.end() && pAgent == iter->second) {
-                    indexedPlugins.erase(iter);
-                    // we do not care about the TagParser in use, let it leak/crash!
-                }
-            }
+        for (auto& kv: parsers_) {
+            kv.second->FreeObject(kv.first);
         }
-    }
-
-    void UnregisterPlugin(std::vector<const Plugin*>& agents)
-    {
-        for (auto agent: agents) {
-            UnregisterPlugin(agent);
-        }
-    }
-
-    void UnregisterAll()
-    {
-        while (!indexedPlugins.empty()) {
-            UnregisterPlugin(indexedPlugins.begin()->second);
-        }
+        parsers_.clear();
+        plugins_.clear();
     }
 
     ITagParser* CreateParser(const std::string& fileName) const
     {
-        ITagParser* parser = nullptr;
         const std::string& suffix = scx::FileHelper::FileSuffix(fileName);
-        auto iter = indexedPlugins.find(suffix);
-        if (iter == indexedPlugins.end()) {
-            iter = indexedPlugins.find("*");
+        auto iter = plugins_.find(suffix);
+        if (iter == plugins_.end()) {
+            iter = plugins_.find("*");
         }
-        if (iter != indexedPlugins.end()) {
-            parser =  static_cast<ITagParser*>(iter->second->CreateObject());
+        if (iter == plugins_.end()) {
+            return nullptr;
         }
+        auto parser = iter->second->CreateObject<ITagParser*>();
         if (parser != nullptr) {
-            m_ParserParentMap[parser] = iter->second;
+            parsers_[parser] = iter->second;
         }
         return parser;
     }
 
     void FreeParser(ITagParser* parser) const
     {
-        auto iter = m_ParserParentMap.find(parser);
-        if (iter != m_ParserParentMap.end()) {
+        auto iter = parsers_.find(parser);
+        if (iter != parsers_.end()) {
             iter->second->FreeObject(parser);
-            m_ParserParentMap.erase(iter);
+            parsers_.erase(iter);
         }
     }
 
 private:
-    std::unordered_map<std::string, const Plugin*> indexedPlugins;
-    mutable std::unordered_map<ITagParser*, const Plugin*> m_ParserParentMap;
+    std::map<std::string, std::shared_ptr<Plugin>> plugins_;
+    mutable std::map<ITagParser*, std::shared_ptr<Plugin>> parsers_;
 };
 
 }

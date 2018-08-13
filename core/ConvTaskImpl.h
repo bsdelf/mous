@@ -10,14 +10,14 @@ namespace mous {
 class ConvTask::Impl {
 public:
     Impl(const MediaItem& item,
-         const Plugin* decoderPlugin,
-         const Plugin* encoderPlugin)
+         const std::shared_ptr<Plugin>& decoderPlugin,
+         const std::shared_ptr<Plugin>& encoderPlugin)
         : m_Item(item)
         , m_DecoderPlugin(decoderPlugin)
         , m_EncoderPlugin(encoderPlugin)
     {
-        m_Decoder = (IDecoder*)m_DecoderPlugin->CreateObject();
-        m_Encoder = (IEncoder*)m_EncoderPlugin->CreateObject();
+        m_Decoder = m_DecoderPlugin->CreateObject<IDecoder*>();
+        m_Encoder = m_EncoderPlugin->CreateObject<IEncoder*>();
     }
 
     ~Impl()
@@ -133,8 +133,8 @@ public:
 
 private:
     MediaItem m_Item;
-    const Plugin* m_DecoderPlugin;
-    const Plugin* m_EncoderPlugin;
+    std::shared_ptr<Plugin> m_DecoderPlugin;
+    std::shared_ptr<Plugin> m_EncoderPlugin;
 
     std::thread m_WorkThread;
 

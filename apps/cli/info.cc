@@ -47,7 +47,7 @@ int cmd_info(int argc, char** argv)
         // tag info
         {
             std::deque<MediaItem> media_list;
-            ctx.loader.LoadMedia(argv[i], media_list);
+            ctx->mediaLoader.LoadMedia(argv[i], media_list);
             for (auto& item: media_list) {
                 // duration
                 if (item.hasRange) {

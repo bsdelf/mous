@@ -17,7 +17,7 @@ int cmd_dec(int argc, char** argv)
 {
     // find wav encoder
     std::string wav_enc;
-    const std::vector<std::string>& encoders = ctx.convertTaskFactory.EncoderNames();
+    const std::vector<std::string>& encoders = ctx->convertTaskFactory.EncoderNames();
     for (size_t i = 0; i < encoders.size(); ++i) {
         if (ToLower(encoders[i]).find("wav") != std::string::npos)
             wav_enc = encoders[i];
@@ -34,7 +34,7 @@ int cmd_dec(int argc, char** argv)
 
         // load media file
         std::deque<MediaItem> media_list;
-        ctx.loader.LoadMedia(argv[i], media_list);
+        ctx->mediaLoader.LoadMedia(argv[i], media_list);
 
         // convert each track
         for (size_t mi = 0; mi < media_list.size(); ++mi) {
@@ -54,7 +54,7 @@ int cmd_dec(int argc, char** argv)
             }
 
             // do it!
-            ConvTask* task = ctx.convertTaskFactory.CreateTask(media_list[mi], wav_enc);
+            ConvTask* task = ctx->convertTaskFactory.CreateTask(media_list[mi], wav_enc);
             task->Run(outname);
 
             while (!task->IsFinished()) {

@@ -4,8 +4,15 @@
 #include <cctype>
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 namespace scx {
+
+template<typename E>
+constexpr auto ToUnderlying(E e)
+{
+    return static_cast<typename std::underlying_type<E>::type>(e);
+}
 
 template<typename num_t>
 inline num_t

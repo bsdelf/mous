@@ -12,29 +12,19 @@ TagParserFactory::~TagParserFactory()
 {
 }
 
-void TagParserFactory::RegisterTagParserPlugin(const Plugin* plugin)
+void TagParserFactory::LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin)
 {
-    return impl->RegisterTagParserPlugin(plugin);
+    return impl->LoadTagParserPlugin(plugin);
 }
 
-void TagParserFactory::RegisterTagParserPlugin(std::vector<const Plugin*>& plugins)
+void TagParserFactory::UnloadPlugin(const std::string& path)
 {
-    return impl->RegisterTagParserPlugin(plugins);
+    return impl->UnloadPlugin(path);
 }
 
-void TagParserFactory::UnregisterPlugin(const Plugin* plugin)
+void TagParserFactory::UnloadPlugin()
 {
-    return impl->UnregisterPlugin(plugin);
-}
-
-void TagParserFactory::UnregisterPlugin(std::vector<const Plugin*>& plugins)
-{
-    return impl->UnregisterPlugin(plugins);
-}
-
-void TagParserFactory::UnregisterAll()
-{
-    return impl->UnregisterAll();
+    return impl->UnloadPlugin();
 }
 
 ITagParser* TagParserFactory::CreateParser(const std::string& fileName) const

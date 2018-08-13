@@ -530,7 +530,7 @@ static void coreaudio_hog_device(AudioDeviceID dev_id, bool hog)
 		d_print("Cannot hog the device: %d\n", err);
 }
 
-static OSStatus coreaudio_set_buffer_size(AudioUnit au, AudioStreamBasicDescription desc, int *frame_size)
+static OSStatus coreaudio_set_buffer_size(AudioUnit au, AudioStreamBasicDescription desc, UInt32 *frame_size)
 {
 	AudioValueRange value_range = {0, 0};
 	UInt32 property_size = sizeof(AudioValueRange);
@@ -613,7 +613,7 @@ static OSStatus coreaudio_init_audio_unit(AudioUnit *au,
 }
 
 static OSStatus coreaudio_start_audio_unit(AudioUnit *au,
-					   int *frame_size,
+					   UInt32 *frame_size,
 					   AudioStreamBasicDescription desc)
 {
 	

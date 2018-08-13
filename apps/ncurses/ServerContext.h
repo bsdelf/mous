@@ -11,14 +11,12 @@ using namespace scx;
 #include <util/Playlist.h>
 #include <core/Player.h>
 #include <core/MediaLoader.h>
-#include <core/PluginManager.h>
 using namespace mous;
 
 struct ServerContext
 {
     mutex mtx;
 
-    PluginManager mgr;
     MediaLoader loader;
     Player player;
 
