@@ -159,7 +159,7 @@ uint64_t Player::CurrentMs() const
     return impl->CurrentMs();
 }
 
-AudioMode Player::AudioMode() const
+enum AudioMode Player::AudioMode() const
 {
     return impl->AudioMode();
 }
