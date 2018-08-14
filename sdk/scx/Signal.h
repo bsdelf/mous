@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
