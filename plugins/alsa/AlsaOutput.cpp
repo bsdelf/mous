@@ -56,7 +56,7 @@ ErrorCode AlsaOutput::Setup(int32_t& channels, int32_t& sampleRate, int32_t& bit
         //NOTE: just is a workaround :-(
         ok = sampleRate > 1 ? true : false;
     }
-    if ((unsigned int)bitsPerSample != m_BitsPerSample) {
+    if (bitsPerSample != m_BitsPerSample) {
         bitsPerSample = m_BitsPerSample;
         ok = false;
     }
