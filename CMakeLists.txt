@@ -193,7 +193,7 @@ add_library(MousCore SHARED ${LIB_MOUS_CORE})
 set_target_properties(MousCore PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 if(LINUX)
-    set(LIB_MOUS_CORE_EXTRA -ld)
+    set(LIB_MOUS_CORE_EXTRA -ldl)
 endif()
 target_link_libraries(MousCore Threads::Threads ${LIB_MOUS_CORE_EXTRA})
 install(TARGETS MousCore LIBRARY DESTINATION lib)

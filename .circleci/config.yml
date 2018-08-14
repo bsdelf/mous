@@ -1,0 +1,24 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: debian:stretch
+    steps:
+      - checkout
+      - run: apt-get update
+      - run: apt-get install -y build-essential cmake libasound2-dev
+      - run: >
+          mkdir -p build &&
+          cd build &&
+          cmake ../
+          -DWITH_APP_QT5=OFF
+          -DWITH_PLUGIN_COREAUDIO=OFF
+          -DWITH_PLUGIN_TAGLIB=OFF
+          -DWITH_PLUGIN_LIBCUE=OFF
+          -DWITH_PLUGIN_FAAC=OFF
+          -DWITH_PLUGIN_FDK_AAC=OFF
+          -DWITH_PLUGIN_FLAC=OFF
+          -DWITH_PLUGIN_LAME=OFF
+          -DWITH_PLUGIN_MPG123=OFF
+          -DWITH_PLUGIN_WAVPACK=OFF &&
+          make

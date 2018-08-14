@@ -53,4 +53,3 @@ private:
     Tuple<snd_pcm_uframes_t> m_PeriodSize;
 };
 
-#endif
