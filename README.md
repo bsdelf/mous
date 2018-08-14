@@ -1,7 +1,8 @@
 <!-- font font-family="monospace" -->
 
-
 # Mous Player
+
+[![CircleCI](https://circleci.com/gh/bsdelf/mous/tree/master.svg?style=svg)](https://circleci.com/gh/bsdelf/mous/tree/master)
 
 ## Features
 
