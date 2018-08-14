@@ -178,7 +178,7 @@ class Player::Impl
     ~Impl()
     {
         Close();
-        
+
         m_DecoderMailbox.EmplaceFront(QUIT, nullptr, std::weak_ptr<Mailbox>());
         m_OutputMailbox.EmplaceFront(QUIT, nullptr, std::weak_ptr<Mailbox>());
 
@@ -302,7 +302,7 @@ class Player::Impl
         const uint32_t maxBytesPerUnit = m_Decoder->MaxBytesPerUnit();
         m_BufferMailbox.Clear();
         m_Buffer = std::make_unique<char[]>(m_BufferCount * (sizeof(UnitBuffer) + maxBytesPerUnit));
-        for (size_t i = 0; i < m_BufferCount; ++i) {
+        for (int i = 0; i < m_BufferCount; ++i) {
             auto ptr = m_Buffer.get() + (sizeof(UnitBuffer) + maxBytesPerUnit) * i;
             auto buf = reinterpret_cast<UnitBuffer*>(ptr);
             m_BufferMailbox.EmplaceBack(0, buf, std::weak_ptr<Mailbox>());
