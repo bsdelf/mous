@@ -21,5 +21,8 @@ public:
     virtual void SetVolumeLevel(int level);
 
     virtual std::vector<const BaseOption*> Options() const;
+
+private:
+    bool closed = true;
 };
 

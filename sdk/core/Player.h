@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include <core/Plugin.h>
+#include <util/Plugin.h>
 
 #include <util/ErrorCode.h>
 #include <util/AudioMode.h>
@@ -34,14 +34,10 @@ public:
 public:
     PlayerStatus Status() const;
 
-    void RegisterDecoderPlugin(const Plugin* pAgent);
-    void RegisterDecoderPlugin(std::vector<const Plugin*>& agents);
-
-    void RegisterOutputPlugin(const Plugin* pAgent);
-
-    void UnregisterPlugin(const Plugin* pAgent);
-    void UnregisterPlugin(std::vector<const Plugin*>& agents);
-    void UnregisterAll();
+    void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin);
+    void LoadOutputPlugin(const std::shared_ptr<Plugin>& plugin);
+    void UnloadPlugin(const std::string& path);
+    void UnloadPlugin();
 
     std::vector<std::string> SupportedSuffixes() const;
 

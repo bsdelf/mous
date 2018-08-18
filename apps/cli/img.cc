@@ -16,7 +16,7 @@ int cmd_img(int argc, char** argv)
             continue;
         }
 
-        ITagParser* parser = ctx.tagParserFactory.CreateParser(argv[i]);
+        ITagParser* parser = ctx->tagParserFactory.CreateParser(argv[i]);
         if (parser == nullptr) {
             printf("no parser!\n");
             continue;

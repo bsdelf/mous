@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "ctx.h"
 #include "cmd.h"
@@ -43,29 +44,16 @@ int cmd_help(int, char**)
 
 int cmd_plugin(int, char**)
 {
-    const std::vector<std::string>& path_list = ctx.pluginManager.PluginPaths();
-    for (size_t i = 0; i < path_list.size(); ++i) {
-        const PluginInfo* info = ctx.pluginManager.QueryPluginInfo(path_list[i]);
-        printf("#%02zu %s\n"
-               "    %s\n"
-               "    %s\n"
-               "    %d\n",
-               i+1, path_list[i].c_str(),
-               info->name,
-               info->desc,
-               info->version);
-    }
-
     printf("Decoder:     %zu\n"
            "Endocer:     %zu\n"
-           "Output:    %zu\n"
+           "Output:      %zu\n"
            "SheetParser: %zu\n"
            "TagParser:   %zu\n",
-           ctx.decoderPlugins.size(),
-           ctx.encoderPlugins.size(),
-           ctx.outputPlugins.size(),
-           ctx.sheetParserPlugins.size(),
-           ctx.tagParserPlugins.size());
+           ctx->decoderPlugins.size(),
+           ctx->encoderPlugins.size(),
+           ctx->outputPlugins.size(),
+           ctx->sheetParserPlugins.size(),
+           ctx->tagParserPlugins.size());
 
     return 0;
 }
@@ -79,6 +67,8 @@ int main(int argc, char** argv)
         cmd_help(0, nullptr);
         exit(EXIT_FAILURE);
     }
+
+    ctx = std::make_unique<Context>();
 
     // match command
     {
@@ -97,6 +87,8 @@ int main(int argc, char** argv)
             ret = cmd_play(argc, argv);
         }
     }
+
+    ctx.reset();
 
     exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }

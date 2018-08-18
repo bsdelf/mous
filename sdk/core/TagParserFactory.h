@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include <core/Plugin.h>
+#include <util/Plugin.h>
 #include <plugin/ITagParser.h>
 
 namespace mous {
@@ -16,12 +16,9 @@ public:
     TagParserFactory();
     ~TagParserFactory();
 
-    void RegisterTagParserPlugin(const Plugin* pAgent);
-    void RegisterTagParserPlugin(std::vector<const Plugin*>& agents);
-
-    void UnregisterPlugin(const Plugin* pAgent);
-    void UnregisterPlugin(std::vector<const Plugin*>& agents);
-    void UnregisterAll();
+    void LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin);
+    void UnloadPlugin(const std::string& path);
+    void UnloadPlugin();
 
     ITagParser* CreateParser(const std::string& fileName) const;
     void FreeParser(ITagParser* parser) const;

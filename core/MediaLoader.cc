@@ -1,5 +1,5 @@
 #include <core/MediaLoader.h>
-#include <core/Plugin.h>
+#include <util/Plugin.h>
 
 #include "MediaLoaderImpl.h"
 
@@ -14,39 +14,24 @@ MediaLoader::~MediaLoader()
 {
 }
 
-void MediaLoader::RegisterSheetParserPlugin(const Plugin* pAgent)
+void MediaLoader::LoadSheetParserPlugin(const std::shared_ptr<Plugin>& plugin)
 {
-    return impl->RegisterSheetParserPlugin(pAgent);
+    return impl->LoadSheetParserPlugin(plugin);
 }
 
-void MediaLoader::RegisterSheetParserPlugin(std::vector<const Plugin*>& agents)
+void MediaLoader::LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin)
 {
-    return impl->RegisterSheetParserPlugin(agents);
+    return impl->LoadTagParserPlugin(plugin);
 }
 
-void MediaLoader::RegisterTagParserPlugin(const Plugin* pAgent)
+void MediaLoader::UnloadPlugin(const std::string& path)
 {
-    return impl->RegisterTagParserPlugin(pAgent);
+    return impl->UnloadPlugin(path);
 }
 
-void MediaLoader::RegisterTagParserPlugin(std::vector<const Plugin*>& agents)
+void MediaLoader::UnloadPlugin()
 {
-    return impl->RegisterTagParserPlugin(agents);
-}
-
-void MediaLoader::UnregisterPlugin(const Plugin* pAgent)
-{
-    return impl->UnregisterPlugin(pAgent);
-}
-
-void MediaLoader::UnregisterPlugin(std::vector<const Plugin*>& agents)
-{
-    return impl->UnregisterPlugin(agents);
-}
-
-void MediaLoader::UnregisterAll()
-{
-    return impl->UnregisterAll();
+    return impl->UnloadPlugin();
 }
 
 std::vector<std::string> MediaLoader::SupportedSuffixes() const

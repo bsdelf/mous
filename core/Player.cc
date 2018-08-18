@@ -1,5 +1,5 @@
 #include <core/Player.h>
-#include <core/Plugin.h>
+#include <util/Plugin.h>
 
 #include "PlayerImpl.h"
 
@@ -19,34 +19,24 @@ PlayerStatus Player::Status() const
     return impl->Status();
 }
 
-void Player::RegisterDecoderPlugin(const Plugin* pAgent)
+void Player::LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin)
 {
-    return impl->RegisterDecoderPlugin(pAgent);
+    return impl->LoadDecoderPlugin(plugin);
 }
 
-void Player::RegisterDecoderPlugin(vector<const Plugin*>& agents)
+void Player::LoadOutputPlugin(const std::shared_ptr<Plugin>& plugin)
 {
-    return impl->RegisterDecoderPlugin(agents);
+    return impl->LoadOutputPlugin(plugin);
 }
 
-void Player::RegisterOutputPlugin(const Plugin* pAgent)
+void Player::UnloadPlugin(const std::string& path)
 {
-    return impl->RegisterOutputPlugin(pAgent);
+    return impl->UnloadPlugin(path);
 }
 
-void Player::UnregisterPlugin(const Plugin* pAgent)
+void Player::UnloadPlugin()
 {
-    return impl->UnregisterPlugin(pAgent);
-}
-
-void Player::UnregisterPlugin(vector<const Plugin*>& agents)
-{
-    return impl->UnregisterPlugin(agents);
-}
-
-void Player::UnregisterAll()
-{
-    return impl->UnregisterAll();
+    return impl->UnloadPlugin();
 }
 
 vector<string> Player::SupportedSuffixes() const

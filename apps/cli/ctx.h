@@ -1,11 +1,13 @@
 #pragma once
 
 #include <vector>
+#include <mutex>
 
 #include <util/MediaItem.h>
 #include <util/PluginOption.h>
 #include <core/MediaLoader.h>
-#include <core/PluginManager.h>
+#include <core/Player.h>
+#include <util/Playlist.h>
 #include <core/ConvTask.h>
 #include <core/ConvTaskFactory.h>
 #include <core/TagParserFactory.h>
@@ -13,22 +15,25 @@ using namespace mous;
 
 struct Context
 {
-    using PluginPtrVector = std::vector<const Plugin*>;
+    using PluginVector = std::vector<std::shared_ptr<Plugin>>;
 
     Context();
     ~Context();
 
-    PluginManager pluginManager;
-
-    MediaLoader loader;
+    MediaLoader mediaLoader;
     TagParserFactory tagParserFactory;
     ConvTaskFactory convertTaskFactory;
 
-    PluginPtrVector decoderPlugins;
-    PluginPtrVector encoderPlugins;
-    PluginPtrVector outputPlugins;
-    PluginPtrVector tagParserPlugins;
-    PluginPtrVector sheetParserPlugins;
+    Player player;
+    std::mutex playerMutex;
+    bool playerQuit;
+    Playlist<MediaItem> playlist;
+
+    PluginVector decoderPlugins;
+    PluginVector encoderPlugins;
+    PluginVector outputPlugins;
+    PluginVector tagParserPlugins;
+    PluginVector sheetParserPlugins;
 };
 
-extern Context ctx;
+extern std::unique_ptr<Context> ctx;

@@ -16,6 +16,7 @@ using namespace sqt;
 using namespace scx;
 
 #include <util/MediaItem.h>
+#include <util/PluginFinder.h>
 using namespace mous;
 
 using namespace std;
@@ -82,42 +83,48 @@ void MainWindow::InitMousCore()
     m_ConvFactory = new ConvTaskFactory();
     m_ParserFactory = new TagParserFactory();
 
-    m_PluginManager.LoadPluginDir(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
-    //const vector<string>& pathList = m_PluginManager.PluginPaths();
+    int decoderPluginCount = 0;
+    int encoderPluginCount = 0;
+    int outputPluginCount = 0;
+    int sheetParserPluginCount = 0;
+    int tagParserPluginCount = 0;
 
-    vector<const Plugin*> sheetParserAgentList = 
-        m_PluginManager.PluginAgents(PluginType::SheetParser);
-    vector<const Plugin*> tagParserAgentList = 
-        m_PluginManager.PluginAgents(PluginType::TagParser);
+    PluginFinder()
+        .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
+            m_Player->LoadDecoderPlugin(plugin);
+            m_ConvFactory->LoadDecoderPlugin(plugin);
+            ++decoderPluginCount;
+        })
+        .OnPlugin(PluginType::Encoder, [&, this](const std::shared_ptr<Plugin>&plugin) {
+            m_ConvFactory->LoadEncoderPlugin(plugin);
+            ++encoderPluginCount;
+        })
+        .OnPlugin(PluginType::Output, [&, this](const std::shared_ptr<Plugin>& plugin) {
+            m_Player->LoadOutputPlugin(plugin);
+            ++outputPluginCount;
+        })
+        .OnPlugin(PluginType::SheetParser, [&, this](const std::shared_ptr<Plugin>& plugin) {
+            m_MediaLoader->LoadSheetParserPlugin(plugin);
+            ++sheetParserPluginCount;
+        })
+        .OnPlugin(PluginType::TagParser, [&, this](const std::shared_ptr<Plugin>& plugin) {
+            m_MediaLoader->LoadTagParserPlugin(plugin);
+            m_ParserFactory->LoadTagParserPlugin(plugin);
+            ++tagParserPluginCount;
+        })
+        .Run(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
 
-    m_MediaLoader->RegisterSheetParserPlugin(sheetParserAgentList);
-    m_MediaLoader->RegisterTagParserPlugin(tagParserAgentList);
-
-    vector<const Plugin*> decoderAgentList =
-        m_PluginManager.PluginAgents(PluginType::Decoder);
-    vector<const Plugin*> encoderAgentList = 
-        m_PluginManager.PluginAgents(PluginType::Encoder);
-    vector<const Plugin*> outputAgentList =
-        m_PluginManager.PluginAgents(PluginType::Output);
-
-    m_Player->RegisterOutputPlugin(outputAgentList[0]);
-    m_Player->RegisterDecoderPlugin(decoderAgentList);
     m_Player->SetBufferCount(102);
     m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
-
-    m_ConvFactory->RegisterDecoderPlugin(decoderAgentList);
-    m_ConvFactory->RegisterEncoderPlugin(encoderAgentList);
-
-    m_ParserFactory->RegisterTagParserPlugin(tagParserAgentList);
 
     m_FrmTagEditor.SetPlayer(m_Player);
     m_FrmTagEditor.SetTagParserFactory(m_ParserFactory);
 
-    qDebug() << ">> SheetParser count:" << sheetParserAgentList.size();
-    qDebug() << ">> TagParser count:" << tagParserAgentList.size();
-    qDebug() << ">> Decoder count:" << decoderAgentList.size();
-    qDebug() << ">> Encoder count:" << encoderAgentList.size();
-    qDebug() << ">> Output count:" << outputAgentList.size();
+    qDebug() << ">> SheetParser count:" << sheetParserPluginCount;
+    qDebug() << ">> TagParser count:" << tagParserPluginCount;
+    qDebug() << ">> Decoder count:" << decoderPluginCount;
+    qDebug() << ">> Encoder count:" << encoderPluginCount;
+    qDebug() << ">> Output count:" << outputPluginCount;
 }
 
 void MainWindow::ClearMousCore()
@@ -126,11 +133,10 @@ void MainWindow::ClearMousCore()
     m_FrmTagEditor.SetPlayer(nullptr);
     m_FrmTagEditor.SetTagParserFactory(nullptr);
 
-    m_Player->UnregisterAll();
-    m_MediaLoader->UnregisterAll();
-    m_ConvFactory->UnregisterAll();
-    m_ParserFactory->UnregisterAll();
-    m_PluginManager.UnloadAll();
+    m_Player->UnloadPlugin();
+    m_MediaLoader->UnloadPlugin();
+    m_ConvFactory->UnloadPlugin();
+    m_ParserFactory->UnloadPlugin();
 
     delete m_MediaLoader;
     delete m_Player;

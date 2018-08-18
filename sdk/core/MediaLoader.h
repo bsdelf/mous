@@ -7,7 +7,7 @@
 
 #include <util/ErrorCode.h>
 #include <util/MediaItem.h>
-#include <core/Plugin.h>
+#include <util/Plugin.h>
 
 namespace mous {
 
@@ -19,15 +19,10 @@ public:
     MediaLoader();
     ~MediaLoader();
 
-    void RegisterSheetParserPlugin(const Plugin* pAgent);
-    void RegisterSheetParserPlugin(std::vector<const Plugin*>& agents);
-
-    void RegisterTagParserPlugin(const Plugin* pAgent);
-    void RegisterTagParserPlugin(std::vector<const Plugin*>& agents);
-
-    void UnregisterPlugin(const Plugin* pAgent);
-    void UnregisterPlugin(std::vector<const Plugin*>& agents);
-    void UnregisterAll();
+    void LoadSheetParserPlugin(const std::shared_ptr<Plugin>& plugin);
+    void LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin);
+    void UnloadPlugin(const std::string& path);
+    void UnloadPlugin();
 
     std::vector<std::string> SupportedSuffixes() const;
     ErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const;

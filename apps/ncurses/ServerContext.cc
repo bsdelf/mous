@@ -9,6 +9,7 @@ using namespace std;
 using namespace scx;
 
 #include <util/PlaylistSerializer.h>
+#include <util/PluginFinder.h>
 using namespace mous;
 
 #include "AppEnv.h"
@@ -35,33 +36,32 @@ ServerContext::~ServerContext()
 
 bool ServerContext::Init()
 {
+    bool hasDecoder = false;
+    bool hasOutput = false;
     const auto env = GlobalAppEnv::Instance();
-    if (!mgr.LoadPluginDir(env->pluginDir))
-        return false;
-
-    typedef vector<const Plugin*> PluginAgentArray;
-
-    PluginAgentArray decoders = mgr.PluginAgents(PluginType::Decoder);
-    //PluginAgentArray encoders;
-    //mgr.DumpPluginAgent(encoders, PluginType::Encoder);
-    PluginAgentArray outputs = mgr.PluginAgents(PluginType::Output);
-    PluginAgentArray sheetParsers = mgr.PluginAgents(PluginType::SheetParser);
-    PluginAgentArray tagParsers = mgr.PluginAgents(PluginType::TagParser);
-
-    loader.RegisterSheetParserPlugin(sheetParsers);
-    loader.RegisterTagParserPlugin(tagParsers);
-
-    player.RegisterOutputPlugin(outputs[0]);
-    player.RegisterDecoderPlugin(decoders);
-
-    return true;
+    PluginFinder()
+        .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
+            player.LoadDecoderPlugin(plugin);
+            hasDecoder = true;
+        })
+        .OnPlugin(PluginType::Output, [&, this](const std::shared_ptr<Plugin>& plugin) {
+            player.LoadOutputPlugin(plugin);
+            hasOutput = true;
+        })
+        .OnPlugin(PluginType::SheetParser, [this](const std::shared_ptr<Plugin>& plugin) {
+            loader.LoadSheetParserPlugin(plugin);
+        })
+        .OnPlugin(PluginType::TagParser, [this](const std::shared_ptr<Plugin>& plugin) {
+            loader.LoadTagParserPlugin(plugin);
+        })
+        .Run(env->pluginDir);
+    return hasDecoder && hasOutput;
 }
 
 void ServerContext::Cleanup()
 {
-    loader.UnregisterAll();
-    player.UnregisterAll();
-    mgr.UnloadAll();
+    loader.UnloadPlugin();
+    player.UnloadPlugin();
 }
 
 void ServerContext::Dump()
