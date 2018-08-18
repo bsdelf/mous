@@ -22,14 +22,18 @@ class MediaLoader::Impl
         if (!parser) {
             return;
         }
-        for (const std::string& item : parser->FileSuffix()) {
+        size_t refcnt = 0;
+        for (const std::string& item: parser->FileSuffix()) {
             const std::string& suffix = ToLower(item);
-            auto iter = indexedSheetParsers.find(suffix);
-            if (iter == indexedSheetParsers.end()) {
-                indexedSheetParsers.emplace(suffix, parser);
+            auto iter = sheet_parsers_.find(suffix);
+            if (iter == sheet_parsers_.end()) {
+                sheet_parsers_.emplace(suffix, std::make_pair(parser, plugin));
+                ++refcnt;
             }
         }
-        plugins_.push_back(plugin);
+        if (!refcnt) {
+            plugin->FreeObject(parser);
+        }
     }
 
     void LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin)
@@ -38,14 +42,18 @@ class MediaLoader::Impl
         if (!parser) {
             return;
         }
-        for (const std::string& item : parser->FileSuffix()) {
+        size_t refcnt = 0;
+        for (const std::string& item: parser->FileSuffix()) {
             const std::string& suffix = ToLower(item);
-            auto iter = indexedTagParsers.find(suffix);
-            if (iter == indexedTagParsers.end()) {
-                indexedTagParsers.emplace(suffix, parser);
+            auto iter = tag_parsers_.find(suffix);
+            if (iter == tag_parsers_.end()) {
+                tag_parsers_.emplace(suffix, std::make_pair(parser, plugin));
+                ++refcnt;
             }
         }
-        plugins_.push_back(plugin);
+        if (!refcnt) {
+            plugin->FreeObject(parser);
+        }
     }
 
     void UnloadPlugin(const std::string&)
@@ -55,17 +63,23 @@ class MediaLoader::Impl
 
     void UnloadPlugin()
     {
-        // FIX: leak
-        indexedSheetParsers.clear();
-        indexedTagParsers.clear();
-        plugins_.clear();
+        for (const auto& kv: sheet_parsers_) {
+            const auto& pair = kv.second;
+            pair.second->FreeObject(pair.first);
+        }
+        sheet_parsers_.clear();
+        for (const auto& kv: tag_parsers_) {
+            const auto& pair = kv.second;
+            pair.second->FreeObject(pair.first);
+        }
+        tag_parsers_.clear();
     }
 
     std::vector<std::string> SupportedSuffixes() const
     {
         std::vector<std::string> list;
-        list.reserve(indexedSheetParsers.size());
-        for (const auto& entry : indexedSheetParsers) {
+        list.reserve(sheet_parsers_.size());
+        for (const auto& entry : sheet_parsers_) {
             list.push_back(entry.first);
         }
         return list;
@@ -74,10 +88,8 @@ class MediaLoader::Impl
     ErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const
     {
         list.clear();
-
         TryUnpack(path, list);
         TryParseTag(list);
-
         return ErrorCode::Ok;
     }
 
@@ -86,14 +98,14 @@ class MediaLoader::Impl
     {
         // Find SheetParser.
         const std::string& suffix = ToLower(FileHelper::FileSuffix(path));
-        auto iter = indexedSheetParsers.find(suffix);
+        auto iter = sheet_parsers_.find(suffix);
 
-        if (iter == indexedSheetParsers.end()) {
+        if (iter == sheet_parsers_.end()) {
             // General Media
             list.emplace_back(path);
         } else {
             // SheetParser
-            ISheetParser* parser = iter->second;
+            ISheetParser* parser = iter->second.first;
             parser->DumpMedia(path, list);
         }
 
@@ -105,16 +117,16 @@ class MediaLoader::Impl
         for (auto& item : list) {
             // Find TagParser.
             const std::string& suffix = ToLower(FileHelper::FileSuffix(item.url));
-            auto iter = indexedTagParsers.find(suffix);
-            if (iter == indexedTagParsers.end()) {
-                iter = indexedTagParsers.find("*");
-                if (iter == indexedTagParsers.end()) {
+            auto iter = tag_parsers_.find(suffix);
+            if (iter == tag_parsers_.end()) {
+                iter = tag_parsers_.find("*");
+                if (iter == tag_parsers_.end()) {
                     continue;
                 }
             }
 
             // Parse & Fill.
-            ITagParser* parser = iter->second;
+            ITagParser* parser = iter->second.first;
             parser->Open(item.url);
             if (parser->HasTag()) {
                 if (item.tag.title.empty()) {
@@ -158,9 +170,10 @@ class MediaLoader::Impl
     }
 
   private:
-    std::vector<std::shared_ptr<Plugin>> plugins_;
-    std::map<std::string, ISheetParser*> indexedSheetParsers;
-    std::map<std::string, ITagParser*> indexedTagParsers;
+    template <typename T>
+    using SuffixMap = std::map<std::string, std::pair<T, std::shared_ptr<Plugin>>>;
 
+    SuffixMap<ISheetParser*> sheet_parsers_;
+    SuffixMap<ITagParser*> tag_parsers_;
 };
 }
