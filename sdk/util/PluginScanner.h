@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <deque>
 #include <strings.h>
 #include <scx/Conv.h>
 #include <scx/Dir.h>
@@ -35,32 +36,42 @@ public:
         return *this;
     }
 
-    int Scan(const std::string& path) const {
-        int count = 0;
-        const auto& files = scx::Dir::ListDir(path);
-        for (size_t i = 0; i < files.size(); ++i) {
-            const auto& file = files[i];
-            if (file.compare(0, 3, "lib") != 0) {
-                continue;
-            }           
-            std::string full = path + "/" + file;
-            if (scx::FileInfo(full).Type() != scx::FileType::Regular) {
-                continue;
-            }
-            auto plugin = std::make_shared<Plugin>(full);
-            if (!*plugin) {
-                continue;
-            }
-            const auto bits = scx::ToUnderlying(plugin->Type());
-            for (int k = 0; k < nCallbacks_; ++k) {
-                const auto mask = 1u << k;
-                if (bits & mask) {
-                    callbacks_[k](plugin);
+    void Scan(const std::string& path) const {
+        std::deque<std::string> fifo { path };
+        while (!fifo.empty()) {
+            std::string head { std::move(fifo.front()) };
+            fifo.pop_front();
+            auto type = scx::FileInfo(head).Type();
+            switch (type) {
+                case scx::FileType::Regular: {
+                    auto plugin = std::make_shared<Plugin>(head);
+                    if (*plugin) {
+                        const auto bits = scx::ToUnderlying(plugin->Type());
+                        for (int k = 0; k < nCallbacks_; ++k) {
+                            const auto mask = 1u << k;
+                            if (bits & mask) {
+                                callbacks_[k](plugin);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case scx::FileType::Directory: {
+                    const auto& files = scx::Dir::ListDir(head);
+                    for (size_t i = 0; i < files.size(); ++i) {
+                        const auto& file = files[i];
+                        if (file == "." || file == "..") {
+                            continue;
+                        }
+                        fifo.emplace_back(head + "/" + file);
+                    }
+                    break;
+                }
+                default: {
+                    break;
                 }
             }
-            ++count;
         }
-        return count;
     }
 
 private:

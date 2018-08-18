@@ -36,14 +36,17 @@ ServerContext::~ServerContext()
 
 bool ServerContext::Init()
 {
+    bool hasDecoder = false;
+    bool hasOutput = false;
     const auto env = GlobalAppEnv::Instance();
-
-    const int nPlugins = PluginScanner()
-        .OnPlugin(PluginType::Decoder, [this](const std::shared_ptr<Plugin>& plugin) {
+    PluginScanner()
+        .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
             player.LoadDecoderPlugin(plugin);
+            hasDecoder = true;
         })
-        .OnPlugin(PluginType::Output, [this](const std::shared_ptr<Plugin>& plugin) {
+        .OnPlugin(PluginType::Output, [&, this](const std::shared_ptr<Plugin>& plugin) {
             player.LoadOutputPlugin(plugin);
+            hasOutput = true;
         })
         .OnPlugin(PluginType::SheetParser, [this](const std::shared_ptr<Plugin>& plugin) {
             loader.LoadSheetParserPlugin(plugin);
@@ -53,7 +56,7 @@ bool ServerContext::Init()
         })
         .Scan(env->pluginDir);
 
-    return nPlugins > 1;
+    return hasDecoder && hasOutput;
 }
 
 void ServerContext::Cleanup()
