@@ -23,11 +23,14 @@ public:
         }
     }
 
+    // NOTE: be careful with overwrite
     PluginScanner& OnPlugin(PluginType type, std::function<void (const std::shared_ptr<Plugin>& plugin)> callback) {
-        const auto n = scx::ToUnderlying(type);
-        const auto i = ffs(n);
-        if (i >= 0 && i < nCallbacks_) {
-            callbacks_[i] = callback;
+        const auto bits = scx::ToUnderlying(type);
+        for (int k = 0; k < nCallbacks_; ++k) {
+            const auto mask = 1u << k;
+            if (bits & mask) {
+                callbacks_[k] = callback;
+            }
         }
         return *this;
     }
@@ -48,11 +51,12 @@ public:
             if (!*plugin) {
                 continue;
             }
-            // TODO: support compound plugin (multi-bits are set)
-            const auto n = scx::ToUnderlying(plugin->Type());
-            const auto k = ffs(n);
-            if (k >= 0 && i < nCallbacks_) {
-                callbacks_[k](plugin);
+            const auto bits = scx::ToUnderlying(plugin->Type());
+            for (int k = 0; k < nCallbacks_; ++k) {
+                const auto mask = 1u << k;
+                if (bits & mask) {
+                    callbacks_[k](plugin);
+                }
             }
             ++count;
         }
