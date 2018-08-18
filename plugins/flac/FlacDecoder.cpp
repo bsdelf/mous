@@ -52,11 +52,6 @@ void FlacDecoder::Close()
         FLAC__stream_decoder_finish(m_pDecoder);
 }
 
-bool FlacDecoder::IsFormatVaild() const
-{
-    return true;
-}
-
 ErrorCode FlacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     m_dctx.buf = data;

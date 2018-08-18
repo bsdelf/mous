@@ -19,8 +19,6 @@ public:
     virtual ErrorCode Open(const std::string& url) = 0;
     virtual void Close() = 0;
 
-    virtual bool IsFormatVaild() const = 0;
-
     virtual ErrorCode DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount) = 0;
     virtual ErrorCode SetUnitIndex(uint64_t index) = 0;
     virtual uint32_t MaxBytesPerUnit() const = 0;

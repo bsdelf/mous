@@ -77,11 +77,6 @@ void Mpg123Decoder::Close()
     }
 }
 
-bool Mpg123Decoder::IsFormatVaild() const
-{
-    return true;
-}
-
 ErrorCode Mpg123Decoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (unit_index_ >= unit_count_) {

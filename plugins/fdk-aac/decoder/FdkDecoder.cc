@@ -118,11 +118,6 @@ void FdkDecoder::Close()
     }
 }
 
-bool FdkDecoder::IsFormatVaild() const
-{
-    return false;
-}
-
 ErrorCode FdkDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return m_ismp4 ? 

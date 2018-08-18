@@ -135,11 +135,6 @@ void FaadDecoder::Close()
     }
 }
 
-bool FaadDecoder::IsFormatVaild() const
-{
-    return false;
-}
-
 EmErrorCode FaadDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     return m_IsMp4File ? 
