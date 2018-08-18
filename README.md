@@ -8,7 +8,7 @@
 
 * Lightweight
 * Extensible plugins
-* Only a few dependencies
+* Reasonable dependencies
 * Support FreeBSD, Linux, macOS
 
 ## Applications
