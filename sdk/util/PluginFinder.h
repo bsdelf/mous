@@ -12,9 +12,9 @@
 
 namespace mous {
 
-class PluginScanner {
+class PluginFinder {
 public:
-    PluginScanner() {
+    PluginFinder() {
         Reset();
     }
 
@@ -25,7 +25,7 @@ public:
     }
 
     // NOTE: be careful with overwrite
-    PluginScanner& OnPlugin(PluginType type, std::function<void (const std::shared_ptr<Plugin>& plugin)> callback) {
+    PluginFinder& OnPlugin(PluginType type, std::function<void (const std::shared_ptr<Plugin>& plugin)> callback) {
         const auto bits = scx::ToUnderlying(type);
         for (int k = 0; k < nCallbacks_; ++k) {
             const auto mask = 1u << k;
@@ -36,7 +36,7 @@ public:
         return *this;
     }
 
-    void Scan(const std::string& path) const {
+    void Run(const std::string& path) const {
         std::deque<std::string> fifo { path };
         while (!fifo.empty()) {
             std::string head { std::move(fifo.front()) };

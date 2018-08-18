@@ -3,7 +3,7 @@
 #include <scx/FileInfo.h>
 using namespace scx;
 
-#include <util/PluginScanner.h>
+#include <util/PluginFinder.h>
 
 #include "ctx.h"
 
@@ -23,7 +23,7 @@ Context::Context()
         exit(EXIT_FAILURE);
     }
 
-    PluginScanner()
+    PluginFinder()
         .OnPlugin(PluginType::Decoder, [this](const std::shared_ptr<Plugin>& plugin) {
             decoderPlugins.push_back(plugin);
             player.LoadDecoderPlugin(plugin);
@@ -46,7 +46,7 @@ Context::Context()
             mediaLoader.LoadTagParserPlugin(plugin);
             tagParserFactory.LoadTagParserPlugin(plugin);
         })
-        .Scan(pluginDir);
+        .Run(pluginDir);
 
     if (decoderPlugins.empty() || outputPlugins.empty()) {
         printf("need more plugins!\n");

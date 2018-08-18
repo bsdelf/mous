@@ -9,7 +9,7 @@ using namespace std;
 using namespace scx;
 
 #include <util/PlaylistSerializer.h>
-#include <util/PluginScanner.h>
+#include <util/PluginFinder.h>
 using namespace mous;
 
 #include "AppEnv.h"
@@ -39,7 +39,7 @@ bool ServerContext::Init()
     bool hasDecoder = false;
     bool hasOutput = false;
     const auto env = GlobalAppEnv::Instance();
-    PluginScanner()
+    PluginFinder()
         .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
             player.LoadDecoderPlugin(plugin);
             hasDecoder = true;
@@ -54,8 +54,7 @@ bool ServerContext::Init()
         .OnPlugin(PluginType::TagParser, [this](const std::shared_ptr<Plugin>& plugin) {
             loader.LoadTagParserPlugin(plugin);
         })
-        .Scan(env->pluginDir);
-
+        .Run(env->pluginDir);
     return hasDecoder && hasOutput;
 }
 

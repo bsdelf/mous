@@ -16,7 +16,7 @@ using namespace sqt;
 using namespace scx;
 
 #include <util/MediaItem.h>
-#include <util/PluginScanner.h>
+#include <util/PluginFinder.h>
 using namespace mous;
 
 using namespace std;
@@ -89,7 +89,7 @@ void MainWindow::InitMousCore()
     int sheetParserPluginCount = 0;
     int tagParserPluginCount = 0;
 
-    PluginScanner()
+    PluginFinder()
         .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
             m_Player->LoadDecoderPlugin(plugin);
             m_ConvFactory->LoadDecoderPlugin(plugin);
@@ -112,7 +112,7 @@ void MainWindow::InitMousCore()
             m_ParserFactory->LoadTagParserPlugin(plugin);
             ++tagParserPluginCount;
         })
-        .Scan(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
+        .Run(GlobalAppEnv::Instance()->pluginDir.toLocal8Bit().data());
 
     m_Player->SetBufferCount(102);
     m_Player->SigFinished()->Connect(&MainWindow::SlotPlayerFinished, this);
