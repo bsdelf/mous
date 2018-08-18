@@ -63,11 +63,6 @@ void WmaDecoder::Close()
     }
 }
 
-bool WmaDecoder::IsFormatVaild() const
-{
-    return true;
-}
-
 ErrorCode WmaDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     used = 0;

@@ -45,11 +45,6 @@ void WvDecoder::Close()
     }
 }
 
-bool WvDecoder::IsFormatVaild() const
-{
-    return true;
-}
-
 ErrorCode WvDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_UnitIndex < m_UnitCount) {

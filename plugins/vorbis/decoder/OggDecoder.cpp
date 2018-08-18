@@ -39,11 +39,6 @@ void OggDecoder::Close()
     ov_clear(&m_File);
 }
 
-bool OggDecoder::IsFormatVaild() const
-{
-    return true;
-}
-
 ErrorCode OggDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_UnitIndex < m_UnitCount) {

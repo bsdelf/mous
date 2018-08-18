@@ -68,11 +68,6 @@ void WavDecoder::Close()
     }
 }
 
-bool WavDecoder::IsFormatVaild() const
-{
-    return true;
-}
-
 ErrorCode WavDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     m_InputStream.read(data, m_BlockLength);

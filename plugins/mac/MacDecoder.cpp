@@ -46,11 +46,6 @@ void MacDecoder::Close()
     }
 }
 
-bool MacDecoder::IsFormatVaild() const
-{
-    return true;
-}
-
 ErrorCode MacDecoder::DecodeUnit(char* data, uint32_t& used, uint32_t& unitCount)
 {
     if (m_BlockIndex < m_BlockCount) {
