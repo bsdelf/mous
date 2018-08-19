@@ -33,10 +33,9 @@ inline auto& operator |= (PluginType& lhs, PluginType rhs) {
 
 struct PluginInfo
 {
-    const char* author;
     const char* name;
     const char* desc;
-    const int32_t version;
+    const uint32_t version;
 };
 
 const char* const StrGetPluginType = "MousGetPluginType";

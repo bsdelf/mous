@@ -4,7 +4,7 @@
 #include <string>
 
 #include <util/Plugin.h>
-#include <plugin/ITagParser.h>
+#include <plugin/TagParser.h>
 
 namespace mous {
 
@@ -20,8 +20,7 @@ public:
     void UnloadPlugin(const std::string& path);
     void UnloadPlugin();
 
-    ITagParser* CreateParser(const std::string& fileName) const;
-    void FreeParser(ITagParser* parser) const;
+    std::shared_ptr<TagParser> CreateParser(const std::string& fileName) const;
 
 private:
     std::unique_ptr<Impl> impl;

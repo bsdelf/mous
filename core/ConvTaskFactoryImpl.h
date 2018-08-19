@@ -5,8 +5,8 @@
 #include <core/ConvTaskFactory.h>
 #include <core/ConvTask.h>
 #include <util/Plugin.h>
-#include <plugin/IDecoder.h>
-#include <plugin/IEncoder.h>
+#include <plugin/Decoder.h>
+#include <plugin/Encoder.h>
 #include <util/MediaItem.h>
 
 #include <scx/Conv.h>
@@ -23,8 +23,8 @@ public:
 
     void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        auto decoder = plugin->CreateObject<IDecoder*>();
-        if (!decoder) {
+        auto decoder = std::make_unique<Decoder>(plugin);
+        if (!decoder || !*decoder) {
             return;
         }
         const auto& list = decoder->FileSuffix();
@@ -34,7 +34,6 @@ public:
                 decoderPlugins_.emplace(suffix, plugin);
             }
         }
-        plugin->FreeObject(decoder);
     }
 
     void LoadEncoderPlugin(const std::shared_ptr<Plugin>& plugin)
@@ -57,11 +56,10 @@ public:
     {
         std::vector<std::string> list;
         list.reserve(encoderPlugins_.size());
-
-        for (auto entry: encoderPlugins_) {
-            list.push_back(entry.first);
+        for (const auto& kv: encoderPlugins_) {
+            const auto& plugin = kv.second;
+            list.push_back(plugin->Info()->name);
         }
-
         return list;
     }
 

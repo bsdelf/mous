@@ -4,7 +4,7 @@
 
 namespace mous {
 
-enum class AudioMode : uint8_t
+enum class AudioMode: uint32_t
 {
     None,
     Mono,

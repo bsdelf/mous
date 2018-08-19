@@ -1,14 +1,15 @@
 #pragma once
 
 #include <map>
+#include <memory>
 
 #include <scx/Conv.h>
 #include <scx/FileHelper.h>
 using namespace scx;
 
 #include <util/Plugin.h>
-#include <plugin/ISheetParser.h>
-#include <plugin/ITagParser.h>
+#include <plugin/SheetParser.h>
+#include <plugin/TagParser.h>
 #include <util/MediaItem.h>
 
 namespace mous {
@@ -18,41 +19,31 @@ class MediaLoader::Impl
   public:
     void LoadSheetParserPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        auto parser = plugin->CreateObject<ISheetParser*>();
-        if (!parser) {
+        auto parser = std::make_shared<SheetParser>(plugin);
+        if (!parser || !*parser) {
             return;
         }
-        size_t refcnt = 0;
         for (const std::string& item: parser->FileSuffix()) {
             const std::string& suffix = ToLower(item);
             auto iter = sheet_parsers_.find(suffix);
             if (iter == sheet_parsers_.end()) {
-                sheet_parsers_.emplace(suffix, std::make_pair(parser, plugin));
-                ++refcnt;
+                sheet_parsers_.emplace(suffix, parser);
             }
-        }
-        if (!refcnt) {
-            plugin->FreeObject(parser);
         }
     }
 
     void LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        auto parser = plugin->CreateObject<ITagParser*>();
-        if (!parser) {
+        auto parser = std::make_shared<TagParser>(plugin);
+        if (!parser || !*parser) {
             return;
         }
-        size_t refcnt = 0;
         for (const std::string& item: parser->FileSuffix()) {
             const std::string& suffix = ToLower(item);
             auto iter = tag_parsers_.find(suffix);
             if (iter == tag_parsers_.end()) {
-                tag_parsers_.emplace(suffix, std::make_pair(parser, plugin));
-                ++refcnt;
+                tag_parsers_.emplace(suffix, parser);
             }
-        }
-        if (!refcnt) {
-            plugin->FreeObject(parser);
         }
     }
 
@@ -63,15 +54,7 @@ class MediaLoader::Impl
 
     void UnloadPlugin()
     {
-        for (const auto& kv: sheet_parsers_) {
-            const auto& pair = kv.second;
-            pair.second->FreeObject(pair.first);
-        }
         sheet_parsers_.clear();
-        for (const auto& kv: tag_parsers_) {
-            const auto& pair = kv.second;
-            pair.second->FreeObject(pair.first);
-        }
         tag_parsers_.clear();
     }
 
@@ -79,8 +62,8 @@ class MediaLoader::Impl
     {
         std::vector<std::string> list;
         list.reserve(sheet_parsers_.size());
-        for (const auto& entry : sheet_parsers_) {
-            list.push_back(entry.first);
+        for (const auto& kv: sheet_parsers_) {
+            list.push_back(kv.first);
         }
         return list;
     }
@@ -96,19 +79,14 @@ class MediaLoader::Impl
   private:
     ErrorCode TryUnpack(const std::string& path, std::deque<MediaItem>& list) const
     {
-        // Find SheetParser.
         const std::string& suffix = ToLower(FileHelper::FileSuffix(path));
-        auto iter = sheet_parsers_.find(suffix);
-
+        const auto iter = sheet_parsers_.find(suffix);
         if (iter == sheet_parsers_.end()) {
-            // General Media
             list.emplace_back(path);
         } else {
-            // SheetParser
-            ISheetParser* parser = iter->second.first;
-            parser->DumpMedia(path, list);
+            const auto& parser = iter->second;
+            parser->DumpFile(path, list);
         }
-
         return ErrorCode::Ok;
     }
 
@@ -126,7 +104,7 @@ class MediaLoader::Impl
             }
 
             // Parse & Fill.
-            ITagParser* parser = iter->second.first;
+            const auto& parser = iter->second;
             parser->Open(item.url);
             if (parser->HasTag()) {
                 if (item.tag.title.empty()) {
@@ -154,7 +132,7 @@ class MediaLoader::Impl
                 // cout << "WARN: no tag!!" << endl;
             }
 
-            if (parser->HasAudioProperty()) {
+            if (parser->HasAudioProperties()) {
                 if (item.duration < 0) {
                     item.duration = parser->Duration();
                 }
@@ -170,10 +148,8 @@ class MediaLoader::Impl
     }
 
   private:
-    template <typename T>
-    using SuffixMap = std::map<std::string, std::pair<T, std::shared_ptr<Plugin>>>;
-
-    SuffixMap<ISheetParser*> sheet_parsers_;
-    SuffixMap<ITagParser*> tag_parsers_;
+    std::map<std::string, std::shared_ptr<SheetParser>> sheet_parsers_;
+    std::map<std::string, std::shared_ptr<TagParser>> tag_parsers_;
 };
+
 }

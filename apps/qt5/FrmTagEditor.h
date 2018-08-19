@@ -57,7 +57,7 @@ private:
 
     mous::Player* m_Player;
     const mous::TagParserFactory* m_ParserFactory;    
-    mous::ITagParser* m_CurrentParser;
+    std::shared_ptr<mous::TagParser> m_CurrentParser;
     mous::MediaItem m_CurrentItem;
 
     QPixmap m_CurrentImage;

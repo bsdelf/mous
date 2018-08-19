@@ -93,9 +93,9 @@ void FrmTagEditor::SetPlayer(Player *player)
 
 void FrmTagEditor::SetTagParserFactory(const TagParserFactory *factory)
 {
-    if (m_ParserFactory == nullptr && m_ParserFactory != nullptr && m_CurrentParser != nullptr) {
+    if (m_CurrentParser) {
         m_CurrentParser->Close();
-        m_ParserFactory->FreeParser(m_CurrentParser);
+        m_CurrentParser.reset();
     }
     m_ParserFactory = factory;
 }
@@ -119,11 +119,12 @@ void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
     if (m_ParserFactory == nullptr)
         return;
 
-    if (m_CurrentParser != nullptr) {
+    if (m_CurrentParser) {
         m_CurrentParser->Close();
-        m_ParserFactory->FreeParser(m_CurrentParser);
+        m_CurrentParser.reset();
     }
-    if ((m_CurrentParser = m_ParserFactory->CreateParser(fileName)) == nullptr) {
+    m_CurrentParser = m_ParserFactory->CreateParser(fileName);
+    if (!m_CurrentParser) {
         return;
     }
     m_CurrentParser->Open(fileName);
@@ -131,7 +132,7 @@ void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
         ui->tagTable->setEnabled(true);
     UpdateTag();
 
-    {
+    if (m_CurrentParser) {
         vector<char> buf;
         m_CurrentImgFmt = m_CurrentParser->DumpCoverArt(buf);
         m_CurrentImgData.swap(buf);
@@ -297,8 +298,9 @@ void FrmTagEditor::SlotSaveImageAs()
 
 void FrmTagEditor::SlotChangeCoverArt()
 {
-    if (m_CurrentParser == nullptr)
+    if (!m_CurrentParser) {
         return;
+    }
 
     QString fileName =
             QFileDialog::getOpenFileName(this, tr("Select Image File"), m_OldImagePath, tr("Images (*.jpg *.png)"));
@@ -344,8 +346,9 @@ void FrmTagEditor::SlotChangeCoverArt()
 
 void FrmTagEditor::UpdateTag()
 {
-    if (m_CurrentParser == nullptr)
+    if (!m_CurrentParser) {
         return;
+    }
 
     QList<QTableWidgetItem*> valList;
     for (int i = 0; i < ui->tagTable->rowCount(); ++i) {

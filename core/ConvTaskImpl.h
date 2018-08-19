@@ -2,8 +2,8 @@
 
 #include <thread>
 
-#include <plugin/IDecoder.h>
-#include <plugin/IEncoder.h>
+#include <plugin/Decoder.h>
+#include <plugin/Encoder.h>
 
 namespace mous {
 
@@ -16,26 +16,26 @@ public:
         , m_DecoderPlugin(decoderPlugin)
         , m_EncoderPlugin(encoderPlugin)
     {
-        m_Decoder = m_DecoderPlugin->CreateObject<IDecoder*>();
-        m_Encoder = m_EncoderPlugin->CreateObject<IEncoder*>();
+        // TODO: check availablity
+        m_Decoder = std::make_unique<Decoder>(decoderPlugin);
+        m_Encoder = std::make_unique<Encoder>(encoderPlugin);
     }
 
     ~Impl()
     {
         Cancel();
-
-        m_DecoderPlugin->FreeObject(m_Decoder);
-        m_EncoderPlugin->FreeObject(m_Encoder);
+        m_Decoder.reset();
+        m_Encoder.reset();
     }
 
     std::vector<const BaseOption*> DecoderOptions() const
     {
-        return m_Decoder ? m_Decoder->Options() : std::vector<const BaseOption*>();
+        return m_Decoder ? m_Decoder->GetOptions() : std::vector<const BaseOption*>();
     }
 
     std::vector<const BaseOption*> EncoderOptions() const
     {
-        return m_Encoder ? m_Encoder->Options() : std::vector<const BaseOption*>();
+        return m_Encoder ? m_Encoder->GetOptions() : std::vector<const BaseOption*>();
     }
 
     const char* EncoderFileSuffix() const
@@ -138,8 +138,8 @@ private:
 
     std::thread m_WorkThread;
 
-    IDecoder* m_Decoder;
-    IEncoder* m_Encoder;
+    std::unique_ptr<Decoder> m_Decoder;
+    std::unique_ptr<Encoder> m_Encoder;
 
     double m_Progress = -1;
     bool m_Finished = true;

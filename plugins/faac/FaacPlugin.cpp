@@ -2,9 +2,8 @@
 #include <util/PluginHelper.h>
 
 static const PluginInfo info = {
-    "Yanhui Shen",
+    "faac",
     "FAAC Encoder",
-    "MPEG-2 and MPEG-4 AAC audio encoder.",
     1
 };
 

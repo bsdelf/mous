@@ -2,9 +2,8 @@
 #include <util/PluginHelper.h>
 
 static const PluginInfo info = {
-    "Yanhui Shen",
+    "faad",
     "FAAD Decoder",
-    "Decoder for mp4 audio.",
     1
 };
 

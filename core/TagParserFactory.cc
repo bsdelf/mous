@@ -27,14 +27,9 @@ void TagParserFactory::UnloadPlugin()
     return impl->UnloadPlugin();
 }
 
-ITagParser* TagParserFactory::CreateParser(const std::string& fileName) const
+std::shared_ptr<TagParser> TagParserFactory::CreateParser(const std::string& fileName) const
 {
     return impl->CreateParser(fileName);
-}
-
-void TagParserFactory::FreeParser(ITagParser* parser) const
-{
-    return impl->FreeParser(parser);
 }
 
 }

@@ -4,7 +4,7 @@
 
 namespace mous {
 
-enum class ErrorCode : uint8_t
+enum class ErrorCode : uint32_t
 {
     Ok = 0,
 

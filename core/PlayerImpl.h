@@ -16,21 +16,16 @@ using namespace std;
 using namespace scx;
 
 #include <util/Plugin.h>
-#include <plugin/IDecoder.h>
-#include <plugin/IOutput.h>
+#include <plugin/Decoder.h>
+#include <plugin/Output.h>
 
 namespace mous {
+
 struct UnitBuffer
 {
     uint32_t used;
     uint32_t unitCount;
     char data[];
-};
-
-struct DecoderPluginNode
-{
-    std::shared_ptr<Plugin> plugin;
-    IDecoder* decoder;
 };
 
 enum : std::size_t
@@ -199,33 +194,27 @@ class Player::Impl
 
     void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        auto decoder = plugin->CreateObject<IDecoder*>();
-        if (!decoder) {
+        auto decoder = std::make_shared<Decoder>(plugin);
+        if (!decoder || !*decoder) {
             return;
         }
         const vector<string>& list = decoder->FileSuffix();
-        bool used = false;
         for (const string& item : list) {
             const string& suffix = ToLower(item);
-            auto iter = m_DecoderPluginMap.find(suffix);
-            if (iter == m_DecoderPluginMap.end()) {
-                m_DecoderPluginMap.emplace(suffix, DecoderPluginNode{ plugin, decoder });
-                used = true;
+            auto iter = m_Decoders.find(suffix);
+            if (iter == m_Decoders.end()) {
+                m_Decoders.emplace(suffix, decoder);
             }
-        }
-        if (!used) {
-            plugin->FreeObject(decoder);
         }
     }
 
     void LoadOutputPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        m_Output = plugin->CreateObject<IOutput*>();
-        if (!m_Output) {
+        m_Output = std::make_unique<Output>(plugin);
+        if (!m_Output || !*m_Output) {
             return;
         }
         m_Output->Open();
-        m_OutputPlugin = plugin;
     }
 
     void UnloadPlugin(const std::string&)
@@ -240,31 +229,20 @@ class Player::Impl
         if (m_Decoder) {
             m_Decoder->Close();
         }
-        std::set<IDecoder*> freed;
-        for (auto& kv: m_DecoderPluginMap) {
-            auto& node = kv.second;
-            if (freed.find(node.decoder) != freed.end()) {
-                continue;
-            }
-            node.plugin->FreeObject(node.decoder);
-            freed.insert(node.decoder);
-        }
-        m_Decoder = nullptr;
-        m_DecoderPluginMap.clear();
+        m_Decoder.reset();
+        m_Decoders.clear();
 
         if (m_Output) {
             m_Output->Close();
-            m_OutputPlugin->FreeObject(m_Output);
-            m_Output = nullptr;
-            m_OutputPlugin = nullptr;
+            m_Output.reset();
         }
     }
 
     vector<string> SupportedSuffixes() const
     {
         vector<string> list;
-        list.reserve(m_DecoderPluginMap.size());
-        for (const auto& entry : m_DecoderPluginMap) {
+        list.reserve(m_Decoders.size());
+        for (const auto& entry : m_Decoders) {
             list.push_back(entry.first);
         }
         return list;
@@ -280,12 +258,14 @@ class Player::Impl
         m_BufferCount = count;
     }
 
-    int Volume() const { return m_Output != nullptr ? m_Output->VolumeLevel() : -1; }
+    int Volume() const {
+        return m_Output ? m_Output->GetVolume() : -1;
+    }
 
     void SetVolume(int level)
     {
-        if (m_Output != nullptr) {
-            m_Output->SetVolumeLevel(level);
+        if (m_Output) {
+            m_Output->SetVolume(level);
         }
     }
 
@@ -296,11 +276,11 @@ class Player::Impl
         }
 
         string suffix = ToLower(FileHelper::FileSuffix(path));
-        auto iter = m_DecoderPluginMap.find(suffix);
-        if (iter == m_DecoderPluginMap.end()) {
+        auto iter = m_Decoders.find(suffix);
+        if (iter == m_Decoders.end()) {
             return ErrorCode::PlayerNoDecoder;
         }
-        m_Decoder = iter->second.decoder;
+        m_Decoder = iter->second;
 
         ErrorCode err = m_Decoder->Open(path);
         if (err != ErrorCode::Ok) {
@@ -544,21 +524,19 @@ class Player::Impl
     std::vector<PluginOption> DecoderPluginOption() const
     {
         std::vector<PluginOption> list;
-
-        list.reserve(m_DecoderPluginMap.size());
-
-        for (const auto entry : m_DecoderPluginMap) {
-            auto node = entry.second;
-            list.emplace_back(node.plugin->Type(), node.plugin->Info(), node.decoder->Options());
+        list.reserve(m_Decoders.size());
+        for (const auto& kv: m_Decoders) {
+            const auto& decoder = kv.second;
+            list.emplace_back(decoder->GetPlugin()->Type(), decoder->GetPlugin()->Info(), decoder->GetOptions());
         }
-
         return list;
     }
 
     PluginOption OutputPluginOption() const
     {
-        if (m_OutputPlugin != nullptr && m_Output != nullptr) {
-            return { m_OutputPlugin->Type(), m_OutputPlugin->Info(), m_Output->Options() };
+        if (m_Output) {
+            const auto& plugin = m_Output->GetPlugin();
+            return { plugin->Type(), plugin->Info(), m_Output->GetOptions() };
         } else {
             return {};
         }
@@ -571,8 +549,8 @@ class Player::Impl
 
     std::string m_DecodeFile;
 
-    IDecoder* m_Decoder = nullptr;
-    IOutput* m_Output = nullptr;
+    std::shared_ptr<Decoder> m_Decoder;
+    std::unique_ptr<Output> m_Output;
     std::thread m_DecoderThread;
     std::thread m_OutputThread;
     Mailbox m_DecoderMailbox;
@@ -590,8 +568,7 @@ class Player::Impl
 
     double m_UnitPerMs = 0;
 
-    std::shared_ptr<Plugin> m_OutputPlugin = nullptr;
-    std::map<std::string, DecoderPluginNode> m_DecoderPluginMap;
+    std::map<std::string, std::shared_ptr<Decoder>> m_Decoders;
 
     scx::Signal<void(void)> m_SigFinished;
 };
