@@ -2,9 +2,8 @@
 #include <util/PluginHelper.h>
 
 static const PluginInfo info = {
-    "Yanhui Shen",
-    "AO Output",
-    "Portable audio output library.",
+    "ao",
+    "Portable Audio Output",
     1
 };
 
