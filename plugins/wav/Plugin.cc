@@ -1,15 +1,15 @@
 #include <util/PluginHelper.h>
-#include "Decoder.h"
+using namespace mous;
 
 static const PluginInfo plugin_info {
-    "vorbis",
-    "Decoder for Ogg Vorbis stream.",
+    "wav",
+    "WAV Codec",
     2
 };
 
 extern "C" {
     PluginType MousGetPluginType() {
-        return PluginType::Decoder;
+        return PluginType::Decoder | PluginType::Encoder;
     }
 
     const PluginInfo* MousGetPluginInfo() {
@@ -21,9 +21,5 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const DecoderInterface* MousGetDecoderInterface() {
-        return &decoder_interface;
     }
 }

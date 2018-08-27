@@ -1,24 +1,24 @@
-#pragma once
-
 #include <string.h>
 #include <vorbis/vorbisfile.h>
 
 #include <plugin/DecoderProto.h>
 using namespace mous;
 
-struct Self {
-    OggVorbis_File file;
-    int bit_stream;
+namespace {
+    struct Self {
+        OggVorbis_File file;
+        int bit_stream;
 
-    uint64_t unit_index;
-    uint64_t unit_count;
+        uint64_t unit_index;
+        uint64_t unit_count;
 
-    int32_t channels;
-    int32_t bits_per_sample;
-    int32_t sample_rate;
-    int32_t bit_rate;
-    uint64_t duration;
-};
+        int32_t channels;
+        int32_t bits_per_sample;
+        int32_t sample_rate;
+        int32_t bit_rate;
+        uint64_t duration;
+    };
+}
 
 static void* Create() {
     return new Self;

@@ -1,5 +1,5 @@
 #include <util/PluginHelper.h>
-#include "SheetParser.h"
+using namespace mous;
 
 static const PluginInfo plugin_info = {
     "libcue",
@@ -21,9 +21,5 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const SheetParserInterface* MousGetSheetParserInterface() {
-        return &sheet_parser_interface;
     }
 }

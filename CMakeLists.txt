@@ -294,13 +294,10 @@ if(WITH_PLUGIN_LIBAO)
     install(TARGETS AoOutput LIBRARY DESTINATION lib/mous)
 endif()
 
-# TODO: merge decoder and encoder to stand-alone plugin
 if(WITH_PLUGIN_WAV)
-    file(GLOB WAV_DECODER_SRC plugins/wav/decoder/*)
-    add_library(WavDecoder SHARED ${WAV_DECODER_SRC})
-    file(GLOB WAV_ENCODER_SRC plugins/wav/encoder/*)
-    add_library(WavEncoder SHARED ${WAV_ENCODER_SRC})
-    install(TARGETS WavDecoder WavEncoder LIBRARY DESTINATION lib/mous)
+    file(GLOB WAV_CODEC_SRC plugins/wav/*)
+    add_library(WavCodec SHARED ${WAV_CODEC_SRC})
+    install(TARGETS WavCodec LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_MPG123)
@@ -317,15 +314,14 @@ if(WITH_PLUGIN_LAME)
     install(TARGETS LameEncoder LIBRARY DESTINATION lib/mous)
 endif()
 
-# TODO: merge decoder and encoder to stand-alone plugin
 if(WITH_PLUGIN_OGG_VORBIS)
-    file(GLOB VORBIS_DECODER_SRC plugins/vorbis/decoder/*)
-    add_library(VorbisDecoder SHARED ${VORBIS_DECODER_SRC})
-    target_link_libraries(VorbisDecoder ${LIB_VORBISFILE})
-    file(GLOB VORBIS_ENCODER_SRC plugins/vorbis/encoder/*)
-    add_library(VorbisEncoder SHARED ${VORBIS_ENCODER_SRC})
-    target_link_libraries(VorbisEncoder ${LIB_OGG} ${LIB_VORBIS} ${LIB_VORBISFILE} ${LIB_VORBISENC})
-    install(TARGETS VorbisDecoder VorbisEncoder LIBRARY DESTINATION lib/mous)
+    file(GLOB VORBIS_CODEC_SRC plugins/vorbis/*)
+    add_library(VorbisCodec SHARED ${VORBIS_CODEC_SRC})
+    target_link_libraries(
+        VorbisCodec
+        ${LIB_VORBISFILE} ${LIB_OGG} ${LIB_VORBIS} ${LIB_VORBISENC}
+    )
+    install(TARGETS VorbisCodec LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_MAC)

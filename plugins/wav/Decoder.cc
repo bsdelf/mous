@@ -1,5 +1,3 @@
-#pragma once
-
 #include <inttypes.h>
 #include <fstream>
 #include <cstring>
@@ -12,21 +10,23 @@ using namespace mous;
 
 #define SAMPLES_PER_BLOCK 200;
 
-struct Self {
-    ifstream input_stream;
-    WavHeader wav_header;
+namespace {
+    struct Self {
+        ifstream input_stream;
+        WavHeader wav_header;
 
-    size_t raw_data_offset = 0;
-    size_t raw_data_length = 0;
+        size_t raw_data_offset = 0;
+        size_t raw_data_length = 0;
 
-    int sample_length = 0;
-    int block_length = 0;
-    char* block_buffer = nullptr;
-    size_t block_index = 0;
-    size_t total_blocks = 0;
+        int sample_length = 0;
+        int block_length = 0;
+        char* block_buffer = nullptr;
+        size_t block_index = 0;
+        size_t total_blocks = 0;
 
-    uint64_t duration = 0;
-};
+        uint64_t duration = 0;
+    };
+}
 
 static void* Create() {
     auto self = new Self;
@@ -50,7 +50,7 @@ static ErrorCode Open(void* ptr, const char* url) {
     
     if (memcmp(SELF->wav_header.riff_id, "RIFF", 4) != 0 ||
         memcmp(SELF->wav_header.riff_type, "WAVE", 4) != 0 ||
-        memcmp(SELF->wav_header.formatId, "fmt ", 4) != 0) {
+        memcmp(SELF->wav_header.format_id, "fmt ", 4) != 0) {
         SELF->input_stream.close();
         return ErrorCode::DecoderFailedToInit;
     }

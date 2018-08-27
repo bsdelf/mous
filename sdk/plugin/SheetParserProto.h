@@ -21,3 +21,9 @@ static const mous::SheetParserInterface sheet_parser_interface {
     GetOptions,
     GetSuffixes
 };
+
+extern "C" {
+    const mous::SheetParserInterface* MousGetSheetParserInterface() {
+        return &sheet_parser_interface;
+    }
+}

@@ -1,5 +1,5 @@
 #include <util/PluginHelper.h>
-#include "Decoder.h"
+using namespace mous;
 
 static const PluginInfo plugin_info {
     "wma",
@@ -21,9 +21,5 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const DecoderInterface* MousGetDecoderInterface() {
-        return &decoder_interface;
     }
 }

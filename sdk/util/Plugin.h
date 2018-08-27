@@ -55,6 +55,7 @@ class Plugin {
     ~Plugin() {
         if (handle_) {
             dlclose(handle_);
+            handle_ = nullptr;
         }
     }
 

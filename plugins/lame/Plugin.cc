@@ -1,10 +1,10 @@
 #include <util/PluginHelper.h>
-#include "Encoder.h"
+using namespace mous;
 
 static const PluginInfo plugin_info = {
     "lame",
     "Lame Encoder",
-    1
+    2
 };
 
 extern "C" {
@@ -21,9 +21,5 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const EncoderInterface* MousGetEncoderInterface() {
-        return &encoder_interface;
     }
 }

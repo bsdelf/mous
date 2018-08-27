@@ -1,5 +1,3 @@
-#pragma once
-
 #include <algorithm>
 #include <errno.h>
 #include <unistd.h>
@@ -19,25 +17,27 @@ struct Tuple {
     T min;
 };
 
-struct Self {
-    string device_name { "default" };
+namespace {
+    struct Self {
+        string device_name { "default" };
 
-    snd_pcm_t* snd_pcm = nullptr;
+        snd_pcm_t* snd_pcm = nullptr;
 
-    int dir = 0;
-    int resample = 1;
-    snd_pcm_access_t access;
-    snd_pcm_format_t format;
+        int dir = 0;
+        int resample = 1;
+        snd_pcm_access_t access;
+        snd_pcm_format_t format;
 
-    int frame_length = 0;
-    int bits_per_sample = 0;
-    Tuple<unsigned int> channels;
-    Tuple<unsigned int> sample_rate;
-    Tuple<unsigned int> buffer_time;
-    Tuple<unsigned int> period_time;
-    Tuple<snd_pcm_uframes_t> buffer_size;
-    Tuple<snd_pcm_uframes_t> period_size;
-};
+        int frame_length = 0;
+        int bits_per_sample = 0;
+        Tuple<unsigned int> channels;
+        Tuple<unsigned int> sample_rate;
+        Tuple<unsigned int> buffer_time;
+        Tuple<unsigned int> period_time;
+        Tuple<snd_pcm_uframes_t> buffer_size;
+        Tuple<snd_pcm_uframes_t> period_size;
+    };
+}
 
 static bool SetupHwParams(void*);
 static void SetupSwParams(void*);

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <libcue.h>
 #include <cstdio>
 #include <scx/FileHelper.h>
@@ -9,7 +7,9 @@ using namespace scx;
 #include <plugin/SheetParserProto.h>
 using namespace mous;
 
-struct Self {};
+namespace {
+    struct Self {};
+}
 
 static void DumpCue(const std::string& dir, Cd* cd, std::deque<MediaItem>& items);
 

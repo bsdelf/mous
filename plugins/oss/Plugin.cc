@@ -1,5 +1,5 @@
 #include <util/PluginHelper.h>
-#include "Output.h"
+using namespace mous;
 
 static const PluginInfo plugin_info {
     "oss",
@@ -21,10 +21,6 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const OutputInterface* MousGetOutputInterface() {
-        return &output_interface;
     }
 }
 

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <cstdio>
 #include <cwctype>
 #include <MAC_SDK/Source/Shared/All.h>
@@ -10,22 +8,24 @@
 #include <plugin/DecoderProto.h>
 using namespace mous;
 
-struct Self {
-    APE::IAPEDecompress* decompress = nullptr;
+namespace {
+    struct Self {
+        APE::IAPEDecompress* decompress = nullptr;
 
-    uint64_t block_index;
-    uint64_t block_count;
+        uint64_t block_index;
+        uint64_t block_count;
 
-    uint32_t block_align;
-    uint32_t blocks_per_frame;
-    uint32_t blocks_per_read;
+        uint32_t block_align;
+        uint32_t blocks_per_frame;
+        uint32_t blocks_per_read;
 
-    int32_t channels;
-    int32_t bits_per_sample;
-    int32_t sample_rate;
-    int32_t bit_rate;
-    uint64_t duration;
-};
+        int32_t channels;
+        int32_t bits_per_sample;
+        int32_t sample_rate;
+        int32_t bit_rate;
+        uint64_t duration;
+    };
+}
 
 static void* Create() {
     return new Self;

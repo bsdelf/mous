@@ -1,5 +1,3 @@
-#pragma once
-
 #include <fstream>
 #include <cstring>
 using namespace std;
@@ -9,13 +7,15 @@ using namespace mous;
 
 #include "Common.h"
 
-struct Self {
-    std::fstream outfile;
-    WavHeader wav_header;
-};
+namespace {
+    struct Self {
+        std::fstream outfile;
+        WavHeader wav_header;
+    };
+}
 
 static void* Create() {
-    auto self = new Self();
+    auto self = new Self;
     memset(&self->wav_header, 0, sizeof(WavHeader));
     memcpy(self->wav_header.riff_id, "RIFF", 4);
     memcpy(self->wav_header.riff_type, "WAVE", 4);
@@ -46,7 +46,7 @@ static void SetMediaTag(void* ptr, const MediaTag* tag) {
 }
 
 static ErrorCode OpenOutput(void* ptr, const char* path) {
-    SELF->outfile.open(path, ios::binary | ios::out );
+    SELF->outfile.open(path, ios::binary | ios::out);
     if (!SELF->outfile.is_open()) {
         return ErrorCode::EncoderFailedToOpen;
     }
@@ -82,6 +82,6 @@ static const BaseOption** GetOptions(void* ptr) {
     return nullptr;
 }
 
-const char* GetSuffix(void* ptr) {
+static const char* GetSuffix(void* ptr) {
     return "wav";
 }

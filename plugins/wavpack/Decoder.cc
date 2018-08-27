@@ -9,21 +9,23 @@ using namespace mous;
 
 #define NUM_SAMPLES 32
 
-struct Self {
-    WavpackContext* wavpack_context = nullptr;
-    
-    vector<int32_t> buffer;
-    int bytes_per_sample;
+namespace {
+    struct Self {
+        WavpackContext* wavpack_context = nullptr;
+        
+        vector<int32_t> buffer;
+        int bytes_per_sample;
 
-    uint64_t unit_index;
-    uint64_t unit_count;
+        uint64_t unit_index;
+        uint64_t unit_count;
 
-    int32_t channels;
-    int32_t bits_per_sample;
-    int32_t sample_rate;
-    int32_t bit_rate;
-    uint64_t duration;
-};
+        int32_t channels;
+        int32_t bits_per_sample;
+        int32_t sample_rate;
+        int32_t bit_rate;
+        uint64_t duration;
+    };
+}
 
 static void FormatSamples(int bps, unsigned char *dst, int32_t *src, uint32_t samcnt);
 

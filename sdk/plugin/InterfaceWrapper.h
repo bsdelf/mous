@@ -50,7 +50,6 @@ public:\
         const auto** option = m_interface->get_options(m_data);\
         if (option) {\
             for (; *option; ++option) {\
-                printf("%p\n", *option);\
                 options.push_back(*option);\
             }\
         }\

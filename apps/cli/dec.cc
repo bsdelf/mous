@@ -17,10 +17,12 @@ int cmd_dec(int argc, char** argv)
 {
     // find wav encoder
     std::string wav_enc;
-    const std::vector<std::string>& encoders = ctx->convertTaskFactory.EncoderNames();
-    for (size_t i = 0; i < encoders.size(); ++i) {
-        if (ToLower(encoders[i]).find("wav") != std::string::npos)
-            wav_enc = encoders[i];
+    const auto& encoders = ctx->convertTaskFactory.EncoderNames();
+    for (const auto& encoder: encoders) {
+        if (ToLower(encoder).find("wav") != std::string::npos) {
+            wav_enc = encoder;
+            break;
+        }
     }
     if (wav_enc.empty()) {
         printf("can't find wav encoder!\n");
@@ -49,8 +51,9 @@ int cmd_dec(int argc, char** argv)
                 printf("file already exist! overwrite? [n/y]\n");
                 char ch;
                 scanf("%c", &ch);
-                if (ch != 'y')
+                if (ch != 'y') {
                     continue;
+                }
             }
 
             // do it!
