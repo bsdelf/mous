@@ -1,5 +1,3 @@
-#pragma once
-
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -10,30 +8,32 @@
 #include <plugin/DecoderProto.h>
 using namespace mous;
 
-struct Self {
-    bool is_mp4 = false;
+namespace {
+    struct Self {
+        bool is_mp4 = false;
 
-    // mp4v2
-    MP4FileHandle mp4 = nullptr;
-    int trackid = -1;
+        // mp4v2
+        MP4FileHandle mp4 = nullptr;
+        int trackid = -1;
 
-    // fdk-aac
-    HANDLE_AACDECODER fdk = nullptr;
+        // fdk-aac
+        HANDLE_AACDECODER fdk = nullptr;
 
-    // minor
-    int32_t bitrate;
-    uint64_t duration;
+        // minor
+        int32_t bitrate;
+        uint64_t duration;
 
-    // meta data
-    int32_t channels;
-    int64_t timescale;
-    int32_t bits;
+        // meta data
+        int32_t channels;
+        int64_t timescale;
+        int32_t bits;
 
-    // sample info
-    uint64_t sampleid;
-    uint64_t nsamples;
-    std::vector<uint8_t> samplebuff;
-};
+        // sample info
+        uint64_t sampleid;
+        uint64_t nsamples;
+        std::vector<uint8_t> samplebuff;
+    };
+}
 
 static void* Create() {
     return new Self;

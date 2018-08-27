@@ -1,5 +1,3 @@
-#pragma once
-
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -29,22 +27,24 @@ namespace TagLib {
     }
 }
 
-struct Self {
-    std::string file_name;
+namespace {
+    struct Self {
+        std::string file_name;
 
-    FileRef* file_ref = nullptr;
-    Tag* tag = nullptr;
-    AudioProperties* props = nullptr;
+        FileRef* file_ref = nullptr;
+        Tag* tag = nullptr;
+        AudioProperties* props = nullptr;
 
-    std::map<std::string, CoverFormat(*)(const string&, char**, uint32_t*)> dump_funcs;
-    std::map<std::string, bool(*)(const string&, CoverFormat, const char*, size_t)> store_funcs;
+        std::map<std::string, CoverFormat(*)(const string&, char**, uint32_t*)> dump_funcs;
+        std::map<std::string, bool(*)(const string&, CoverFormat, const char*, size_t)> store_funcs;
 
-    std::string title;
-    std::string artist;
-    std::string album;
-    std::string comment;
-    std::string genre;
-};
+        std::string title;
+        std::string artist;
+        std::string album;
+        std::string comment;
+        std::string genre;
+    };
+}
 
 static string StringTostd_string(const String& str) {
     if (str.isLatin1()) {

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <fcntl.h>  // open
 #include <unistd.h> // write
 #include <sys/ioctl.h>
@@ -13,15 +11,17 @@ using namespace std;
 #include <plugin/OutputProto.h>
 using namespace mous;
 
-struct Self {
-    std::string prev_path;
-    int fd = -1;
-    bool is_opened = false;
-    int32_t channels = -1;
-    int32_t sample_rate = -1;
-    int32_t bits_per_sample = -1;
-    StringOption option_device_path;
-};
+namespace {
+    struct Self {
+        std::string prev_path;
+        int fd = -1;
+        bool is_opened = false;
+        int32_t channels = -1;
+        int32_t sample_rate = -1;
+        int32_t bits_per_sample = -1;
+        StringOption option_device_path;
+    };
+}
 
 static void* Create() {
     auto self = new Self;

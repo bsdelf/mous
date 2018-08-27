@@ -44,3 +44,9 @@ static mous::DecoderInterface decoder_interface {
     GetOptions,
     GetSuffixes
 };
+
+extern "C" {
+    const mous::DecoderInterface* MousGetDecoderInterface() {
+        return &decoder_interface;
+    }
+}

@@ -51,8 +51,12 @@ public:
         return m_interface->flush(m_data);
     }
 
-    const char* FileSuffix() const {
-        return m_interface->get_suffix(m_data);
+    std::string FileSuffix() const {
+        const auto suffix = m_interface->get_suffix(m_data);
+        if (!suffix) {
+            return {};
+        }
+        return { suffix };
     }
 };
 

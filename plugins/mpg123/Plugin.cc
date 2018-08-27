@@ -1,5 +1,5 @@
-#include "Decoder.h"
 #include <util/PluginHelper.h>
+using namespace mous;
 
 static const PluginInfo plugin_info {
     "mpg123",
@@ -21,9 +21,5 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const DecoderInterface* MousGetDecoderInterface() {
-        return &decoder_interface;
     }
 }

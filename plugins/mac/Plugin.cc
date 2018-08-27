@@ -1,10 +1,10 @@
-#include "Decoder.h"
 #include <util/PluginDef.h>
+using namespace mous;
 
 static const PluginInfo plugin_info {
     "mac",
     "MAC Decoder",
-    1
+    2
 };
 
 extern "C" {
@@ -21,9 +21,5 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const DecoderInterface* MousGetDecoderInterface() {
-        return &decoder_interface;
     }
 }

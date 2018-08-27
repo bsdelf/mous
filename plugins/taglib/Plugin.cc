@@ -1,5 +1,5 @@
 #include <util/PluginHelper.h>
-#include "TagParser.h"
+using namespace mous;
 
 static const PluginInfo info = {
     "taglib",
@@ -21,10 +21,6 @@ extern "C" {
     }
 
     void MousFreeObject() {
-    }
-
-    const TagParserInterface* MousGetTagParserInterface() {
-        return &tag_parser_interface;
     }
 }
 

@@ -25,3 +25,9 @@ static const mous::OutputInterface output_interface {
     SetVolume,
     GetOptions
 };
+
+extern "C" {
+    const mous::OutputInterface* MousGetOutputInterface() {
+        return &output_interface;
+    }
+}

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 #include <util/Plugin.h>
 #include <util/MediaItem.h>
@@ -19,7 +20,7 @@ public:
 
     std::vector<const BaseOption*> DecoderOptions() const;
     std::vector<const BaseOption*> EncoderOptions() const;
-    const char* EncoderFileSuffix() const;
+    std::string EncoderFileSuffix() const;
 
     void Run(const std::string& output);
     void Cancel();

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <unistd.h> // for off_t
 #include <string.h>
 #include <assert.h>
@@ -9,25 +7,27 @@
 #include <plugin/DecoderProto.h>
 using namespace mous;
 
-struct Self {
-    mpg123_handle* mpg123;
+namespace {
+    struct Self {
+        mpg123_handle* mpg123;
 
-    uint32_t max_bytes_per_unit;
-    uint64_t unit_index;
-    uint64_t unit_count;
+        uint32_t max_bytes_per_unit;
+        uint64_t unit_index;
+        uint64_t unit_count;
 
-    int32_t channels;
-    int32_t bits_per_sample;
-    int32_t sample_rate;
-    int32_t bit_rate;
-    uint64_t duration;
+        int32_t channels;
+        int32_t bits_per_sample;
+        int32_t sample_rate;
+        int32_t bit_rate;
+        uint64_t duration;
 
-    Self(mpg123_handle* mpg123, uint32_t max_bytes_per_unit)
-        : mpg123(mpg123)
-        , max_bytes_per_unit(max_bytes_per_unit) {
+        Self(mpg123_handle* mpg123, uint32_t max_bytes_per_unit)
+            : mpg123(mpg123)
+            , max_bytes_per_unit(max_bytes_per_unit) {
 
-    }
-};
+        }
+    };
+}
 
 static void* Create() {
     int error = mpg123_init();

@@ -1,26 +1,26 @@
-#pragma once
-
 #include <stdio.h>
 #include <vorbis/vorbisenc.h>
 
 #include <plugin/EncoderProto.h>
 using namespace mous;
 
-struct Self {
-    RangedFloatOption quality;
-    EnumedIntOption bit_rate;
-    GroupedOption vbr_or_abr;
+namespace {
+    struct Self {
+        RangedFloatOption quality;
+        EnumedIntOption bit_rate;
+        GroupedOption vbr_or_abr;
 
-    FILE* file = nullptr;
+        FILE* file = nullptr;
 
-    int channels = 0;
-    int sample_rate = 0;
-    int bits_per_sample = 0;
+        int channels = 0;
+        int sample_rate = 0;
+        int bits_per_sample = 0;
 
-    vorbis_info vorbis_info;
+        vorbis_info vorbis_info;
 
-    const MediaTag* media_tag = nullptr;
-};
+        const MediaTag* media_tag = nullptr;
+    };
+}
 
 static void* Create() {
     auto self = new Self();

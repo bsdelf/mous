@@ -34,3 +34,9 @@ static mous::EncoderInterface encoder_interface {
     GetOptions,
     GetSuffix
 };
+
+extern "C" {
+    const mous::EncoderInterface* MousGetEncoderInterface() {
+        return &encoder_interface;
+    }
+}

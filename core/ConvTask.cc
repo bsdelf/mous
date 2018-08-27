@@ -25,7 +25,7 @@ std::vector<const BaseOption*> ConvTask::EncoderOptions() const
     return impl->EncoderOptions();
 }
 
-const char* ConvTask::EncoderFileSuffix() const
+std::string ConvTask::EncoderFileSuffix() const
 {
     return impl->EncoderFileSuffix();
 }

@@ -63,3 +63,9 @@ static const mous::TagParserInterface tag_parser_interface {
     GetOptions,
     GetSuffixes
 };
+
+extern "C" {
+    const mous::TagParserInterface* MousGetTagParserInterface() {
+        return &tag_parser_interface;
+    }
+}

@@ -1,4 +1,3 @@
-#pragma once
 #include <unistd.h>
 #include <iostream>
 using namespace std;
@@ -13,11 +12,11 @@ extern "C" {
 
 const char* program_name = "CoreAudioOutput";
 
-#define SELF (static_cast<Self*>(ptr))
-
-struct Self {
-    bool closed = true;
-};
+namespace {
+    struct Self {
+        bool closed = true;
+    };
+}
 
 static void* Create() {
     op_pcm_ops.init();

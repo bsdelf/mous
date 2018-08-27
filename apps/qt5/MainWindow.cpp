@@ -446,8 +446,9 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 
     int encoderIndex = dlgEncoders.GetSelectedIndex();
     ConvTask* newTask = m_ConvFactory->CreateTask(item, encoderNames[encoderIndex]);
-    if (newTask == nullptr)
+    if (!newTask) {
         return;
+    }
 
     //==== show options
     vector<const BaseOption*> opts = newTask->EncoderOptions();

@@ -1,7 +1,5 @@
-#pragma once
-
-#include <lame/lame.h>
 #include <stdio.h>
+#include <lame/lame.h>
 
 #include <vector>
 using namespace std;
@@ -9,20 +7,22 @@ using namespace std;
 #include <plugin/EncoderProto.h>
 using namespace mous;
 
-struct Self {
-    RangedIntOption quality;
-    EnumedIntOption bit_rate;
-    BooleanOption replay_gain;
+namespace {
+    struct Self {
+        RangedIntOption quality;
+        EnumedIntOption bit_rate;
+        BooleanOption replay_gain;
 
-    lame_global_flags* flags = nullptr;
-    FILE* file = nullptr;
+        lame_global_flags* flags = nullptr;
+        FILE* file = nullptr;
 
-    int bits_per_sample = 0;
+        int bits_per_sample = 0;
 
-    vector<unsigned char> buffer;
+        vector<unsigned char> buffer;
 
-    const MediaTag* media_tag = nullptr;
-};
+        const MediaTag* media_tag = nullptr;
+    };
+}
 
 static void* Create() {
     auto self = new Self();
@@ -71,7 +71,7 @@ static void SetMediaTag(void* ptr, const MediaTag* tag) {
 static ErrorCode OpenOutput(void* ptr, const char* path) {
     SELF->file = ::fopen(path, "wb+");
 
-    if (SELF->file == nullptr) {
+    if (!SELF->file) {
         return ErrorCode::EncoderFailedToOpen;
     }
 
@@ -105,12 +105,12 @@ static ErrorCode OpenOutput(void* ptr, const char* path) {
 }
 
 static void CloseOutput(void* ptr) {
-    if (SELF->file != nullptr) {
+    if (SELF->file) {
         ::fclose(SELF->file);
         SELF->file = nullptr;
     }
 
-    if (SELF->flags != nullptr) {
+    if (SELF->flags) {
         ::lame_close(SELF->flags);
         SELF->flags = nullptr;
     }
@@ -143,8 +143,7 @@ static ErrorCode Encode(void* ptr, const char* data, uint32_t length) {
     return ErrorCode::EncoderFailedToEncode;
 }
 
-static ErrorCode Flush(void* ptr)
-{
+static ErrorCode Flush(void* ptr) {
     int ret = lame_encode_flush(SELF->flags, SELF->buffer.data(), SELF->buffer.size());
     if (ret >= 0) {
         if ((int)::fwrite(SELF->buffer.data(), 1, ret, SELF->file) == ret) {

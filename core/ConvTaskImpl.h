@@ -24,8 +24,6 @@ public:
     ~Impl()
     {
         Cancel();
-        m_Decoder.reset();
-        m_Encoder.reset();
     }
 
     std::vector<const BaseOption*> DecoderOptions() const
@@ -38,9 +36,12 @@ public:
         return m_Encoder ? m_Encoder->GetOptions() : std::vector<const BaseOption*>();
     }
 
-    const char* EncoderFileSuffix() const
+    std::string EncoderFileSuffix() const
     {
-        return m_Encoder ? m_Encoder->FileSuffix() : nullptr;
+        if (!m_Encoder) {
+            return {};
+        }
+        return { m_Encoder->FileSuffix() };
     }
 
     void Run(const std::string& output)

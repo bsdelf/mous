@@ -1,18 +1,18 @@
-#pragma once
-
 #include <sndio.h>
 #include <stdio.h>
 
 #include <plugin/OutputProto.h>
 using namespace mous;
 
-struct Self {
-    struct sio_hdl* sio = nullptr;
-    unsigned int volume = 0;
-    int32_t channels = -1;
-    int32_t sample_rate = -1;
-    int32_t bits_per_sample = -1;
-};
+namespace {
+    struct Self {
+        struct sio_hdl* sio = nullptr;
+        unsigned int volume = 0;
+        int32_t channels = -1;
+        int32_t sample_rate = -1;
+        int32_t bits_per_sample = -1;
+    };
+}
 
 static void* Create(void) {
     return new Self;

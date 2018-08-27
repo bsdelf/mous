@@ -1,14 +1,14 @@
-#pragma once
-
 #include <FLAC/stream_decoder.h>
 #include <plugin/DecoderProto.h>
 using namespace mous;
 
-struct DecoderContext {
-    char* buf = nullptr;
-    int32_t buf_used = 0;
-    int32_t samples_read = 0;
-};
+namespace {
+    struct DecoderContext {
+        char* buf = nullptr;
+        int32_t buf_used = 0;
+        int32_t samples_read = 0;
+    };
+}
 
 struct Self {
     FLAC__StreamDecoder* decoder;
