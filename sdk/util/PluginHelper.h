@@ -2,28 +2,15 @@
 
 #include <util/PluginDef.h>
 
-/**
- * Simple yet helpful macro for declare a plugin.
- */
-#define MOUS_DEF_PLUGIN(type, p_info, obj_t)\
+#define MOUS_EXPORT_PLUGIN(type, name, desc, version)\
 extern "C" {\
-    PluginType MousGetPluginType() {    \
-        return type;                    \
-    }                                   \
-    \
-    const PluginInfo* MousGetPluginInfo() { \
-        return p_info;                      \
-    }                                       \
-    \
-    void* MousCreateObject() {  \
-        return new obj_t;       \
-    }                           \
-    \
-    void MousFreeObject(void* p) {              \
-        if (p != nullptr) {                     \
-            obj_t* op = static_cast<obj_t*>(p); \
-            delete op;                          \
-        }                                       \
-    }                                           \
-    \
-} struct __MOUS_MACRO_END__
+    PluginType MousGetPluginType() {\
+        return type;\
+    }\
+    const PluginInfo* MousGetPluginInfo() {\
+        static const PluginInfo info {\
+            name, desc, version\
+        };\
+        return &info;\
+    }\
+}

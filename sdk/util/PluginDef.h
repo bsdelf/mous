@@ -4,12 +4,11 @@
 #include <scx/Conv.h>
 
 /**
- * Plugin common definition.
+ * Plugin common definitions.
  */
 namespace mous {
 
-enum class PluginType: uint32_t
-{
+enum class PluginType: uint32_t {
     None = 0,
     Decoder = 1u,
     Encoder = 1u << 1,
@@ -18,33 +17,7 @@ enum class PluginType: uint32_t
     TagParser = 1u << 4
 };
 
-inline auto operator & (PluginType lhs, PluginType rhs) {
-    return static_cast<PluginType>(scx::ToUnderlying(lhs) & scx::ToUnderlying(rhs));
-}
-
-inline auto operator | (PluginType lhs, PluginType rhs) {
-    return static_cast<PluginType>(scx::ToUnderlying(lhs) | scx::ToUnderlying(rhs));
-}
-
-inline auto& operator |= (PluginType& lhs, PluginType rhs) {
-    lhs = static_cast<PluginType>(scx::ToUnderlying(lhs) | scx::ToUnderlying(rhs));
-    return lhs;
-}
-
-struct PluginInfo
-{
-    const char* name;
-    const char* desc;
-    const uint32_t version;
-};
-
-const char* const StrGetPluginType = "MousGetPluginType";
-const char* const StrGetPluginInfo = "MousGetPluginInfo";
-const char* const StrCreateObject = "MousCreateObject";
-const char* const StrFreeObject = "MousFreeObject";
-
-inline const char* ToString(PluginType type)
-{
+inline const char* ToString(PluginType type) {
     switch (type) {
         case PluginType::None:
             return "None";
@@ -69,5 +42,27 @@ inline const char* ToString(PluginType type)
     }
     return "";
 }
+
+inline auto operator & (PluginType lhs, PluginType rhs) {
+    return static_cast<PluginType>(scx::ToUnderlying(lhs) & scx::ToUnderlying(rhs));
+}
+
+inline auto operator | (PluginType lhs, PluginType rhs) {
+    return static_cast<PluginType>(scx::ToUnderlying(lhs) | scx::ToUnderlying(rhs));
+}
+
+inline auto& operator |= (PluginType& lhs, PluginType rhs) {
+    lhs = static_cast<PluginType>(scx::ToUnderlying(lhs) | scx::ToUnderlying(rhs));
+    return lhs;
+}
+
+struct PluginInfo {
+    const char* name;
+    const char* desc;
+    const uint32_t version;
+};
+
+const char* const StrGetPluginType = "MousGetPluginType";
+const char* const StrGetPluginInfo = "MousGetPluginInfo";
 
 }

@@ -9,8 +9,6 @@ namespace mous {
 class Plugin {
     using FuncPluginType = PluginType (*)(void);
     using FuncPluginInfo = const PluginInfo* (*)(void);
-    using FuncCreateObject = void* (*)(void);
-    using FuncFreeObject = void (*)(void*);
 
   public:
     Plugin() = default;
@@ -28,14 +26,6 @@ class Plugin {
         }
         funcPluginInfo_ = Symbol<FuncPluginInfo>(StrGetPluginInfo);
         if (!funcPluginInfo_) {
-            goto Cleanup;
-        }
-        funcCreateObject_ = Symbol<FuncCreateObject>(StrCreateObject);
-        if (!funcCreateObject_) {
-            goto Cleanup;
-        }
-        funcFreeObject_ = Symbol<FuncFreeObject>(StrFreeObject);
-        if (!funcFreeObject_) {
             goto Cleanup;
         }
         type_ = funcPluginType_();
@@ -90,16 +80,6 @@ class Plugin {
         return funcPluginInfo_();
     }
 
-    template<class T>
-    T CreateObject() const {
-        void* data = funcCreateObject_();
-        return static_cast<T>(data);
-    }
-
-    void FreeObject(void* data) const {
-        funcFreeObject_(data);
-    }
-
     static inline auto LatestError() {
         return std::string(dlerror());
     }
@@ -108,8 +88,6 @@ class Plugin {
     void* handle_ = nullptr;
     FuncPluginType funcPluginType_ = nullptr;
     FuncPluginInfo funcPluginInfo_ = nullptr;
-    FuncCreateObject funcCreateObject_ = nullptr;
-    FuncFreeObject funcFreeObject_ = nullptr;
     PluginType type_ = PluginType::None;
     std::string path_;
 };
