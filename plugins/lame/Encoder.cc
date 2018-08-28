@@ -9,42 +9,46 @@ using namespace mous;
 
 namespace {
     struct Self {
-        RangedIntOption quality;
-        EnumedIntOption bit_rate;
-        BooleanOption replay_gain;
-
         lame_global_flags* flags = nullptr;
         FILE* file = nullptr;
-
         int bits_per_sample = 0;
-
         vector<unsigned char> buffer;
-
         const MediaTag* media_tag = nullptr;
+        RangedIntOption option_quality;
+        EnumedIntOption option_bit_rate;
+        BooleanOption option_replay_gain;
+        vector<const BaseOption*> options;
+
+        Self() {
+            option_quality.desc = "Quality\n0=best(very slow), 9 worst";
+            option_quality.min = 0;
+            option_quality.max = 9;
+            option_quality.defaultVal = 5;
+            option_quality.userVal = 5;
+
+            option_bit_rate.desc = "Bit Rate";
+            int rates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
+            option_bit_rate.enumedVal.assign(rates, rates + sizeof(rates)/sizeof(int));
+            option_bit_rate.defaultChoice = sizeof(rates)/sizeof(int) - 4;
+            option_bit_rate.userChoice = sizeof(rates)/sizeof(int) - 4;
+
+            option_replay_gain.desc = "ReplayGain";
+            option_replay_gain.detail = "Perform ReplayGain Analysis";
+            option_replay_gain.defaultChoice = true;
+            option_replay_gain.userChoice = true;
+
+            options = {
+                &option_quality,
+                &option_bit_rate,
+                &option_replay_gain,
+                nullptr
+            };
+        }
     };
 }
 
 static void* Create() {
-    auto self = new Self();
-
-    self->quality.desc = "Quality\n0=best(very slow), 9 worst";
-    self->quality.min = 0;
-    self->quality.max = 9;
-    self->quality.defaultVal = 5;
-    self->quality.userVal = 5;
-
-    self->bit_rate.desc = "Bit Rate";
-    int rates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
-    self->bit_rate.enumedVal.assign(rates, rates + sizeof(rates)/sizeof(int));
-    self->bit_rate.defaultChoice = sizeof(rates)/sizeof(int) - 4;
-    self->bit_rate.userChoice = sizeof(rates)/sizeof(int) - 4;
-
-    self->replay_gain.desc = "ReplayGain";
-    self->replay_gain.detail = "Perform ReplayGain Analysis";
-    self->replay_gain.defaultChoice = true;
-    self->replay_gain.userChoice = true;
-
-    return self;
+    return new Self();
 }
 
 static void Destroy(void* ptr) {
@@ -78,10 +82,10 @@ static ErrorCode OpenOutput(void* ptr, const char* path) {
     // init lame
     SELF->flags = ::lame_init();
 
-    ::lame_set_quality(SELF->flags, SELF->quality.userVal);
-    ::lame_set_brate(SELF->flags, SELF->bit_rate.enumedVal[SELF->bit_rate.userChoice]);
+    ::lame_set_quality(SELF->flags, SELF->option_quality.userVal);
+    ::lame_set_brate(SELF->flags, SELF->option_bit_rate.enumedVal[SELF->option_bit_rate.userChoice]);
     ::lame_set_mode(SELF->flags, ::JOINT_STEREO);
-    ::lame_set_findReplayGain(SELF->flags, SELF->replay_gain.userChoice ? 1 : 0);
+    ::lame_set_findReplayGain(SELF->flags, SELF->option_replay_gain.userChoice ? 1 : 0);
     ::lame_set_asm_optimizations(SELF->flags, MMX, 1);
     ::lame_set_asm_optimizations(SELF->flags, SSE, 1);
     if (SELF->media_tag != nullptr) {
@@ -155,13 +159,7 @@ static ErrorCode Flush(void* ptr) {
 }
 
 static const BaseOption** GetOptions(void* ptr) {
-    static const BaseOption* options[] {
-        &SELF->quality,
-        &SELF->bit_rate,
-        &SELF->replay_gain,
-        nullptr
-    };
-    return options;
+    return SELF->options.data();
 }
 
 static const char* GetSuffix(void* ptr) {

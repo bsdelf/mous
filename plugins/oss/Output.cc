@@ -20,6 +20,14 @@ namespace {
         int32_t sample_rate = -1;
         int32_t bits_per_sample = -1;
         StringOption option_device_path;
+        std::vector<const BaseOption*> options;
+
+        Self() {
+            options = {
+                &option_device_path,
+                nullptr;
+            };
+        }
     };
 }
 
@@ -136,9 +144,5 @@ static void SetVolume(void* ptr, int avg) {
 }
 
 static const BaseOption** GetOptions(void* ptr) {
-    static const BaseOption* options[] {
-        static_cast<BaseOption*>(&SELF->option_device_path),
-        nullptr
-    };
-    return options;
+    return SELF->options.data();
 }
