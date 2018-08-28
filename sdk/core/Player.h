@@ -9,7 +9,6 @@
 
 #include <util/ErrorCode.h>
 #include <util/AudioMode.h>
-#include <util/PluginOption.h>
 
 #include <scx/Signal.h>
 
@@ -70,9 +69,6 @@ public:
     uint64_t OffsetMs() const;
     uint64_t CurrentMs() const;
     enum AudioMode AudioMode() const;
-
-    std::vector<PluginOption> DecoderPluginOption() const;
-    PluginOption OutputPluginOption() const;
 
 public:
     scx::Signal<void (void)>* SigFinished();

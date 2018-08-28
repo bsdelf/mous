@@ -38,7 +38,7 @@ public:
 
     void LoadEncoderPlugin(const std::shared_ptr<Plugin>& plugin)
     {
-        encoderPlugins_.emplace(plugin->Info()->name, plugin);
+        encoderPlugins_.emplace(plugin->Name(), plugin);
     }
 
     void UnloadPlugin(const std::string& path)
@@ -58,7 +58,7 @@ public:
         list.reserve(encoderPlugins_.size());
         for (const auto& kv: encoderPlugins_) {
             const auto& plugin = kv.second;
-            list.push_back(plugin->Info()->name);
+            list.push_back(plugin->Name());
         }
         return list;
     }

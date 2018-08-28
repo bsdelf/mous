@@ -164,16 +164,6 @@ enum AudioMode Player::AudioMode() const
     return impl->AudioMode();
 }
 
-std::vector<PluginOption> Player::DecoderPluginOption() const
-{
-    return impl->DecoderPluginOption();
-}
-
-PluginOption Player::OutputPluginOption() const
-{
-    return impl->OutputPluginOption();
-}
-
 Signal<void (void)>* Player::SigFinished()
 {
     return impl->SigFinished();

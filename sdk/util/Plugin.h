@@ -7,7 +7,6 @@
 namespace mous {
 
 class Plugin {
-    using FuncPluginType = PluginType (*)(void);
     using FuncPluginInfo = const PluginInfo* (*)(void);
 
   public:
@@ -20,21 +19,18 @@ class Plugin {
         if (!handle_) {
             return;
         }
-        funcPluginType_ = Symbol<FuncPluginType>(StrGetPluginType);
-        if (!funcPluginType_) {
-            goto Cleanup;
+        func_plugin_info_ = Symbol<FuncPluginInfo>(StrGetPluginInfo);
+        if (!func_plugin_info_) {
+            dlclose(handle_);
+            handle_ = nullptr;
+            return;
         }
-        funcPluginInfo_ = Symbol<FuncPluginInfo>(StrGetPluginInfo);
-        if (!funcPluginInfo_) {
-            goto Cleanup;
-        }
-        type_ = funcPluginType_();
+        const auto info = func_plugin_info_();
         path_ = path;
-        return;
-
-    Cleanup:
-        dlclose(handle_);
-        handle_ = nullptr;
+        type_ = info->type;
+        name_ = info->name;
+        desc_ = info->desc;
+        version_ = info->version;
     }
 
     Plugin(Plugin&& that) {
@@ -76,8 +72,16 @@ class Plugin {
         return type_;
     }
 
-    auto Info() const {
-        return funcPluginInfo_();
+    auto Name() const {
+        return name_;
+    }
+
+    auto Description() const {
+        return desc_;
+    }
+
+    auto Version() const {
+        return version_;
     }
 
     static inline auto LatestError() {
@@ -85,11 +89,13 @@ class Plugin {
     }
 
   private:
-    void* handle_ = nullptr;
-    FuncPluginType funcPluginType_ = nullptr;
-    FuncPluginInfo funcPluginInfo_ = nullptr;
-    PluginType type_ = PluginType::None;
     std::string path_;
+    void* handle_ = nullptr;
+    FuncPluginInfo func_plugin_info_ = nullptr;
+    PluginType type_ = PluginType::None;
+    std::string name_;
+    std::string desc_;
+    uint32_t version_;
 };
 
 }

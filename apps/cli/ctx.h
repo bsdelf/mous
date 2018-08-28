@@ -4,7 +4,6 @@
 #include <mutex>
 
 #include <util/MediaItem.h>
-#include <util/PluginOption.h>
 #include <core/MediaLoader.h>
 #include <core/Player.h>
 #include <util/Playlist.h>

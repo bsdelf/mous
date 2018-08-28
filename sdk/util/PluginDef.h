@@ -57,6 +57,7 @@ inline auto& operator |= (PluginType& lhs, PluginType rhs) {
 }
 
 struct PluginInfo {
+    PluginType type;
     const char* name;
     const char* desc;
     const uint32_t version;

@@ -521,27 +521,6 @@ class Player::Impl
 
     enum AudioMode AudioMode() const { return (m_Decoder != nullptr) ? m_Decoder->AudioMode() : AudioMode::None; }
 
-    std::vector<PluginOption> DecoderPluginOption() const
-    {
-        std::vector<PluginOption> list;
-        list.reserve(m_Decoders.size());
-        for (const auto& kv: m_Decoders) {
-            const auto& decoder = kv.second;
-            list.emplace_back(decoder->GetPlugin()->Type(), decoder->GetPlugin()->Info(), decoder->GetOptions());
-        }
-        return list;
-    }
-
-    PluginOption OutputPluginOption() const
-    {
-        if (m_Output) {
-            const auto& plugin = m_Output->GetPlugin();
-            return { plugin->Type(), plugin->Info(), m_Output->GetOptions() };
-        } else {
-            return {};
-        }
-    }
-
     Signal<void(void)>* SigFinished() { return &m_SigFinished; }
 
   private:
