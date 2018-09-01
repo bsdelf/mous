@@ -44,16 +44,16 @@
 | oss | OSS output | - |
 | coreaudio | Core Audio output | - |
 | sndio | sndio output | sndio |
-| libao | libao output | libao |
-| mpg123 | .mp3 decoding | mpg123 |
-| lame | .mp3 encoding | lame |
-| fdk-aac | .m4a codec | fdk-aac, mp4v2 |
-| wavpack | .wv codec | wavpack |
-| vorbis | .ogg codec | libvorbis, libogg |
-| flac | .flac codec | flac |
-| mac | .ape codec | (bundled) |
-| taglib | meta-data editor | taglib |
-| libcue | .cue parser | libcue |
+| taglib | audio meta-data read & write | taglib |
+| lpcm | LPCM codec (\*.wav) | (bundled) |
+| mpg123 | MP3 decoding (\*.mp3) | mpg123 |
+| lame | MP3 encoding (\*.mp3) | lame |
+| fdk-aac | AAC codec (\*.m4a, \*.mp4) | fdk-aac, mp4v2 |
+| wavpack | WavPack codec (\*.wv) | wavpack |
+| vorbis | Ogg Vorbis codec (\*.ogg) | libvorbis, libogg |
+| flac | FLAC codec (\*.flac) | flac |
+| mac | Monkey's Audio codec (\*.ape) | (bundled) |
+| libcue | Cue sheet parser (\*.cue) | libcue |
 
 ## Install
 
