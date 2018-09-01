@@ -13,7 +13,7 @@ namespace {
         bool is_mp4 = false;
 
         // mp4v2
-        MP4FileHandle mp4 = nullptr;
+        MP4FileHandle mp4file = nullptr;
         int trackid = -1;
 
         // fdk-aac
@@ -44,40 +44,39 @@ static void Destroy(void* ptr) {
 }
 
 static ErrorCode OpenMP4(void* ptr, const char* url) {
-    // mp4v2
-    SELF->mp4 = MP4Read(url);
-    if (SELF->mp4 == nullptr) {
+    SELF->mp4file = MP4Read(url);
+    if (!SELF->mp4file) {
         return ErrorCode::DecoderFailedToOpen;
     }
 
-    {
-        // get first audio track
-        SELF->trackid = 0;
-        int ntrack = MP4GetNumberOfTracks(SELF->mp4);
-        for (int itrack = 1; itrack <= ntrack; ++itrack) {
-            if (MP4_IS_AUDIO_TRACK_TYPE(MP4GetTrackType(SELF->mp4, itrack))) {
-                SELF->trackid = itrack;
-                std::cout << SELF->trackid << std::endl;
-                break;
-            }
+    SELF->trackid = MP4_INVALID_TRACK_ID;
+    auto ntrack = MP4GetNumberOfTracks(SELF->mp4file);
+    for (decltype(ntrack) itrack = 0; itrack < ntrack; ++itrack) {
+        auto trackid = MP4FindTrackId(SELF->mp4file, itrack);
+        if (trackid == MP4_INVALID_TRACK_ID) {
+            continue;
         }
-        if (SELF->trackid == 0) {
-            Close(ptr);
-            return ErrorCode::DecoderFailedToOpen;
+        if (MP4_IS_AUDIO_TRACK_TYPE(MP4GetTrackType(SELF->mp4file, trackid))) {
+            SELF->trackid = trackid;
+            break;
         }
     }
+    if (SELF->trackid == MP4_INVALID_TRACK_ID) {
+        Close(ptr);
+        return ErrorCode::DecoderFailedToOpen;
+    }
 
-    SELF->bitrate = MP4GetTrackBitRate(SELF->mp4, SELF->trackid);
+    SELF->bitrate = MP4GetTrackBitRate(SELF->mp4file, SELF->trackid);
     SELF->duration = MP4ConvertFromTrackDuration(
-        SELF->mp4, SELF->trackid, MP4GetTrackDuration(SELF->mp4, SELF->trackid), MP4_MSECS_TIME_SCALE);
+        SELF->mp4file, SELF->trackid, MP4GetTrackDuration(SELF->mp4file, SELF->trackid), MP4_MSECS_TIME_SCALE);
 
-    SELF->channels = MP4GetTrackAudioChannels(SELF->mp4, SELF->trackid);
-    SELF->timescale = MP4GetTrackTimeScale(SELF->mp4, SELF->trackid);
+    SELF->channels = MP4GetTrackAudioChannels(SELF->mp4file, SELF->trackid);
+    SELF->timescale = MP4GetTrackTimeScale(SELF->mp4file, SELF->trackid);
     SELF->bits = 16;
 
-    SELF->nsamples = MP4GetTrackNumberOfSamples(SELF->mp4, SELF->trackid);
+    SELF->nsamples = MP4GetTrackNumberOfSamples(SELF->mp4file, SELF->trackid);
     SELF->sampleid = 1; // player will call SetUnitIndex() anyway
-    SELF->samplebuff.resize(MP4GetTrackMaxSampleSize(SELF->mp4, SELF->trackid));
+    SELF->samplebuff.resize(MP4GetTrackMaxSampleSize(SELF->mp4file, SELF->trackid));
     SELF->samplebuff.shrink_to_fit();
 
     //cout << "info: " << m_bitrate << ", "<< m_channels << ", "<< m_nsamples << ", " << m_timescale << endl;
@@ -91,7 +90,7 @@ static ErrorCode OpenMP4(void* ptr, const char* url) {
 
     unsigned char conf[128];
     UINT confBytes = sizeof(conf);
-    MP4GetTrackESConfiguration(SELF->mp4, SELF->trackid, (uint8_t **) &conf, (uint32_t *) &confBytes);
+    MP4GetTrackESConfiguration(SELF->mp4file, SELF->trackid, (uint8_t **) &conf, (uint32_t *) &confBytes);
     aacDecoder_ConfigRaw(SELF->fdk, (unsigned char **)&conf, (uint32_t *) &confBytes);
 
     // see AACDEC_PARAM
@@ -110,7 +109,7 @@ ErrorCode Open(void* ptr, const char* url) {
     SELF->is_mp4 = false;
 
     FILE* file = fopen(url, "rb");
-    if (file == nullptr) {
+    if (!file) {
         return ErrorCode::DecoderFailedToOpen;
     }
 
@@ -130,11 +129,11 @@ ErrorCode Open(void* ptr, const char* url) {
 }
 
 static void Close(void* ptr) {
-    if (SELF->mp4 != nullptr) {
-        MP4Close(SELF->mp4);
-        SELF->mp4 = nullptr;
+    if (SELF->mp4file) {
+        MP4Close(SELF->mp4file);
+        SELF->mp4file = nullptr;
     }
-    if (SELF->fdk != nullptr) {
+    if (SELF->fdk) {
         aacDecoder_Close(SELF->fdk);
         SELF->fdk = nullptr;
     }
@@ -153,13 +152,11 @@ static ErrorCode DecodeMp4Unit(void* ptr, char* data, uint32_t* used, uint32_t* 
     // read sample
     uint8_t* pbytes = SELF->samplebuff.data();
     uint32_t nbytes = SELF->samplebuff.size();
-    bool ok = MP4ReadSample(SELF->mp4, SELF->trackid, SELF->sampleid, &pbytes, &nbytes);
+    bool ok = MP4ReadSample(SELF->mp4file, SELF->trackid, SELF->sampleid, &pbytes, &nbytes);
     if (!ok) {
         std::cout << "mp4 bad sample: " << SELF->sampleid << std::endl;
         return ErrorCode::DecoderFailedToRead;
     }
-    //cout << nbytes << " - " << m_samplebuff.size() << endl;
-
     // decode sample
     UINT valid = nbytes;
     AAC_DECODER_ERROR err = aacDecoder_Fill(SELF->fdk, &pbytes, &nbytes, &valid);
@@ -167,7 +164,6 @@ static ErrorCode DecodeMp4Unit(void* ptr, char* data, uint32_t* used, uint32_t* 
         std::cout << "fdk bad fill" << std::endl;
         return ErrorCode::DecoderFailedToRead;
     }
-
     err = aacDecoder_DecodeFrame(SELF->fdk, reinterpret_cast<INT_PCM*>(data), GetMaxBytesPerUnit(ptr), 0);
     if (err == AAC_DEC_NOT_ENOUGH_BITS) {
         std::cout << "fdk short frame" << std::endl;
@@ -177,19 +173,16 @@ static ErrorCode DecodeMp4Unit(void* ptr, char* data, uint32_t* used, uint32_t* 
         std::cout << "fdk bad frame" << std::endl;
         return ErrorCode::DecoderFailedToRead;
     }
-
-    auto framesize = aacDecoder_GetStreamInfo(SELF->fdk)->frameSize;
+    // update status
+    const auto framesize = aacDecoder_GetStreamInfo(SELF->fdk)->frameSize;
     *used = SELF->channels * framesize * (SELF->bits / 8);
     *unit_count = 1;
-
-    // move forward
     SELF->sampleid += 1;
-
     return ErrorCode::Ok;
 }
 
 static ErrorCode DecodeAacUnit(void* ptr, char* data, uint32_t* used, uint32_t* unitCount) {
-    return ErrorCode::Ok;
+    return ErrorCode::DecoderFailedToRead;
 }
 
 static ErrorCode DecodeUnit(void* ptr, char* data, uint32_t* used, uint32_t* unit_count) {
