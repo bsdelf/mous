@@ -155,6 +155,10 @@ if(LIB_FDK_AAC AND LIB_MP4V2)
     set(TRY_PLUGIN_FDK_AAC ON)
 endif()
 option(WITH_PLUGIN_FDK_AAC "FDK AAC decoder" ${TRY_PLUGIN_FDK_AAC})
+if(LIB_MP4V2)
+    set(TRY_PLUGIN_ALAC ON)
+endif()
+option(WITH_PLUGIN_ALAC "ALAC decoder" ${TRY_PLUGIN_ALAC})
 if(LIB_FLAC)
     set(TRY_PLUGIN_FLAC ON)
 endif()
@@ -339,6 +343,20 @@ if(WITH_PLUGIN_MAC)
         COMPILE_FLAGS "-DPLATFORM_LINUX -I${PROJECT_SOURCE_DIR}/deps/MAC_SDK/Source/Shared")
     target_link_libraries(MacDecoder)
     install(TARGETS MacDecoder LIBRARY DESTINATION lib/mous)
+endif()
+
+if(WITH_PLUGIN_ALAC)
+    file(GLOB LIB_ALAC
+        deps/alac/codec/*.c
+        deps/alac/codec/*.cpp
+        deps/alac/convert-utility/CAFFileALAC.cpp
+    )
+    file(GLOB PLUGIN_ALAC_SRC plugins/alac/*)
+    add_library(AlacCodec SHARED ${PLUGIN_ALAC_SRC} ${LIB_ALAC})
+    set_target_properties(AlacCodec PROPERTIES
+        COMPILE_FLAGS "-I${PROJECT_SOURCE_DIR}/deps/alac/codec")
+    target_link_libraries(AlacCodec ${LIB_MP4V2})
+    install(TARGETS AlacCodec LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_FLAC)
