@@ -90,6 +90,9 @@ void MainWindow::InitMousCore()
     int tagParserPluginCount = 0;
 
     PluginFinder()
+        .OnPlugin(PluginType::FormatProbe, [this](const std::shared_ptr<Plugin>& plugin) {
+            m_Player->LoadFormatProbePlugin(plugin);
+        })
         .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
             m_Player->LoadDecoderPlugin(plugin);
             m_ConvFactory->LoadDecoderPlugin(plugin);

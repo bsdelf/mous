@@ -142,6 +142,9 @@ endif()
 option(WITH_PLUGIN_ALSA "ALSA output" ${TRY_PLUGIN_ALSA})
 option(WITH_PLUGIN_LIBAO "Libao output" OFF)
 
+#==== Format Probe ====#
+option(WITH_PLUGIN_FORMAT_PROBE "Format Probe" ON)
+
 #==== Codecs ====#
 if(LIB_FAAC AND LIB_MP4V2)
     set(TRY_PLUGIN_FAAC ON)
@@ -296,6 +299,16 @@ if(WITH_PLUGIN_LIBAO)
     add_library(AoOutput SHARED ${PLUGIN_LIBAO_SRC})
     target_link_libraries(AoOutput ${LIB_AO})
     install(TARGETS AoOutput LIBRARY DESTINATION lib/mous)
+endif()
+
+if(WITH_PLUGIN_FORMAT_PROBE)
+    file(GLOB PLUGIN_FORMAT_PROBE_SRC plugins/format-probe/*)
+    add_library(FormatProbe SHARED ${PLUGIN_FORMAT_PROBE_SRC})
+    if(LIB_MP4V2)
+        target_compile_definitions(FormatProbe PRIVATE ENABLE_MP4)
+        target_link_libraries(FormatProbe ${LIB_MP4V2})
+    endif()
+    install(TARGETS FormatProbe LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_LPCM)

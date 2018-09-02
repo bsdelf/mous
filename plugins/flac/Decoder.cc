@@ -200,3 +200,9 @@ static const char** GetSuffixes(void* ptr) {
     static const char* suffixes[] { "flac", nullptr };
     return suffixes;
 }
+
+static const char** GetEncodings(void* ptr) {
+    (void) ptr;
+    static const char* encodings[] { "flac", nullptr };
+    return encodings;
+}

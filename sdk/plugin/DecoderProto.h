@@ -24,6 +24,7 @@ static int32_t GetBitRate(void* ptr);
 static uint64_t GetDuration(void* ptr);
 static const mous::BaseOption** GetOptions(void* ptr);
 static const char** GetSuffixes(void* ptr);
+static const char** GetEncodings(void* ptr);
 
 static mous::DecoderInterface decoder_interface {
     Create,
@@ -42,7 +43,8 @@ static mous::DecoderInterface decoder_interface {
     GetBitRate,
     GetDuration,
     GetOptions,
-    GetSuffixes
+    GetSuffixes,
+    GetEncodings
 };
 
 extern "C" {

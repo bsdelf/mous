@@ -33,6 +33,7 @@ public:
 public:
     PlayerStatus Status() const;
 
+    void LoadFormatProbePlugin(const std::shared_ptr<Plugin>& plugin);
     void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin);
     void LoadOutputPlugin(const std::shared_ptr<Plugin>& plugin);
     void UnloadPlugin(const std::string& path);

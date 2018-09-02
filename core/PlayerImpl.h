@@ -18,6 +18,7 @@ using namespace scx;
 #include <util/Plugin.h>
 #include <plugin/Decoder.h>
 #include <plugin/Output.h>
+#include <plugin/FormatProbe.h>
 
 namespace mous {
 
@@ -192,18 +193,44 @@ class Player::Impl
 
     PlayerStatus Status() const { return m_Status; }
 
+    void LoadFormatProbePlugin(const std::shared_ptr<Plugin>& plugin)
+    {
+        auto probe = std::make_shared<FormatProbe>(plugin);
+        if (!probe || !*probe) {
+            return;
+        }
+        const auto suffixes = probe->FileSuffix();
+        for (const auto& suffix: suffixes) {
+            const auto& str = ToLower(suffix);
+            auto iter = m_Probes.find(str);
+            if (iter == m_Probes.end()) {
+                m_Probes.emplace(suffix, probe);
+            }
+        }
+    }
+
     void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin)
     {
         auto decoder = std::make_shared<Decoder>(plugin);
         if (!decoder || !*decoder) {
             return;
         }
-        const vector<string>& list = decoder->FileSuffix();
-        for (const string& item : list) {
-            const string& suffix = ToLower(item);
-            auto iter = m_Decoders.find(suffix);
+        const auto& suffixes = decoder->FileSuffix();
+        const auto& encodings = decoder->Encodings();
+        for (const auto& suffix : suffixes) {
+            const auto& str = ToLower(suffix);
+            const auto key = "suffix/" + str;
+            const auto iter = m_Decoders.find(key);
             if (iter == m_Decoders.end()) {
-                m_Decoders.emplace(suffix, decoder);
+                m_Decoders.emplace(key, decoder);
+            }
+        }
+        for (const auto& encoding : encodings) {
+            const auto& str = ToLower(encoding);
+            const auto key = "encoding/" + str;
+            const auto iter = m_Decoders.find(key);
+            if (iter == m_Decoders.end()) {
+                m_Decoders.emplace(key, decoder);
             }
         }
     }
@@ -236,14 +263,22 @@ class Player::Impl
             m_Output->Close();
             m_Output.reset();
         }
+
+        m_Probes.clear();
     }
 
     vector<string> SupportedSuffixes() const
     {
         vector<string> list;
         list.reserve(m_Decoders.size());
+        std::string prefix("suffix/");
         for (const auto& entry : m_Decoders) {
-            list.push_back(entry.first);
+            const auto pos = entry.first.find(prefix);
+            if (pos == std::string::npos) {
+                continue;
+            }
+            auto&& suffix = entry.first.substr(prefix.size());
+            list.push_back(std::move(suffix));
         }
         return list;
     }
@@ -275,12 +310,33 @@ class Player::Impl
             return ErrorCode::PlayerNoOutput;
         }
 
-        string suffix = ToLower(FileHelper::FileSuffix(path));
-        auto iter = m_Decoders.find(suffix);
-        if (iter == m_Decoders.end()) {
+        m_Decoder.reset();
+        {
+            const auto& suffix = ToLower(FileHelper::FileSuffix(path));
+            // detect encoding
+            std::string encoding;
+            {
+                auto iter = m_Probes.find(suffix);
+                if (iter != m_Probes.end()) {
+                    encoding = iter->second->Probe(path);
+                }
+            }
+            if (encoding.size() > 0) {
+                const auto iter = m_Decoders.find("encoding/" + encoding);
+                if (iter != m_Decoders.end()) {
+                    m_Decoder = iter->second;
+                }
+            }
+            if (!m_Decoder) {
+                auto iter = m_Decoders.find("suffix/" + suffix);
+                if (iter != m_Decoders.end()) {
+                    m_Decoder = iter->second;
+                }
+            }
+        }
+        if (!m_Decoder) {
             return ErrorCode::PlayerNoDecoder;
         }
-        m_Decoder = iter->second;
 
         ErrorCode err = m_Decoder->Open(path);
         if (err != ErrorCode::Ok) {
@@ -548,6 +604,7 @@ class Player::Impl
     double m_UnitPerMs = 0;
 
     std::map<std::string, std::shared_ptr<Decoder>> m_Decoders;
+    std::map<std::string, std::shared_ptr<FormatProbe>> m_Probes;
 
     scx::Signal<void(void)> m_SigFinished;
 };

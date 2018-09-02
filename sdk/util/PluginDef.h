@@ -14,29 +14,26 @@ enum class PluginType: uint32_t {
     Encoder = 1u << 1,
     Output = 1u << 2,
     SheetParser = 1u << 3,
-    TagParser = 1u << 4
+    TagParser = 1u << 4,
+    FormatProbe = 1u << 5
 };
 
 inline const char* ToString(PluginType type) {
     switch (type) {
         case PluginType::None:
             return "None";
-
         case PluginType::Decoder:
             return "Decoder";
-
         case PluginType::Encoder:
             return "Encoder";
-
         case PluginType::Output:
             return "Output";
-
         case PluginType::SheetParser:
             return "SheetParser";
-
         case PluginType::TagParser:
             return "TagParser";
-
+        case PluginType::FormatProbe:
+            return "FormatProbe";
         default:
             return "Unknown";
     }

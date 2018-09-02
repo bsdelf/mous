@@ -184,3 +184,9 @@ static const char** GetSuffixes(void* ptr) {
     static const char* suffixes[] { "wma", nullptr };
     return suffixes;
 }
+
+static const char** GetEncodings(void* ptr) {
+    (void) ptr;
+    static const char* encodings[] { "wma", nullptr };
+    return encodings;
+}

@@ -149,6 +149,12 @@ static const char** GetSuffixes(void* ptr) {
     return suffixes;
 }
 
+static const char** GetEncodings(void* ptr) {
+    (void) ptr;
+    static const char* encodings[] { "wavpack", nullptr };
+    return encodings;
+}
+
 static void FormatSamples(int bps, unsigned char* dst, int32_t *src, uint32_t samcnt) {
     int32_t temp;
 

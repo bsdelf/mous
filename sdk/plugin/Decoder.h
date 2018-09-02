@@ -78,6 +78,17 @@ public:
         }
         return suffixes;
     }
+
+    std::vector<std::string> Encodings() const {
+        std::vector<std::string> suffixes;
+        const char** p = m_interface->get_encodings(m_data);
+        if (p) {
+            for (; *p; ++p) {
+                suffixes.emplace_back(*p);
+            }
+        }
+        return suffixes;
+    }
 };
 
 }

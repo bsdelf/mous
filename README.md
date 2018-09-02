@@ -49,6 +49,7 @@
 | mpg123 | MP3 decoding (\*.mp3) | mpg123 |
 | lame | MP3 encoding (\*.mp3) | lame |
 | fdk-aac | AAC codec (\*.m4a, \*.mp4) | fdk-aac, mp4v2 |
+| alac | ALAC codec (\*.m4a, \*.mp4) | mp4v2 |
 | wavpack | WavPack codec (\*.wv) | wavpack |
 | vorbis | Ogg Vorbis codec (\*.ogg) | libvorbis, libogg |
 | flac | FLAC codec (\*.flac) | flac |

@@ -173,3 +173,9 @@ static const char** GetSuffixes(void* ptr) {
     static const char* suffixes[] { "mp3", nullptr };
     return suffixes;
 }
+
+static const char** GetEncodings(void* ptr) {
+    (void) ptr;
+    static const char* encodings[] { "mp3", nullptr };
+    return encodings;
+}

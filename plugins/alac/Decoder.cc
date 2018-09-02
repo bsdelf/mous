@@ -181,6 +181,12 @@ static const BaseOption** GetOptions(void* ptr) {
 
 static const char** GetSuffixes(void* ptr) {
     (void) ptr;
-    static const char* suffixes[] { "alac", nullptr };
+    static const char* suffixes[] { "m4a", nullptr };
     return suffixes;
+}
+
+static const char** GetEncodings(void* ptr) {
+    (void) ptr;
+    static const char* encodings[] { "alac", nullptr };
+    return encodings;
 }

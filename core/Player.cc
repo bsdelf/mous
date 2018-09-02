@@ -19,6 +19,11 @@ PlayerStatus Player::Status() const
     return impl->Status();
 }
 
+void Player::LoadFormatProbePlugin(const std::shared_ptr<Plugin>& plugin)
+{
+    return impl->LoadFormatProbePlugin(plugin);
+}
+
 void Player::LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin)
 {
     return impl->LoadDecoderPlugin(plugin);

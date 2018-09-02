@@ -45,6 +45,7 @@ struct DecoderInterface {
     uint64_t (*get_duration)(void* ptr);
     const BaseOption** (*get_options)(void* ptr);
     const char** (*get_suffixes)(void* ptr);
+    const char** (*get_encodings)(void* ptr);
 };
 
 struct EncoderInterface {
@@ -98,6 +99,14 @@ struct SheetParserInterface {
     void (*destroy)(void* ptr);
     void (*dump_file)(void* ptr, const char* path, std::deque<MediaItem>* list);
     void (*dump_stream)(void* ptr, const char* stream, std::deque<MediaItem>* list);
+    const mous::BaseOption** (*get_options)(void* ptr);
+    const char** (*get_suffixes)(void* ptr);
+};
+
+struct FormatProbeInterface {
+    void* (*create)(void);
+    void (*destroy)(void* ptr);
+    const char* (*probe)(void* ptr, const char* path);
     const mous::BaseOption** (*get_options)(void* ptr);
     const char** (*get_suffixes)(void* ptr);
 };

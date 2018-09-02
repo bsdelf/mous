@@ -24,6 +24,9 @@ Context::Context()
     }
 
     PluginFinder()
+        .OnPlugin(PluginType::FormatProbe, [this](const std::shared_ptr<Plugin>& plugin) {
+            player.LoadFormatProbePlugin(plugin);
+        })
         .OnPlugin(PluginType::Decoder, [this](const std::shared_ptr<Plugin>& plugin) {
             decoderPlugins.push_back(plugin);
             player.LoadDecoderPlugin(plugin);

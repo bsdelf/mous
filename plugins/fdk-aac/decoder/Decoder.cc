@@ -236,3 +236,9 @@ const char** GetSuffixes(void* ptr) {
     static const char* suffixes[] { "m4a", "mp4", nullptr };
     return suffixes;
 }
+
+static const char** GetEncodings(void* ptr) {
+    (void) ptr;
+    static const char* encodings[] { "aac", nullptr };
+    return encodings;
+}

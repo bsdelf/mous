@@ -157,3 +157,9 @@ static const char** GetSuffixes(void* ptr) {
     static const char* suffixes[] { "ape", nullptr };
     return suffixes;
 }
+
+static const char** GetEncodings(void* ptr) {
+    (void) ptr;
+    static const char* encodings[] { "ape", nullptr };
+    return encodings;
+}

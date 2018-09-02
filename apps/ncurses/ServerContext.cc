@@ -40,6 +40,9 @@ bool ServerContext::Init()
     bool hasOutput = false;
     const auto env = GlobalAppEnv::Instance();
     PluginFinder()
+        .OnPlugin(PluginType::FormatProbe, [this](const std::shared_ptr<Plugin>& plugin) {
+            player.LoadFormatProbePlugin(plugin);
+        })
         .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
             player.LoadDecoderPlugin(plugin);
             hasDecoder = true;
