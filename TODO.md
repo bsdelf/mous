@@ -7,7 +7,6 @@ Bugs:
 
 Architecture:
 
-- Redesign and refactor the entire plugin infrastructure
 - Plugin ABI compatible issue
 - Profile the performance and overhead of inter-thread communication based on mailbox
 - Implement filter plugin interface
@@ -16,18 +15,18 @@ Architecture:
 
 Features:
 
-- Use AudioToolbox to decode, encode formats on macOS
+- m3u, m3u8 playlist
 - PulseAudio output
-- opus encoder and decoder
-- libmad decoder
-- MP4 插件的 AAC 支持
+- libresample, libsamplerate
+- libsndfile
+- Use AudioToolbox to decode and encode on macOS
+- TTA codec
+- Raw AAC
 - 音效插件
 - 音量均衡插件
 - 播放统计插件
 - APE/FLAC 内嵌 CUE
 - 支持除了 FrontCover 之外的封面，flac，ape 等格式的封面
-- libresample
-- m3u 播放列表读取
 - 更好的播放列表序列化格式？
 
 Qt:
