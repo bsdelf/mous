@@ -51,7 +51,8 @@
 | fdk-aac | AAC codec (\*.m4a, \*.mp4) | fdk-aac, mp4v2 |
 | alac | ALAC codec (\*.m4a, \*.mp4) | alac (bundled), mp4v2 |
 | wavpack | WavPack codec (\*.wv) | wavpack |
-| vorbis | Ogg Vorbis codec (\*.ogg) | libvorbis, libogg |
+| vorbis | Ogg Vorbis codec (\*.ogg) | vorbis, vorbisfile |
+| opus | Ogg Opus codec (\*.opus) | opus, opusfile |
 | flac | FLAC codec (\*.flac) | flac |
 | mac | Monkey's Audio codec (\*.ape) | MAC (bundled) |
 | libcue | Cue sheet parser (\*.cue) | libcue |

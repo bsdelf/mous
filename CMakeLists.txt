@@ -71,6 +71,10 @@ find_library(LIB_TAGLIB tag)
 find_library(LIB_VORBIS vorbis)
 find_library(LIB_VORBISENC vorbisenc)
 find_library(LIB_VORBISFILE vorbisfile)
+find_library(LIB_OPUS opus)
+find_library(LIB_OPUSENC opusenc)
+find_library(LIB_OPUSFILE opusfile)
+find_path(LIB_OPUS_INCLUDE_DIR opus/opus.h)
 find_library(LIB_WAVPACK wavpack)
 if(APPLE)
     find_program(PROG_BREW brew)
@@ -179,6 +183,10 @@ if(LIB_OGG AND LIB_VORBIS AND LIB_VORBISFILE AND LIB_VORBISENC)
     set(TRY_PLUGIN_OGG_VORBIS)
 endif()
 option(WITH_PLUGIN_OGG_VORBIS "Ogg Vorbis codec" ${TRY_PLUGIN_OGG_VORBIS})
+if(LIB_OGG AND LIB_OPUS AND LIB_OPUSFILE AND LIB_OPUSENC)
+    set(TRY_PLUGIN_OGG_OPUS)
+endif()
+option(WITH_PLUGIN_OGG_OPUS "Ogg Opus codec" ${TRY_PLUGIN_OGG_OPUS})
 option(WITH_PLUGIN_LPCM "LPCM codec" ON)
 if(LIB_WAVPACK)
     set(TRY_PLUGIN_WAVPACK ON)
@@ -339,6 +347,19 @@ if(WITH_PLUGIN_OGG_VORBIS)
         ${LIB_VORBISFILE} ${LIB_OGG} ${LIB_VORBIS} ${LIB_VORBISENC}
     )
     install(TARGETS VorbisCodec LIBRARY DESTINATION lib/mous)
+endif()
+
+if(WITH_PLUGIN_OGG_OPUS)
+    file(GLOB OPUS_CODEC_SRC plugins/opus/*)
+    add_library(OpusCodec SHARED ${OPUS_CODEC_SRC})
+    # workaround for opusfile.h's "# include <opus_multistream.h>" issue
+    set_target_properties(OpusCodec PROPERTIES
+        COMPILE_FLAGS "-I${LIB_OPUS_INCLUDE_DIR}/opus")
+    target_link_libraries(
+        OpusCodec
+        ${LIB_OPUSFILE} ${LIB_OGG} ${LIB_OPUS} ${LIB_OPUSENC}
+    )
+    install(TARGETS OpusCodec LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_MAC)
