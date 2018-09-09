@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <memory>
 #include <AudioToolbox/AudioFile.h>
 #include <AudioToolbox/AudioConverter.h>
 #include <CoreAudio/CoreAudioTypes.h>
@@ -34,6 +35,14 @@ static UInt32 MapBitDepth(UInt32 input) {
 static UInt32 MapSampleRate(UInt32 input) {
     return input > 48000 ? MapSampleRate(input >> 1) : input;
 }
+
+struct CFTypeDeleter {
+    void operator()(CFTypeRef ref) {
+        if (ref) {
+            CFRelease(ref);
+        }
+    }
+};
 
 static OSStatus AudioFileGetPropertyHelper(
     AudioFileID inAudioFile,
@@ -100,26 +109,32 @@ static void* Create() {
 }
 
 static void Destroy(void* ptr) {
+    Close(ptr);
     delete SELF;
 }
 
 static ErrorCode Open(void* ptr, const char* url) {
     OSStatus status = noErr;
-    auto cstr = CFStringCreateWithCString(kCFAllocatorDefault, url, kCFStringEncodingUTF8);
-    if (!cstr) {
-        printf("CFStringCreateWithCString failed\n");
-        return ErrorCode::DecoderFailedToOpen;
-    }
-    auto fsref = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cstr, kCFURLPOSIXPathStyle, false);
-    if (!cstr) {
-        printf("CFURLCreateWithFileSystemPath failed\n");
-        return ErrorCode::DecoderFailedToOpen;
-    }
-    status = AudioFileOpenURL(fsref, kAudioFileReadPermission, 0, &(SELF->fileid));
-    CFRelease(fsref);
-    CFRelease(cstr);
-    if (status != noErr) {
-        return ErrorCode::DecoderFailedToOpen;
+
+    {
+        std::unique_ptr<std::remove_pointer<CFStringRef>::type, CFTypeDeleter> cfstr(
+            CFStringCreateWithCString(kCFAllocatorDefault, url, kCFStringEncodingUTF8)
+        );
+        if (!cfstr) {
+            printf("CFStringCreateWithCString failed\n");
+            return ErrorCode::DecoderFailedToOpen;
+        }
+        std::unique_ptr<std::remove_pointer<CFURLRef>::type, CFTypeDeleter> cfurl(
+            CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cfstr.get(), kCFURLPOSIXPathStyle, false)
+        );
+        if (!cfurl) {
+            printf("CFURLCreateWithFileSystemPath failed\n");
+            return ErrorCode::DecoderFailedToOpen;
+        }
+        status = AudioFileOpenURL(cfurl.get(), kAudioFileReadPermission, 0, &(SELF->fileid));
+        if (status != noErr) {
+            return ErrorCode::DecoderFailedToOpen;
+        }
     }
     
     UInt32 size;
