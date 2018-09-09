@@ -19,7 +19,6 @@ Features:
 - PulseAudio output
 - libresample, libsamplerate
 - libsndfile
-- Use AudioToolbox to decode and encode on macOS
 - TTA codec
 - Raw AAC
 - 音效插件

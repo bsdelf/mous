@@ -1,4 +1,4 @@
-# Core Audio Plugin
+# Core Audio Output
 
 Thanks to Wang-Yue's core audio wrapper.
 

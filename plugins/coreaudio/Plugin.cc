@@ -2,8 +2,8 @@
 using namespace mous;
 
 MOUS_EXPORT_PLUGIN(
-    PluginType::Output,
+    PluginType::Output | PluginType::Decoder,
     "coreaudio",
-    "Core Audio Output",
+    "Core Audio Codec & Output",
     2
 )
