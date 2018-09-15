@@ -298,9 +298,9 @@ endif()
 
 if(WITH_PLUGIN_COREAUDIO)
     file(GLOB_RECURSE PLUGIN_COREAUDIO_SRC plugins/coreaudio/*)
-    add_library(CoreAudioOutput SHARED ${PLUGIN_COREAUDIO_SRC})
-    target_link_libraries(CoreAudioOutput ${LIB_AUDIO_UNIT} ${LIB_AUDIO_TOOLBOX} ${LIB_CORE_AUDIO} ${LIB_CORE_SERVICES})
-    install(TARGETS CoreAudioOutput LIBRARY DESTINATION lib/mous)
+    add_library(CoreAudio SHARED ${PLUGIN_COREAUDIO_SRC})
+    target_link_libraries(CoreAudio ${LIB_AUDIO_UNIT} ${LIB_AUDIO_TOOLBOX} ${LIB_CORE_AUDIO} ${LIB_CORE_SERVICES})
+    install(TARGETS CoreAudio LIBRARY DESTINATION lib/mous)
 endif()
 
 if(WITH_PLUGIN_LIBAO)

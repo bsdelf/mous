@@ -42,7 +42,7 @@
 |:---|:---|:---|
 | alsa | ALSA output | - |
 | oss | OSS output | - |
-| coreaudio | Core Audio output | - |
+| coreaudio | Core Audio codec & output | - |
 | sndio | sndio output | sndio |
 | taglib | audio meta-data read & write | taglib |
 | lpcm | LPCM codec (\*.wav) | - |
