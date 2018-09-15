@@ -1,12 +1,11 @@
 #pragma once
 
 #include <assert.h>
+#include <stdio.h>
 
 #include <algorithm>
 #include <chrono>
-#include <iostream>
 #include <map>
-#include <set>
 #include <thread>
 using namespace std;
 
@@ -357,15 +356,12 @@ class Player::Impl
         m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
 
         int32_t channels = m_Decoder->Channels();
-        int32_t samleRate = m_Decoder->SampleRate();
-        int32_t bitsPerSamle = m_Decoder->BitsPerSample();
+        int32_t sampleRate = m_Decoder->SampleRate();
+        int32_t bitsPerSample = m_Decoder->BitsPerSample();
         // TODO: add log
-        err = m_Output->Setup(channels, samleRate, bitsPerSamle);
+        err = m_Output->Setup(channels, sampleRate, bitsPerSample);
         if (err != ErrorCode::Ok) {
-            cout << "FATAL: failed to set output:" << static_cast<uint8_t>(err) << endl;
-            cout << "       channels:" << channels << endl;
-            cout << "       samleRate:" << samleRate << endl;
-            cout << "       bitsPerSamle:" << bitsPerSamle << endl;
+            printf("Failed to set output, error: %u, channels: %d, sample rate: %d, bits: %d\n", err, channels, sampleRate, bitsPerSample);
             return err;
         }
 
@@ -547,9 +543,6 @@ class Player::Impl
     void ResumeDecoder()
     {
         /*
-        // cout << "data:" << m_UnitBuffers.DataCount() << endl;
-        // cout << "free:" << m_UnitBuffers.FreeCount() << endl;
-
         m_Decoder->Open(m_DecodeFile);
         m_Decoder->SetUnitIndex(m_DecoderIndex);
 
