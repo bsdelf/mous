@@ -1,51 +1,50 @@
-#include <core/ConvTask.h>
-
-#include "ConvTaskImpl.h"
+#include <core/Conversion.h>
+#include "ConversionImpl.h"
 
 namespace mous {
 
-ConvTask::ConvTask(const MediaItem& item, 
+Conversion::Conversion(const MediaItem& item, 
                    const std::shared_ptr<Plugin>& decoderPlugin,
                    const std::shared_ptr<Plugin>& encoderPlugin):
     impl(std::make_unique<Impl>(item, decoderPlugin, encoderPlugin))
 {
 }
 
-ConvTask::~ConvTask()
+Conversion::~Conversion()
 {
 }
 
-std::vector<const BaseOption*> ConvTask::DecoderOptions() const
+std::vector<const BaseOption*> Conversion::DecoderOptions() const
 {
     return impl->DecoderOptions();
 }
 
-std::vector<const BaseOption*> ConvTask::EncoderOptions() const
+std::vector<const BaseOption*> Conversion::EncoderOptions() const
 {
     return impl->EncoderOptions();
 }
 
-std::string ConvTask::EncoderFileSuffix() const
+std::string Conversion::EncoderFileSuffix() const
 {
     return impl->EncoderFileSuffix();
 }
 
-void ConvTask::Run(const std::string& output)
+void Conversion::Run(const std::string& output)
 {
     return impl->Run(output);
 }
 
-void ConvTask::Cancel()
+void Conversion::Cancel()
 {
     return impl->Cancel();
 }
 
-double ConvTask::Progress() const
+double Conversion::Progress() const
 {
     return impl->Progress();
 }
 
-bool ConvTask::IsFinished() const
+bool Conversion::IsFinished() const
 {
     return impl->IsFinished();
 }

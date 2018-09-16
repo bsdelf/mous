@@ -7,7 +7,7 @@
 #include <scx/FileInfo.h>
 using namespace scx;
 
-#include <core/ConvTask.h>
+#include <core/Conversion.h>
 using namespace mous;
 
 #include "cmd.h"
@@ -17,7 +17,7 @@ int cmd_dec(int argc, char** argv)
 {
     // find wav encoder
     std::string wav_enc;
-    const auto& encoders = ctx->convertTaskFactory.EncoderNames();
+    const auto& encoders = ctx->converter.EncoderNames();
     for (const auto& encoder: encoders) {
         if (ToLower(encoder).find("wav") != std::string::npos) {
             wav_enc = encoder;
@@ -57,11 +57,11 @@ int cmd_dec(int argc, char** argv)
             }
 
             // do it!
-            ConvTask* task = ctx->convertTaskFactory.CreateTask(media_list[mi], wav_enc);
-            task->Run(outname);
+            auto conversion = ctx->converter.CreateConversion(media_list[mi], wav_enc);
+            conversion->Run(outname);
 
-            while (!task->IsFinished()) {
-                double percent = task->Progress();
+            while (!conversion->IsFinished()) {
+                double percent = conversion->Progress();
                 if (percent < 0) {
                     printf("failed!\n");
                     break;
@@ -70,7 +70,6 @@ int cmd_dec(int argc, char** argv)
                 usleep(200);
             }
             printf("\ndone!\n");
-            delete task;
         }
 
         printf("\n");

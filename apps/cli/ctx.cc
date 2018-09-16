@@ -30,11 +30,11 @@ Context::Context()
         .OnPlugin(PluginType::Decoder, [this](const std::shared_ptr<Plugin>& plugin) {
             decoderPlugins.push_back(plugin);
             player.LoadDecoderPlugin(plugin);
-            convertTaskFactory.LoadDecoderPlugin(plugin);
+            converter.LoadDecoderPlugin(plugin);
         })
         .OnPlugin(PluginType::Encoder, [this](const std::shared_ptr<Plugin>& plugin) {
             encoderPlugins.push_back(plugin);
-            convertTaskFactory.LoadEncoderPlugin(plugin);
+            converter.LoadEncoderPlugin(plugin);
         })
         .OnPlugin(PluginType::Output, [this](const std::shared_ptr<Plugin>& plugin) {
             outputPlugins.push_back(plugin);

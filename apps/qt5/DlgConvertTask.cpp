@@ -1,10 +1,10 @@
-#include <core/ConvTask.h>
 #include "DlgConvertTask.h"
 #include "ui_DlgConvertTask.h"
 #include "FrmProgressBar.h"
 using namespace mous;
 
-Q_DECLARE_METATYPE(ConvTask*)
+Q_DECLARE_METATYPE(std::shared_ptr<mous::Conversion>)
+//Q_DECLARE_SMART_POINTER_METATYPE(std::shared_ptr)
 
 DlgConvertTask::DlgConvertTask(QWidget *parent) :
     QDialog(parent),
@@ -24,11 +24,11 @@ DlgConvertTask::~DlgConvertTask()
     delete ui;
 }
 
-void DlgConvertTask::AddTask(ConvTask* newTask, const QString &output)
+void DlgConvertTask::AddTask(std::shared_ptr<mous::Conversion>&& conversion, const QString &output)
 {
     QListWidgetItem* item = new QListWidgetItem();
     FrmProgressBar* bar = new FrmProgressBar();
-    item->setData(Qt::UserRole, QVariant::fromValue(newTask));
+    item->setData(Qt::UserRole, QVariant::fromValue(conversion));
     item->setSizeHint(QSize(-1, bar->height()));
     bar->SetKey(item);
     bar->SetFileName(output);
@@ -37,7 +37,7 @@ void DlgConvertTask::AddTask(ConvTask* newTask, const QString &output)
     ui->listAllTask->insertItem(0, item);
     ui->listAllTask->setItemWidget(item, bar);
 
-    newTask->Run(output.toUtf8().data());
+    conversion->Run(output.toUtf8().data());
 
     m_ProgressTimer.start();
 }
@@ -47,24 +47,25 @@ void DlgConvertTask::SlotUpdateProgress()
     for (int i = 0; i < ui->listAllTask->count(); ++i) {
         QListWidgetItem* item = ui->listAllTask->item(i);
         FrmProgressBar* bar = (FrmProgressBar*)ui->listAllTask->itemWidget(item);
-        ConvTask* task = item->data(Qt::UserRole).value<ConvTask*>();
+        auto conversion = item->data(Qt::UserRole).value<std::shared_ptr<mous::Conversion>>();
 
-        bar->SetProgress(task->Progress()*100);
+        bar->SetProgress(conversion->Progress()*100);
 
-        if (task->IsFinished()) {
+        if (conversion->IsFinished()) {
+            conversion.reset();
             disconnect(bar, 0, this, 0);
             ui->listAllTask->removeItemWidget(item);
             ui->listAllTask->takeItem(ui->listAllTask->row(item));
             delete item;
             delete bar;
-            delete task;
         }
     }
 
     if (ui->listAllTask->count() == 0) {
         m_ProgressTimer.stop();
-        if (ui->boxAutoClose->isChecked())
+        if (ui->boxAutoClose->isChecked()) {
             close();
+        }
     }
 }
 
@@ -75,12 +76,12 @@ void DlgConvertTask::SlotCancelTask(void* key)
     disconnect(bar, 0, this, 0);
 
     QVariant var(item->data(Qt::UserRole));
-    ConvTask* task = var.value<ConvTask*>();
-    task->Cancel();
+    auto conversion = var.value<std::shared_ptr<mous::Conversion>>();
+    conversion->Cancel();
+    conversion.reset();
 
     ui->listAllTask->removeItemWidget(item);
     ui->listAllTask->takeItem(ui->listAllTask->row(item));
     delete item;
     delete bar;
-    delete task;
 }

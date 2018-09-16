@@ -6,17 +6,17 @@
 
 #include <util/Plugin.h>
 #include <util/MediaItem.h>
-#include <core/ConvTask.h>
+#include <core/Conversion.h>
 
 namespace mous {
 
-class ConvTaskFactory
+class Converter
 {
     class Impl;
 
 public:
-    ConvTaskFactory();
-    ~ConvTaskFactory();
+    Converter();
+    ~Converter();
 
     void LoadDecoderPlugin(const std::shared_ptr<Plugin>& plugin);
     void LoadEncoderPlugin(const std::shared_ptr<Plugin>& plugin);
@@ -24,7 +24,7 @@ public:
     void UnloadPlugin();
 
     std::vector<std::string> EncoderNames() const;
-    ConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const;
+    std::shared_ptr<Conversion> CreateConversion(const MediaItem& item, const std::string& encoder) const;
 
 private:
     std::unique_ptr<Impl> impl;

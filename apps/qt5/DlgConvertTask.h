@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include <QDialog>
+#include <core/Conversion.h>
 #include "FrmProgressBar.h"
 
 namespace Ui {
@@ -21,7 +22,7 @@ public:
     explicit DlgConvertTask(QWidget *parent = 0);
     ~DlgConvertTask();
     
-    void AddTask(mous::ConvTask* newTask, const QString& output);
+    void AddTask(std::shared_ptr<mous::Conversion>&& conversion, const QString& output);
 
 private slots:
     void SlotUpdateProgress();

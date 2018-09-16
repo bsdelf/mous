@@ -2,12 +2,13 @@
 
 #include <thread>
 
+#include <core/Conversion.h>
 #include <plugin/Decoder.h>
 #include <plugin/Encoder.h>
 
 namespace mous {
 
-class ConvTask::Impl {
+class Conversion::Impl {
 public:
     Impl(const MediaItem& item,
          const std::shared_ptr<Plugin>& decoderPlugin,

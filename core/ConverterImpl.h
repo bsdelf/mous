@@ -2,8 +2,7 @@
 
 #include <map>
 
-#include <core/ConvTaskFactory.h>
-#include <core/ConvTask.h>
+#include <core/Converter.h>
 #include <util/Plugin.h>
 #include <plugin/Decoder.h>
 #include <plugin/Encoder.h>
@@ -14,7 +13,7 @@
 
 namespace mous {
 
-class ConvTaskFactory::Impl {
+class Converter::Impl {
 public:
     ~Impl()
     {
@@ -63,7 +62,7 @@ public:
         return list;
     }
 
-    ConvTask* CreateTask(const MediaItem& item, const std::string& encoder) const
+    std::shared_ptr<Conversion> CreateConversion(const MediaItem& item, const std::string& encoder) const
     {
         const std::string& suffix = scx::ToLower(scx::FileHelper::FileSuffix(item.url));
         auto decoderPluginIter = decoderPlugins_.find(suffix);
@@ -74,7 +73,7 @@ public:
         if (encoderPluginIter == encoderPlugins_.end()) {
            return nullptr;
         }
-        return new ConvTask(item, decoderPluginIter->second, encoderPluginIter->second);
+        return std::make_shared<Conversion>(item, decoderPluginIter->second, encoderPluginIter->second);
     }
 
 private:

@@ -7,8 +7,7 @@
 #include <core/MediaLoader.h>
 #include <core/Player.h>
 #include <util/Playlist.h>
-#include <core/ConvTask.h>
-#include <core/ConvTaskFactory.h>
+#include <core/Converter.h>
 #include <core/TagParserFactory.h>
 using namespace mous;
 
@@ -21,7 +20,7 @@ struct Context
 
     MediaLoader mediaLoader;
     TagParserFactory tagParserFactory;
-    ConvTaskFactory convertTaskFactory;
+    Converter converter;
 
     Player player;
     std::mutex playerMutex;

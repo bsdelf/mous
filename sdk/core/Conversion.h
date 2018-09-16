@@ -10,13 +10,13 @@
 
 namespace mous {
 
-class ConvTask
+class Conversion
 {
     class Impl;
 
 public:
-    ConvTask(const MediaItem& item, const std::shared_ptr<Plugin>& decoderPlugin, const std::shared_ptr<Plugin>& encoderPlugin);
-    ~ConvTask();
+    Conversion(const MediaItem& item, const std::shared_ptr<Plugin>& decoderPlugin, const std::shared_ptr<Plugin>& encoderPlugin);
+    ~Conversion();
 
     std::vector<const BaseOption*> DecoderOptions() const;
     std::vector<const BaseOption*> EncoderOptions() const;

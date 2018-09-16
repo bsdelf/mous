@@ -80,7 +80,7 @@ void MainWindow::InitMousCore()
 {
     m_MediaLoader = new MediaLoader();
     m_Player = new Player();
-    m_ConvFactory = new ConvTaskFactory();
+    m_converter = new Converter();
     m_ParserFactory = new TagParserFactory();
 
     int decoderPluginCount = 0;
@@ -95,11 +95,11 @@ void MainWindow::InitMousCore()
         })
         .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
             m_Player->LoadDecoderPlugin(plugin);
-            m_ConvFactory->LoadDecoderPlugin(plugin);
+            m_converter->LoadDecoderPlugin(plugin);
             ++decoderPluginCount;
         })
         .OnPlugin(PluginType::Encoder, [&, this](const std::shared_ptr<Plugin>&plugin) {
-            m_ConvFactory->LoadEncoderPlugin(plugin);
+            m_converter->LoadEncoderPlugin(plugin);
             ++encoderPluginCount;
         })
         .OnPlugin(PluginType::Output, [&, this](const std::shared_ptr<Plugin>& plugin) {
@@ -138,12 +138,12 @@ void MainWindow::ClearMousCore()
 
     m_Player->UnloadPlugin();
     m_MediaLoader->UnloadPlugin();
-    m_ConvFactory->UnloadPlugin();
+    m_converter->UnloadPlugin();
     m_ParserFactory->UnloadPlugin();
 
     delete m_MediaLoader;
     delete m_Player;
-    delete m_ConvFactory;
+    delete m_converter;
     delete m_ParserFactory;
 }
 
@@ -429,7 +429,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 {
     //==== show encoders
-    vector<string> encoderNames = m_ConvFactory->EncoderNames();
+    vector<string> encoderNames = m_converter->EncoderNames();
     if (encoderNames.empty())
         return;
     QStringList list;
@@ -448,16 +448,16 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
         return;
 
     int encoderIndex = dlgEncoders.GetSelectedIndex();
-    ConvTask* newTask = m_ConvFactory->CreateTask(item, encoderNames[encoderIndex]);
-    if (!newTask) {
+    auto conversion = m_converter->CreateConversion(item, encoderNames[encoderIndex]);
+    if (!conversion) {
         return;
     }
 
     //==== show options
-    vector<const BaseOption*> opts = newTask->EncoderOptions();
+    vector<const BaseOption*> opts = conversion->EncoderOptions();
 
     QString fileName =
-            QString::fromUtf8((item.tag.artist + " - " + item.tag.title + "." + newTask->EncoderFileSuffix()).c_str());
+            QString::fromUtf8((item.tag.artist + " - " + item.tag.title + "." + conversion->EncoderFileSuffix()).c_str());
     DlgConvertOption dlgOption(this);
     dlgOption.SetDir(QDir::homePath());
     dlgOption.SetFileName(fileName);
@@ -466,14 +466,13 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
     dlgOption.exec();
 
     if (dlgOption.result() != QDialog::Accepted) {
-        delete newTask;
         return;
     }
 
     //==== do work
     QString filePath = QFileInfo(dlgOption.Dir(), dlgOption.FileName()).absoluteFilePath();
     m_DlgConvertTask.show();
-    m_DlgConvertTask.AddTask(newTask, filePath);
+    m_DlgConvertTask.AddTask(std::move(conversion), filePath);
 }
 
 void MainWindow::SlotConvertMediaItems(const QList<MediaItem>& items)
