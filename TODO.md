@@ -7,6 +7,7 @@ Bugs:
 
 Architecture:
 
+- Log system
 - Plugin ABI compatible issue
 - Profile the performance and overhead of inter-thread communication based on mailbox
 - Implement filter plugin interface
