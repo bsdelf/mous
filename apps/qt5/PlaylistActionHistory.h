@@ -15,7 +15,7 @@ public:
         Remove
     };
 
-    typedef std::deque<std::pair<int, T> > ActionItemList;
+    using ActionItemList = std::deque<std::pair<int, T>>;
 
     struct Action
     {
@@ -27,12 +27,6 @@ public:
     };
 
 public:
-    PlaylistActionHistory():
-        m_MaxHistory(10)
-    {
-
-    }
-
     int MaxHistory() const
     {
         return m_MaxHistory;
@@ -88,7 +82,7 @@ public:
     }
 
 public:
-    int m_MaxHistory;
+    int m_MaxHistory = 10;
     std::deque<Action> m_UndoStack;
     std::deque<Action> m_RedoStack;
 };

@@ -163,12 +163,13 @@ void FrmTagEditor::ShowBottomBtns(bool show)
 
 void FrmTagEditor::SlotBtnSave()
 {
-    if (m_CurrentParser == nullptr)
+    if (!m_CurrentParser) {
         return;
+    }
 
     MediaItem tmpItem = m_CurrentItem;
 
-    typedef QPair<int, int> Cell;
+    using Cell = QPair<int, int>;
     foreach (const Cell& cell, m_UnsavedFields) {
         qDebug() << cell;
         QString qtext = ui->tagTable->item(cell.first, cell.second)->text();
@@ -277,14 +278,16 @@ void FrmTagEditor::SlotSaveImageAs()
     default:
         fmt.clear();
     }
-    if (fmt.isEmpty() || m_CurrentImgData.empty())
+    if (fmt.isEmpty() || m_CurrentImgData.empty()) {
         return;
+    }
 
     // pick file name
     QString fileName =
             QFileDialog::getSaveFileName(this, tr("Save Image As"), m_OldImagePath, fmt);
-    if (fileName.isEmpty())
+    if (fileName.isEmpty()) {
         return;
+    }
     m_OldImagePath = QFileInfo(fileName).absolutePath();
 
     // write it
@@ -381,8 +384,9 @@ void FrmTagEditor::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
 
-    if (event->size() != event->oldSize())
+    if (event->size() != event->oldSize()) {
         UpdateCoverArt();
+    }
 }
 
 void FrmTagEditor::WaitForLoadFinished()

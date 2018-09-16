@@ -1,6 +1,4 @@
 #include <unistd.h>
-#include <iostream>
-using namespace std;
 
 #include <plugin/OutputProto.h>
 using namespace mous;

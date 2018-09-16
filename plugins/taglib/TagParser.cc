@@ -1,9 +1,16 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 
 #include <vector>
 #include <map>
+
+#include <taglib/mpegfile.h>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
+#include <taglib/audioproperties.h>
+using namespace TagLib;
 
 #include <scx/Conv.h>
 #include <scx/FileHelper.h>
@@ -12,12 +19,6 @@ using namespace scx;
 
 #include <plugin/TagParserProto.h>
 using namespace mous;
-
-#include <taglib/mpegfile.h>
-#include <taglib/fileref.h>
-#include <taglib/tag.h>
-#include <taglib/audioproperties.h>
-using namespace TagLib;
 
 #include "CoverArt.h"
 
@@ -191,7 +192,7 @@ static bool Save(void* ptr)
     if (ext == "mp3") {
         auto ref = dynamic_cast<TagLib::MPEG::File*>(SELF->file_ref->file());
         if (!ref) {
-            cout << "bad type" << endl;
+            printf("[taglib] bad type\n");
             return false;
         }
         return ref->save(TagLib::MPEG::File::TagTypes::ID3v2, true, 3, true);

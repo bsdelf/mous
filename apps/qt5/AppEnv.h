@@ -36,6 +36,6 @@ private:
     bool CheckDefaultConfig();
 };
 
-typedef scx::Singleton<AppEnv> GlobalAppEnv;
+using GlobalAppEnv = scx::Singleton<AppEnv>;
 
 #endif // APPENV_H

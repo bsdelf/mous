@@ -7,24 +7,19 @@
 int main(int argc, char *argv[])
 {
     auto env = GlobalAppEnv::Instance();
-    auto flag = env->Init();
-    if (!flag) {
-        qDebug() << "bad";
+    const auto ok = env->Init();
+    if (!ok) {
+        qDebug() << "failed to initialize app env";
+        return 1;
     }
-
-
-    QApplication app(argc, argv);
 
     QTranslator translator;
     translator.load(env->translationFile);
+    QApplication app(argc, argv);
     app.installTranslator(&translator);
-
     MainWindow win;
     win.show();
-
-    int ret = app.exec();
-
+    const int ret = app.exec();
     env->Save();
-
     return ret;
 }

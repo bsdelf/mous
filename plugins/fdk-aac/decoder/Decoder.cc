@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <iostream>
 #include <vector>
 
 #include <fdk-aac/aacdecoder_lib.h>
@@ -79,8 +78,6 @@ static ErrorCode OpenMP4(void* ptr, const char* url) {
     SELF->samplebuff.resize(MP4GetTrackMaxSampleSize(SELF->mp4file, SELF->trackid));
     SELF->samplebuff.shrink_to_fit();
 
-    //cout << "info: " << m_bitrate << ", "<< m_channels << ", "<< m_nsamples << ", " << m_timescale << endl;
-
     // fdk
     SELF->fdk = aacDecoder_Open(TT_MP4_RAW, 1);
     if (SELF->fdk == nullptr) {
@@ -154,23 +151,23 @@ static ErrorCode DecodeMp4Unit(void* ptr, char* data, uint32_t* used, uint32_t* 
     uint32_t nbytes = SELF->samplebuff.size();
     bool ok = MP4ReadSample(SELF->mp4file, SELF->trackid, SELF->sampleid, &pbytes, &nbytes);
     if (!ok) {
-        std::cout << "mp4 bad sample: " << SELF->sampleid << std::endl;
+        printf("[fdk-aac] bad sample: %lld\n", SELF->sampleid);
         return ErrorCode::DecoderFailedToRead;
     }
     // decode sample
     UINT valid = nbytes;
     AAC_DECODER_ERROR err = aacDecoder_Fill(SELF->fdk, &pbytes, &nbytes, &valid);
     if (err != AAC_DEC_OK) {
-        std::cout << "fdk bad fill" << std::endl;
+        printf("[fdk-aac] fill failed\n");
         return ErrorCode::DecoderFailedToRead;
     }
     err = aacDecoder_DecodeFrame(SELF->fdk, reinterpret_cast<INT_PCM*>(data), GetMaxBytesPerUnit(ptr), 0);
     if (err == AAC_DEC_NOT_ENOUGH_BITS) {
-        std::cout << "fdk short frame" << std::endl;
+        printf("[fdk-aac] short frame\n");
         return ErrorCode::DecoderFailedToRead;
     }
     if (err != AAC_DEC_OK) {
-        std::cout << "fdk bad frame" << std::endl;
+        printf("[fdk-aac] bad frame\n");
         return ErrorCode::DecoderFailedToRead;
     }
     // update status

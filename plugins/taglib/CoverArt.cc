@@ -1,21 +1,19 @@
-#include "CoverArt.h"
-
+#include <stdio.h>
 #include <string.h>
-
-#include <scx/Conv.h>
-using namespace scx;
-
-//#include <iostream>
 
 #include <taglib/mp4file.h>
 #include <taglib/mp4tag.h>
 #include <taglib/mp4coverart.h>
-
 #include <taglib/mpegfile.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/id3v2frame.h>
 #include <taglib/attachedpictureframe.h>
 using namespace TagLib;
+
+#include <scx/Conv.h>
+using namespace scx;
+
+#include "CoverArt.h"
 
 static CoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, char** out, uint32_t* length);
 static bool StoreID3v2Cover(ID3v2::Tag* idtag, CoverFormat fmt, const char* buf, size_t len);
@@ -91,8 +89,7 @@ static CoverFormat DumpID3v2Cover(ID3v2::Tag* idtag, char** out, uint32_t* lengt
         for (auto iter = frameList.begin(); iter != frameList.end(); ++iter) {
             auto frame = static_cast<ID3v2::AttachedPictureFrame*>(*iter);
             string mime = ToLower(frame->mimeType().to8Bit());
-            cout << "type: " << (int) frame->type() << endl;
-            cout << "mime: " << mime << endl;
+            printf("[taglib] type: %d, mime: %s\n", static_cast<int>(frame->type()), mime.c_str());
             const ByteVector& v = frame->picture();
             if (v.size() != 0) {
                 *out = new char[v.size()];
@@ -119,7 +116,7 @@ bool StoreMp3Cover(const string& path, CoverFormat fmt, const char* buf, size_t 
         if (ref != nullptr) {
             return ref->save(TagLib::MPEG::File::TagTypes::ID3v2, true, 3, true);
         } else {
-            cout << "bad type" << endl;
+            printf("[taglib] bad type\n");
         }
     }
     return false;

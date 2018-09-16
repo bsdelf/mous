@@ -281,55 +281,62 @@ void MainWindow::SlotBtnPlay()
     qDebug() << (int)m_Player->Status();
 
     switch (m_Player->Status()) {
-    case PlayerStatus::Closed:
-        if (m_UsedMediaItem != nullptr) {
-            if (m_Player->Open(m_UsedMediaItem->url) == ErrorCode::Ok)
-                SlotBtnPlay();
+        case PlayerStatus::Closed: {
+            if (m_UsedMediaItem) {
+                if (m_Player->Open(m_UsedMediaItem->url) == ErrorCode::Ok) {
+                    SlotBtnPlay();
+                }
+            }
+            break;
         }
-        break;
 
-    case PlayerStatus::Playing:
-        m_Player->Pause();
-        m_TimerUpdateUi.stop();
-        m_FrmToolBar.BtnPlay()->setIcon(m_IconPlaying);
-        break;
+        case PlayerStatus::Playing: {
+            m_Player->Pause();
+            m_TimerUpdateUi.stop();
+            m_FrmToolBar.BtnPlay()->setIcon(m_IconPlaying);
+            break;
+        }
 
-    case PlayerStatus::Paused:
-        m_TimerUpdateUi.start(m_UpdateInterval);
-        m_Player->Resume();
-        m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
-        break;
+        case PlayerStatus::Paused: {
+            m_TimerUpdateUi.start(m_UpdateInterval);
+            m_Player->Resume();
+            m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
+            break;
+        }
 
-    case PlayerStatus::Stopped:
-        m_TimerUpdateUi.start(m_UpdateInterval);
-        if (m_UsedMediaItem->hasRange)
-            m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
-        else
-            m_Player->Play();
-        m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
-        break;
+        case PlayerStatus::Stopped: {
+            m_TimerUpdateUi.start(m_UpdateInterval);
+            if (m_UsedMediaItem->hasRange) {
+                m_Player->Play(m_UsedMediaItem->msBeg, m_UsedMediaItem->msEnd);
+            } else {
+                m_Player->Play();
+            }
+            m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
+            break;
+        }
     }
 }
 
 void MainWindow::SlotBtnPrev()
 {
-    if (m_UsedPlaylistView == nullptr)
+    if (!m_UsedPlaylistView) {
         return;
-
+    }
     const mous::MediaItem* item = m_UsedPlaylistView->PrevItem();
-    if (item != nullptr)
+    if (item) {
         SlotPlayMediaItem(m_UsedPlaylistView, *item);
+    }
 }
 
 void MainWindow::SlotBtnNext()
 {
-    if (m_UsedPlaylistView == nullptr) {
+    if (!m_UsedPlaylistView) {
         return;
     }
-
     const mous::MediaItem* item = m_UsedPlaylistView->NextItem();
-    if (item != nullptr)
+    if (item) {
         SlotPlayMediaItem(m_UsedPlaylistView, *item);
+    }
 }
 
 void MainWindow::SlotSliderVolumeValueChanged(int val)
@@ -350,28 +357,25 @@ void MainWindow::SlotSliderPlayingReleased()
 
 void MainWindow::SlotSliderPlayingValueChanged(int val)
 {
-    if (!m_SliderPlayingPreempted)
+    if (!m_SliderPlayingPreempted) {
         return;
-
+    }
     const double& percent = (double)val / m_FrmToolBar.SliderPlaying()->maximum();
-
     QMutexLocker locker(&m_PlayerMutex);
-    if (m_Player->Status() != PlayerStatus::Closed)
+    if (m_Player->Status() != PlayerStatus::Closed) {
         m_Player->SeekPercent(percent);
+    }
 }
 
 void MainWindow::SlotBarPlayListMidClick(int index)
 {
-    if (m_TabWidgetPlaylist->count() <= 1)
+    if (m_TabWidgetPlaylist->count() <= 1) {
         return;
-
+    }
     SimplePlaylistView* view = (SimplePlaylistView*)m_TabWidgetPlaylist->widget(index);
     m_TabWidgetPlaylist->removeTab(index);
-
     disconnect(view, 0, this, 0);
-
     delete view;
-
     m_TabBarPlaylist->setFocus();
 }
 
@@ -415,10 +419,11 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
     }
 
     m_TimerUpdateUi.start(m_UpdateInterval);
-    if (item.hasRange)
+    if (item.hasRange) {
         m_Player->Play(item.msBeg, item.msEnd);
-    else
+    } else {
         m_Player->Play();
+    }
     m_FrmToolBar.BtnPlay()->setIcon(m_IconPaused);
 
     setWindowTitle("Mous ( " + QString::fromUtf8(item.tag.title.c_str()) + " )");
@@ -428,10 +433,11 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 
 void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 {
-    //==== show encoders
     vector<string> encoderNames = m_converter->EncoderNames();
-    if (encoderNames.empty())
+    if (encoderNames.empty()) {
         return;
+    }
+
     QStringList list;
     for (size_t i = 0; i < encoderNames.size(); ++i) {
         list << QString::fromUtf8(encoderNames[i].c_str());
@@ -444,8 +450,9 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
     dlgEncoders.SetSelectedIndex(0);
     dlgEncoders.exec();
 
-    if (dlgEncoders.result() != QDialog::Accepted)
+    if (dlgEncoders.result() != QDialog::Accepted) {
         return;
+    }
 
     int encoderIndex = dlgEncoders.GetSelectedIndex();
     auto conversion = m_converter->CreateConversion(item, encoderNames[encoderIndex]);
@@ -482,6 +489,7 @@ void MainWindow::SlotConvertMediaItems(const QList<MediaItem>& items)
 
 void MainWindow::SlotTagUpdated(const MediaItem& item)
 {
-    if (m_UsedPlaylistView != nullptr)
+    if (m_UsedPlaylistView) {
         m_UsedPlaylistView->OnMediaItemUpdated(item);
+    }
 }

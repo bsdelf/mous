@@ -1,11 +1,11 @@
+#include <errno.h>
 #include <fcntl.h>  // open
 #include <unistd.h> // write
+#include <stdio.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
-#include <errno.h>
 
-#include <cstring>
-#include <iostream>
 using namespace std;
 
 #include <plugin/OutputProto.h>
@@ -85,7 +85,7 @@ static ErrorCode Setup(void* ptr, int32_t* channels, int32_t* sample_rate, int32
     errno = 0;
     if (err == -1 || _channels != *channels) {
         *channels = _channels;
-        cout << ::strerror(errno) << endl;
+        printf("[oss] %s\n", ::strerror(errno));
         return ErrorCode::OutputBadChannels;
     }
 
@@ -93,7 +93,7 @@ static ErrorCode Setup(void* ptr, int32_t* channels, int32_t* sample_rate, int32
     err = ::ioctl(SELF->fd, SNDCTL_DSP_SPEED, &_sampleRate);
     if (err == -1 || _sampleRate != *sample_rate) {
         *sample_rate = _sampleRate;
-        cout << ::strerror(errno) << endl;
+        printf("[oss] %s\n", ::strerror(errno));
         return ErrorCode::OutputBadSampleRate;
     }
 
@@ -101,7 +101,7 @@ static ErrorCode Setup(void* ptr, int32_t* channels, int32_t* sample_rate, int32
     err = ::ioctl(SELF->fd, SNDCTL_DSP_SETFMT, &_bitsPerSample);
     if (err == -1 || _bitsPerSample != *bits_per_sample) {
         *bits_per_sample = _bitsPerSample;
-        cout << ::strerror(errno) << endl;
+        printf("[oss] %s\n", ::strerror(errno));
         return ErrorCode::OutputBadBitsPerSample;
     }
 
