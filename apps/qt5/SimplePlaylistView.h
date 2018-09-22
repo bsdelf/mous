@@ -90,7 +90,7 @@ private:
     void LoadMediaItem(const QStringList& pathList);
     QList<int> PickSelectedRows() const;
     void CorrectTagCharset(MediaTag& tag, const std::string& ifNotUtf8) const;
-    ListRow BuildListRow(MediaItem &item) const;
+    static ListRow BuildListRow(const MediaItem &item);
 
 private:
     const MediaLoader* m_MediaLoader;

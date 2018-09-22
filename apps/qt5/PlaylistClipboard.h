@@ -7,18 +7,12 @@ template <class T>
 class PlaylistClipboard
 {
 public:
-    PlaylistClipboard():
-        m_Empty(true)
-    {
-
-    }
-
     bool Empty() const
     {
         return m_Empty;
     }
 
-    std::deque<T> Content() const
+    const std::deque<T>& Content() const
     {
         return m_Content;
     }
@@ -29,13 +23,19 @@ public:
         m_Empty = false;
     }
 
+    void SetContent(std::deque<T>&& content)
+    {
+        m_Content = std::move(content);
+        m_Empty = false;
+    }
+
     void Clear()
     {
         m_Empty = true;
     }
 
 private:
-    bool m_Empty;
+    bool m_Empty = true;
     std::deque<T> m_Content;
 };
 

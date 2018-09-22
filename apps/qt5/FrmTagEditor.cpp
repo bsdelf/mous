@@ -82,7 +82,7 @@ void FrmTagEditor::SaveUiStatus()
 
 void FrmTagEditor::RestoreUiStatus()
 {
-    auto env = GlobalAppEnv::Instance();
+    const auto env = GlobalAppEnv::Instance();
     ui->splitter->restoreState(env->tagEditorSplitterState);
 }
 
@@ -102,8 +102,9 @@ void FrmTagEditor::SetTagParserFactory(const TagParserFactory *factory)
 
 void FrmTagEditor::LoadMediaItem(const mous::MediaItem& item)
 {
-    if (!m_SemLoadFinished.tryAcquire())
+    if (!m_SemLoadFinished.tryAcquire()) {
         return;
+    }
 
     m_CurrentItem = item;
     DoLoadFileTag(item.url);
@@ -116,9 +117,9 @@ void FrmTagEditor::LoadMediaItem(const mous::MediaItem& item)
 
 void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
 {
-    if (m_ParserFactory == nullptr)
+    if (!m_ParserFactory) {
         return;
-
+    }
     if (m_CurrentParser) {
         m_CurrentParser->Close();
         m_CurrentParser.reset();
@@ -128,8 +129,9 @@ void FrmTagEditor::DoLoadFileTag(const std::string &fileName)
         return;
     }
     m_CurrentParser->Open(fileName);
-    if (m_CurrentParser->CanEdit())
+    if (m_CurrentParser->CanEdit()) {
         ui->tagTable->setEnabled(true);
+    }
     UpdateTag();
 
     if (m_CurrentParser) {
@@ -283,8 +285,7 @@ void FrmTagEditor::SlotSaveImageAs()
     }
 
     // pick file name
-    QString fileName =
-            QFileDialog::getSaveFileName(this, tr("Save Image As"), m_OldImagePath, fmt);
+    const auto& fileName = QFileDialog::getSaveFileName(this, tr("Save Image As"), m_OldImagePath, fmt);
     if (fileName.isEmpty()) {
         return;
     }
@@ -305,11 +306,13 @@ void FrmTagEditor::SlotChangeCoverArt()
         return;
     }
 
-    QString fileName =
-            QFileDialog::getOpenFileName(this, tr("Select Image File"), m_OldImagePath, tr("Images (*.jpg *.png)"));
+    const auto& fileName = QFileDialog::getOpenFileName(this, tr("Select Image File"), m_OldImagePath, tr("Images (*.jpg *.png)"));
+    if (fileName.isEmpty()) {
+        return;
+    }
 
     // check format
-    QString suffix = QFileInfo(fileName).suffix();
+    const auto& suffix = QFileInfo(fileName).suffix();
     CoverFormat fmt = CoverFormat::None;
     if (suffix == "jpg") {
         fmt = CoverFormat::JPEG;
@@ -327,8 +330,9 @@ void FrmTagEditor::SlotChangeCoverArt()
         bytes = imgFile.readAll();
     }
     imgFile.close();
-    if (bytes.isEmpty())
+    if (bytes.isEmpty()) {
         return;
+    }
 
     // modify media file & show it
     const char* data = bytes.data();
@@ -370,20 +374,19 @@ void FrmTagEditor::UpdateTag()
 
 void FrmTagEditor::UpdateCoverArt()
 {
-    if (m_CurrentImage.isNull() || m_LabelImage == nullptr) {
+    if (m_CurrentImage.isNull() || !m_LabelImage) {
         m_LabelImage->setPixmap(QPixmap());
-    } else {
-        QSize size = m_CurrentImage.size();
-        size.scale(ui->scrollAreaCover->viewport()->size(), Qt::KeepAspectRatio);
-        const QPixmap& img = m_CurrentImage.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        m_LabelImage->setPixmap(img);
+        return;
     }
+    QSize size(m_CurrentImage.size());
+    size.scale(ui->scrollAreaCover->viewport()->size(), Qt::KeepAspectRatio);
+    const QPixmap& img = m_CurrentImage.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    m_LabelImage->setPixmap(img);
 }
 
 void FrmTagEditor::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
-
     if (event->size() != event->oldSize()) {
         UpdateCoverArt();
     }

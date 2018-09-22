@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     InitQtSlots();
 
     m_FrmTagEditor.RestoreUiStatus();
-    auto env = GlobalAppEnv::Instance();
+    const auto env = GlobalAppEnv::Instance();
     restoreGeometry(env->windowGeometry);
     restoreState(env->windowState);
 }
@@ -181,12 +181,13 @@ void MainWindow::InitMyUi()
     // Recover previous playlist
     for (int i = 0; i < env->tabCount; ++i) {
         SlotWidgetPlayListDoubleClick();
-        SimplePlaylistView* view =  qobject_cast<SimplePlaylistView*>(m_TabWidgetPlaylist->widget(i));
-        QString filePath = env->configDir + QString("/playlist%1.dat").arg(i);
-        if (QFileInfo(filePath).isFile())
-            view->Load(filePath.toLatin1());
-        else
+        SimplePlaylistView* view = qobject_cast<SimplePlaylistView*>(m_TabWidgetPlaylist->widget(i));
+        const QString& filePath = env->configDir + QString("/playlist%1.dat").arg(i);
+        if (!QFileInfo(filePath).isFile()) {
             qDebug() << filePath << "not exist!";
+            continue;
+        }
+        view->Load(filePath.toLatin1());
     }
     m_TabWidgetPlaylist->setCurrentIndex(env->tabIndex);
 
@@ -244,33 +245,28 @@ void MainWindow::SlotUiPlayerFinished()
 /* Qt slots */
 void MainWindow::SlotUpdateUi()
 {
-    // Update statusbar & progress slider
-    if (!m_PlayerMutex.tryLock())
-        return;
-
-    if (m_Player->Status() == PlayerStatus::Playing) {
-        long total = m_Player->RangeDuration();
-        long ms = m_Player->OffsetMs();
-        long hz = m_Player->SamleRate();
-        long kbps = m_Player->BitRate();
-        m_PlayerMutex.unlock();
-
-        const QString& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6").arg(hz).arg(kbps, 4).
-                arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0')).
-                arg(total/1000/60, 2, 10, QChar('0')).arg(total/1000%60, 2, 10, QChar('0'));
-
-        ui->statusBar->showMessage(status);
-
-        if (!m_SliderPlayingPreempted) {
-            int val = (double)ms / total * m_FrmToolBar.SliderPlaying()->maximum();
-            m_FrmToolBar.SliderPlaying()->setSliderPosition(val);
-        }
-
-    } else {
-        m_PlayerMutex.unlock();
+    if (m_Player->Status() != PlayerStatus::Playing) {
         ui->statusBar->showMessage("");
         m_FrmToolBar.SliderPlaying()->setSliderPosition(0);
         setWindowTitle("Mous");
+        return;
+    }
+    if (!m_PlayerMutex.tryLock()) {
+        return;
+    }
+    long total = m_Player->RangeDuration();
+    long ms = m_Player->OffsetMs();
+    long hz = m_Player->SamleRate();
+    long kbps = m_Player->BitRate();
+    m_PlayerMutex.unlock();
+    const auto& status = QString("%1 Hz | %2 Kbps | %3:%4/%5:%6")
+            .arg(hz).arg(kbps, 4)
+            .arg(ms/1000/60, 2, 10, QChar('0')).arg(ms/1000%60, 2, 10, QChar('0'))
+            .arg(total/1000/60, 2, 10, QChar('0')).arg(total/1000%60, 2, 10, QChar('0'));
+    ui->statusBar->showMessage(status);
+    if (!m_SliderPlayingPreempted) {
+        int val = (double)ms / total * m_FrmToolBar.SliderPlaying()->maximum();
+        m_FrmToolBar.SliderPlaying()->setSliderPosition(val);
     }
 }
 
@@ -433,7 +429,7 @@ void MainWindow::SlotPlayMediaItem(IPlaylistView *view, const MediaItem& item)
 
 void MainWindow::SlotConvertMediaItem(const MediaItem& item)
 {
-    vector<string> encoderNames = m_converter->EncoderNames();
+    const auto& encoderNames = m_converter->EncoderNames();
     if (encoderNames.empty()) {
         return;
     }
@@ -461,14 +457,14 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
     }
 
     //==== show options
-    vector<const BaseOption*> opts = conversion->EncoderOptions();
+    const auto& options = conversion->EncoderOptions();
 
-    QString fileName =
+    const auto& initialFileName =
             QString::fromUtf8((item.tag.artist + " - " + item.tag.title + "." + conversion->EncoderFileSuffix()).c_str());
     DlgConvertOption dlgOption(this);
     dlgOption.SetDir(QDir::homePath());
-    dlgOption.SetFileName(fileName);
-    dlgOption.BindWidgetAndOption(opts);
+    dlgOption.SetFileName(initialFileName);
+    dlgOption.BindWidgetAndOption(options);
     dlgOption.setWindowTitle(tr("Config"));
     dlgOption.exec();
 
@@ -477,7 +473,7 @@ void MainWindow::SlotConvertMediaItem(const MediaItem& item)
     }
 
     //==== do work
-    QString filePath = QFileInfo(dlgOption.Dir(), dlgOption.FileName()).absoluteFilePath();
+    const auto& filePath = QFileInfo(dlgOption.Dir(), dlgOption.FileName()).absoluteFilePath();
     m_DlgConvertTask.show();
     m_DlgConvertTask.AddTask(std::move(conversion), filePath);
 }

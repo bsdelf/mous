@@ -40,12 +40,16 @@ bool AppEnv::Init()
         }
     }
 #endif
-    if (!pluginDir.isEmpty() && !resourceDir.isEmpty()) {
-        InitFilePath();
-        return LoadConfig();
-    } else {
+    if (pluginDir.isEmpty()) {
+        qDebug() << "FATAL: plugin directory is empty";
         return false;
     }
+    if (resourceDir.isEmpty()) {
+        qDebug() << "FATAL: resource directory is empty";
+        return false;
+    }
+    InitFilePath();
+    return LoadConfig();
 }
 
 void AppEnv::Save()
@@ -68,7 +72,7 @@ void AppEnv::InitFilePath()
     configFile = configDir + "/config";
     qDebug() << "configFile" << configFile;
 
-    QString locale = QLocale::system().name();
+    const auto& locale = QLocale::system().name();
     translationFile = resourceDir + "/qt/mous-qt_" + locale;
     qDebug() << "locale:" << locale;
     qDebug() << "translationFile:" << translationFile;
@@ -76,9 +80,9 @@ void AppEnv::InitFilePath()
 
 bool AppEnv::LoadConfig()
 {
-    if (!CheckDefaultConfig())
+    if (!CheckDefaultConfig()) {
         return false;
-
+    }
     QSettings settings(configFile, QSettings::IniFormat);
     ifNotUtf8 = settings.value(Key::IfNotUtf8).toString();    
     windowGeometry = settings.value(Key::WindowGeometry).toByteArray();

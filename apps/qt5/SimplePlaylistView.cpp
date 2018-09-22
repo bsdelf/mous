@@ -275,11 +275,11 @@ void SimplePlaylistView::Load(const char* filename)
 {
     QMutexLocker locker(&m_PlaylistMutex);
 
-    using Serializer =  PlaylistSerializer<MediaItem>;
+    using Serializer = PlaylistSerializer<MediaItem>;
     Serializer::Load(m_Playlist, filename);
 
     for (int i = 0; i < m_Playlist.Count(); ++i) {
-        ListRow listRow = BuildListRow(m_Playlist[i]);
+        const ListRow& listRow = BuildListRow(m_Playlist[i]);
         m_ItemModel.appendRow(listRow.fields);
     }
 
@@ -426,7 +426,7 @@ void SimplePlaylistView::dropEvent(QDropEvent *event)
             for (size_t i = 0; i < content.size(); ++i) {
                 const ListRow& listRow = BuildListRow(content[i]);
                 m_ItemModel.insertRow(realInsertPos+i, listRow.fields);
-                action.srcItemList.push_back(std::pair<int, MediaItem>(rowList[i], listRow.item));
+                action.srcItemList.emplace_back(rowList[i], listRow.item);
             }
 
             // as for playlist, we already have "move"
@@ -451,8 +451,7 @@ void SimplePlaylistView::SlotAppend()
         QFileInfo info(m_PrevMediaFilePath);
         oldPath = info.dir().dirName();
     }
-    QStringList pathList = QFileDialog::getOpenFileNames(
-                this, tr("Open Media"), oldPath, "*");
+    const auto& pathList = QFileDialog::getOpenFileNames(this, tr("Open Media"), oldPath, "*");
     if (pathList.isEmpty()) {
         return;
     }
@@ -528,13 +527,10 @@ void SimplePlaylistView::SlotLoadFinished()
 
 void SimplePlaylistView::SlotListRowGot(const ListRow& listRow)
 {
-    QFileInfo info(QString::fromUtf8(listRow.item.url.c_str()));
-    QString fileName(info.fileName());
-
+    const QFileInfo info(QString::fromUtf8(listRow.item.url.c_str()));
+    const QString fileName(info.fileName());
     m_DlgLoadingMedia.SetFileName(fileName);
-
     QMutexLocker locker(&m_PlaylistMutex);
-
     m_Playlist.Append(listRow.item);
     m_ItemModel.appendRow(listRow.fields);
 }
@@ -559,7 +555,7 @@ void SimplePlaylistView::SlotShortcutCopy()
         return;
     }
 
-    QList<int> selectedRows = PickSelectedRows();
+    const auto& selectedRows = PickSelectedRows();
     if (selectedRows.empty()) {
         m_Clipboard->Clear();
         return;
@@ -567,9 +563,10 @@ void SimplePlaylistView::SlotShortcutCopy()
 
     deque<MediaItem> contents;
     for (int i = 0; i < selectedRows.size(); ++i) {
-        contents.push_back(m_Playlist[selectedRows[i]]);
+        const auto pos = selectedRows[i];
+        contents.push_back(m_Playlist[pos]);
     }
-    m_Clipboard->SetContent(contents);
+    m_Clipboard->SetContent(std::move(contents));
 }
 
 void SimplePlaylistView::SlotShortcutCut()
@@ -585,13 +582,14 @@ void SimplePlaylistView::SlotShortcutPaste()
 
     qDebug() << "paste";
 
-    if (m_Clipboard == nullptr || m_Clipboard->Empty())
+    if (!m_Clipboard || m_Clipboard->Empty()) {
         return;
+    }
 
-    deque<MediaItem> content = m_Clipboard->Content();
+    const auto& content = m_Clipboard->Content();
 
     // insert or append(optimized?)
-    QList<int> selectedRows = PickSelectedRows();
+    const auto& selectedRows = PickSelectedRows();
     int insertPos = selectedRows.count() == 1 ? selectedRows[0] : -1;
 
     ActionHistory::Action action;
@@ -599,7 +597,7 @@ void SimplePlaylistView::SlotShortcutPaste()
     action.insertPos = insertPos;
 
     for (size_t i = 0; i < content.size(); ++i) {
-        const ListRow& listRow = BuildListRow(content[i]);
+        const auto& listRow = BuildListRow(content[i]);
         if (insertPos != -1) {
             m_Playlist.Insert(insertPos+i, listRow.item);
             m_ItemModel.insertRow(insertPos+i, listRow.fields);
@@ -607,12 +605,13 @@ void SimplePlaylistView::SlotShortcutPaste()
             m_Playlist.Append(listRow.item);
             m_ItemModel.appendRow(listRow.fields);
         }
-        action.srcItemList.push_back(std::pair<int, MediaItem>(-1, listRow.item));
+        action.srcItemList.emplace_back(-1, listRow.item);
     }
 
     // Record operation
-    if (!action.srcItemList.empty())
+    if (!action.srcItemList.empty()) {
         m_History.PushUndoAction(action);
+    }
 }
 
 void SimplePlaylistView::SlotShortcutDelete()
@@ -634,7 +633,7 @@ void SimplePlaylistView::SlotShortcutDelete()
         int delPos = selectedRows[i];
 
         // push at front to ensure asc seq
-        action.srcItemList.push_front(std::pair<int, MediaItem>(delPos, m_Playlist[delPos]));
+        action.srcItemList.emplace_front(delPos, m_Playlist[delPos]);
 
         m_Playlist.Remove(delPos);
         m_ItemModel.removeRow(delPos);
@@ -677,7 +676,7 @@ void SimplePlaylistView::SlotShortcutUndo()
             for (int i = 0; i < n; ++i) {
                 int insertPos = action.srcItemList[i].first;
                 MediaItem& item = action.srcItemList[i].second;
-                const ListRow& listRow = BuildListRow(item);
+                const auto& listRow = BuildListRow(item);
                 m_Playlist.Insert(insertPos, listRow.item);
                 m_ItemModel.insertRow(insertPos, listRow.fields);
             }
@@ -689,7 +688,7 @@ void SimplePlaylistView::SlotShortcutUndo()
             int moveInsertPos = action.moveInsertPos;
             for (int i = 0; i < n; ++i) {
                 MediaItem& item = action.srcItemList[i].second;
-                const ListRow& listRow = BuildListRow(item);
+                const auto& listRow = BuildListRow(item);
                 m_ItemModel.removeRow(moveInsertPos + i);
                 m_ItemModel.insertRow(action.srcItemList[i].first, listRow.fields);
                 m_Playlist.Move(moveInsertPos + i, action.srcItemList[i].first);
@@ -717,7 +716,7 @@ void SimplePlaylistView::SlotShortcutRedo()
         {
             // insert or append
             for (int i = 0; i < n; ++i) {
-                ListRow listRow = BuildListRow(action.srcItemList[i].second);
+                const auto& listRow = BuildListRow(action.srcItemList[i].second);
                 if (action.insertPos != -1) {
                     m_Playlist.Insert(action.insertPos+i, listRow.item);
                     m_ItemModel.insertRow(action.insertPos+i, listRow.fields);
@@ -752,7 +751,7 @@ void SimplePlaylistView::SlotShortcutRedo()
             int begPos = action.moveInsertPos;
             for (int i = 0; i < n; ++i) {
                 oldPos[i] = action.srcItemList[i].first;
-                const ListRow& listRow = BuildListRow(action.srcItemList[i].second);
+                const auto& listRow = BuildListRow(action.srcItemList[i].second);
                 m_ItemModel.insertRow(begPos+i, listRow.fields);
             }
 
@@ -780,27 +779,25 @@ void SimplePlaylistView::LoadMediaItem(const QStringList& pathList)
     action.type = ActionHistory::Insert;
     action.insertPos = -1;
 
-    string ifNotUtf8 = GlobalAppEnv::Instance()->ifNotUtf8.toStdString();
+    const auto& ifNotUtf8 = GlobalAppEnv::Instance()->ifNotUtf8.toStdString();
 
     for (int i = 0; i < pathList.size(); ++i) {
-        if (pathList.at(i).isEmpty()) {
+        const auto& path = pathList.at(i);
+        if (path.isEmpty()) {
             continue;
         }
-
         // Although load ok,
         // the item may still invaild(player won't be able to play it)
         deque<MediaItem> mediaItemList;
-        const char* filePath = pathList.at(i).toUtf8().data();
-
+        const char* filePath = path.toUtf8().data();
         if (m_MediaLoader->LoadMedia(filePath, mediaItemList) != ErrorCode::Ok) {
             continue;
         }
-
         for(size_t j = 0; j < mediaItemList.size(); ++j) {
-            MediaItem& item = mediaItemList[j];
+            auto& item = mediaItemList[j];
             CorrectTagCharset(item.tag, ifNotUtf8);
-            ListRow listRow = BuildListRow(item);
-            action.srcItemList.push_back(std::pair<int, MediaItem>(-1, item));
+            const auto& listRow = BuildListRow(item);
+            action.srcItemList.emplace_back(-1, item);
             emit SigListRowGot(listRow);
         }
     }
@@ -869,7 +866,7 @@ void SimplePlaylistView::CorrectTagCharset(MediaTag& tag, const string& ifNotUtf
     //    qDebug() << "no touch:" << QString::fromUtf8(tag.genre.c_str());
 }
 
-SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(MediaItem& item) const
+SimplePlaylistView::ListRow SimplePlaylistView::BuildListRow(const MediaItem& item)
 {
     ListRow listRow;
     listRow.item = item;
