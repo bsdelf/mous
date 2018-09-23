@@ -68,21 +68,25 @@ class Player::Impl
                     case IDLE | QUIT:
                     case RUNNING | QUIT: {
                         quit = true;
-                    } break;
+                        break;
+                    }
 
                     case IDLE | PROCEED: {
                         status = RUNNING;
-                    } break;
+                        break;
+                    }
 
                     case IDLE | DECODE: {
                         std::get<TYPE>(mail) = 0;
                         m_BufferMailbox.PushBack(std::move(mail));
-                    } break;
+                        break;
+                    }
 
                     case IDLE | SUSPEND:
                     case RUNNING | SUSPEND: {
                         status = IDLE;
-                    } break;
+                        break;
+                    }
 
                     case RUNNING | DECODE: {
                         auto& buf = std::get<DATA>(mail);
@@ -101,11 +105,13 @@ class Player::Impl
                             std::get<TYPE>(mail) = 0;
                             m_BufferMailbox.PushBack(std::move(mail));
                         }
-                    } break;
+                        break;
+                    }
 
                     default: {
                         // unexpected
-                    } break;
+                        break;
+                    }
                 }
             }
         });
@@ -123,21 +129,25 @@ class Player::Impl
                     case IDLE | QUIT:
                     case RUNNING | QUIT: {
                         quit = true;
-                    } break;
+                        break;
+                    }
 
                     case IDLE | PROCEED: {
                         status = RUNNING;
-                    } break;
+                        break;
+                    }
 
                     case IDLE | OUTPUT: {
                         std::get<TYPE>(mail) = 0;
                         m_BufferMailbox.PushBack(std::move(mail));
-                    } break;
+                        break;
+                    }
 
                     case IDLE | SUSPEND:
                     case RUNNING | SUSPEND: {
                         status = IDLE;
-                    } break;
+                        break;
+                    }
 
                     case RUNNING | OUTPUT: {
                         auto& buf = std::get<DATA>(mail);
@@ -161,11 +171,13 @@ class Player::Impl
                             std::get<TYPE>(mail) = 0;
                             m_BufferMailbox.PushBack(std::move(mail));
                         }
-                    } break;
+                        break;
+                    }
 
                     default: {
                         // unexpected
-                    } break;
+                        break;
+                    }
                 }
             }
         });
@@ -471,19 +483,22 @@ class Player::Impl
     void SeekTime(uint64_t msPos)
     {
         switch (m_Status) {
-            case PlayerStatus::Playing:
+            case PlayerStatus::Playing: {
                 Pause();
                 DoSeekTime(msPos);
                 Resume();
                 break;
+            }
 
             case PlayerStatus::Paused:
-            case PlayerStatus::Stopped:
+            case PlayerStatus::Stopped: {
                 DoSeekTime(msPos);
                 break;
+            }
 
-            default:
+            default: {
                 break;
+            }
         }
     }
 
@@ -492,19 +507,22 @@ class Player::Impl
         uint64_t unit = m_UnitBeg + (m_UnitEnd - m_UnitBeg) * percent;
 
         switch (m_Status) {
-            case PlayerStatus::Playing:
+            case PlayerStatus::Playing: {
                 Pause();
                 DoSeekUnit(unit);
                 Resume();
                 break;
+            }
 
             case PlayerStatus::Paused:
-            case PlayerStatus::Stopped:
+            case PlayerStatus::Stopped: {
                 DoSeekUnit(unit);
                 break;
+            }
 
-            default:
+            default: {
                 break;
+            }
         }
     }
 
@@ -552,9 +570,9 @@ class Player::Impl
         */
     }
 
-    int32_t BitRate() const { return (m_Decoder != nullptr) ? m_Decoder->BitRate() : -1; }
+    int32_t BitRate() const { return m_Decoder ? m_Decoder->BitRate() : -1; }
 
-    int32_t SamleRate() const { return (m_Decoder != nullptr) ? m_Decoder->SampleRate() : -1; }
+    int32_t SamleRate() const { return m_Decoder ? m_Decoder->SampleRate() : -1; }
 
     uint64_t Duration() const { return m_Decoder->Duration(); }
 
@@ -568,7 +586,7 @@ class Player::Impl
 
     uint64_t CurrentMs() const { return m_OutputIndex / m_UnitPerMs; }
 
-    enum AudioMode AudioMode() const { return (m_Decoder != nullptr) ? m_Decoder->AudioMode() : AudioMode::None; }
+    enum AudioMode AudioMode() const { return m_Decoder ? m_Decoder->AudioMode() : AudioMode::None; }
 
     Signal<void(void)>* SigFinished() { return &m_SigFinished; }
 

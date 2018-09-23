@@ -88,7 +88,7 @@ static ErrorCode OpenOutput(void* ptr, const char* path) {
     ::lame_set_findReplayGain(SELF->flags, SELF->option_replay_gain.userChoice ? 1 : 0);
     ::lame_set_asm_optimizations(SELF->flags, MMX, 1);
     ::lame_set_asm_optimizations(SELF->flags, SSE, 1);
-    if (SELF->media_tag != nullptr) {
+    if (SELF->media_tag) {
         lame_set_write_id3tag_automatic(SELF->flags, 1);
         id3tag_init(SELF->flags);
         id3tag_v2_only(SELF->flags);

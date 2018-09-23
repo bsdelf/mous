@@ -91,7 +91,7 @@ static ErrorCode Open(void* ptr, const char* url) {
 }
 
 static void Close(void* ptr) {
-    if (SELF->mpg123 != nullptr) {
+    if (SELF->mpg123) {
         mpg123_close(SELF->mpg123);
     }
 }

@@ -80,7 +80,7 @@ static ErrorCode OpenMP4(void* ptr, const char* url) {
 
     // fdk
     SELF->fdk = aacDecoder_Open(TT_MP4_RAW, 1);
-    if (SELF->fdk == nullptr) {
+    if (!SELF->fdk) {
         Close(ptr);
         return ErrorCode::DecoderFailedToOpen;
     }

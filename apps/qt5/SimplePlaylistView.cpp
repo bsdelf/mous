@@ -200,7 +200,7 @@ SimplePlaylistView::~SimplePlaylistView()
     while (!actionList.isEmpty()) {
         QAction* action = actionList.takeFirst();
         removeAction(action);
-        if (action->menu() != nullptr) {
+        if (action->menu()) {
             delete action->menu();
         }
         delete action;

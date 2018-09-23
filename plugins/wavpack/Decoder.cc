@@ -40,7 +40,7 @@ static void Destroy(void* ptr) {
 
 static ErrorCode Open(void* ptr, const char* url) {
     SELF->wavpack_context = WavpackOpenFileInput(url, nullptr, 0, 0);
-    if (SELF->wavpack_context == nullptr) {
+    if (!SELF->wavpack_context) {
         return ErrorCode::DecoderFailedToOpen;
     }
 
@@ -64,7 +64,7 @@ static ErrorCode Open(void* ptr, const char* url) {
 }
 
 static void Close(void* ptr) {
-    if (SELF->wavpack_context != nullptr) {
+    if (SELF->wavpack_context) {
         WavpackCloseFile(SELF->wavpack_context);
         SELF->wavpack_context = nullptr;
     }

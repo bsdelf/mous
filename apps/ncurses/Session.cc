@@ -290,8 +290,9 @@ void Session::PlayerSync(BufObj& buf)
         case BINARY_MASK(0, 1):
         {
             const MediaItem* item = m_Context->ItemInPlaying();
-            if (item != nullptr)
+            if (item) {
                 SendMediaItemInfo(*item);
+            }
         }
         case BINARY_MASK(1, 1):
         {
@@ -408,8 +409,9 @@ void Session::PlaylistPlay(BufObj& buf)
     bool ok = m_Context->PlayAt(iList, iItem);
     if (ok) {
         const MediaItem* item = m_Context->ItemInPlaying();
-        if (item != nullptr)
+        if (item) {
             SendMediaItemInfo(*item);
+        }
     } 
 
     SEND_PLAYLIST_PACKET(<< (char)Op::Playlist::Play << (char)iList << (char)(ok ? 1 : 0));

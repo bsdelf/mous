@@ -187,7 +187,7 @@ class ConfigFile
                     val = &m_Lines[i].val;
             }
         }
-        if (val == nullptr) {
+        if (!val) {
             m_Lines.emplace_back(true, key);
             val = &(m_Lines[m_Lines.size() - 1].val);
         }

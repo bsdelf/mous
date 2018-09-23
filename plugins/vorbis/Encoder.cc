@@ -76,7 +76,7 @@ static void SetMediaTag(void* ptr, const MediaTag* tag)
 static ErrorCode OpenOutput(void* ptr, const char* path)
 {
     SELF->file = ::fopen(path, "wb+");
-    if (SELF->file == nullptr) {
+    if (!SELF->file) {
         return ErrorCode::EncoderFailedToOpen;
     }
 
@@ -96,7 +96,7 @@ static ErrorCode OpenOutput(void* ptr, const char* path)
 
 static void CloseOutput(void* ptr)
 {
-    if (SELF->file != nullptr) {
+    if (SELF->file) {
         ::fclose(SELF->file);
         SELF->file = nullptr;
     }

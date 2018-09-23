@@ -21,8 +21,9 @@ EmErrorCode FaadDecoder::Open(const string& url)
     m_IsMp4File = false;
 
     FILE* file = fopen(url.c_str(), "rb");
-    if (file == nullptr)
+    if (!file) {
         return ErrorCode::DecoderFailedToOpen;
+    }
 
     unsigned char header[8];
     size_t rcount = fread(header, 1, 8, file);
@@ -49,8 +50,9 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     m_UseAacLength = 1;
 
     m_File = fopen(url.c_str(), "rb");
-    if (m_File == nullptr)
+    if (!m_File) {
         return ErrorCode::DecoderFailedToOpen;
+    }
 
     m_Mp4Callback.read = &ReadCallback;
     m_Mp4Callback.seek = &SeekCallback;
@@ -63,8 +65,9 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     NeAACDecSetConfiguration(m_NeAACDecHandle, config);
 
     m_Infile = mp4ff_open_read(&m_Mp4Callback);
-    if (m_Infile == nullptr)
+    if (!m_Infile) {
         return ErrorCode::DecoderFailedToOpen;
+    }
 
     m_Track = GetAACTrack(m_Infile);
     if (m_Track < 0) {
@@ -90,7 +93,7 @@ EmErrorCode FaadDecoder::OpenMp4(const string& url)
     m_FrameSize = 1024;
     m_UseAacLength = 0;
 
-    if (confBuf != nullptr) {
+    if (confBuf) {
         if (NeAACDecAudioSpecificConfig(confBuf, confBufSize, &mp4Asc) >= 0) {
             if (mp4Asc.frameLengthFlag == 1)
                 m_FrameSize = 960;
@@ -119,17 +122,17 @@ EmErrorCode FaadDecoder::OpenAac(const string& url)
 
 void FaadDecoder::Close()
 {
-    if (m_NeAACDecHandle != nullptr) {
+    if (m_NeAACDecHandle) {
         NeAACDecClose(m_NeAACDecHandle);
         m_NeAACDecHandle = nullptr;
     }
 
-    if (m_Infile != nullptr) {
+    if (m_Infile) {
         mp4ff_close(m_Infile);
         m_Infile = nullptr;
     }
 
-    if (m_File != nullptr) {
+    if (m_File) {
         fclose(m_File);
         m_File = nullptr;
     }
@@ -158,8 +161,9 @@ EmErrorCode FaadDecoder::DecodeMp4Unit(char* data, uint32_t& used, uint32_t& uni
 
     NeAACDecFrameInfo frameInfo;
     void* sampleBuf = NeAACDecDecode(m_NeAACDecHandle, &frameInfo, buffer, bufferSize);
-    if (buffer != nullptr)
+    if (buffer) {
         free(buffer);
+    }
 
     unsigned int sampleCount;
     unsigned int delay = 0;

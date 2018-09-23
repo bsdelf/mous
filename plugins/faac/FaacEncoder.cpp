@@ -79,8 +79,9 @@ ErrorCode FaacEncoder::OpenOutput(const std::string& path)
 
     // init faac & buffer
     m_EncHandle = faacEncOpen(m_SampleRate, m_Channels, &m_InputSamples, &m_MaxOutputBytes);
-    if (m_EncHandle == nullptr)
+    if (!m_EncHandle) {
         return ErrorCode::EncoderFailedToInit;
+    }
 
     m_InputBufferSize = m_InputSamples * (m_BitsPerSample/8);
     m_InputBuffer = new char[m_InputBufferSize];
@@ -147,17 +148,17 @@ void FaacEncoder::CloseOutput()
             MP4Optimize(m_FileName.c_str(), nullptr);
     }
 
-    if (m_EncHandle != nullptr) {
+    if (m_EncHandle) {
         faacEncClose(m_EncHandle);
         m_EncHandle = nullptr;
     }
 
-    if (m_OutputBuffer != nullptr) {
+    if (m_OutputBuffer) {
         delete[] m_OutputBuffer;
         m_OutputBuffer = nullptr;
     }
 
-    if (m_InputBuffer != nullptr) {
+    if (m_InputBuffer) {
         delete[] m_InputBuffer;
         m_InputBuffer = nullptr;
     }
@@ -336,12 +337,14 @@ void FaacEncoder::WriteToolVersion()
 
 void FaacEncoder::UpdateMediaTag()
 {
-    if (m_FileName.empty() || m_MediaTag == nullptr)
+    if (m_FileName.empty() || !m_MediaTag) {
         return;
+    }
 
     MP4FileHandle file = MP4Modify(m_FileName.c_str());
-    if (file == MP4_INVALID_FILE_HANDLE)
+    if (file == MP4_INVALID_FILE_HANDLE) {
         return;
+    }
     const MP4Tags* tag = MP4TagsAlloc();
     MP4TagsFetch(tag, file);
 

@@ -234,9 +234,9 @@ void MainWindow::SlotUiPlayerFinished()
 {
     qDebug() << "SlotUiPlayerFinished()";
 
-    if (m_UsedPlaylistView != nullptr) {
+    if (m_UsedPlaylistView) {
         const MediaItem* item = m_UsedPlaylistView->NextItem();
-        if (item != nullptr) {
+        if (item) {
             SlotPlayMediaItem(m_UsedPlaylistView, *item);
         }
     }

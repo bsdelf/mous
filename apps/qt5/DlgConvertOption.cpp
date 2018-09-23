@@ -172,7 +172,7 @@ void DlgConvertOption::BuildWidgetAndOption(QBoxLayout* layout, const mous::Base
 void DlgConvertOption::SlotGroupChanged(int index)
 {
     QObject* combox = sender();
-    assert(combox != nullptr);
+    assert(combox);
 
     QStackedWidget* stack = m_ComboxWidgetHash[combox].first;
     const GroupedOption* opt = m_ComboxWidgetHash[combox].second;
@@ -185,11 +185,12 @@ void DlgConvertOption::SlotGroupChanged(int index)
 void DlgConvertOption::SlotIntValChanged(int val)
 {
     QObject* widget = sender();
-    assert(widget != nullptr);
+    assert(widget);
 
     const BaseOption* baseOpt = m_WidgetOptionHash[widget];
-    if (baseOpt == nullptr)
+    if (!baseOpt) {
         return;
+    }
 
     qDebug() << mous::ToString(baseOpt->type) << val;
 
@@ -198,22 +199,22 @@ void DlgConvertOption::SlotIntValChanged(int val)
     {
         DEF_FROM_CAST(const BooleanOption*, opt, baseOpt);
         opt->userChoice = val == Qt::Checked ? true : false;
-    }
         break;
+    }
 
     case OptionType::RangedInt:
     {
         DEF_FROM_CAST(const RangedIntOption*, opt, baseOpt);
         opt->userVal = val;
-    }
         break;
+    }
 
     case OptionType::EnumedInt:
     {
         DEF_FROM_CAST(const EnumedIntOption*, opt, baseOpt);
         opt->userChoice = val;
-    }
         break;
+    }
 
     default:
         break;

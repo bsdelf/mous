@@ -37,7 +37,7 @@ static void Destroy(void* ptr) {
 
 static ErrorCode Open(void* ptr, const char* url) {
     SELF->mp4file = MP4Read(url);
-    if (SELF->mp4file == nullptr) {
+    if (!SELF->mp4file) {
         return ErrorCode::DecoderFailedToOpen;
     }
 
@@ -99,7 +99,7 @@ static ErrorCode Open(void* ptr, const char* url) {
 }
 
 static void Close(void* ptr) {
-    if (SELF->mp4file != nullptr) {
+    if (SELF->mp4file) {
         MP4Close(SELF->mp4file);
         SELF->mp4file = nullptr;
     }

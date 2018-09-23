@@ -31,7 +31,7 @@ void DumpMP4(const string& filename)
     TagLib::MP4::File file(filename.c_str());
     MP4::Tag* mp4tag = file.tag();
 
-    if (mp4tag == nullptr) {
+    if (!mp4tag) {
         cout << "no mp4 tag found!" << endl;
         return;
     }
@@ -59,7 +59,7 @@ void DumpMP4(const string& filename)
 
 void DumpID3v2(ID3v2::Tag* mp3Tag)
 {
-    if (mp3Tag == nullptr){
+    if (!mp3Tag){
         cout << "no id3v2 tag found!" << endl;
         return;
     } 
@@ -101,12 +101,12 @@ void DumpFlac(const string& filename)
     if (picList.isEmpty()) {
         cout << "no flac pic found!" << endl;
         ID3v2::Tag* tag = file.ID3v2Tag();
-        if (tag != nullptr) {
+        if (tag) {
             DumpID3v2(tag);
         } else {
             cout << "no id3v2 found!" << endl;
             Ogg::XiphComment* com = file.xiphComment();
-            if (com == nullptr) {
+            if (!com) {
                 cout << "no xiph found!" << endl;
                 return;
             }

@@ -74,7 +74,7 @@ static ErrorCode Open(void* ptr, const char* url) {
 static void Close(void* ptr) {
     SELF->input_stream.close();
     memset(&SELF->wav_header, 0, sizeof(WavHeader));
-    if (SELF->block_buffer != nullptr) {
+    if (SELF->block_buffer) {
         delete[] SELF->block_buffer;
         SELF->block_buffer = nullptr;
     }

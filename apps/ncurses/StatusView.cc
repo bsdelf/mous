@@ -261,7 +261,7 @@ int StatusView::MinHeight() const
 
 void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
 {
-    if (m_PlayerHandler != nullptr) {
+    if (m_PlayerHandler) {
         m_PlayerHandler->SigPause().Disconnect(this);
         m_PlayerHandler->SigSeek().Disconnect(this);
         m_PlayerHandler->SigVolume().Disconnect(this);
@@ -270,7 +270,7 @@ void StatusView::SetPlayerHandler(ClientPlayerHandler* handler)
         m_PlayerHandler->SigStatus().Disconnect(this);
     }
 
-    if (handler != nullptr) {
+    if (handler) {
         handler->SigPause().Connect(&StatusView::SlotPause, this);
         handler->SigSeek().Connect(&StatusView::SlotSeek, this);
         handler->SigVolume().Connect(&StatusView::SlotVolume, this);

@@ -40,12 +40,12 @@ EmErrorCode AoOutput::Open()
     Close();
 
     m_Device = ao_open_live(m_Driver, &m_Format, nullptr);
-    return m_Device != nullptr ? ErrorCode::Ok : ErrorCode::OutputFailedToOpen;
+    return m_Device ? ErrorCode::Ok : ErrorCode::OutputFailedToOpen;
 }
 
 void AoOutput::Close()
 {
-    if (m_Device != nullptr) {
+    if (m_Device) {
         ao_close(m_Device);
         m_Device = nullptr;
     }

@@ -347,7 +347,7 @@ void PlaylistView::ScrollDown()
 
 void PlaylistView::ReqSelect()
 {
-    if (m_PlaylistHandler != nullptr) {
+    if (m_PlaylistHandler) {
         m_PlaylistHandler->Select(m_Index, m_ItemSelected);
     }
 }
@@ -357,7 +357,7 @@ void PlaylistView::ReqPlay(int pos)
     if (m_WaitReply) {
         return;
     }
-    if (m_PlaylistHandler != nullptr) {
+    if (m_PlaylistHandler) {
         m_WaitReply = true;
         m_PlaylistHandler->Play(m_Index, pos);
     }
@@ -368,7 +368,7 @@ void PlaylistView::ReqRemove(int pos)
     if (m_WaitReply) {
         return;
     }
-    if (m_PlaylistHandler != nullptr) {
+    if (m_PlaylistHandler) {
         m_WaitReply = true;
         m_PlaylistHandler->Remove(m_Index, pos);
     }
@@ -379,7 +379,7 @@ void PlaylistView::ReqMove(int pos, char direct)
     if (m_WaitReply) {
         return;
     }
-    if (m_PlaylistHandler != nullptr) {
+    if (m_PlaylistHandler) {
         m_WaitReply = true;
         m_PlaylistHandler->Move(m_Index, pos, direct);
     }
@@ -390,7 +390,7 @@ void PlaylistView::ReqClear()
     if (m_WaitReply) {
         return;
     }
-    if (m_PlaylistHandler != nullptr) {
+    if (m_PlaylistHandler) {
         m_WaitReply = true;
         m_PlaylistHandler->Clear(m_Index);
     }

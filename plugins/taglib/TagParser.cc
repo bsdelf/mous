@@ -81,7 +81,7 @@ static void Destroy(void* ptr) {
 static ErrorCode Open(void* ptr, const char* path) {
     SELF->file_name = path;
     SELF->file_ref = new FileRef(path, true);//AudioProperties::);
-    if (!SELF->file_ref->isNull() && SELF->file_ref->tag() != nullptr) {
+    if (!SELF->file_ref->isNull() && SELF->file_ref->tag()) {
         SELF->tag = SELF->file_ref->tag();
         SELF->props = SELF->file_ref->audioProperties();
     }
@@ -100,7 +100,7 @@ static void Close(void* ptr) {
 }
 
 static bool HasTag(void* ptr) {
-    return SELF->tag != nullptr;
+    return SELF->tag;
 }
 
 static const char* GetTitle(void* ptr) {
@@ -163,7 +163,7 @@ static int32_t GetTrack(void* ptr)
 
 static bool HasAudioProperties(void* ptr)
 {
-    return SELF->props != nullptr;
+    return SELF->props;
 }
 
 static int32_t GetDuration(void* ptr)
@@ -197,7 +197,7 @@ static bool Save(void* ptr)
         }
         return ref->save(TagLib::MPEG::File::TagTypes::ID3v2, true, 3, true);
     } else {
-        return SELF->file_ref != nullptr ? SELF->file_ref->save() : false;
+        return SELF->file_ref ? SELF->file_ref->save() : false;
     }
 }
 

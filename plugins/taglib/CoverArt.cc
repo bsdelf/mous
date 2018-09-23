@@ -113,7 +113,7 @@ bool StoreMp3Cover(const string& path, CoverFormat fmt, const char* buf, size_t 
     TagLib::MPEG::File file(path.c_str(), false);
     if (StoreID3v2Cover(file.ID3v2Tag(), fmt, buf, len)) {
         auto ref = dynamic_cast<TagLib::MPEG::File*>(&file);
-        if (ref != nullptr) {
+        if (ref) {
             return ref->save(TagLib::MPEG::File::TagTypes::ID3v2, true, 3, true);
         } else {
             printf("[taglib] bad type\n");
@@ -125,7 +125,7 @@ bool StoreMp3Cover(const string& path, CoverFormat fmt, const char* buf, size_t 
 bool StoreMp4Cover(const string& path, CoverFormat fmt, const char* buf, size_t len) {
     TagLib::MP4::File file(path.c_str(), false);
     MP4::Tag* mp4tag = file.tag();
-    if (mp4tag == nullptr) {
+    if (!mp4tag) {
         //cout << "no mp4 tag found!" << endl;
         return false;
     }
@@ -164,7 +164,7 @@ bool StoreMp4Cover(const string& path, CoverFormat fmt, const char* buf, size_t 
 }
 
 static bool StoreID3v2Cover(ID3v2::Tag* idtag, CoverFormat fmt, const char* buf, size_t len) {
-    if (idtag == nullptr) {
+    if (!idtag) {
         //cout << "no id3v2 tag found!" << endl;
         return false;
     }

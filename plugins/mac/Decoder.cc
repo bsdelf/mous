@@ -42,7 +42,7 @@ static ErrorCode Open(void* ptr, const char* url) {
     APE::CSmartPtr<wchar_t> spFileName = APE::CAPECharacterHelper::GetUTF16FromANSI(url);
     SELF->decompress = CreateIAPEDecompress(spFileName, &err);
 
-    if (SELF->decompress == nullptr || err != ERROR_SUCCESS) {
+    if (!SELF->decompress || err != ERROR_SUCCESS) {
         return ErrorCode::DecoderFailedToOpen;
     }
 

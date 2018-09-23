@@ -131,8 +131,9 @@ MBWidthStr(const std::string& str, int width)
 inline bool
 IsUtf8(const char* string)
 {
-    if (string == nullptr)
+    if (!string) {
         return false;
+    }
 
     const unsigned char* bytes = (const unsigned char*)string;
     while (*bytes) {
