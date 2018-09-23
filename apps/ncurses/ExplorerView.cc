@@ -40,8 +40,9 @@ void ExplorerView::Refresh()
     d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
     d.Clear();
 
-    if (m_Focused)
+    if (m_Focused) {
         d.AttrOn(ncurses::Attr::Bold);
+    }
     d.CenterPrint(0, STR_TITLE);
     d.ResetAttrColor();
 
@@ -107,15 +108,17 @@ void ExplorerView::Refresh()
             off_t size = item.size;
             for (int i = 0; i < 3; ++i, ++hint) {
                 off_t s = size / 1024;
-                if (s <= 0)
+                if (s <= 0) {
                     break;
+                }
                 size = s;
             }
             if (!item.cacheOk) {
                 string& str = item.sizeCache;
                 str = std::to_string(size) + *hint;
-                if (str.size() < 5)
+                if (str.size() < 5) {
                     str = string(5 - str.size(), ' ') + str;
+                }
             }
 
             d.AttrSet(boldAttr);
@@ -129,7 +132,7 @@ void ExplorerView::Refresh()
         xoff = x + 1 + wText;
         if (m_FileItems.size() > (size_t)hText) {
             double percent = (double)(selection+1) / m_FileItems.size() - 0.00001f;
-            yoff = y + hText*percent;
+            yoff = y + hText * percent;
             d.AttrSet(Attr::Bold | Attr::Reverse);
             d.ColorOn(Color::Green, Color::Black);
             d.Print(xoff, yoff, " ");
@@ -207,16 +210,18 @@ bool ExplorerView::InjectKey(int key)
         case KEY_NPAGE:
             if (!m_FileItems.empty()) {
                 int line= (d.h - 3) / 2;
-                for (int i = 0; i < line; ++i)
+                for (int i = 0; i < line; ++i) {
                     ScrollDown();
+                }
             }
             break;
 
         case KEY_PPAGE:
             if (!m_FileItems.empty()) {
                 int line= (d.h - 3) / 2;
-                for (int i = 0; i < line; ++i)
+                for (int i = 0; i < line; ++i) {
                     ScrollUp();
+                }
             }
             break;
 
@@ -237,8 +242,9 @@ bool ExplorerView::InjectKey(int key)
         case 'a':
             if (!m_FileItems.empty()) {
                 int sel = m_SelectionStack.back();
-                if (!m_FileItems[sel].isDir)
+                if (!m_FileItems[sel].isDir) {
                     SigUserOpen(m_Path + '/' + m_FileItems[sel].name);
+                }
             }
             return true;
 
@@ -320,22 +326,25 @@ void ExplorerView::BuildFileItems()
 
     const vector<string>& files = Dir::ListDir(m_Path);
 
-    std::vector<FileItem>& dirItems = m_FileItems;
+    auto& dirItems = m_FileItems;
     dirItems.reserve(files.size());
     std::vector<FileItem> otherItems;
     otherItems.reserve(files.size());
 
     for (const string& file: files) {
-        if (file == "." || file == "..")
+        if (file == "." || file == "..") {
             continue;
-        if (m_HideDot && file[0] == '.')
+        }
+        if (m_HideDot && file[0] == '.') {
             continue;
+        }
 
         FileInfo info(m_Path + "/" + file);
 
         if (m_HideUnknown && (info.Type() != FileType::Directory)) {
-            if (m_Suffixes.find(info.Suffix()) == m_Suffixes.end())
+            if (m_Suffixes.find(info.Suffix()) == m_Suffixes.end()) {
                 continue;
+            }
         }
 
         FileItem item;
@@ -343,11 +352,8 @@ void ExplorerView::BuildFileItems()
         item.isDir = info.Type() == FileType::Directory;
         item.size = info.Size();
         item.cacheOk = false;
-
-        if (item.isDir)
-            dirItems.push_back(std::move(item));
-        else
-            otherItems.push_back(std::move(item));
+        auto& dest = item.isDir ? dirItems : otherItems;
+        dest.push_back(std::move(item));
     }
 
     PinYinCompare pyc;
@@ -395,8 +401,7 @@ void ExplorerView::ScrollDown()
     if (sel < (int)m_FileItems.size()-1) {
         ++sel;
     }
-    if (sel > (d.h-2) / 2
-            && beg < (int)m_FileItems.size()-(d.h-2-1)) {
+    if (sel > (d.h-2) / 2 && beg < (int)m_FileItems.size()-(d.h-2-1)) {
         ++beg;
     }
 }
@@ -408,8 +413,7 @@ void ExplorerView::ScrollUp()
     if (sel > 0) {
         --sel;
     }
-    if (sel < beg + (d.h-2) / 2
-            && beg > 0) {
+    if (sel < beg + (d.h-2) / 2 && beg > 0) {
         --beg;
     }
 }

@@ -65,13 +65,14 @@ struct Window
         boxed = _boxed;
 
         win = newwin(h, w, y, x);
-        if (boxed)
+        if (boxed) {
             box(win, 0, 0);
+        }
     }
 
     void Cleanup()
     {
-        if (win != nullptr) {
+        if (win) {
             delwin(win);
             win = nullptr;
         }
@@ -79,22 +80,25 @@ struct Window
 
     void EnableKeypad(bool enable)
     {
-        if (win != nullptr)
+        if (win) {
             keypad(win, enable ? TRUE : FALSE);
+        }
     }
 
     void Refresh()
     {
-        if (win != nullptr)
+        if (win) {
             wrefresh(win);
+        }
     }
 
     void EnableEcho(bool enable)
     {
-        if (enable)
+        if (enable) {
             echo();
-        else
+        } else {
             noecho();
+        }
     }
 
     int Input(int x, int y, bool showCursor = true)
@@ -103,26 +107,26 @@ struct Window
         return mvwgetch(win, y, x);
     }
 
-    void Print(int x, int y, const std::string& _str, bool styled = false)
+    void Print(int x, int y, const std::string& input, bool styled = false)
     {
-        if (win != nullptr) {
+        if (win) {
             if (!styled) {
-                mvwaddstr(win, y, x, _str.c_str());
+                mvwaddstr(win, y, x, input.c_str());
             } else {
-                const std::string& str = ParseStyle(_str);
+                const std::string& str = ParseStyle(input);
                 mvwaddstr(win, y, x, str.c_str());
                 CloseStyle();
             }
         }
     }
 
-    void CenterPrint(int y, const std::string& _str, bool styled = false)
+    void CenterPrint(int y, const std::string& input, bool styled = false)
     {
-        if (win != nullptr) {
+        if (win) {
             if (!styled) {
-                DoCenterPrint(y, w, _str);
+                DoCenterPrint(y, w, input);
             } else {
-                const std::string& str = ParseStyle(_str);
+                const std::string& str = ParseStyle(input);
                 DoCenterPrint(y, w, str);
                 CloseStyle();
             }
@@ -131,10 +135,11 @@ struct Window
 
     void Clear()
     {
-        if (win != nullptr) {
+        if (win) {
             werase(win);
-            if (boxed)
+            if (boxed) {
                 box(win, 0, 0);
+            }
         }
     }
 
@@ -142,15 +147,16 @@ struct Window
     {
         x = _x;
         y = _y;
-        if (win != nullptr)
+        if (win) {
             mvwin(win, y, x);
+        }
     }
 
     void Resize(int _w, int _h)
     {
         w = _w;
         h = _h;
-        if (win != nullptr) {
+        if (win) {
             wresize(win, h, w);
             mvwin(win, y, x);
         }
@@ -159,8 +165,9 @@ struct Window
     void Show(bool show)
     {
         if (show) {
-            if (win == nullptr)
+            if (!win) {
                 Init(x, y, w, h, boxed);
+            }
         } else {
             Cleanup();
         }
@@ -177,25 +184,28 @@ struct Window
 
     void AttrOn(int attrs)
     {
-        if (win != nullptr)
+        if (win) {
             wattron(win, attrs);
+        }
     }
 
     void AttrSet(int attrs)
     {
-        if (win != nullptr)
+        if (win) {
             wattrset(win, attrs);
+        }
     }
 
     void AttrOff(int attrs)
     {
-        if (win != nullptr)
+        if (win) {
             wattroff(win, attrs);
+        }
     }
 
     void ResetAttrColor()
     {
-        if (win != nullptr) {
+        if (win) {
             init_pair(0, ncurses::Color::White, ncurses::Color::Black);
             wattrset(win, ncurses::Attr::Normal | COLOR_PAIR(0));
         }
@@ -204,7 +214,7 @@ struct Window
     short ColorOn(int f, int b)
     {
         short colorId = f*8 + b + 1;
-        if (win != nullptr) {
+        if (win) {
             init_pair(colorId, f, b);
             wattron(win, COLOR_PAIR(colorId));
         }
@@ -213,7 +223,7 @@ struct Window
 
     void ColorOff(short colorId)
     {
-        if (win != nullptr) {
+        if (win) {
             wattroff(win, COLOR_PAIR(colorId));
             wattroff(win, COLOR_PAIR(0));
         }
@@ -221,29 +231,34 @@ struct Window
 
     int OpenStyle(const std::string& style)
     {
-        if (win == nullptr || style.empty())
+        if (!win || style.empty()) {
             return 0;
+        }
 
         int n = 1;
         switch (style[0]) {
-            case '^':
+            case '^': {
                 n = 0;
                 break;
+            }
 
-            case 'b':
+            case 'b': {
                 wattron(win, A_BOLD);
                 break;
+            }
 
-            case 'h':
+            case 'h': {
                 wattron(win, A_STANDOUT);
                 break;
+            }
 
-            case 'r':
+            case 'r': {
                 wattron(win, A_REVERSE);
                 break;
+            }
 
                 // F|B, 0-7
-            case 'c':
+            case 'c': {
                 if (style.size() >= 3) {
                     char f = style[1]-48;
                     char b = style[2]-48;
@@ -251,9 +266,11 @@ struct Window
                 }
                 n += 2;
                 break;
+            }
 
-            default:
+            default: {
                 break;
+            }
         }
         return n;
     }
@@ -273,8 +290,8 @@ private:
     static int WindowCallback(WINDOW* _w, void* p)
     {
         using namespace std;
-        function<void (void)>* fn = static_cast<function<void (void)>*>(p);
-        (*fn)();
+        auto func = static_cast<std::function<void (void)>*>(p);
+        (*func)();
         return 0;
     }
 
@@ -291,19 +308,20 @@ private:
     {
         size_t off = 0;
         while (off+1 < str.size()) {
-            if (str[off] != '^')
+            if (str[off] != '^') {
                 break;
-
+            }
             switch (str[off+1]) {
-                case '^':
+                case '^': {
                     off = 1;
                     goto LABEL_END;
                     break;
-
-                default:
+                }
+                default: {
                     ++off;
                     off += OpenStyle(str.substr(off, 3));
                     break;
+                }
             }
         }
 

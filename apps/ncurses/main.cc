@@ -44,14 +44,15 @@ void ClearPid()
 int main(int argc, char** argv)
 {
     std::locale::global(std::locale(""));
-
     
-    if (!GlobalAppEnv::Instance()->Init())
+    if (!GlobalAppEnv::Instance()->Init()) {
         return 1;
+    }
 
     pid_t pid = FetchPid();
-    if (pid == 0 || (::kill(pid, 0) != 0 && errno == ESRCH))
+    if (pid == 0 || (::kill(pid, 0) != 0 && errno == ESRCH)) {
         pid = ::fork();
+    }
 
     if (pid == 0) {
         ::daemon(1, 0);

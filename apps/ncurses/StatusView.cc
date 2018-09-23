@@ -10,9 +10,9 @@ using namespace std;
 
 inline static string FormatTime(int ms)
 {
-    if (ms <= 0)
+    if (ms <= 0) {
         return "00:00";
-
+    }
     char buf[5+1];
     const int sec = ms / 1000;
     snprintf(buf, sizeof(buf), "%.2d:%.2d", (int)(sec/60), (int)(sec%60));
@@ -21,9 +21,9 @@ inline static string FormatTime(int ms)
 
 inline static string FormatBitRate(int rate)
 {
-    if (rate <= 0)
+    if (rate <= 0) {
         return "   0";
-
+    }
     char buf[4+1];
     snprintf(buf, sizeof(buf), "%4.d", rate);
     return string(buf, 4);
@@ -60,7 +60,7 @@ void StatusView::Refresh()
     const MediaItem& item = m_PlayerStatus.item;
     const MediaTag& tag = m_PlayerStatus.item.tag;
 
-    // { title - artist (file)~~~~~~-|=======|+}
+    // { title - artist (file)}
     string currentItem = tag.title + " - " + tag.artist + " (" + FileInfo(item.url).BaseName() + ")";
     currentItem = MBStrWidth(currentItem) <= wCurrentItem ?
         currentItem : MBWidthStr(currentItem, wCurrentItem-3) + "...";
@@ -68,23 +68,7 @@ void StatusView::Refresh()
     d.ColorOn(Color::Green, Color::Black);
     d.Print(xoff, yoff, currentItem);
 
-    xoff = x + w - (wVolSlider + wVolLabel);
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::Yellow, Color::Black);
-    d.Print(xoff, yoff, "-|");
-    xoff += 2;
-
-    d.AttrSet(Attr::Normal);
-    d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, string(wVolSlider * (m_Volume/100.f), '#'));
-    xoff += wVolSlider;
-
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::Yellow, Color::Black);
-    d.Print(xoff, yoff,  "|+");
-    xoff += 2;
-
-    // { 00:00/00:00 bitRate bps sampleRate Hz }
+    // { 00:00/00:00 bitRate bps sampleRate Hz ~~~~~~ -|=======|+ }
     xoff = x;
     yoff += 1;
     {
@@ -137,6 +121,21 @@ void StatusView::Refresh()
         d.ColorOn(Color::White, Color::Black);
         d.Print(xoff, yoff, m_PlayMode);
     }
+    xoff = x + w - (wVolSlider + wVolLabel) - 1;
+    d.AttrSet(Attr::Bold);
+    d.ColorOn(Color::Yellow, Color::Black);
+    d.Print(xoff, yoff, "-|");
+    xoff += 2;
+
+    d.AttrSet(Attr::Normal);
+    d.ColorOn(Color::White, Color::Black);
+    d.Print(xoff, yoff, string(wVolSlider * (m_Volume/100.f), '#'));
+    xoff += wVolSlider;
+
+    d.AttrSet(Attr::Bold);
+    d.ColorOn(Color::Yellow, Color::Black);
+    d.Print(xoff, yoff,  "|+");
+    xoff += 2;
 
     // { ---------->~~~~~~~~~~~ }
     xoff = x;
@@ -156,8 +155,9 @@ void StatusView::Refresh()
 
     d.Refresh();
 
-    if (m_NeedRefresh > 0)
+    if (m_NeedRefresh > 0) {
         --m_NeedRefresh;
+    }
 }
 
 bool StatusView::NeedRefresh() const

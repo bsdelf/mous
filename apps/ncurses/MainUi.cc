@@ -268,21 +268,21 @@ class MainUi::Impl
             case View::MaskHelp: {
                 helpView.MoveTo(0, 0);
                 helpView.Resize(w, h);
-            } break;
+                break;
+            }
 
             case View::MaskPlaylist | View::MaskStatus: {
                 int x = 0, y = 0;
                 int hStatus = statusView.MinHeight();
                 int hPlaylist = h - hStatus;
-
                 PlaylistView& playlist = playlistView[iPlaylist];
                 playlist.MoveTo(x, y);
                 playlist.Resize(w, hPlaylist);
                 y += hPlaylist;
-
                 statusView.MoveTo(x, y);
                 statusView.Resize(w, hStatus);
-            } break;
+                break;
+            }
 
             case View::MaskExplorer | View::MaskPlaylist | View::MaskStatus: {
                 int wExplorer = w / 2;
@@ -290,23 +290,22 @@ class MainUi::Impl
                 int hStatus = statusView.MinHeight();
                 int hExplorer = h - hStatus;
                 int x = 0, y = 0;
-
                 explorerView.MoveTo(x, y);
                 explorerView.Resize(wExplorer, hExplorer);
                 x += wExplorer;
-
                 PlaylistView& playlist = playlistView[iPlaylist];
                 playlist.MoveTo(x, y);
                 playlist.Resize(wPlaylist, hExplorer);
                 x = 0;
                 y += hExplorer;
-
                 statusView.MoveTo(x, y);
                 statusView.Resize(w, hStatus);
-            } break;
-
-            default:
                 break;
+            }
+
+            default: {
+                break;
+            }
         }
 
         layerStack.top().RefreshViews(true);
@@ -350,7 +349,7 @@ class MainUi::Impl
             layer.mask = View::MaskHelp;
             layer.focused.push(&helpView);
             layer.views.insert(&helpView);
-            layerStack.push(layer);
+            layerStack.push(std::move(layer));
         }
         layerStack.top().focused.top()->SetFocus(true);
         UpdateTopLayout();
@@ -428,8 +427,7 @@ MainUi::~MainUi()
 {
 }
 
-int
-MainUi::Exec()
+int MainUi::Exec()
 {
     return impl->Exec();
 }

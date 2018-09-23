@@ -126,18 +126,21 @@ void HelpView::Resize(int w, int h)
 bool HelpView::InjectKey(int key)
 {
     switch (key) {
-        case 'j':
-            if (m_LineBegin < m_LineCount-(d.h-2))
+        case 'j': {
+            if (m_LineBegin < m_LineCount-(d.h-2)) {
                 ++m_LineBegin;
+            }
             break;
-
-        case 'k':
-            if (m_LineBegin > 0)
+        }
+        case 'k': {
+            if (m_LineBegin > 0) {
                 --m_LineBegin;
+            }
             break;
-
-        default:
+        }
+        default: {
             return false;
+        }
     }
     Refresh();
     return true;

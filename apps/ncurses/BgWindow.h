@@ -42,7 +42,7 @@ public:
 private:
     void Cleanup()
     {
-        if (m_Wnd != nullptr) {
+        if (m_Wnd) {
             delwin(m_Wnd);
             m_Wnd = nullptr;
         }

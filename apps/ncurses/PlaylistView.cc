@@ -26,11 +26,13 @@ void PlaylistView::Refresh()
     d.Clear();
 
     // title
-    if (m_Focused)
+    if (m_Focused) {
         d.OpenStyle("b");
+    }
     d.CenterPrint(0, m_Title);
-    if (m_Focused)
+    if (m_Focused) {
         d.CloseStyle();
+    }
 
     // content
     // { {title artist album~~00:00 }#}
@@ -105,8 +107,9 @@ void PlaylistView::Refresh()
             // I suppose duration < 59min
             string duration;
             {
-                if (item.hasRange && item.msEnd == (size_t)-1)
+                if (item.hasRange && item.msEnd == (size_t)-1) {
                     item.msEnd = item.duration;
+                }
 
                 int total = (item.hasRange ? item.msEnd - item.msBeg : item.duration) / 1000;
                 int min = total / 60;
@@ -134,8 +137,9 @@ void PlaylistView::Refresh()
     xoff = x + 1;
     yoff = y + hText;
     stringstream status;
-    if (!m_List.empty())
+    if (!m_List.empty()) {
         status << (m_ItemSelected+1) << "/" << m_List.size();
+    }
     d.AttrSet(Attr::Bold);
     d.ColorOn(Color::White, Color::Black);
     d.Print(xoff, yoff, status.str());
@@ -144,8 +148,9 @@ void PlaylistView::Refresh()
 
     d.Refresh();
 
-    if (m_NeedRefresh > 0)
+    if (m_NeedRefresh > 0) {
         --m_NeedRefresh;
+    }
 }
 
 bool PlaylistView::NeedRefresh() const
@@ -292,7 +297,6 @@ int PlaylistView::Index() const
 void PlaylistView::SetIndex(int index)
 {
     m_Index = index;
-
     stringstream str;
     str << "[ " << m_Title << " " << index << " ]";
     m_Title = str.str();
@@ -300,7 +304,7 @@ void PlaylistView::SetIndex(int index)
 
 void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
 {
-    if (m_PlaylistHandler != nullptr) {
+    if (m_PlaylistHandler) {
         m_PlaylistHandler->SigSelect().Disconnect(this);
         m_PlaylistHandler->SigPlay().Disconnect(this);
         m_PlaylistHandler->SigAppend().Disconnect(this);
@@ -308,8 +312,7 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
         m_PlaylistHandler->SigMove().Disconnect(this);
         m_PlaylistHandler->SigClear().Disconnect(this);
     }
-
-    if (handler != nullptr) {
+    if (handler) {
         handler->SigSelect().Connect(&PlaylistView::SlotSelect, this);
         handler->SigPlay().Connect(&PlaylistView::SlotPlay, this);
         handler->SigAppend().Connect(&PlaylistView::SlotAppend, this);
@@ -317,7 +320,6 @@ void PlaylistView::SetPlaylistHandle(ClientPlaylistHandler* handler)
         handler->SigMove().Connect(&PlaylistView::SlotMove, this);
         handler->SigClear().Connect(&PlaylistView::SlotClear, this);
     }
-
     m_PlaylistHandler = handler;
 }
 
@@ -326,11 +328,9 @@ void PlaylistView::ScrollUp()
     if (m_ItemSelected > 0) {
         --m_ItemSelected;
     }
-    if (m_ItemSelected < m_ItemBegin + (d.h-2) / 2 
-            && m_ItemBegin > 0) {
+    if (m_ItemSelected < m_ItemBegin + (d.h-2) / 2 && m_ItemBegin > 0) {
         --m_ItemBegin;
     }
-
     ReqSelect();
 }
 
@@ -339,11 +339,9 @@ void PlaylistView::ScrollDown()
     if (m_ItemSelected < (int)m_List.size()-1) {
         ++m_ItemSelected;
     }
-    if (m_ItemSelected > (d.h-2) / 2
-            && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
+    if (m_ItemSelected > (d.h-2) / 2 && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
         ++m_ItemBegin;
     }
-
     ReqSelect();
 }
 
@@ -356,9 +354,9 @@ void PlaylistView::ReqSelect()
 
 void PlaylistView::ReqPlay(int pos)
 {
-    if (m_WaitReply)
+    if (m_WaitReply) {
         return;
-
+    }
     if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Play(m_Index, pos);
@@ -367,9 +365,9 @@ void PlaylistView::ReqPlay(int pos)
 
 void PlaylistView::ReqRemove(int pos)
 {
-    if (m_WaitReply)
+    if (m_WaitReply) {
         return;
-
+    }
     if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Remove(m_Index, pos);
@@ -378,9 +376,9 @@ void PlaylistView::ReqRemove(int pos)
 
 void PlaylistView::ReqMove(int pos, char direct)
 {
-    if (m_WaitReply)
+    if (m_WaitReply) {
         return;
-
+    }
     if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Move(m_Index, pos, direct);
@@ -389,9 +387,9 @@ void PlaylistView::ReqMove(int pos, char direct)
 
 void PlaylistView::ReqClear()
 {
-    if (m_WaitReply)
+    if (m_WaitReply) {
         return;
-
+    }
     if (m_PlaylistHandler != nullptr) {
         m_WaitReply = true;
         m_PlaylistHandler->Clear(m_Index);
@@ -401,12 +399,10 @@ void PlaylistView::ReqClear()
 void PlaylistView::SlotSelect(int i, int pos)
 {
     lock_guard<mutex> locker(m_NeedRefreshMutex);
-
-    if (i != m_Index)
+    if (i != m_Index) {
         return;
-
+    }
     m_ItemSelected = pos;
-
     if (d.shown) {
         ++m_NeedRefresh;
     }
@@ -414,21 +410,19 @@ void PlaylistView::SlotSelect(int i, int pos)
 
 void PlaylistView::SlotPlay(int i, bool ok)
 {
-    if (i != m_Index)
+    if (i != m_Index) {
         return;
-
+    }
     m_WaitReply = false;
 }
 
 void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 {
     lock_guard<mutex> locker(m_NeedRefreshMutex);
-
-    if (i != m_Index)
+    if (i != m_Index) {
         return;
-
+    }
     m_List.insert(m_List.end(), list.begin(), list.end());
-
     if (d.shown) {
         ++m_NeedRefresh;
     }
@@ -437,70 +431,56 @@ void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
 void PlaylistView::SlotRemove(int i, int pos)
 {
     lock_guard<mutex> locker(m_NeedRefreshMutex);
-
-    if (i != m_Index)
+    if (i != m_Index) {
         return;
-
+    }
     if (pos >= 0 && (size_t)pos < m_List.size()) {
         delete m_List[pos];
         m_List.erase(m_List.begin()+pos);
-
-        if (!m_List.empty() && m_ItemSelected >= (int)m_List.size()-1)
+        if (!m_List.empty() && m_ItemSelected >= (int)m_List.size()-1) {
             m_ItemSelected = m_List.size() - 1;
-
+        }
         if (d.shown) {
             ++m_NeedRefresh;
         }
     }
-
     m_WaitReply = false;
-
     ReqSelect();
 }
 
 void PlaylistView::SlotMove(int i, int pos, char direct)
 {
     lock_guard<mutex> locker(m_NeedRefreshMutex);
-
-    if (i != m_Index)
+    if (i != m_Index) {
         return;
-
+    }
     int newPos = direct > 0 ? pos+1 : pos-1;
     if (!m_List.empty() && (newPos >= 0 && (size_t)newPos < m_List.size())) {
-
         std::swap(m_List[pos], m_List[newPos]);
         m_ItemSelected = newPos;
-
         if (d.shown) {
             ++m_NeedRefresh;
         }
     }
-
     m_WaitReply = false;
-
     ReqSelect();
 }
 
 void PlaylistView::SlotClear(int i)
 {
     lock_guard<mutex> locker(m_NeedRefreshMutex);
-
-    if (i != m_Index)
+    if (i != m_Index) {
         return;
-
+    }
     for (auto entry: m_List) {
         delete entry;
     }
     m_List.clear();
-
     m_ItemSelected = m_ItemBegin = 0;
-
     if (d.shown) {
         ++m_NeedRefresh;
     }
-
     m_WaitReply = false;
-
     ReqSelect();
 }
 
