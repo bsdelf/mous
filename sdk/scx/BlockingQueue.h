@@ -7,27 +7,24 @@
 
 namespace scx {
 
-template<typename... Contents>
-class Mailbox
+template<typename T>
+class BlockingQueue
 {
   public:
-    using Mail = std::tuple<Contents..., std::weak_ptr<Mailbox>>;
+    BlockingQueue() = default;
+    ~BlockingQueue() = default;
 
-  public:
-    Mailbox() = default;
-    ~Mailbox() = default;
+    BlockingQueue(const BlockingQueue&) = delete;
+    BlockingQueue(BlockingQueue&&) = delete;
 
-    Mailbox(const Mailbox&) = delete;
-    Mailbox(Mailbox&&) = delete;
+    BlockingQueue& operator=(const BlockingQueue&) = delete;
+    BlockingQueue& operator=(BlockingQueue&&) = delete;
 
-    Mailbox& operator=(const Mailbox&) = delete;
-    Mailbox& operator=(Mailbox&&) = delete;
-
-    template<typename T>
-    void PushBack(T&& mail)
+    template<typename Arg>
+    void PushBack(Arg&& data)
     {
         std::lock_guard<std::mutex> locker(mutex_);
-        queue_.push_back(std::forward<T>(mail));
+        queue_.push_back(std::forward<Arg>(data));
         condition_.notify_all();
     }
 
@@ -39,11 +36,11 @@ class Mailbox
         condition_.notify_all();
     }
 
-    template<typename T>
-    void PushFront(T&& mail)
+    template<typename Arg>
+    void PushFront(Arg&& data)
     {
         std::lock_guard<std::mutex> locker(mutex_);
-        queue_.push_front(std::forward<T>(mail));
+        queue_.push_front(std::forward<Arg>(data));
         condition_.notify_all();
     }
 
@@ -59,38 +56,20 @@ class Mailbox
     {
         std::unique_lock<std::mutex> locker(mutex_);
         condition_.wait(locker, [this] { return not queue_.empty(); });
-        auto mail = std::move(queue_.front());
+        auto data = std::move(queue_.front());
         queue_.pop_front();
-        return mail;
+        return data;
     }
 
     auto TryTake()
     {
         std::unique_lock<std::mutex> locker(mutex_);
         if (queue_.empty()) {
-            return Mail();
+            return T{};
         }
-        auto mail = std::move(queue_.front());
+        auto data = std::move(queue_.front());
         queue_.pop_front();
-        return mail;
-    }
-
-    template<typename T>
-    auto ExchangeBack(T&& mail)
-    {
-        auto box = std::make_shared<Mailbox>();
-        std::get<std::tuple_size<Mail>::value - 1>(mail) = box;
-        PushBack(std::forward<T>(mail));
-        return box->Take();
-    }
-
-    template<typename T>
-    auto ExchangeFront(T&& mail)
-    {
-        auto box = std::make_shared<Mailbox>();
-        std::get<std::tuple_size<Mail>::value - 1>(mail) = box;
-        PushFront(std::forward<T>(mail));
-        return box->Take();
+        return data;
     }
 
     void Wait(size_t n)
@@ -118,6 +97,6 @@ class Mailbox
   private:
     std::mutex mutex_;
     std::condition_variable condition_;
-    std::deque<Mail> queue_;
+    std::deque<T> queue_;
 };
 }

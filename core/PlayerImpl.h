@@ -11,7 +11,7 @@ using namespace std;
 
 #include <scx/Conv.h>
 #include <scx/FileHelper.h>
-#include <scx/Mailbox.h>
+#include <scx/BlockingQueue.h>
 using namespace scx;
 
 #include <util/Plugin.h>
@@ -28,13 +28,18 @@ struct UnitBuffer
     char data[];
 };
 
+struct Mail
+{
+    size_t action;
+    UnitBuffer* buffer;
+
+    Mail(size_t action, UnitBuffer* buffer): action(action), buffer(buffer) {}
+};
+
+using Mailbox = scx::BlockingQueue<Mail>;
+
 enum : std::size_t
 {
-    // mail contents
-    TYPE = 0,
-    DATA = 1,
-    FROM = 2,
-
     // worker status
     IDLE = 1u << 0,
     RUNNING = 1u << 1,
@@ -49,9 +54,6 @@ enum : std::size_t
 
 class Player::Impl
 {
-  using Mailbox = scx::Mailbox<int, UnitBuffer*>;
-  using Mail = Mailbox::Mail;
-
   public:
     Impl()
     {
@@ -62,7 +64,7 @@ class Player::Impl
             while (!quit) {
                 auto mail = m_DecoderMailbox.Take();
 
-                const int opcode = status | std::get<TYPE>(mail);
+                const int opcode = status | mail.action;
 
                 switch (opcode) {
                     case IDLE | QUIT:
@@ -77,7 +79,6 @@ class Player::Impl
                     }
 
                     case IDLE | DECODE: {
-                        std::get<TYPE>(mail) = 0;
                         m_BufferMailbox.PushBack(std::move(mail));
                         break;
                     }
@@ -89,20 +90,19 @@ class Player::Impl
                     }
 
                     case RUNNING | DECODE: {
-                        auto& buf = std::get<DATA>(mail);
+                        auto& buf = mail.buffer;
 
                         if (m_DecoderIndex < m_UnitEnd) {
                             m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
                             m_DecoderIndex += buf->unitCount;
 
-                            std::get<TYPE>(mail) = OUTPUT;
+                            mail.action = OUTPUT;
                             m_OutputMailbox.PushBack(std::move(mail));
 
                             if (m_DecoderIndex >= m_UnitEnd) {
                                 status = IDLE;
                             }
                         } else {
-                            std::get<TYPE>(mail) = 0;
                             m_BufferMailbox.PushBack(std::move(mail));
                         }
                         break;
@@ -123,7 +123,7 @@ class Player::Impl
             while (!quit) {
                 auto mail = m_OutputMailbox.Take();
 
-                const int opcode = status | std::get<TYPE>(mail);
+                const int opcode = status | mail.action;
 
                 switch (opcode) {
                     case IDLE | QUIT:
@@ -138,7 +138,6 @@ class Player::Impl
                     }
 
                     case IDLE | OUTPUT: {
-                        std::get<TYPE>(mail) = 0;
                         m_BufferMailbox.PushBack(std::move(mail));
                         break;
                     }
@@ -150,7 +149,7 @@ class Player::Impl
                     }
 
                     case RUNNING | OUTPUT: {
-                        auto& buf = std::get<DATA>(mail);
+                        auto& buf = mail.buffer;
 
                         if (m_OutputIndex < m_UnitEnd) {
                             if (m_Output->Write(buf->data, buf->used) != ErrorCode::Ok) {
@@ -160,7 +159,7 @@ class Player::Impl
                             }
                             m_OutputIndex += buf->unitCount;
 
-                            std::get<TYPE>(mail) = DECODE;
+                            mail.action = DECODE;
                             m_DecoderMailbox.PushBack(std::move(mail));
 
                             if (m_OutputIndex >= m_UnitEnd) {
@@ -168,7 +167,6 @@ class Player::Impl
                                 std::thread([this]() { m_SigFinished(); }).detach();
                             }
                         } else {
-                            std::get<TYPE>(mail) = 0;
                             m_BufferMailbox.PushBack(std::move(mail));
                         }
                         break;
@@ -187,8 +185,8 @@ class Player::Impl
     {
         Close();
 
-        m_DecoderMailbox.EmplaceFront(QUIT, nullptr, std::weak_ptr<Mailbox>());
-        m_OutputMailbox.EmplaceFront(QUIT, nullptr, std::weak_ptr<Mailbox>());
+        m_DecoderMailbox.EmplaceFront(QUIT, nullptr);
+        m_OutputMailbox.EmplaceFront(QUIT, nullptr);
 
         if (m_DecoderThread.joinable()) {
             m_DecoderThread.join();
@@ -362,7 +360,7 @@ class Player::Impl
         for (int i = 0; i < m_BufferCount; ++i) {
             auto ptr = m_Buffer.get() + (sizeof(UnitBuffer) + maxBytesPerUnit) * i;
             auto buf = reinterpret_cast<UnitBuffer*>(ptr);
-            m_BufferMailbox.EmplaceBack(0, buf, std::weak_ptr<Mailbox>());
+            m_BufferMailbox.EmplaceBack(0, buf);
         }
 
         m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
@@ -437,14 +435,14 @@ class Player::Impl
         m_UnitEnd = end;
 
         m_OutputIndex = m_UnitBeg;
-        m_OutputMailbox.EmplaceBack(PROCEED, nullptr, std::weak_ptr<Mailbox>());
+        m_OutputMailbox.EmplaceBack(PROCEED, nullptr);
 
         m_DecoderIndex = m_UnitBeg;
         m_Decoder->SetUnitIndex(m_UnitBeg);
-        m_DecoderMailbox.EmplaceBack(PROCEED, nullptr, std::weak_ptr<Mailbox>());
+        m_DecoderMailbox.EmplaceBack(PROCEED, nullptr);
         while (!m_BufferMailbox.Empty()) {
             auto mail = m_BufferMailbox.Take();
-            std::get<TYPE>(mail) = DECODE;
+            mail.action = DECODE;
             m_DecoderMailbox.PushBack(std::move(mail));
         }
 
@@ -457,8 +455,8 @@ class Player::Impl
             return;
         }
 
-        m_DecoderMailbox.EmplaceFront(SUSPEND, nullptr, std::weak_ptr<Mailbox>());
-        m_OutputMailbox.EmplaceFront(SUSPEND, nullptr, std::weak_ptr<Mailbox>());
+        m_DecoderMailbox.EmplaceFront(SUSPEND, nullptr);
+        m_OutputMailbox.EmplaceFront(SUSPEND, nullptr);
         m_BufferMailbox.Wait(m_BufferCount);
 
         m_Status = PlayerStatus::Paused;
@@ -466,14 +464,14 @@ class Player::Impl
 
     void Resume()
     {
-        m_OutputMailbox.EmplaceBack(PROCEED, nullptr, std::weak_ptr<Mailbox>());
+        m_OutputMailbox.EmplaceBack(PROCEED, nullptr);
 
         m_DecoderIndex = m_OutputIndex;
         m_Decoder->SetUnitIndex(m_DecoderIndex);
-        m_DecoderMailbox.EmplaceBack(PROCEED, nullptr, std::weak_ptr<Mailbox>());
+        m_DecoderMailbox.EmplaceBack(PROCEED, nullptr);
         while (!m_BufferMailbox.Empty()) {
             auto mail = m_BufferMailbox.Take();
-            std::get<TYPE>(mail) = DECODE;
+            mail.action = DECODE;
             m_DecoderMailbox.PushBack(std::move(mail));
         }
 
