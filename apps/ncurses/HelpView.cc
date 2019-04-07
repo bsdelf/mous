@@ -98,15 +98,19 @@ HelpView::~HelpView()
 
 void HelpView::Refresh()
 {
-    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
+    using namespace ncurses;
+
+    d.ColorOn(ncurses::color::kWhite, ncurses::color::kBlack);
     d.Clear();
 
-    d.CenterPrint(0, "^b[ Help ]", true);
-    const int lcount = std::min(d.h-2, m_LineCount-m_LineBegin);
+    auto titleText = Text("[ Help ]").SetAttributes(attribute::kBold);
+    d.Draw(ncurses::HorizontalAlignment::kCenter, 0, titleText);
+
+    const int lcount = std::min(d.h - 2, m_LineCount - m_LineBegin);
     for (int l = 0; l < lcount; ++l) {
         const int index = m_LineBegin + l;
-        d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
-        d.Print(8, l+1, STR_ARRAY[index], true);
+        d.ColorOn(ncurses::color::kWhite, ncurses::color::kBlack);
+        d.Draw(8, l + 1, STR_ARRAY[index]);
     }
 
     d.Refresh();
@@ -127,7 +131,7 @@ bool HelpView::InjectKey(int key)
 {
     switch (key) {
         case 'j': {
-            if (m_LineBegin < m_LineCount-(d.h-2)) {
+            if (m_LineBegin < m_LineCount - (d.h - 2)) {
                 ++m_LineBegin;
             }
             break;

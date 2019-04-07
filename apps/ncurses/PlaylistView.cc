@@ -22,17 +22,12 @@ void PlaylistView::Refresh()
 
     lock_guard<mutex> locker(m_NeedRefreshMutex);
 
-    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
+    d.ColorOn(color::kWhite, color::kBlack);
     d.Clear();
 
     // title
-    if (m_Focused) {
-        d.OpenStyle("b");
-    }
-    d.CenterPrint(0, m_Title);
-    if (m_Focused) {
-        d.CloseStyle();
-    }
+    auto titleText = Text(m_Title).EnableAttribute(m_Focused ? attribute::kBold : attribute::kNormal);
+    d.Draw(ncurses::HorizontalAlignment::kCenter, 0, titleText);
 
     // content
     // { {title artist album~~00:00 }#}
@@ -68,43 +63,38 @@ void PlaylistView::Refresh()
             int index = m_ItemBegin + l;
             auto& item = *m_List[index];
 
-            int fieldAttr = Attr::Bold;
-            int fieldColorF = Color::Green;
-            int fieldColorB = Color::Black;
-            int timeAttr = Attr::Bold;
-            int timeColorF = Color::Magenta;
-            int timeColorB = Color::Black;
+            int fieldAttr = attribute::kBold;
+            int fieldColorF = color::kGreen;
+            int fieldColorB = color::kBlack;
+            int timeAttr = attribute::kBold;
+            int timeColorF = color::kMagenta;
+            int timeColorB = color::kBlack;
 
             if (index == m_ItemSelected) {
-                fieldAttr = timeAttr = Attr::Normal;
-                fieldColorF = timeColorF = Color::Black;
-                fieldColorB = timeColorB = Color::White;
-
-                d.AttrSet(Attr::Normal | Attr::Reverse);
-                d.ColorOn(Color::White, Color::Black);
-                d.Print(x, yoff+l, string(w-1, ' '));
+                fieldAttr = timeAttr = attribute::kNormal;
+                fieldColorF = timeColorF = color::kBlack;
+                fieldColorB = timeColorB = color::kWhite;
+                d.Draw(x, yoff + l, Text(std::string(w - 1, ' ')).SetAttributes(attribute::kReverse).SetColor(color::kWhite, color::kBlack));
             }
 
             xoff = x + 1;
-            d.AttrSet(fieldAttr);
-            d.ColorOn(fieldColorF, fieldColorB);
 
             const string& field1 = MBStrWidth(item.tag.title) <= wField1-1 ?
                 item.tag.title : MBWidthStr(item.tag.title, wField1-1-3) + "...";
-            d.Print(xoff, yoff+l, field1);
+            d.Draw(xoff, yoff + l, Text(field1).SetAttributes(fieldAttr).SetColor(fieldColorF, fieldColorB));
             xoff += wField1;
 
             const string& field2 = MBStrWidth(item.tag.artist) <= wField2-1 ?
                 item.tag.artist : MBWidthStr(item.tag.artist, wField2-1-3) + "...";
-            d.Print(xoff, yoff+l, field2);
+            d.Draw(xoff, yoff + l, Text(field2).SetAttributes(fieldAttr).SetColor(fieldColorF, fieldColorB));
             xoff += wField2;
 
             const string& field3 = MBStrWidth(item.tag.album) <= wField3-1 ?
                 item.tag.album : MBWidthStr(item.tag.album, wField3-1-3) + "...";
-            d.Print(xoff, yoff+l, field3);
+            d.Draw(xoff, yoff + l, Text(field3).SetAttributes(fieldAttr).SetColor(fieldColorF, fieldColorB));
             xoff += wField3;
 
-            // I suppose duration < 59min
+            // TODO: duration >= 60min
             string duration;
             {
                 if (item.hasRange && item.msEnd == (size_t)-1) {
@@ -118,18 +108,16 @@ void PlaylistView::Refresh()
                 snprintf(buf, sizeof(buf), "%.2d:%.2d", min, sec);
                 duration.assign(buf, 5);
             }
-            d.ColorOn(timeColorF, timeColorB);
-            d.Print(xoff, yoff+l, duration);
+            d.Draw(xoff, yoff + l, Text(duration).SetAttributes(timeAttr).SetColor(timeColorF, timeColorB));
             xoff += wTime;
         }
 
         xoff = x + 1 + wText;
         if ((int)m_List.size() > hText) {
-            double percent = (double)(m_ItemSelected+1) / m_List.size() - 0.00001f;
-            yoff = y + hText*percent;
-            d.AttrSet(Attr::Bold | Attr::Reverse);
-            d.ColorOn(Color::Green, Color::Black);
-            d.Print(xoff, yoff, " ");
+            double percent = (double)(m_ItemSelected + 1) / m_List.size() - 0.00001f;
+            yoff = y + hText * percent;
+            auto barText = Text(" ").SetAttributes(attribute::kBold | attribute::kReverse).SetColor(color::kGreen, color::kBlack);
+            d.Draw(xoff, yoff, barText);
         }
     }
 
@@ -140,11 +128,8 @@ void PlaylistView::Refresh()
     if (!m_List.empty()) {
         status << (m_ItemSelected+1) << "/" << m_List.size();
     }
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, status.str());
-
-    d.ResetAttrColor();
+    auto statusText = Text(status.str()).SetAttributes(attribute::kBold).SetColor(color::kWhite, color::kBlack);
+    d.Draw(xoff, yoff, statusText);
 
     d.Refresh();
 

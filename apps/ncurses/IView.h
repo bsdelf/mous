@@ -5,6 +5,9 @@
 #include <string>
 #include <functional>
 
+#include "Ncurses.h"
+#include "Text.h"
+
 class IView
 {
 public:
@@ -23,27 +26,6 @@ public:
     virtual void SetFocus(bool focus) { }
     virtual bool HasFocus() const { return false; }
 };
-
-namespace ncurses {
-    namespace Color {
-        const int Black = COLOR_BLACK;
-        const int Red = COLOR_RED;
-        const int Green = COLOR_GREEN;
-        const int Yellow = COLOR_YELLOW;
-        const int Blue = COLOR_BLUE;
-        const int Magenta = COLOR_MAGENTA;
-        const int Cyan = COLOR_CYAN;
-        const int White = COLOR_WHITE;
-    }
-
-    namespace Attr {
-        const int Normal = A_NORMAL;
-        const int Underline = A_UNDERLINE;
-        const int Reverse = A_REVERSE;
-        const int Blink = A_BLINK;
-        const int Bold = A_BOLD;
-    }
-}
 
 struct Window
 {
@@ -107,39 +89,99 @@ struct Window
         return mvwgetch(win, y, x);
     }
 
-    void Print(int x, int y, const std::string& input, bool styled = false)
+    auto Draw(ncurses::HorizontalAlignment ha, int y, const Text& text)
     {
-        if (win) {
-            if (!styled) {
-                mvwaddstr(win, y, x, input.c_str());
-            } else {
-                const std::string& str = ParseStyle(input);
-                mvwaddstr(win, y, x, str.c_str());
-                CloseStyle();
-            }
-        }
+        const auto x = ha2x(ha, text);
+        return Draw(x, y, text);
     }
 
-    void CenterPrint(int y, const std::string& input, bool styled = false)
+    auto Draw(int x, ncurses::VerticalAlignment va, const Text& text)
     {
-        if (win) {
-            if (!styled) {
-                DoCenterPrint(y, w, input);
+        const auto y = va2y(va);
+        return Draw(x, y, text);
+    }
+
+    auto Draw(ncurses::HorizontalAlignment ha, ncurses::VerticalAlignment va, const Text& text)
+    {
+        const auto x = ha2x(ha, text);
+        const auto y = va2y(va);
+        return Draw(x, y, text);
+    }
+
+    auto Draw(ncurses::HorizontalAlignment ha, int y, const std::string& str)
+    {
+        Text text{str};
+        const auto x = ha2x(ha, text);
+        return Draw(x, y, text);
+    }
+
+    auto Draw(int x, ncurses::VerticalAlignment va, const std::string& str)
+    {
+        Text text{str};
+        const auto y = va2y(va);
+        return Draw(x, y, text);
+    }
+
+    auto Draw(ncurses::HorizontalAlignment ha, ncurses::VerticalAlignment va, const std::string& str)
+    {
+        Text text{str};
+        const auto x = ha2x(ha, text);
+        const auto y = va2y(va);
+        return Draw(x, y, text);
+    }
+
+    auto Draw(int x, int y, const std::string& str)
+    {
+        // TODO: support more style
+        Text text;
+        std::string striped;
+        for (size_t i = 0; i < str.size(); ++i) {
+            if (str[i] == '^' && i + 1 < str.size()) {
+                switch (str[i+1]) {
+                    case 'b': {
+                        text.EnableAttribute(ncurses::attribute::kBold);
+                        ++i;
+                        break;
+                    }
+                    default: {
+                        striped += str[i+1];
+                    }
+                }
             } else {
-                const std::string& str = ParseStyle(input);
-                DoCenterPrint(y, w, str);
-                CloseStyle();
+                striped += str[i];
             }
         }
+        text.SetString(striped);
+        return Draw(x, y, text);
+    }
+
+    void Draw(int x, int y, const Text& text)
+    {
+        if (!win) {
+            return;
+        }
+        // attr_t lastAttrs = 0;
+        // short lastPair = 0;
+        // wattr_get(win, &lastAttrs, &lastPair, nullptr);
+        const auto attrs = text.Attributes();
+        const auto fc = text.ForegroundColor();
+        const auto bc = text.BackgroundColor();
+        const short colorId = fc * 8 + bc + 1;
+        init_pair(colorId, fc, bc);
+        wattron(win, attrs | COLOR_PAIR(colorId));
+        mvwaddstr(win, y, x, text.String().c_str());
+        wattroff(win, attrs | COLOR_PAIR(colorId));
+        // wattr_set(win, lastAttrs, lastPair, nullptr);
     }
 
     void Clear()
     {
-        if (win) {
-            werase(win);
-            if (boxed) {
-                box(win, 0, 0);
-            }
+        if (!win) {
+            return;
+        }
+        werase(win);
+        if (boxed) {
+            box(win, 0, 0);
         }
     }
 
@@ -205,79 +247,30 @@ struct Window
 
     void ResetAttrColor()
     {
-        if (win) {
-            init_pair(0, ncurses::Color::White, ncurses::Color::Black);
-            wattrset(win, ncurses::Attr::Normal | COLOR_PAIR(0));
+        if (!win) {
+            return;
         }
+        init_pair(0, ncurses::color::kWhite, ncurses::color::kBlack);
+        wattrset(win, ncurses::attribute::kNormal | COLOR_PAIR(0));
     }
 
-    short ColorOn(int f, int b)
+    void ColorOn(int fg, int bg)
     {
-        short colorId = f*8 + b + 1;
-        if (win) {
-            init_pair(colorId, f, b);
-            wattron(win, COLOR_PAIR(colorId));
+        if (!win) {
+            return;
         }
-        return colorId;
+        const short colorId = fg * 8 + bg + 1;
+        init_pair(colorId, fg, bg);
+        wattron(win, COLOR_PAIR(colorId));
     }
 
     void ColorOff(short colorId)
     {
-        if (win) {
-            wattroff(win, COLOR_PAIR(colorId));
-            wattroff(win, COLOR_PAIR(0));
+        if (!win) {
+            return;
         }
-    }
-
-    int OpenStyle(const std::string& style)
-    {
-        if (!win || style.empty()) {
-            return 0;
-        }
-
-        int n = 1;
-        switch (style[0]) {
-            case '^': {
-                n = 0;
-                break;
-            }
-
-            case 'b': {
-                wattron(win, A_BOLD);
-                break;
-            }
-
-            case 'h': {
-                wattron(win, A_STANDOUT);
-                break;
-            }
-
-            case 'r': {
-                wattron(win, A_REVERSE);
-                break;
-            }
-
-                // F|B, 0-7
-            case 'c': {
-                if (style.size() >= 3) {
-                    char f = style[1]-48;
-                    char b = style[2]-48;
-                    ColorOn(f, b);
-                }
-                n += 2;
-                break;
-            }
-
-            default: {
-                break;
-            }
-        }
-        return n;
-    }
-
-    void CloseStyle()
-    {
-        ResetAttrColor();
+        wattroff(win, COLOR_PAIR(colorId));
+        wattroff(win, COLOR_PAIR(0));
     }
 
 public:
@@ -296,37 +289,44 @@ private:
     }
 
 private:
-    // NOTE: wide characters are not considered presently
-    int DoCenterPrint(int y, int w, const std::string& str)
+    int ha2x(ncurses::HorizontalAlignment ha, const Text& text) const
     {
-        int x = (w - str.size()) / 2;
-        return mvwprintw(win, y, x, "%s", str.c_str());
-    }
-
-    // NOTE: very limited usage
-    std::string ParseStyle(const std::string& str)
-    {
-        size_t off = 0;
-        while (off+1 < str.size()) {
-            if (str[off] != '^') {
+        int x = 0;
+        switch (ha) {
+            case ncurses::HorizontalAlignment::kLeft: {
+                x = 0;
                 break;
             }
-            switch (str[off+1]) {
-                case '^': {
-                    off = 1;
-                    goto LABEL_END;
-                    break;
-                }
-                default: {
-                    ++off;
-                    off += OpenStyle(str.substr(off, 3));
-                    break;
-                }
+            case ncurses::HorizontalAlignment::kCenter: {
+                x = (w - text.Width()) / 2;
+                break;
+            }
+            case ncurses::HorizontalAlignment::kRight: {
+                x = w - text.Width();
+                break;
             }
         }
+        return x;
+    }
 
-LABEL_END:
-        return str.substr(off, str.size());
+    int va2y(ncurses::VerticalAlignment va) const
+    {
+        int y = 0;
+        switch (va) {
+            case ncurses::VerticalAlignment::kTop: {
+                y = 0;
+                break;
+            }
+            case ncurses::VerticalAlignment::kCenter: {
+                y = h / 2;
+                break;
+            }
+            case ncurses::VerticalAlignment::kBottom: {
+                y = h;
+                break;
+            }
+        }
+        return y;
     }
 };
 

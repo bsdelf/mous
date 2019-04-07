@@ -44,7 +44,7 @@ void StatusView::Refresh()
 
     std::lock_guard<std::mutex> locker(m_RefreshMutex);
 
-    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
+    d.ColorOn(ncurses::color::kWhite, ncurses::color::kBlack);
     d.Clear();
 
     const int w = d.w - 3;
@@ -64,9 +64,7 @@ void StatusView::Refresh()
     string currentItem = tag.title + " - " + tag.artist + " (" + FileInfo(item.url).BaseName() + ")";
     currentItem = MBStrWidth(currentItem) <= wCurrentItem ?
         currentItem : MBWidthStr(currentItem, wCurrentItem-3) + "...";
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::Green, Color::Black);
-    d.Print(xoff, yoff, currentItem);
+    d.Draw(xoff, yoff, Text(currentItem).SetAttributes(attribute::kBold).SetColor(color::kGreen, color::kBlack));
 
     // { 00:00/00:00 bitRate bps sampleRate Hz ~~~~~~ -|=======|+ }
     xoff = x;
@@ -81,60 +79,39 @@ void StatusView::Refresh()
         string rate = std::to_string(m_PlayerStatus.sampleRate);
         string strRate = " Hz";
 
-        d.AttrSet(Attr::Bold);
-        d.ColorOn(Color::Magenta, Color::Black);
-        d.Print(xoff, yoff, ms);
+        d.Draw(xoff, yoff, Text(ms).SetAttributes(attribute::kBold).SetColor(color::kMagenta, color::kBlack));
         xoff += ms.size();
 
-        d.AttrSet(Attr::Normal);
-        d.ColorOn(Color::White, Color::Black);
-        d.Print(xoff, yoff, sp);
+        d.Draw(xoff, yoff, Text(sp).SetAttributes(attribute::kNormal).SetColor(color::kWhite, color::kBlack));
         xoff += sp.size();
 
-        d.AttrSet(Attr::Bold);
-        d.ColorOn(Color::Magenta, Color::Black);
-        d.Print(xoff, yoff, dur);
-        xoff += dur.size();
-        xoff += tab;
+        d.Draw(xoff, yoff, Text(dur).SetAttributes(attribute::kBold).SetColor(color::kMagenta, color::kBlack));
+        xoff += dur.size() + tab;
 
-        d.AttrSet(Attr::Bold);
-        d.ColorOn(Color::Magenta, Color::Black);
-        d.Print(xoff, yoff, bps);
+        d.Draw(xoff, yoff, Text(bps).SetAttributes(attribute::kBold).SetColor(color::kMagenta, color::kBlack));
         xoff += bps.size();
 
-        d.AttrSet(Attr::Normal);
-        d.ColorOn(Color::White, Color::Black);
-        d.Print(xoff, yoff, strBps);
+        d.Draw(xoff, yoff, Text(strBps).SetAttributes(attribute::kNormal).SetColor(color::kWhite, color::kBlack));
         xoff += strBps.size() + tab;
 
-        d.AttrSet(Attr::Bold);
-        d.ColorOn(Color::Magenta, Color::Black);
-        d.Print(xoff, yoff, rate);
+        d.Draw(xoff, yoff, Text(rate).SetAttributes(attribute::kBold).SetColor(color::kMagenta, color::kBlack));
         xoff += rate.size();
 
-        d.AttrSet(Attr::Normal);
-        d.ColorOn(Color::White, Color::Black);
-        d.Print(xoff, yoff, strRate);
+        d.Draw(xoff, yoff, Text(strRate).SetAttributes(attribute::kNormal).SetColor(color::kWhite, color::kBlack));
         xoff += strRate.size() + tab;
 
-        d.AttrSet(Attr::Bold);
-        d.ColorOn(Color::White, Color::Black);
-        d.Print(xoff, yoff, m_PlayMode);
+        d.Draw(xoff, yoff, Text(m_PlayMode).SetAttributes(attribute::kBold).SetColor(color::kWhite, color::kBlack));
     }
     xoff = x + w - (wVolSlider + wVolLabel) - 1;
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::Yellow, Color::Black);
-    d.Print(xoff, yoff, "-|");
+
+    d.Draw(xoff, yoff, Text("-|").SetAttributes(attribute::kBold).SetColor(color::kYellow, color::kBlack));
     xoff += 2;
 
-    d.AttrSet(Attr::Normal);
-    d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, string(wVolSlider * (m_Volume/100.f), '#'));
+    std::string volStr(wVolSlider * (m_Volume/100.f), '#');
+    d.Draw(xoff, yoff, Text(volStr).SetAttributes(attribute::kNormal).SetColor(color::kWhite, color::kBlack));
     xoff += wVolSlider;
 
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::Yellow, Color::Black);
-    d.Print(xoff, yoff,  "|+");
+    d.Draw(xoff, yoff, Text("|+").SetAttributes(attribute::kBold).SetColor(color::kYellow, color::kBlack));
     xoff += 2;
 
     // { ---------->~~~~~~~~~~~ }
@@ -145,10 +122,7 @@ void StatusView::Refresh()
         int wSlider = (w - 1 - 1) * percent;
         string slider(wSlider + 1, '-');
         slider.back() = '>';
-
-        d.AttrSet(Attr::Bold);
-        d.ColorOn(Color::Yellow, Color::Black);
-        d.Print(xoff, yoff, slider);
+        d.Draw(xoff, yoff, Text(slider).SetAttributes(attribute::kBold).SetColor(color::kYellow, color::kBlack));
     }
 
     d.ResetAttrColor();

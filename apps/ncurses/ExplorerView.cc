@@ -37,14 +37,11 @@ void ExplorerView::Refresh()
     using namespace CharsetHelper;
     using namespace ncurses;
 
-    d.ColorOn(ncurses::Color::White, ncurses::Color::Black);
+    d.ColorOn(color::kWhite, color::kBlack);
     d.Clear();
 
-    if (m_Focused) {
-        d.AttrOn(ncurses::Attr::Bold);
-    }
-    d.CenterPrint(0, STR_TITLE);
-    d.ResetAttrColor();
+    auto titleText = Text(STR_TITLE).SetAttributes(m_Focused ? attribute::kBold : attribute::kNormal);
+    d.Draw(ncurses::HorizontalAlignment::kCenter, 0, titleText);
 
     // content
     // { {name~~~size }#}
@@ -70,38 +67,33 @@ void ExplorerView::Refresh()
             int index = begin + l;
             const FileItem& item = m_FileItems[index];
 
-            int pathNormalAttr = Attr::Normal;
-            int boldAttr = Attr::Bold;
-            int pathDirColorF = Color::Blue;
-            int pathRegColorF = Color::White;
-            int pathColorB = Color::Black;
-            int sizeColorF = Color::Magenta;
-            int sizeColorB = Color::Black;
+            int pathNormalAttr = attribute::kNormal;
+            int boldAttr = attribute::kBold;
+            int pathDirColorF = color::kBlue;
+            int pathRegColorF = color::kWhite;
+            int pathColorB = color::kBlack;
+            int sizeColorF = color::kMagenta;
+            int sizeColorB = color::kBlack;
 
             if (index == selection) {
-                boldAttr = Attr::Normal;
-                pathRegColorF = sizeColorF = Color::Black;
-                pathColorB = sizeColorB = Color::White;
-
-                d.AttrSet(Attr::Normal | Attr::Reverse);
-                d.ColorOn(Color::White, Color::Black);
-                d.Print(x, yoff+l, string(w-1, ' '));
+                boldAttr = attribute::kNormal;
+                pathRegColorF = sizeColorF = color::kBlack;
+                pathColorB = sizeColorB = color::kWhite;
+                d.Draw(x, yoff + l, Text(std::string(w - 1, ' ')).SetAttributes(attribute::kNormal | attribute::kReverse).SetColor(color::kWhite, color::kBlack));
             }
 
             xoff = x + 1;
-            if (item.isDir) {
-                d.AttrSet(boldAttr);
-                d.ColorOn(pathDirColorF, pathColorB);
-            } else {
-                d.AttrSet(pathNormalAttr);
-                d.ColorOn(pathRegColorF, pathColorB);
-            }
-
             if (!item.cacheOk) {
                 item.nameCache = MBStrWidth(item.name) <= wPath-1 ?
                     item.name : MBWidthStr(item.name, wPath-1-3) + "...";
             }
-            d.Print(xoff, yoff+l, item.nameCache);
+            Text nameText(item.nameCache);
+            if (item.isDir) {
+                nameText.SetAttributes(boldAttr).SetColor(pathDirColorF, pathColorB);
+            } else {
+                nameText.SetAttributes(pathNormalAttr).SetColor(pathRegColorF, pathColorB);
+            }
+            d.Draw(xoff, yoff + l, nameText);
             xoff += wPath;
 
             const char* hint = SIZE_HINT;
@@ -120,10 +112,8 @@ void ExplorerView::Refresh()
                     str = string(5 - str.size(), ' ') + str;
                 }
             }
-
-            d.AttrSet(boldAttr);
-            d.ColorOn(sizeColorF, sizeColorB);
-            d.Print(xoff, yoff+l, item.sizeCache);
+            auto sizeText = Text(item.sizeCache).SetAttributes(boldAttr).SetColor(sizeColorF, sizeColorB);
+            d.Draw(xoff, yoff + l, sizeText);
             xoff += wSize;
 
             item.cacheOk = true;
@@ -133,9 +123,8 @@ void ExplorerView::Refresh()
         if (m_FileItems.size() > (size_t)hText) {
             double percent = (double)(selection+1) / m_FileItems.size() - 0.00001f;
             yoff = y + hText * percent;
-            d.AttrSet(Attr::Bold | Attr::Reverse);
-            d.ColorOn(Color::Green, Color::Black);
-            d.Print(xoff, yoff, " ");
+            auto barText = Text(" ").SetAttributes(attribute::kBold | attribute::kReverse).SetColor(color::kGreen, color::kBlack);
+            d.Draw(xoff, yoff, barText);
         }
 
     }
@@ -152,11 +141,8 @@ void ExplorerView::Refresh()
     }
     xoff = x + 1;
     yoff = y + hText;
-    d.AttrSet(Attr::Bold);
-    d.ColorOn(Color::White, Color::Black);
-    d.Print(xoff, yoff, m_PathCache);
-
-    d.ResetAttrColor();
+    auto pathText = Text(m_PathCache).SetAttributes(attribute::kBold).SetColor(color::kWhite, color::kBlack);
+    d.Draw(xoff, yoff, pathText);
 
     d.Refresh();
 }
