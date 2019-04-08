@@ -139,7 +139,7 @@ struct Window
             if (str[i] == '^' && i + 1 < str.size()) {
                 switch (str[i+1]) {
                     case 'b': {
-                        text.EnableAttribute(ncurses::attribute::kBold);
+                        text.EnableAttributes(ncurses::attribute::kBold);
                         ++i;
                         break;
                     }
