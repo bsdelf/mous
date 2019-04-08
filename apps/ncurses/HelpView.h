@@ -1,8 +1,9 @@
 #pragma once
 
-#include "IView.h"
+#include "BaseView.h"
+#include "Ncurses.h"
 
-class HelpView: public IView
+class HelpView: public BaseView
 {
 public:
     HelpView();
@@ -21,7 +22,7 @@ private:
     void Cleanup();
 
 private:
-    Window d;
+    ncurses::Window d;
     int m_LineBegin;
     int m_LineCount;
 };

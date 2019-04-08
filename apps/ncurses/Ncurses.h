@@ -1,30 +1,115 @@
 #pragma once
 
+#include <string>
+// #include <functional>
+
 #include <ncurses.h>
 
-#include <string>
-#include <functional>
+namespace ncurses {
 
-#include "Ncurses.h"
-#include "Text.h"
+namespace color {
+    const int kBlack = COLOR_BLACK;
+    const int kRed = COLOR_RED;
+    const int kGreen = COLOR_GREEN;
+    const int kYellow = COLOR_YELLOW;
+    const int kBlue = COLOR_BLUE;
+    const int kMagenta = COLOR_MAGENTA;
+    const int kCyan = COLOR_CYAN;
+    const int kWhite = COLOR_WHITE;
+}
 
-class IView
-{
+namespace attribute {
+    const int kNormal = A_NORMAL;
+    const int kStandout = A_STANDOUT;
+    const int kUnderline = A_UNDERLINE;
+    const int kReverse = A_REVERSE;
+    const int kBlink = A_BLINK;
+    const int kDim = A_DIM;
+    const int kBold = A_BOLD;
+}
+
+enum class HorizontalAlignment {
+    kLeft,
+    kCenter,
+    kRight
+};
+
+enum class VerticalAlignment {
+    kTop,
+    kCenter,
+    kBottom
+};
+
+class Text {
 public:
-    virtual ~IView() { }
+    Text() = default;
+    Text(const Text&) = default;
+    Text(Text&&) = default;
+    Text(const std::string& str): str_(str) {}
+    Text(std::string&& str): str_(std::move(str)) {}
 
-    virtual void MoveTo(int x, int y) = 0;
-    virtual void Resize(int w, int h) = 0;
-    virtual void Refresh() = 0;
-    virtual bool NeedRefresh() const { return false; }
+    // TODO: non-ascii characters
+    const size_t Width() const {
+        return str_.size();
+    }
 
-    virtual bool InjectKey(int key) = 0;
+    const std::string& String() const {
+        return str_;
+    }
 
-    virtual void Show(bool show) = 0;
-    virtual bool IsShown() const = 0;
+    int Attributes() const {
+        return attrs_;
+    }
 
-    virtual void SetFocus(bool focus) { }
-    virtual bool HasFocus() const { return false; }
+    int ForegroundColor() const {
+        return fc_;
+    }
+
+    int BackgroundColor() const {
+        return bc_;
+    }
+
+    Text& SetString(const std::string& str) {
+        str_ = str;
+        return *this;
+    }
+
+    Text& SetString(std::string&& str) {
+        str_ = std::move(str);
+        return *this;
+    }
+
+    Text& SetAttributes(int attrs) {
+        attrs_ = attrs;
+        return *this;
+    }
+
+    Text& EnableAttributes(int attr) {
+        attrs_ |= attr;
+        return *this;
+    }
+
+    Text& SetForegroundColor(int fc) {
+        fc_ = fc;
+        return *this;
+    }
+
+    Text& SetBackgroundColor(int bc) {
+        bc_ = bc;
+        return *this;
+    }
+
+    Text& SetColor(int fc, int bc) {
+        fc_ = fc;
+        bc_ = bc;
+        return *this;
+    }
+
+private:
+    std::string str_;
+    int attrs_ = A_NORMAL;
+    int fc_ = COLOR_WHITE;
+    int bc_ = COLOR_BLACK;
 };
 
 struct Window
@@ -89,40 +174,40 @@ struct Window
         return mvwgetch(win, y, x);
     }
 
-    auto Draw(ncurses::HorizontalAlignment ha, int y, const Text& text)
+    auto Draw(HorizontalAlignment ha, int y, const Text& text)
     {
         const auto x = ha2x(ha, text);
         return Draw(x, y, text);
     }
 
-    auto Draw(int x, ncurses::VerticalAlignment va, const Text& text)
+    auto Draw(int x, VerticalAlignment va, const Text& text)
     {
         const auto y = va2y(va);
         return Draw(x, y, text);
     }
 
-    auto Draw(ncurses::HorizontalAlignment ha, ncurses::VerticalAlignment va, const Text& text)
+    auto Draw(HorizontalAlignment ha, VerticalAlignment va, const Text& text)
     {
         const auto x = ha2x(ha, text);
         const auto y = va2y(va);
         return Draw(x, y, text);
     }
 
-    auto Draw(ncurses::HorizontalAlignment ha, int y, const std::string& str)
+    auto Draw(HorizontalAlignment ha, int y, const std::string& str)
     {
         Text text{str};
         const auto x = ha2x(ha, text);
         return Draw(x, y, text);
     }
 
-    auto Draw(int x, ncurses::VerticalAlignment va, const std::string& str)
+    auto Draw(int x, VerticalAlignment va, const std::string& str)
     {
         Text text{str};
         const auto y = va2y(va);
         return Draw(x, y, text);
     }
 
-    auto Draw(ncurses::HorizontalAlignment ha, ncurses::VerticalAlignment va, const std::string& str)
+    auto Draw(HorizontalAlignment ha, VerticalAlignment va, const std::string& str)
     {
         Text text{str};
         const auto x = ha2x(ha, text);
@@ -139,7 +224,7 @@ struct Window
             if (str[i] == '^' && i + 1 < str.size()) {
                 switch (str[i+1]) {
                     case 'b': {
-                        text.EnableAttributes(ncurses::attribute::kBold);
+                        text.EnableAttributes(attribute::kBold);
                         ++i;
                         break;
                     }
@@ -250,8 +335,8 @@ struct Window
         if (!win) {
             return;
         }
-        init_pair(0, ncurses::color::kWhite, ncurses::color::kBlack);
-        wattrset(win, ncurses::attribute::kNormal | COLOR_PAIR(0));
+        init_pair(0, color::kWhite, color::kBlack);
+        wattrset(win, attribute::kNormal | COLOR_PAIR(0));
     }
 
     void ColorOn(int fg, int bg)
@@ -273,35 +358,35 @@ struct Window
         wattroff(win, COLOR_PAIR(0));
     }
 
-public:
-    void SafelyDo(const std::function<void (void)>& fn)
-    {
-        use_window(win, &WindowCallback, const_cast<void*>(static_cast<const void*>(&fn)));
-    }
+// public:
+//     void SafelyDo(const std::function<void (void)>& fn)
+//     {
+//         use_window(win, &WindowCallback, const_cast<void*>(static_cast<const void*>(&fn)));
+//     }
+
+// private:
+//     static int WindowCallback(WINDOW* _w, void* p)
+//     {
+//         using namespace std;
+//         auto func = static_cast<std::function<void (void)>*>(p);
+//         (*func)();
+//         return 0;
+//     }
 
 private:
-    static int WindowCallback(WINDOW* _w, void* p)
-    {
-        using namespace std;
-        auto func = static_cast<std::function<void (void)>*>(p);
-        (*func)();
-        return 0;
-    }
-
-private:
-    int ha2x(ncurses::HorizontalAlignment ha, const Text& text) const
+    int ha2x(HorizontalAlignment ha, const Text& text) const
     {
         int x = 0;
         switch (ha) {
-            case ncurses::HorizontalAlignment::kLeft: {
+            case HorizontalAlignment::kLeft: {
                 x = 0;
                 break;
             }
-            case ncurses::HorizontalAlignment::kCenter: {
+            case HorizontalAlignment::kCenter: {
                 x = (w - text.Width()) / 2;
                 break;
             }
-            case ncurses::HorizontalAlignment::kRight: {
+            case HorizontalAlignment::kRight: {
                 x = w - text.Width();
                 break;
             }
@@ -309,19 +394,19 @@ private:
         return x;
     }
 
-    int va2y(ncurses::VerticalAlignment va) const
+    int va2y(VerticalAlignment va) const
     {
         int y = 0;
         switch (va) {
-            case ncurses::VerticalAlignment::kTop: {
+            case VerticalAlignment::kTop: {
                 y = 0;
                 break;
             }
-            case ncurses::VerticalAlignment::kCenter: {
+            case VerticalAlignment::kCenter: {
                 y = h / 2;
                 break;
             }
-            case ncurses::VerticalAlignment::kBottom: {
+            case VerticalAlignment::kBottom: {
                 y = h;
                 break;
             }
@@ -330,3 +415,4 @@ private:
     }
 };
 
+}

@@ -26,7 +26,7 @@ void PlaylistView::Refresh()
     d.Clear();
 
     // title
-    auto titleText = Text(m_Title).EnableAttribute(m_Focused ? attribute::kBold : attribute::kNormal);
+    auto titleText = Text(m_Title).SetAttributes(m_Focused ? attribute::kBold : attribute::kNormal);
     d.Draw(ncurses::HorizontalAlignment::kCenter, 0, titleText);
 
     // content

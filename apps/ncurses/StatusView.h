@@ -5,10 +5,11 @@
 #include <util/MediaItem.h>
 using namespace mous;
 
-#include "IView.h"
+#include "BaseView.h"
 #include "ClientPlayerHandler.h"
+#include "Ncurses.h"
 
-class StatusView: public IView
+class StatusView: public BaseView
 {
 public:
     StatusView();
@@ -39,7 +40,7 @@ private:
     void SlotStatus(const ClientPlayerHandler::PlayerStatus&);
 
 private:
-    Window d;
+    ncurses::Window d;
 
     ClientPlayerHandler* m_PlayerHandler = nullptr;
 

@@ -14,7 +14,7 @@ using namespace std;
 #include "Client.h"
 #include "ExplorerView.h"
 #include "HelpView.h"
-#include "IView.h"
+#include "BaseView.h"
 #include "PlaylistView.h"
 #include "StatusView.h"
 
@@ -46,8 +46,8 @@ const int PLAYLIST_COUNT = 6;
 struct LayerInfo
 {
     View::mask_t mask;
-    set<IView*> views;
-    stack<IView*> focused;
+    set<BaseView*> views;
+    stack<BaseView*> focused;
 
     void RefreshViews(bool forced)
     {
@@ -362,11 +362,14 @@ class MainUi::Impl
             return;
         }
 
-        LayerInfo& layer = layerStack.top();
-        IView* focused = layer.focused.top();
-        layer.focused.top()->SetFocus(false);
-        layer.focused.top() = (focused == (IView*)&explorerView) ? (IView*)(playlistView + iPlaylist) : (IView*)&explorerView;
-        layer.focused.top()->SetFocus(true);
+        auto& focused = layerStack.top().focused;
+        focused.top()->SetFocus(false);
+        if (focused.top() == &explorerView) {
+            focused.top() = playlistView + iPlaylist;
+        } else {
+            focused.top() = &explorerView;
+        }
+        focused.top()->SetFocus(true);
 
         // NOTE: avoid refresh status view
         // layer.RefreshViews();

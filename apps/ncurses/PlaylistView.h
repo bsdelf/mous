@@ -10,10 +10,11 @@ using namespace scx;
 #include <util/MediaItem.h>
 using namespace mous;
 
-#include "IView.h"
+#include "BaseView.h"
 #include "ClientPlaylistHandler.h"
+#include "Ncurses.h"
 
-class PlaylistView: public IView
+class PlaylistView: public BaseView
 {
 public:
     PlaylistView();
@@ -61,7 +62,7 @@ public:
     Signal<void (bool)> SigSwitchPlaylist;
 
 private:
-    Window d;
+    ncurses::Window d;
 
     int m_NeedRefresh = 0;
     mutable mutex m_NeedRefreshMutex;

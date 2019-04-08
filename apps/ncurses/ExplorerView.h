@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IView.h"
 
 #include <string>
 #include <vector>
@@ -9,7 +8,10 @@
 
 #include <scx/Signal.h>
 
-class ExplorerView: public IView
+#include "BaseView.h"
+#include "Ncurses.h"
+
+class ExplorerView: public BaseView
 {
 public:
     ExplorerView();
@@ -52,7 +54,7 @@ private:
     };
 
 private:
-    Window d;
+    ncurses::Window d;
     bool m_Focused = false;
     std::string m_Path;
     std::string m_PathCache;
