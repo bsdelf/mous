@@ -43,7 +43,7 @@ typedef View::Type EmViewType;
 
 const int PLAYLIST_COUNT = 6;
 
-struct LayerInfo
+struct Layer
 {
     View::mask_t mask;
     set<BaseView*> views;
@@ -80,7 +80,7 @@ class MainUi::Impl
 
         PlaylistView& playlist = playlistView[iPlaylist];
 
-        LayerInfo layer;
+        Layer layer;
         layer.mask = View::MaskPlaylist | View::MaskStatus;
         layer.views.insert(&playlist);
         layer.views.insert(&statusView);
@@ -314,7 +314,7 @@ class MainUi::Impl
     /* on same layer */
     void ShowOrHideExplorer()
     {
-        LayerInfo& layer = layerStack.top();
+        Layer& layer = layerStack.top();
         layer.focused.top()->SetFocus(false);
         if (explorerView.IsShown()) {
             // remove view
@@ -345,7 +345,7 @@ class MainUi::Impl
             layerStack.pop();
         } else {
             // push layer
-            LayerInfo layer;
+            Layer layer;
             layer.mask = View::MaskHelp;
             layer.focused.push(&helpView);
             layer.views.insert(&helpView);
@@ -387,7 +387,7 @@ class MainUi::Impl
 
         playlistView[oldn].Show(false);
 
-        LayerInfo& layer = layerStack.top();
+        Layer& layer = layerStack.top();
         layer.views.erase(playlistView + oldn);
         layer.views.insert(playlistView + n);
         if (playlistView[oldn].HasFocus()) {
@@ -414,7 +414,7 @@ class MainUi::Impl
     StatusView statusView;
 
     int iPlaylist = 1;
-    stack<LayerInfo> layerStack;
+    stack<Layer> layerStack;
 
     mutex needSwitchPlaylistMutex;
     int needSwitchPlaylist = 0;
