@@ -254,14 +254,14 @@ bool PlaylistView::InjectKey(int key)
     return true;
 }
 
-void PlaylistView::Show(bool show)
+void PlaylistView::Show(bool visible)
 {
-    d.Show(show);
+    d.SetVisible(visible);
 }
 
 bool PlaylistView::IsShown() const
 {
-    return d.shown;
+    return d.IsVisible();
 }
 
 void PlaylistView::SetFocus(bool focus)
@@ -388,7 +388,7 @@ void PlaylistView::SlotSelect(int i, int pos)
         return;
     }
     m_ItemSelected = pos;
-    if (d.shown) {
+    if (d.IsVisible()) {
         ++m_NeedRefresh;
     }
 }
@@ -408,7 +408,7 @@ void PlaylistView::SlotAppend(int i, deque<MediaItem*>& list)
         return;
     }
     m_List.insert(m_List.end(), list.begin(), list.end());
-    if (d.shown) {
+    if (d.IsVisible()) {
         ++m_NeedRefresh;
     }
 }
@@ -425,7 +425,7 @@ void PlaylistView::SlotRemove(int i, int pos)
         if (!m_List.empty() && m_ItemSelected >= (int)m_List.size()-1) {
             m_ItemSelected = m_List.size() - 1;
         }
-        if (d.shown) {
+        if (d.IsVisible()) {
             ++m_NeedRefresh;
         }
     }
@@ -443,7 +443,7 @@ void PlaylistView::SlotMove(int i, int pos, char direct)
     if (!m_List.empty() && (newPos >= 0 && (size_t)newPos < m_List.size())) {
         std::swap(m_List[pos], m_List[newPos]);
         m_ItemSelected = newPos;
-        if (d.shown) {
+        if (d.IsVisible()) {
             ++m_NeedRefresh;
         }
     }
@@ -462,7 +462,7 @@ void PlaylistView::SlotClear(int i)
     }
     m_List.clear();
     m_ItemSelected = m_ItemBegin = 0;
-    if (d.shown) {
+    if (d.IsVisible()) {
         ++m_NeedRefresh;
     }
     m_WaitReply = false;

@@ -114,35 +114,11 @@ private:
 
 struct Window
 {
-    Window()
-    {
-    }
+    Window() = default;
 
     ~Window()
     {
-        Cleanup();
-    }
-
-    void Init(int _x, int _y, int _w, int _h, bool _boxed)
-    {
-        x = _x;
-        y = _y;
-        w = _w;
-        h = _h;
-        boxed = _boxed;
-
-        win = newwin(h, w, y, x);
-        if (boxed) {
-            box(win, 0, 0);
-        }
-    }
-
-    void Cleanup()
-    {
-        if (win) {
-            delwin(win);
-            win = nullptr;
-        }
+        SetVisible(false);
     }
 
     void EnableKeypad(bool enable)
@@ -289,21 +265,30 @@ struct Window
         }
     }
 
-    void Show(bool show)
+    void SetVisible(bool visible)
     {
-        if (show) {
+        if (visible) {
             if (!win) {
-                Init(x, y, w, h, boxed);
+                win = newwin(h, w, y, x);
+                if (boxed) {
+                    box(win, 0, 0);
+                }
             }
         } else {
-            Cleanup();
+            if (win) {
+                delwin(win);
+                win = nullptr;
+            }
         }
-        shown = show;
+    }
+
+    bool IsVisible() const
+    {
+        return !!win;
     }
 
     WINDOW* win = nullptr;
     bool boxed = true;
-    bool shown = false;
     int x = 0;
     int y = 0;
     int w = 0;

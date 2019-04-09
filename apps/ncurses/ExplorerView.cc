@@ -279,14 +279,14 @@ bool ExplorerView::InjectKey(int key)
     return true;
 }
 
-void ExplorerView::Show(bool show)
+void ExplorerView::Show(bool visible)
 {
-    d.Show(show);
+    d.SetVisible(visible);
 }
 
 bool ExplorerView::IsShown() const
 {
-    return d.shown;
+    return d.IsVisible();
 }
 
 void ExplorerView::SetFocus(bool focus)

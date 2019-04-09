@@ -220,12 +220,12 @@ bool StatusView::InjectKey(int key)
 
 void StatusView::Show(bool show)
 {
-    d.Show(show);
+    d.SetVisible(show);
 }
 
 bool StatusView::IsShown() const
 {
-    return d.shown;
+    return d.IsVisible();
 }
 
 int StatusView::MinHeight() const

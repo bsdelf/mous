@@ -150,12 +150,12 @@ bool HelpView::InjectKey(int key)
     return true;
 }
 
-void HelpView::Show(bool show)
+void HelpView::Show(bool visible)
 {
-    d.Show(show);
+    d.SetVisible(visible);
 }
 
 bool HelpView::IsShown() const
 {
-    return d.shown;
+    return d.IsVisible();
 }
