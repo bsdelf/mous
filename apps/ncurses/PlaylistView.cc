@@ -31,8 +31,8 @@ void PlaylistView::Refresh()
 
     // content
     // { {title artist album~~00:00 }#}
-    const int w = d.w - 2;
-    const int h = d.h - 2;
+    const int w = d.Width() - 2;
+    const int h = d.Height() - 2;
     const int x = 1;
     const int y = 1;
     int xoff = x;
@@ -52,8 +52,8 @@ void PlaylistView::Refresh()
             // use the same algorithm in ScrollDown()
             m_ItemBegin = 0;
             for (int i = 0; i < m_ItemSelected; ++i) {
-                if (m_ItemSelected > (d.h-2) / 2
-                    && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
+                if (m_ItemSelected > (d.Height()-2) / 2
+                    && m_ItemBegin < (int)m_List.size()-(d.Height()-2-1)) {
                     ++m_ItemBegin;
                 }
             }
@@ -186,7 +186,7 @@ bool PlaylistView::InjectKey(int key)
 
         case KEY_NPAGE:
             if (!empty) {
-                const int line = (d.h - 3) / 2;
+                const int line = (d.Height() - 3) / 2;
                 for (int i = 0; i < line; ++i) {
                     ScrollDown();
                 }
@@ -195,7 +195,7 @@ bool PlaylistView::InjectKey(int key)
 
         case KEY_PPAGE:
             if (!empty) {
-                const int line = (d.h - 3) / 2;
+                const int line = (d.Height() - 3) / 2;
                 for (int i = 0; i < line; ++i) {
                     ScrollUp();
                 }
@@ -213,7 +213,7 @@ bool PlaylistView::InjectKey(int key)
         case KEY_END:
             if (!empty) {
                 m_ItemSelected = m_List.size() - 1;
-                m_ItemBegin = std::max((int)m_List.size() - (d.h - 3), 0);
+                m_ItemBegin = std::max((int)m_List.size() - (d.Height() - 3), 0);
                 ReqSelect();
             }
             break;
@@ -313,7 +313,7 @@ void PlaylistView::ScrollUp()
     if (m_ItemSelected > 0) {
         --m_ItemSelected;
     }
-    if (m_ItemSelected < m_ItemBegin + (d.h-2) / 2 && m_ItemBegin > 0) {
+    if (m_ItemSelected < m_ItemBegin + (d.Height()-2) / 2 && m_ItemBegin > 0) {
         --m_ItemBegin;
     }
     ReqSelect();
@@ -324,7 +324,7 @@ void PlaylistView::ScrollDown()
     if (m_ItemSelected < (int)m_List.size()-1) {
         ++m_ItemSelected;
     }
-    if (m_ItemSelected > (d.h-2) / 2 && m_ItemBegin < (int)m_List.size()-(d.h-2-1)) {
+    if (m_ItemSelected > (d.Height()-2) / 2 && m_ItemBegin < (int)m_List.size()-(d.Height()-2-1)) {
         ++m_ItemBegin;
     }
     ReqSelect();

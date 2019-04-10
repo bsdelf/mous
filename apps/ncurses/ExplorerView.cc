@@ -46,8 +46,8 @@ void ExplorerView::Refresh()
     // content
     // { {name~~~size }#}
     // { {foo~~~1023K }#}
-    const int w = d.w - 2;
-    const int h = d.h - 2;
+    const int w = d.Width() - 2;
+    const int h = d.Height() - 2;
     const int x = 1;
     const int y = 1;
     int xoff = x;
@@ -195,7 +195,7 @@ bool ExplorerView::InjectKey(int key)
 
         case KEY_NPAGE:
             if (!m_FileItems.empty()) {
-                int line= (d.h - 3) / 2;
+                int line= (d.Height() - 3) / 2;
                 for (int i = 0; i < line; ++i) {
                     ScrollDown();
                 }
@@ -204,7 +204,7 @@ bool ExplorerView::InjectKey(int key)
 
         case KEY_PPAGE:
             if (!m_FileItems.empty()) {
-                int line= (d.h - 3) / 2;
+                int line= (d.Height() - 3) / 2;
                 for (int i = 0; i < line; ++i) {
                     ScrollUp();
                 }
@@ -221,7 +221,7 @@ bool ExplorerView::InjectKey(int key)
         case KEY_END:
             if (!m_FileItems.empty()) {
                 m_SelectionStack.back() = m_FileItems.size() - 1;
-                m_BeginStack.back() = std::max((int)m_FileItems.size() - (d.h - 3), 0);
+                m_BeginStack.back() = std::max((int)m_FileItems.size() - (d.Height() - 3), 0);
             }
             break;
 
@@ -387,7 +387,7 @@ void ExplorerView::ScrollDown()
     if (sel < (int)m_FileItems.size()-1) {
         ++sel;
     }
-    if (sel > (d.h-2) / 2 && beg < (int)m_FileItems.size()-(d.h-2-1)) {
+    if (sel > (d.Height()-2) / 2 && beg < (int)m_FileItems.size()-(d.Height()-2-1)) {
         ++beg;
     }
 }
@@ -399,7 +399,7 @@ void ExplorerView::ScrollUp()
     if (sel > 0) {
         --sel;
     }
-    if (sel < beg + (d.h-2) / 2 && beg > 0) {
+    if (sel < beg + (d.Height()-2) / 2 && beg > 0) {
         --beg;
     }
 }
