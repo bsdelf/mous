@@ -10,7 +10,6 @@ using namespace std;
 
 #include <util/MediaItem.h>
 
-#include "BgWindow.h"
 #include "Client.h"
 #include "ExplorerView.h"
 #include "HelpView.h"
@@ -107,7 +106,7 @@ class MainUi::Impl
             for (bool quit = false; !quit; quit = false) {
                 SyncRefresh();
 
-                int key = bgWindow.Input();
+                int key = wgetch(curscr);
                 if (key != ERR && HandleTopKey(key, quit)) {
                     if (quit) {
                         break;
@@ -170,6 +169,7 @@ class MainUi::Impl
         noecho();
         refresh();
         halfdelay(1);
+        curs_set(0);
     }
 
     void EndNcurses() { endwin(); }
@@ -249,8 +249,6 @@ class MainUi::Impl
 
     void OnResize()
     {
-        bgWindow.OnResize();
-
         layerStack.top().ShowViews(false);
         UpdateTopLayout();
     }
@@ -258,8 +256,8 @@ class MainUi::Impl
     /* update the layout of top layer */
     void UpdateTopLayout()
     {
-        const int w = bgWindow.Width();
-        const int h = bgWindow.Height();
+        const int w = COLS;
+        const int h = LINES;
 
         layerStack.top().ShowViews(true);
 
@@ -405,8 +403,6 @@ class MainUi::Impl
 
   private:
     Client client;
-
-    BgWindow bgWindow;
 
     ExplorerView explorerView;
     PlaylistView playlistView[PLAYLIST_COUNT];
