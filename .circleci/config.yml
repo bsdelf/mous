@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: apt-get update
-      - run: apt-get install -y build-essential cmake ncurses-dev libasound2-dev
+      - run: apt-get install -y build-essential cmake libncurses-dev libasound2-dev
       - run: >
           mkdir -p build &&
           cd build &&
