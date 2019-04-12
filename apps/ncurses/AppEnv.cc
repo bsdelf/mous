@@ -102,7 +102,8 @@ bool AppEnv::LoadContent()
     if (!infile.is_open()) {
         return false;
     }
-    const auto& str = (std::stringstream() << infile.rdbuf()).str();
+    // NOTE: once more useful rvalue stream insertion implemented in libstdc++, cast can be removed
+    const auto& str = static_cast<std::stringstream&>(std::stringstream() << infile.rdbuf()).str();
     infile.close();
     const Config config(str);
     serverIp = config[Key::ServerIp];
