@@ -103,7 +103,7 @@ bool AppEnv::LoadContent()
         return false;
     }
     // NOTE: once more useful rvalue stream insertion implemented in libstdc++, cast can be removed
-    const auto& str = static_cast<std::stringstream&>(std::stringstream() << infile.rdbuf()).str();
+    const auto& str = static_cast<std::stringstream&&>(std::stringstream() << infile.rdbuf()).str();
     infile.close();
     const Config config(str);
     serverIp = config[Key::ServerIp];
