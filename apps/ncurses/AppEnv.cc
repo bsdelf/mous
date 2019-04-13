@@ -83,7 +83,7 @@ bool AppEnv::SaveDefault()
         .Append()
         .ToString();
     std::ofstream outfile;
-    outfile.open(configFile.c_str(), std::ios::out);
+    outfile.open(configFile, std::ios::out);
     if (!outfile.is_open()) {
         cerr << "InitConfig(): Failed to write config" << endl;
         return false;
