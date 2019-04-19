@@ -315,11 +315,7 @@ class Player::Impl
 
     ErrorCode Open(const string& path)
     {
-        if (!m_Output) {
-            return ErrorCode::PlayerNoOutput;
-        }
-
-        m_Decoder.reset();
+        std::shared_ptr<Decoder> decoder;
         {
             const auto& suffix = ToLower(FileHelper::FileSuffix(path));
             // detect encoding
@@ -333,28 +329,41 @@ class Player::Impl
             if (encoding.size() > 0) {
                 const auto iter = m_Decoders.find("encoding/" + encoding);
                 if (iter != m_Decoders.end()) {
-                    m_Decoder = iter->second;
+                    decoder = iter->second;
                 }
             }
-            if (!m_Decoder) {
+            if (!decoder) {
                 auto iter = m_Decoders.find("suffix/" + suffix);
                 if (iter != m_Decoders.end()) {
-                    m_Decoder = iter->second;
+                    decoder = iter->second;
                 }
             }
         }
-        if (!m_Decoder) {
+        if (!decoder) {
             return ErrorCode::PlayerNoDecoder;
         }
-
-        ErrorCode err = m_Decoder->Open(path);
+        ErrorCode err = decoder->Open(path);
         if (err != ErrorCode::Ok) {
             return err;
         }
-        m_DecodeFile = path;
+
+        if (!m_Output) {
+            decoder->Close();
+            return ErrorCode::PlayerNoOutput;
+        }
+        int32_t channels = decoder->Channels();
+        int32_t sampleRate = decoder->SampleRate();
+        int32_t bitsPerSample = decoder->BitsPerSample();
+        // TODO: add log
+        err = m_Output->Setup(channels, sampleRate, bitsPerSample);
+        if (err != ErrorCode::Ok) {
+            decoder->Close();
+            printf("Failed to set output, error: %u, channels: %d, sample rate: %d, bits: %d\n", err, channels, sampleRate, bitsPerSample);
+            return err;
+        }
 
         // TODO: add log for buffer size and count
-        const uint32_t maxBytesPerUnit = m_Decoder->MaxBytesPerUnit();
+        const uint32_t maxBytesPerUnit = decoder->MaxBytesPerUnit();
         m_BufferMailbox.Clear();
         m_Buffer = std::make_unique<char[]>(m_BufferCount * (sizeof(UnitBuffer) + maxBytesPerUnit));
         for (int i = 0; i < m_BufferCount; ++i) {
@@ -362,22 +371,11 @@ class Player::Impl
             auto buf = reinterpret_cast<UnitBuffer*>(ptr);
             m_BufferMailbox.EmplaceBack(0, buf);
         }
-
-        m_UnitPerMs = (double)m_Decoder->UnitCount() / m_Decoder->Duration();
-
-        int32_t channels = m_Decoder->Channels();
-        int32_t sampleRate = m_Decoder->SampleRate();
-        int32_t bitsPerSample = m_Decoder->BitsPerSample();
-        // TODO: add log
-        err = m_Output->Setup(channels, sampleRate, bitsPerSample);
-        if (err != ErrorCode::Ok) {
-            printf("Failed to set output, error: %u, channels: %d, sample rate: %d, bits: %d\n", err, channels, sampleRate, bitsPerSample);
-            return err;
-        }
-
+        m_UnitPerMs = (double)decoder->UnitCount() / decoder->Duration();
         m_Status = PlayerStatus::Stopped;
-
-        return err;
+        m_DecodeFile = path;
+        m_Decoder = decoder;
+        return ErrorCode::Ok;
     }
 
     void Close()
