@@ -90,21 +90,18 @@ class Player::Impl
                     }
 
                     case RUNNING | DECODE: {
-                        auto& buf = mail.buffer;
-
-                        if (m_DecoderIndex < m_UnitEnd) {
-                            m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
-                            m_DecoderIndex += buf->unitCount;
-
-                            mail.action = OUTPUT;
-                            m_OutputMailbox.PushBack(std::move(mail));
-
-                            if (m_DecoderIndex >= m_UnitEnd) {
-                                status = IDLE;
-                            }
-                        } else {
+                        if (m_DecoderIndex >= m_UnitEnd) {
                             m_BufferMailbox.PushBack(std::move(mail));
+                            break;
                         }
+                        auto& buf = mail.buffer;
+                        m_Decoder->DecodeUnit(buf->data, buf->used, buf->unitCount);
+                        m_DecoderIndex += buf->unitCount;
+                        if (m_DecoderIndex >= m_UnitEnd) {
+                            status = IDLE;
+                        }
+                        mail.action = OUTPUT;
+                        m_OutputMailbox.PushBack(std::move(mail));
                         break;
                     }
 
@@ -149,26 +146,23 @@ class Player::Impl
                     }
 
                     case RUNNING | OUTPUT: {
-                        auto& buf = mail.buffer;
-
-                        if (m_OutputIndex < m_UnitEnd) {
-                            if (m_Output->Write(buf->data, buf->used) != ErrorCode::Ok) {
-                                // avoid busy write
-                                const int64_t delay = buf->unitCount / m_UnitPerMs * 1e6;
-                                std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
-                            }
-                            m_OutputIndex += buf->unitCount;
-
-                            mail.action = DECODE;
-                            m_DecoderMailbox.PushBack(std::move(mail));
-
-                            if (m_OutputIndex >= m_UnitEnd) {
-                                status = IDLE;
-                                std::thread([this]() { m_SigFinished(); }).detach();
-                            }
-                        } else {
+                        if (m_OutputIndex >= m_UnitEnd) {
                             m_BufferMailbox.PushBack(std::move(mail));
+                            break;
                         }
+                        auto& buf = mail.buffer;
+                        if (m_Output->Write(buf->data, buf->used) != ErrorCode::Ok) {
+                            // avoid busy write
+                            const int64_t delay = buf->unitCount / m_UnitPerMs * 1e6;
+                            std::this_thread::sleep_for(std::chrono::nanoseconds(delay));
+                        }
+                        m_OutputIndex += buf->unitCount;
+                        if (m_OutputIndex >= m_UnitEnd) {
+                            status = IDLE;
+                            std::thread([this]() { m_SigFinished(); }).detach();
+                        }
+                        mail.action = DECODE;
+                        m_DecoderMailbox.PushBack(std::move(mail));
                         break;
                     }
 
