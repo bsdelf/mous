@@ -2,12 +2,13 @@
 
 #include <dlfcn.h>
 #include <memory>
+#include <utility>
 #include <util/PluginDef.h>
 
 namespace mous {
 
 class Plugin {
-    using FuncPluginInfo = const PluginInfo* (*)(void);
+    using GetPluginInfo = const PluginInfo* (*)(void);
 
   public:
     Plugin() = default;
@@ -15,40 +16,51 @@ class Plugin {
     Plugin& operator=(const Plugin&) = delete;
 
     Plugin(const std::string& path, int mode = RTLD_LAZY | RTLD_GLOBAL) {
-        handle_ = dlopen(path.c_str(), mode);
-        if (!handle_) {
+        auto handle = ::dlopen(path.c_str(), mode);
+        if (!handle) {
             return;
         }
-        func_plugin_info_ = Symbol<FuncPluginInfo>(StrGetPluginInfo);
-        if (!func_plugin_info_) {
-            dlclose(handle_);
-            handle_ = nullptr;
+        auto get_plugin_info = reinterpret_cast<GetPluginInfo>(::dlsym(handle, StrGetPluginInfo));
+        if (!get_plugin_info) {
+            ::dlclose(handle);
             return;
         }
-        const auto info = func_plugin_info_();
+        const auto info = get_plugin_info();
+        if (!info) {
+            return;
+        }
         path_ = path;
+        handle_ = handle;
         type_ = info->type;
         name_ = info->name;
         desc_ = info->desc;
         version_ = info->version;
     }
 
-    Plugin(Plugin&& that) {
-        handle_ = that.handle_;
-        that.handle_ = nullptr;
+    Plugin(Plugin&& that): Plugin() {
+        std::swap(*this, that);
     }
 
     ~Plugin() {
-        if (handle_) {
-            dlclose(handle_);
-            handle_ = nullptr;
-        }
+        Clear();
     }
 
     Plugin& operator=(Plugin&& that) {
-        handle_ = that.handle_;
-        that.handle_ = nullptr;
+        Clear();
+        std::swap(*this, that);
         return *this;
+    }
+
+    void Clear() {
+        if (handle_) {
+            ::dlclose(handle_);
+            handle_ = nullptr;
+        }
+        path_.clear();
+        type_ = PluginType::None;
+        name_.clear();
+        desc_.clear();
+        version_ = 0;
     }
 
     explicit operator bool () const {
@@ -56,7 +68,7 @@ class Plugin {
     }
 
     auto Symbol(const std::string& name) const {
-        return dlsym(handle_, name.c_str());
+        return ::dlsym(handle_, name.c_str());
     }
 
     template <class T>
@@ -85,13 +97,12 @@ class Plugin {
     }
 
     static inline auto LatestError() {
-        return std::string(dlerror());
+        return std::string(::dlerror());
     }
 
   private:
     std::string path_;
     void* handle_ = nullptr;
-    FuncPluginInfo func_plugin_info_ = nullptr;
     PluginType type_ = PluginType::None;
     std::string name_;
     std::string desc_;
