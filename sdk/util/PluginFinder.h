@@ -19,15 +19,15 @@ public:
     }
 
     void Reset() {
-        for (int i = 0; i < nCallbacks_; ++i) {
-            callbacks_[i] = [](const std::shared_ptr<Plugin>&) {};
+        for (int i = 0; i < ncallbacks_; ++i) {
+            callbacks_[i] = [](const auto&) {};
         }
     }
 
     // NOTE: be careful with overwrite
     PluginFinder& OnPlugin(PluginType type, std::function<void (const std::shared_ptr<Plugin>& plugin)> callback) {
         const auto bits = scx::ToUnderlying(type);
-        for (int k = 0; k < nCallbacks_; ++k) {
+        for (int k = 0; k < ncallbacks_; ++k) {
             const auto mask = 1u << k;
             if (bits & mask) {
                 callbacks_[k] = callback;
@@ -47,7 +47,7 @@ public:
                     auto plugin = std::make_shared<Plugin>(head);
                     if (*plugin) {
                         const auto bits = scx::ToUnderlying(plugin->Type());
-                        for (int k = 0; k < nCallbacks_; ++k) {
+                        for (int k = 0; k < ncallbacks_; ++k) {
                             const auto mask = 1u << k;
                             if (bits & mask) {
                                 callbacks_[k](plugin);
@@ -75,8 +75,8 @@ public:
     }
 
 private:
-    static constexpr int nCallbacks_ = 32;
-    std::function<void (const std::shared_ptr<Plugin>&)> callbacks_[nCallbacks_];
+    static constexpr int ncallbacks_ = 32;
+    std::function<void (const std::shared_ptr<Plugin>&)> callbacks_[ncallbacks_];
 };
 
 }
