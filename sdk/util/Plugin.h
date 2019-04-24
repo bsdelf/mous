@@ -1,7 +1,6 @@
 #pragma once
 
 #include <dlfcn.h>
-#include <memory>
 #include <utility>
 #include <util/PluginDef.h>
 
@@ -11,9 +10,19 @@ class Plugin {
     using GetPluginInfo = const PluginInfo* (*)(void);
 
   public:
+    friend void swap(Plugin& a, Plugin& b) {
+        using std::swap;
+        swap(a.path_, b.path_);
+        swap(a.handle_, b.handle_);
+        swap(a.type_, b.type_);
+        swap(a.name_, b.name_);
+        swap(a.desc_, b.desc_);
+        swap(a.version_, b.version_);
+    }
+
     Plugin() = default;
+
     Plugin(const Plugin&) = delete;
-    Plugin& operator=(const Plugin&) = delete;
 
     Plugin(const std::string& path, int mode = RTLD_LAZY | RTLD_GLOBAL) {
         auto handle = ::dlopen(path.c_str(), mode);
@@ -38,29 +47,18 @@ class Plugin {
     }
 
     Plugin(Plugin&& that): Plugin() {
-        std::swap(*this, that);
+        swap(*this, that);
     }
 
     ~Plugin() {
-        Clear();
-    }
-
-    Plugin& operator=(Plugin&& that) {
-        Clear();
-        std::swap(*this, that);
-        return *this;
-    }
-
-    void Clear() {
         if (handle_) {
             ::dlclose(handle_);
-            handle_ = nullptr;
         }
-        path_.clear();
-        type_ = PluginType::None;
-        name_.clear();
-        desc_.clear();
-        version_ = 0;
+    }
+
+    Plugin& operator=(Plugin that) {
+        swap(*this, that);
+        return *this;
     }
 
     explicit operator bool () const {
