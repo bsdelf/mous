@@ -36,6 +36,7 @@ class Plugin {
         }
         const auto info = get_plugin_info();
         if (!info) {
+            ::dlclose(handle);
             return;
         }
         path_ = path;
