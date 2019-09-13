@@ -90,4 +90,12 @@ The 2-Clause BSD License
 ![qt application 2](https://github.com/bsdelf/mous/raw/master/screenshot/qt-conv.png)
 ![qt application 3](https://github.com/bsdelf/mous/raw/master/screenshot/qt5-macos.png)
 
+## Donate
+
+Want to sponsor this project? Send a donation to Ethereum address:
+
+```
+0xffEebDBFdc9a524D6B1b605CAaC739aB2D411709
+```
+
 <!--/font-->
