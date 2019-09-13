@@ -6,56 +6,56 @@
 
 ## Features
 
-* Lightweight
-* Extensible plugins
-* Reasonable dependencies
-* Support FreeBSD, Linux, macOS
+- Lightweight
+- Extensible plugins
+- Reasonable dependencies
+- Support FreeBSD, Linux, macOS
 
 ## Applications
 
-*1*. mous-qt
+_1_. mous-qt
 
-* Foobar2000 like
-* Audio format conversion
-* Tag & cover art editor
-* Charset conversion
-* Qt 5 is the only dependency
+- Foobar2000 like
+- Audio format conversion
+- Tag & cover art editor
+- Charset conversion
+- Qt 5 is the only dependency
 
-*2*. mous-ncurses
+_2_. mous-ncurses
 
-* Client-server model
-* Vim like key binding
-* File explorer
-* Multi playlists
-* Low memory consumption
-* Play in background
-* Charset conversion
-* Ncurses is the only dependency
+- Client-server model
+- Vim like key binding
+- File explorer
+- Multi playlists
+- Low memory consumption
+- Play in background
+- Charset conversion
+- Ncurses is the only dependency
 
-*3*. mous-cli
+_3_. mous-cli
 
-* Has no dependency at all
+- Has no dependency at all
 
 ## Plugins
 
-| Name | Capability | Dependency |
-|:---|:---|:---|
-| alsa | ALSA output | - |
-| oss | OSS output | - |
-| coreaudio | Core Audio codec & output | - |
-| sndio | sndio output | sndio |
-| taglib | audio meta-data read & write | taglib |
-| lpcm | LPCM codec (\*.wav) | - |
-| mpg123 | MP3 decoding (\*.mp3) | mpg123 |
-| lame | MP3 encoding (\*.mp3) | lame |
-| fdk-aac | AAC codec (\*.m4a, \*.mp4) | fdk-aac, mp4v2 |
-| alac | ALAC codec (\*.m4a, \*.mp4) | alac (bundled), mp4v2 |
-| wavpack | WavPack codec (\*.wv) | wavpack |
-| vorbis | Ogg Vorbis codec (\*.ogg) | vorbis, vorbisfile |
-| opus | Ogg Opus codec (\*.opus) | opus, opusfile |
-| flac | FLAC codec (\*.flac) | flac |
-| mac | Monkey's Audio codec (\*.ape) | MAC (bundled) |
-| libcue | Cue sheet parser (\*.cue) | libcue |
+| Name      | Capability                    | Dependency            |
+| :-------- | :---------------------------- | :-------------------- |
+| alsa      | ALSA output                   | -                     |
+| oss       | OSS output                    | -                     |
+| coreaudio | Core Audio codec & output     | -                     |
+| sndio     | sndio output                  | sndio                 |
+| taglib    | audio meta-data read & write  | taglib                |
+| lpcm      | LPCM codec (\*.wav)           | -                     |
+| mpg123    | MP3 decoding (\*.mp3)         | mpg123                |
+| lame      | MP3 encoding (\*.mp3)         | lame                  |
+| fdk-aac   | AAC codec (\*.m4a, \*.mp4)    | fdk-aac, mp4v2        |
+| alac      | ALAC codec (\*.m4a, \*.mp4)   | alac (bundled), mp4v2 |
+| wavpack   | WavPack codec (\*.wv)         | wavpack               |
+| vorbis    | Ogg Vorbis codec (\*.ogg)     | vorbis, vorbisfile    |
+| opus      | Ogg Opus codec (\*.opus)      | opus, opusfile        |
+| flac      | FLAC codec (\*.flac)          | flac                  |
+| mac       | Monkey's Audio codec (\*.ape) | MAC (bundled)         |
+| libcue    | Cue sheet parser (\*.cue)     | libcue                |
 
 ## Install
 
