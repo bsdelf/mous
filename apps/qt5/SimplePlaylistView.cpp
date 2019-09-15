@@ -1,5 +1,6 @@
 #include "SimplePlaylistView.h"
 
+#include <algorithm>
 #include <thread>
 using namespace std;
 
@@ -368,10 +369,11 @@ void SimplePlaylistView::dropEvent(QDropEvent* event) {
 
     std::thread([this, files] {
       LoadMediaItem(files);
-    }).detach();
+    })
+        .detach();
   } else if (text.isEmpty()) {
     QList<int> rowList = PickSelectedRows();
-    qSort(rowList);
+    std::sort(rowList.begin(), rowList.end());
     if (!rowList.empty()) {
       // calc insert pos
       int visualInsertPos = indexAt(m_FoobarStyle->BelowIndicator()).row();
@@ -442,7 +444,8 @@ void SimplePlaylistView::SlotAppend() {
   // Async load
   std::thread([this, pathList] {
     LoadMediaItem(pathList);
-  }).detach();
+  })
+      .detach();
 }
 
 void SimplePlaylistView::SlotTagging() {
@@ -585,7 +588,7 @@ void SimplePlaylistView::SlotShortcutDelete() {
   if (selectedRows.empty()) {
     return;
   }
-  qSort(selectedRows);
+  std::sort(selectedRows.begin(), selectedRows.end());
 
   ActionHistory::Action action;
   action.type = ActionHistory::Remove;
