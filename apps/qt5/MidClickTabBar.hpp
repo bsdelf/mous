@@ -5,21 +5,19 @@
 
 namespace sqt {
 
-class MidClickTabBar : public QTabBar
-{
-    Q_OBJECT
+class MidClickTabBar : public QTabBar {
+  Q_OBJECT
 
-public:
-    MidClickTabBar(QWidget * parent = 0);
+ public:
+  MidClickTabBar(QWidget* parent = 0);
 
-signals:
-    void SigMidClick(int id);
+ signals:
+  void SigMidClick(int id);
 
-private:
-    virtual void mouseReleaseEvent(QMouseEvent* event);
-    
+ private:
+  virtual void mouseReleaseEvent(QMouseEvent* event);
 };
 
-}
+}  // namespace sqt
 
-#endif // DCLICKTABBAR_H
+#endif  // DCLICKTABBAR_H

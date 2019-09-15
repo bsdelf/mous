@@ -9,7 +9,7 @@ static void Destroy(void* ptr);
 static mous::ErrorCode Open(void* ptr, const char* path);
 static void Close(void* ptr);
 static bool HasTag(void* ptr);
-static const char* GetTitle(void* ptr); 
+static const char* GetTitle(void* ptr);
 static const char* GetArtist(void* ptr);
 static const char* GetAlbum(void* ptr);
 static const char* GetComment(void* ptr);
@@ -33,7 +33,7 @@ static int32_t GetBitRate(void* ptr);
 static const mous::BaseOption** GetOptions(void* ptr);
 static const char** GetSuffixes(void* ptr);
 
-static const mous::TagParserInterface tag_parser_interface {
+static const mous::TagParserInterface tag_parser_interface{
     Create,
     Destroy,
     Open,
@@ -61,11 +61,10 @@ static const mous::TagParserInterface tag_parser_interface {
     GetDuration,
     GetBitRate,
     GetOptions,
-    GetSuffixes
-};
+    GetSuffixes};
 
 extern "C" {
-    const mous::TagParserInterface* MousGetTagParserInterface() {
-        return &tag_parser_interface;
-    }
+const mous::TagParserInterface* MousGetTagParserInterface() {
+  return &tag_parser_interface;
+}
 }

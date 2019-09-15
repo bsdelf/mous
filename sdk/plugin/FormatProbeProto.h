@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unistd.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include <util/AudioMode.h>
 #include <util/ErrorCode.h>
 #include <util/Option.h>
@@ -13,16 +13,15 @@ static const char* Probe(void* ptr, const char* path);
 static const mous::BaseOption** GetOptions(void* ptr);
 static const char** GetSuffixes(void* ptr);
 
-static mous::FormatProbeInterface format_probe_interface {
+static mous::FormatProbeInterface format_probe_interface{
     Create,
     Destroy,
     Probe,
     GetOptions,
-    GetSuffixes
-};
+    GetSuffixes};
 
 extern "C" {
-    const mous::FormatProbeInterface* MousGetFormatProbeInterface() {
-        return &format_probe_interface;
-    }
+const mous::FormatProbeInterface* MousGetFormatProbeInterface() {
+  return &format_probe_interface;
+}
 }

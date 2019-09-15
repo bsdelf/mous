@@ -2,173 +2,179 @@
 
 #include <inttypes.h>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace mous {
 
-enum class OptionType : uint8_t
-{
-    None = 0,
+enum class OptionType : uint8_t {
+  None = 0,
 
-    Int,            // int32_t
-    Float,          // double
-    String,
-    Boolean,
+  Int,    // int32_t
+  Float,  // double
+  String,
+  Boolean,
 
-    EnumedInt,
-    EnumedFloat,
-    EnumedString,
+  EnumedInt,
+  EnumedFloat,
+  EnumedString,
 
-    RangedInt,
-    RangedFloat,
+  RangedInt,
+  RangedFloat,
 
-    Grouped
+  Grouped
 };
 
-inline const char* ToString(OptionType type)
-{
-    switch (type) {
-        case OptionType::None:
-            return "None";
+inline const char* ToString(OptionType type) {
+  switch (type) {
+    case OptionType::None:
+      return "None";
 
-        case OptionType::Int:
-            return "Int";
+    case OptionType::Int:
+      return "Int";
 
-        case OptionType::Float:
-            return "Float";
+    case OptionType::Float:
+      return "Float";
 
-        case OptionType::String:
-            return "String";
+    case OptionType::String:
+      return "String";
 
-        case OptionType::Boolean:
-            return "Boolean";
+    case OptionType::Boolean:
+      return "Boolean";
 
-        case OptionType::EnumedInt:
-            return "EnumedInt";
+    case OptionType::EnumedInt:
+      return "EnumedInt";
 
-        case OptionType::EnumedFloat:
-            return "EnumedFloat";
+    case OptionType::EnumedFloat:
+      return "EnumedFloat";
 
-        case OptionType::EnumedString:
-            return "EnumedString";
+    case OptionType::EnumedString:
+      return "EnumedString";
 
-        case OptionType::RangedInt:
-            return "RangedInt";
+    case OptionType::RangedInt:
+      return "RangedInt";
 
-        case OptionType::RangedFloat:
-            return "RangedFloat";
+    case OptionType::RangedFloat:
+      return "RangedFloat";
 
-        case OptionType::Grouped:
-            return "Grouped";
-    }
-    return "";
+    case OptionType::Grouped:
+      return "Grouped";
+  }
+  return "";
 }
 
-struct BaseOption
-{
-    const OptionType type;
-    std::string desc;
+struct BaseOption {
+  const OptionType type;
+  std::string desc;
 
-    explicit BaseOption(OptionType _type):
-        type(_type)
-    {
-    }
+  explicit BaseOption(OptionType _type)
+      : type(_type) {
+  }
 };
 
-struct IntOption: public BaseOption
-{
-    int32_t defaultVal;
-    mutable int32_t userVal; 
+struct IntOption : public BaseOption {
+  int32_t defaultVal;
+  mutable int32_t userVal;
 
-    IntOption(): BaseOption(OptionType::Int) {}
+  IntOption()
+      : BaseOption(OptionType::Int) {
+  }
 };
 
-struct FloatOption: public BaseOption
-{
-    int32_t defaultVal;
-    mutable double userVal; 
+struct FloatOption : public BaseOption {
+  int32_t defaultVal;
+  mutable double userVal;
 
-    int point;  // double = defaultVal/point eg. 123/10=12.3
+  int point;  // double = defaultVal/point eg. 123/10=12.3
 
-    FloatOption(): BaseOption(OptionType::Float) {}
+  FloatOption()
+      : BaseOption(OptionType::Float) {
+  }
 };
 
-struct StringOption: public BaseOption
-{
-    std::string defaultVal;
-    mutable std::string userVal; 
+struct StringOption : public BaseOption {
+  std::string defaultVal;
+  mutable std::string userVal;
 
-    StringOption(): BaseOption(OptionType::String) {}
+  StringOption()
+      : BaseOption(OptionType::String) {
+  }
 };
 
-struct BooleanOption: public BaseOption
-{
-    std::string detail;
-    bool defaultChoice;
-    mutable bool userChoice;
+struct BooleanOption : public BaseOption {
+  std::string detail;
+  bool defaultChoice;
+  mutable bool userChoice;
 
-    BooleanOption(): BaseOption(OptionType::Boolean) {}
+  BooleanOption()
+      : BaseOption(OptionType::Boolean) {
+  }
 };
 
-struct EnumedIntOption: public BaseOption
-{
-    std::vector<int32_t> enumedVal;
-    size_t defaultChoice;
-    mutable size_t userChoice; 
+struct EnumedIntOption : public BaseOption {
+  std::vector<int32_t> enumedVal;
+  size_t defaultChoice;
+  mutable size_t userChoice;
 
-    EnumedIntOption(): BaseOption(OptionType::EnumedInt) {}
+  EnumedIntOption()
+      : BaseOption(OptionType::EnumedInt) {
+  }
 };
 
-struct EnumedFloatOption: public BaseOption
-{
-    std::vector<int32_t> enumedVal;
-    size_t defaultChoice;
-    mutable size_t userChoice; 
+struct EnumedFloatOption : public BaseOption {
+  std::vector<int32_t> enumedVal;
+  size_t defaultChoice;
+  mutable size_t userChoice;
 
-    int point;  // double = defaultVal/point eg. 123/10=12.3
+  int point;  // double = defaultVal/point eg. 123/10=12.3
 
-    EnumedFloatOption(): BaseOption(OptionType::EnumedFloat) {}
+  EnumedFloatOption()
+      : BaseOption(OptionType::EnumedFloat) {
+  }
 };
 
-struct EnumedStringOption: public BaseOption
-{
-    std::vector<std::string> enumedVal;
-    size_t defaultChoice;
-    mutable size_t userChoice; 
+struct EnumedStringOption : public BaseOption {
+  std::vector<std::string> enumedVal;
+  size_t defaultChoice;
+  mutable size_t userChoice;
 
-    EnumedStringOption(): BaseOption(OptionType::EnumedString) {}
+  EnumedStringOption()
+      : BaseOption(OptionType::EnumedString) {
+  }
 };
 
-struct RangedIntOption: public BaseOption
-{
-    int32_t min;
-    int32_t max;
-    int32_t defaultVal;
-    mutable int32_t userVal; 
+struct RangedIntOption : public BaseOption {
+  int32_t min;
+  int32_t max;
+  int32_t defaultVal;
+  mutable int32_t userVal;
 
-    RangedIntOption(): BaseOption(OptionType::RangedInt) {}
+  RangedIntOption()
+      : BaseOption(OptionType::RangedInt) {
+  }
 };
 
-struct RangedFloatOption: public BaseOption
-{
-    int32_t min;
-    int32_t max;
-    int32_t defaultVal;
-    mutable int32_t userVal; 
+struct RangedFloatOption : public BaseOption {
+  int32_t min;
+  int32_t max;
+  int32_t defaultVal;
+  mutable int32_t userVal;
 
-    int point;  // double = defaultVal/point eg. 123/10=12.3
+  int point;  // double = defaultVal/point eg. 123/10=12.3
 
-    RangedFloatOption(): BaseOption(OptionType::RangedFloat) {}
+  RangedFloatOption()
+      : BaseOption(OptionType::RangedFloat) {
+  }
 };
 
-struct GroupedOption: public BaseOption
-{
-    std::vector<std::pair<std::string, std::vector<BaseOption*> > > groups;
-    int defaultUse;
-    mutable int userUse;
+struct GroupedOption : public BaseOption {
+  std::vector<std::pair<std::string, std::vector<BaseOption*> > > groups;
+  int defaultUse;
+  mutable int userUse;
 
-    GroupedOption(): BaseOption(OptionType::Grouped) { }
+  GroupedOption()
+      : BaseOption(OptionType::Grouped) {
+  }
 };
 
-}
+}  // namespace mous

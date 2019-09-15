@@ -1,113 +1,110 @@
 #include "AppEnv.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 using namespace std;
 
-#include <scx/Env.h>
-#include <scx/Dir.h>
-#include <scx/FileInfo.h>
 #include <scx/Config.h>
+#include <scx/Dir.h>
+#include <scx/Env.h>
+#include <scx/FileInfo.h>
 using namespace scx;
 
 namespace Path {
-    const char* const ConfigRoot = "/.config/mous/ncurses/";
-    const char* const PluginRoot = "/lib/mous/";
+const char* const ConfigRoot = "/.config/mous/ncurses/";
+const char* const PluginRoot = "/lib/mous/";
 
-    const char* const ConfigFile = "config";
-    const char* const PidFile = "server.pid";
+const char* const ConfigFile = "config";
+const char* const PidFile = "server.pid";
 
-    const char* const ContextFile = "context.dat";
-    const char* const PlaylistFile = "playlist%d.dat";
-}
+const char* const ContextFile = "context.dat";
+const char* const PlaylistFile = "playlist%d.dat";
+}  // namespace Path
 
 namespace Key {
-    const char* const ServerIp = "ServerIp";
-    const char* const ServerPort = "ServerPort";
-    const char* const IfNotUtf8 = "IfNotUtf8";
+const char* const ServerIp = "ServerIp";
+const char* const ServerPort = "ServerPort";
+const char* const IfNotUtf8 = "IfNotUtf8";
+}  // namespace Key
+
+bool AppEnv::Init() {
+  // init path
+  FileInfo pluginDirInfo(string(CMAKE_INSTALL_PREFIX) + Path::PluginRoot);
+  if (!pluginDirInfo.Exists() || pluginDirInfo.Type() != FileType::Directory) {
+    return false;
+  }
+  pluginDir = pluginDirInfo.AbsFilePath();
+  configDir = Env::Get("HOME") + Path::ConfigRoot;
+  configFile = configDir + Path::ConfigFile;
+  pidFile = configDir + Path::PidFile;
+  contextFile = configDir + Path::ContextFile;
+  playlistFile = configDir + Path::PlaylistFile;
+
+  // ensure root directory
+  FileInfo configRootDirInfo(configDir);
+  if (configRootDirInfo.Exists()) {
+    if (configRootDirInfo.Type() != FileType::Directory) {
+      return false;
+    }
+  } else {
+    if (!Dir::MakeDir(configDir, 0777)) {
+      return false;
+    }
+  }
+
+  // ensure config file
+  FileInfo configFileInfo(configFile);
+  if (configFileInfo.Exists()) {
+    if (configFileInfo.Type() != FileType::Regular) {
+      return false;
+    }
+  } else {
+    if (!SaveDefault()) {
+      return false;
+    }
+  }
+
+  return LoadContent();
 }
 
-bool AppEnv::Init()
-{
-    // init path
-    FileInfo pluginDirInfo(string(CMAKE_INSTALL_PREFIX) + Path::PluginRoot);
-    if (!pluginDirInfo.Exists() || pluginDirInfo.Type() != FileType::Directory) {
-        return false;
-    }
-    pluginDir = pluginDirInfo.AbsFilePath();
-    configDir = Env::Get("HOME") + Path::ConfigRoot;
-    configFile = configDir + Path::ConfigFile;
-    pidFile = configDir + Path::PidFile;
-    contextFile = configDir + Path::ContextFile;
-    playlistFile = configDir + Path::PlaylistFile;
-
-    // ensure root directory
-    FileInfo configRootDirInfo(configDir);
-    if (configRootDirInfo.Exists()) {
-        if (configRootDirInfo.Type() != FileType::Directory) {
-            return false;
-        }
-    } else {
-        if (!Dir::MakeDir(configDir, 0777)) {
-            return false;
-        }
-    }
-
-    // ensure config file
-    FileInfo configFileInfo(configFile);
-    if (configFileInfo.Exists()) {
-        if (configFileInfo.Type() != FileType::Regular) {
-            return false;
-        }
-    } else {
-        if (!SaveDefault()) {
-            return false;
-        }
-    }
-
-    return LoadContent();
+bool AppEnv::SaveDefault() {
+  const auto& str = Config()
+                        .Concat(Config::Comment("server ip"))
+                        .Concat(Config::KeyValue(Key::ServerIp, "127.0.0.1"))
+                        .Concat(Config::Blank())
+                        .Concat(Config::Comment("server port"))
+                        .Concat(Config::KeyValue(Key::ServerPort, "21027"))
+                        .Concat(Config::Blank())
+                        .Concat(Config::Comment("fallback encoding"))
+                        .Concat(Config::KeyValue(Key::IfNotUtf8, "GBK"))
+                        .Concat(Config::Blank())
+                        .ToString();
+  std::ofstream outfile;
+  outfile.open(configFile, std::ios::out);
+  if (!outfile.is_open()) {
+    cerr << "InitConfig(): Failed to write config" << endl;
+    return false;
+  }
+  outfile.write(str.data(), str.size());
+  outfile.close();
+  cout << "New config file was generated: " << configFile << endl;
+  sleep(1);
+  return true;
 }
 
-bool AppEnv::SaveDefault()
-{
-    const auto& str = Config()
-        .Concat(Config::Comment("server ip"))
-        .Concat(Config::KeyValue(Key::ServerIp, "127.0.0.1"))
-        .Concat(Config::Blank())
-        .Concat(Config::Comment("server port"))
-        .Concat(Config::KeyValue(Key::ServerPort, "21027"))
-        .Concat(Config::Blank())
-        .Concat(Config::Comment("fallback encoding"))
-        .Concat(Config::KeyValue(Key::IfNotUtf8, "GBK"))
-        .Concat(Config::Blank())
-        .ToString();
-    std::ofstream outfile;
-    outfile.open(configFile, std::ios::out);
-    if (!outfile.is_open()) {
-        cerr << "InitConfig(): Failed to write config" << endl;
-        return false;
-    }
-    outfile.write(str.data(), str.size());
-    outfile.close();
-    cout << "New config file was generated: " << configFile << endl;
-    sleep(1);
-    return true;
-}
-
-bool AppEnv::LoadContent()
-{
-    std::ifstream infile;
-    infile.open(configFile, std::ios::in);
-    if (!infile.is_open()) {
-        return false;
-    }
-    // NOTE: once more useful rvalue stream insertion implemented in libstdc++, cast can be removed
-    const auto& str = static_cast<std::stringstream&&>(std::stringstream() << infile.rdbuf()).str();
-    infile.close();
-    const Config config(str);
-    serverIp = config[Key::ServerIp];
-    serverPort = std::stoi(config[Key::ServerPort]);
-    ifNotUtf8 = config[Key::IfNotUtf8];
-    return true;
+bool AppEnv::LoadContent() {
+  std::ifstream infile;
+  infile.open(configFile, std::ios::in);
+  if (!infile.is_open()) {
+    return false;
+  }
+  // NOTE: once more useful rvalue stream insertion implemented in libstdc++, cast can be removed
+  const auto& str = static_cast<std::stringstream&&>(std::stringstream() << infile.rdbuf()).str();
+  infile.close();
+  const Config config(str);
+  serverIp = config[Key::ServerIp];
+  serverPort = std::stoi(config[Key::ServerPort]);
+  ifNotUtf8 = config[Key::IfNotUtf8];
+  return true;
 }

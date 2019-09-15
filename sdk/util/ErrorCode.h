@@ -4,43 +4,42 @@
 
 namespace mous {
 
-enum class ErrorCode : uint32_t
-{
-    Ok = 0,
+enum class ErrorCode : uint32_t {
+  Ok = 0,
 
-    FileNotFound,
+  FileNotFound,
 
-    PluginFailedToOpen,
-    PluginBadFormat,
+  PluginFailedToOpen,
+  PluginBadFormat,
 
-    DecoderFailedToOpen,
-    DecoderFailedToInit,
-    DecoderFailedToRead,
-    DecoderOutOfRange,
+  DecoderFailedToOpen,
+  DecoderFailedToInit,
+  DecoderFailedToRead,
+  DecoderOutOfRange,
 
-    EncoderFailedToOpen,
-    EncoderFailedToInit,
-    EncoderFailedToEncode,
-    EncoderFailedToFlush,
+  EncoderFailedToOpen,
+  EncoderFailedToInit,
+  EncoderFailedToEncode,
+  EncoderFailedToFlush,
 
-    OutputFailedToOpen,
-    OutputFailedToSetup,
-    OutputFailedToWrite,
-    OutputBadChannels,
-    OutputBadSampleRate,
-    OutputBadBitsPerSample,
-    OutputIsNotSupported,
+  OutputFailedToOpen,
+  OutputFailedToSetup,
+  OutputFailedToWrite,
+  OutputBadChannels,
+  OutputBadSampleRate,
+  OutputBadBitsPerSample,
+  OutputIsNotSupported,
 
-    PlayerNoDecoder,
-    PlayerNoOutput,
+  PlayerNoDecoder,
+  PlayerNoOutput,
 
-    TagPraserFailedToWrite,
+  TagPraserFailedToWrite,
 
-    MediaLoaderFailedToLoad,
+  MediaLoaderFailedToLoad,
 
-    PlaylistEmpty,
-    PlaylistHitBegin,
-    PlaylistHitEnd
+  PlaylistEmpty,
+  PlaylistHitBegin,
+  PlaylistHitEnd
 };
 
 /*
@@ -60,4 +59,4 @@ const char* const ErrorMsg[] = {
 };
 */
 
-}
+}  // namespace mous

@@ -7,45 +7,42 @@ namespace Ui {
 class FrmProgressBar;
 }
 
-class FrmProgressBar : public QWidget
-{
-    Q_OBJECT
-    
-public:
-    explicit FrmProgressBar(QWidget *parent = 0);
-    ~FrmProgressBar();
-    
-    void SetKey(void* key);
+class FrmProgressBar : public QWidget {
+  Q_OBJECT
 
-    void SetProgress(int progress);
-    void SetFileName(const QString& fileName);
+ public:
+  explicit FrmProgressBar(QWidget* parent = 0);
+  ~FrmProgressBar();
 
-signals:
-    void SigCanceled(void* key);
+  void SetKey(void* key);
 
-private slots:
-    void SlotBtnCancel();
+  void SetProgress(int progress);
+  void SetFileName(const QString& fileName);
 
-private:
-    void UpdatePassedTime();
+ signals:
+  void SigCanceled(void* key);
 
-private:
-    Ui::FrmProgressBar *ui;
-    void* key;
+ private slots:
+  void SlotBtnCancel();
 
-    struct SpeedRecord
-    {
-        qint64 time[2];
-        int progress[2];
+ private:
+  void UpdatePassedTime();
 
-        SpeedRecord()
-        {
-            progress[0] = time[0] = -1;
-            progress[1] = time[1] = -1;
-        }
-    };
+ private:
+  Ui::FrmProgressBar* ui;
+  void* key;
 
-    SpeedRecord m_SpeedRecord;
+  struct SpeedRecord {
+    qint64 time[2];
+    int progress[2];
+
+    SpeedRecord() {
+      progress[0] = time[0] = -1;
+      progress[1] = time[1] = -1;
+    }
+  };
+
+  SpeedRecord m_SpeedRecord;
 };
 
-#endif // FRMPROGRESSBAR_H
+#endif  // FRMPROGRESSBAR_H

@@ -2,17 +2,15 @@
 
 #include <memory>
 
-class MainUi
-{
-    class Impl;
+class MainUi {
+  class Impl;
 
-public:
-    MainUi();
-    ~MainUi();
+ public:
+  MainUi();
+  ~MainUi();
 
-    int Exec();
+  int Exec();
 
-private:
-    std::unique_ptr<Impl> impl;
+ private:
+  std::unique_ptr<Impl> impl;
 };
-

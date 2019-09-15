@@ -1,41 +1,40 @@
 #ifndef APPENV_H
 #define APPENV_H
 
-#include <QString>
 #include <scx/Singleton.h>
+#include <QString>
 
-struct AppEnv
-{
-public:
-    bool Init();
-    void Save();
+struct AppEnv {
+ public:
+  bool Init();
+  void Save();
 
-public:
-    // path
-    QString configDir;
-    QString pluginDir;
-    QString resourceDir;
+ public:
+  // path
+  QString configDir;
+  QString pluginDir;
+  QString resourceDir;
 
-    QString configFile;
-    QString translationFile;
+  QString configFile;
+  QString translationFile;
 
-    // config
-    QString ifNotUtf8;
+  // config
+  QString ifNotUtf8;
 
-    // ui && status
-    QByteArray windowGeometry;
-    QByteArray windowState;
-    QByteArray tagEditorSplitterState;
-    int tabCount;
-    int tabIndex;
-    int volume;
+  // ui && status
+  QByteArray windowGeometry;
+  QByteArray windowState;
+  QByteArray tagEditorSplitterState;
+  int tabCount;
+  int tabIndex;
+  int volume;
 
-private:
-    void InitFilePath();
-    bool LoadConfig();
-    bool CheckDefaultConfig();
+ private:
+  void InitFilePath();
+  bool LoadConfig();
+  bool CheckDefaultConfig();
 };
 
 using GlobalAppEnv = scx::Singleton<AppEnv>;
 
-#endif // APPENV_H
+#endif  // APPENV_H

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unistd.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include <util/AudioMode.h>
 #include <util/ErrorCode.h>
 #include <util/Option.h>
@@ -26,7 +26,7 @@ static const mous::BaseOption** GetOptions(void* ptr);
 static const char** GetSuffixes(void* ptr);
 static const char** GetEncodings(void* ptr);
 
-static mous::DecoderInterface decoder_interface {
+static mous::DecoderInterface decoder_interface{
     Create,
     Destroy,
     Open,
@@ -44,11 +44,10 @@ static mous::DecoderInterface decoder_interface {
     GetDuration,
     GetOptions,
     GetSuffixes,
-    GetEncodings
-};
+    GetEncodings};
 
 extern "C" {
-    const mous::DecoderInterface* MousGetDecoderInterface() {
-        return &decoder_interface;
-    }
+const mous::DecoderInterface* MousGetDecoderInterface() {
+  return &decoder_interface;
+}
 }

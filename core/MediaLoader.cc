@@ -6,42 +6,34 @@
 namespace mous {
 
 MediaLoader::MediaLoader()
-    : impl(std::make_unique<Impl>())
-{
+    : impl(std::make_unique<Impl>()) {
 }
 
-MediaLoader::~MediaLoader()
-{
+MediaLoader::~MediaLoader() {
 }
 
-void MediaLoader::LoadSheetParserPlugin(const std::shared_ptr<Plugin>& plugin)
-{
-    return impl->LoadSheetParserPlugin(plugin);
+void MediaLoader::LoadSheetParserPlugin(const std::shared_ptr<Plugin>& plugin) {
+  return impl->LoadSheetParserPlugin(plugin);
 }
 
-void MediaLoader::LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin)
-{
-    return impl->LoadTagParserPlugin(plugin);
+void MediaLoader::LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin) {
+  return impl->LoadTagParserPlugin(plugin);
 }
 
-void MediaLoader::UnloadPlugin(const std::string& path)
-{
-    return impl->UnloadPlugin(path);
+void MediaLoader::UnloadPlugin(const std::string& path) {
+  return impl->UnloadPlugin(path);
 }
 
-void MediaLoader::UnloadPlugin()
-{
-    return impl->UnloadPlugin();
+void MediaLoader::UnloadPlugin() {
+  return impl->UnloadPlugin();
 }
 
-std::vector<std::string> MediaLoader::SupportedSuffixes() const
-{
-    return impl->SupportedSuffixes();
+std::vector<std::string> MediaLoader::SupportedSuffixes() const {
+  return impl->SupportedSuffixes();
 }
 
-ErrorCode MediaLoader::LoadMedia(const std::string& path, std::deque<MediaItem>& list) const
-{
-    return impl->LoadMedia(path, list);
+ErrorCode MediaLoader::LoadMedia(const std::string& path, std::deque<MediaItem>& list) const {
+  return impl->LoadMedia(path, list);
 }
 
-}
+}  // namespace mous

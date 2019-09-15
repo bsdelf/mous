@@ -1,54 +1,46 @@
 #include "FrmProgressBar.h"
-#include "ui_FrmProgressBar.h"
 #include <QDateTime>
+#include "ui_FrmProgressBar.h"
 
-FrmProgressBar::FrmProgressBar(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::FrmProgressBar)
-{
-    ui->setupUi(this);
+FrmProgressBar::FrmProgressBar(QWidget* parent)
+    : QWidget(parent),
+      ui(new Ui::FrmProgressBar) {
+  ui->setupUi(this);
 
-    connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(SlotBtnCancel()));
+  connect(ui->btnCancel, SIGNAL(clicked()), this, SLOT(SlotBtnCancel()));
 }
 
-FrmProgressBar::~FrmProgressBar()
-{
-    disconnect(ui->btnCancel, 0, this, 0);
+FrmProgressBar::~FrmProgressBar() {
+  disconnect(ui->btnCancel, 0, this, 0);
 
-    delete ui;
+  delete ui;
 }
 
-void FrmProgressBar::SetKey(void *_key)
-{
-    key = _key;
+void FrmProgressBar::SetKey(void* _key) {
+  key = _key;
 }
 
-void FrmProgressBar::SetFileName(const QString &fileName)
-{
-    ui->labelFileName->setText(fileName);
+void FrmProgressBar::SetFileName(const QString& fileName) {
+  ui->labelFileName->setText(fileName);
 }
 
-void FrmProgressBar::SetProgress(int progress)
-{
-    ui->barProgress->setValue(progress);
+void FrmProgressBar::SetProgress(int progress) {
+  ui->barProgress->setValue(progress);
 
-    UpdatePassedTime();
+  UpdatePassedTime();
 }
 
-void FrmProgressBar::SlotBtnCancel()
-{
-    emit SigCanceled(key);
+void FrmProgressBar::SlotBtnCancel() {
+  emit SigCanceled(key);
 }
 
-void FrmProgressBar::UpdatePassedTime()
-{
-    m_SpeedRecord.time[m_SpeedRecord.time[0] != -1 ? 1 : 0] = QDateTime::currentMSecsSinceEpoch();
-    qint64 passedSec = (m_SpeedRecord.time[1] - m_SpeedRecord.time[0]) / 1000;
-    if (m_SpeedRecord.time[1] > 0)
-        ui->labelTime->setText(QString("%1 : %2").arg(int(passedSec/60), 2, 10, QChar('0'))
-                               .arg(int(passedSec%60), 2, 10, QChar('0')));
+void FrmProgressBar::UpdatePassedTime() {
+  m_SpeedRecord.time[m_SpeedRecord.time[0] != -1 ? 1 : 0] = QDateTime::currentMSecsSinceEpoch();
+  qint64 passedSec = (m_SpeedRecord.time[1] - m_SpeedRecord.time[0]) / 1000;
+  if (m_SpeedRecord.time[1] > 0)
+    ui->labelTime->setText(QString("%1 : %2").arg(int(passedSec / 60), 2, 10, QChar('0')).arg(int(passedSec % 60), 2, 10, QChar('0')));
 
-    /* rest time estimate
+  /* rest time estimate
     m_SpeedRecord.time[m_SpeedRecord.time[0] != -1 ? 1 : 0] = QDateTime::currentMSecsSinceEpoch();
     m_SpeedRecord.progress[m_SpeedRecord.progress[0] != -1 ? 1 : 0] = ui->barProgress->value();
 

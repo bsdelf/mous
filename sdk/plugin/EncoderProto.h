@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unistd.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include <util/AudioMode.h>
 #include <util/ErrorCode.h>
 #include <util/Option.h>
@@ -20,7 +20,7 @@ static mous::ErrorCode Flush(void* ptr);
 static const mous::BaseOption** GetOptions(void* ptr);
 static const char* GetSuffix(void* ptr);
 
-static mous::EncoderInterface encoder_interface {
+static mous::EncoderInterface encoder_interface{
     Create,
     Destroy,
     SetChannels,
@@ -32,11 +32,10 @@ static mous::EncoderInterface encoder_interface {
     Encode,
     Flush,
     GetOptions,
-    GetSuffix
-};
+    GetSuffix};
 
 extern "C" {
-    const mous::EncoderInterface* MousGetEncoderInterface() {
-        return &encoder_interface;
-    }
+const mous::EncoderInterface* MousGetEncoderInterface() {
+  return &encoder_interface;
+}
 }

@@ -49,7 +49,7 @@ void Daemonize() {
   ::dup2(destfd, STDERR_FILENO);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   std::locale::global(std::locale(""));
 
   if (!GlobalAppEnv::Instance()->Init()) {

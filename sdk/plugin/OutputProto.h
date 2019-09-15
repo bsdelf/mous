@@ -14,7 +14,7 @@ static int GetVolume(void* ptr);
 static void SetVolume(void* ptr, int avg);
 static const mous::BaseOption** GetOptions(void* ptr);
 
-static const mous::OutputInterface output_interface {
+static const mous::OutputInterface output_interface{
     Create,
     Destroy,
     Open,
@@ -23,11 +23,10 @@ static const mous::OutputInterface output_interface {
     Write,
     GetVolume,
     SetVolume,
-    GetOptions
-};
+    GetOptions};
 
 extern "C" {
-    const mous::OutputInterface* MousGetOutputInterface() {
-        return &output_interface;
-    }
+const mous::OutputInterface* MousGetOutputInterface() {
+  return &output_interface;
+}
 }

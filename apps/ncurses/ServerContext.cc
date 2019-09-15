@@ -16,217 +16,202 @@ using namespace mous;
 
 const int VERSION = 1;
 
-ServerContext::ServerContext():
-    playlists(6),
-    usedPlaylist(-1),
-    selectedPlaylist(1),
-    selectedItem(6, 0)
-{
-    player.SigFinished()->Connect(&ServerContext::SlotFinished, this);
+ServerContext::ServerContext()
+    : playlists(6),
+      usedPlaylist(-1),
+      selectedPlaylist(1),
+      selectedItem(6, 0) {
+  player.SigFinished()->Connect(&ServerContext::SlotFinished, this);
 
-    SetPlayMode(PlaylistMode::Normal);
+  SetPlayMode(PlaylistMode::Normal);
 }
 
-ServerContext::~ServerContext()
-{
-    player.SigFinished()->Disconnect(this);
+ServerContext::~ServerContext() {
+  player.SigFinished()->Disconnect(this);
 
-    ClosePlayer();
+  ClosePlayer();
 }
 
-bool ServerContext::Init()
-{
-    bool hasDecoder = false;
-    bool hasOutput = false;
-    const auto env = GlobalAppEnv::Instance();
-    PluginFinder()
-        .OnPlugin(PluginType::FormatProbe, [this](const std::shared_ptr<Plugin>& plugin) {
-            player.LoadFormatProbePlugin(plugin);
-        })
-        .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
-            player.LoadDecoderPlugin(plugin);
-            hasDecoder = true;
-        })
-        .OnPlugin(PluginType::Output, [&, this](const std::shared_ptr<Plugin>& plugin) {
-            player.LoadOutputPlugin(plugin);
-            hasOutput = true;
-        })
-        .OnPlugin(PluginType::SheetParser, [this](const std::shared_ptr<Plugin>& plugin) {
-            loader.LoadSheetParserPlugin(plugin);
-        })
-        .OnPlugin(PluginType::TagParser, [this](const std::shared_ptr<Plugin>& plugin) {
-            loader.LoadTagParserPlugin(plugin);
-        })
-        .Run(env->pluginDir);
-    return hasDecoder && hasOutput;
+bool ServerContext::Init() {
+  bool hasDecoder = false;
+  bool hasOutput = false;
+  const auto env = GlobalAppEnv::Instance();
+  PluginFinder()
+      .OnPlugin(PluginType::FormatProbe, [this](const std::shared_ptr<Plugin>& plugin) {
+        player.LoadFormatProbePlugin(plugin);
+      })
+      .OnPlugin(PluginType::Decoder, [&, this](const std::shared_ptr<Plugin>& plugin) {
+        player.LoadDecoderPlugin(plugin);
+        hasDecoder = true;
+      })
+      .OnPlugin(PluginType::Output, [&, this](const std::shared_ptr<Plugin>& plugin) {
+        player.LoadOutputPlugin(plugin);
+        hasOutput = true;
+      })
+      .OnPlugin(PluginType::SheetParser, [this](const std::shared_ptr<Plugin>& plugin) {
+        loader.LoadSheetParserPlugin(plugin);
+      })
+      .OnPlugin(PluginType::TagParser, [this](const std::shared_ptr<Plugin>& plugin) {
+        loader.LoadTagParserPlugin(plugin);
+      })
+      .Run(env->pluginDir);
+  return hasDecoder && hasOutput;
 }
 
-void ServerContext::Cleanup()
-{
-    loader.UnloadPlugin();
-    player.UnloadPlugin();
+void ServerContext::Cleanup() {
+  loader.UnloadPlugin();
+  player.UnloadPlugin();
 }
 
-void ServerContext::Dump()
-{
-    typedef PlaylistSerializer<MediaItem> Serializer;
+void ServerContext::Dump() {
+  typedef PlaylistSerializer<MediaItem> Serializer;
 
-    const auto env = GlobalAppEnv::Instance();
+  const auto env = GlobalAppEnv::Instance();
 
-    // save context
-    BufObj buf(nullptr);
-    buf << (int)VERSION;
-    buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
-    buf << selectedItem;
+  // save context
+  BufObj buf(nullptr);
+  buf << (int)VERSION;
+  buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
+  buf << selectedItem;
 
-    vector<char> outbuf(buf.Offset());
+  vector<char> outbuf(buf.Offset());
 
-    buf.SetBuffer(outbuf.data());
-    buf << (int)VERSION;
-    buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
-    buf << selectedItem;
+  buf.SetBuffer(outbuf.data());
+  buf << (int)VERSION;
+  buf << (char)playMode << (int)usedPlaylist << (int)selectedPlaylist;
+  buf << selectedItem;
 
-    fstream outfile;
-    outfile.open(env->contextFile.c_str(), ios::binary | ios::out);
-    outfile.write(outbuf.data(), outbuf.size());
-    outfile.close();
-    
-    // save playlists
-    vector<char> nameBuf(env->playlistFile.size() + 2);
-    for (size_t i = 0; i < playlists.size(); ++i) {
-        snprintf(nameBuf.data(), nameBuf.size(), env->playlistFile.c_str(), i);
-        Serializer::Store(playlists[i], nameBuf.data());
-    }
+  fstream outfile;
+  outfile.open(env->contextFile.c_str(), ios::binary | ios::out);
+  outfile.write(outbuf.data(), outbuf.size());
+  outfile.close();
+
+  // save playlists
+  vector<char> nameBuf(env->playlistFile.size() + 2);
+  for (size_t i = 0; i < playlists.size(); ++i) {
+    snprintf(nameBuf.data(), nameBuf.size(), env->playlistFile.c_str(), i);
+    Serializer::Store(playlists[i], nameBuf.data());
+  }
 }
 
-void ServerContext::Restore()
-{
-    typedef PlaylistSerializer<MediaItem> Serializer;
+void ServerContext::Restore() {
+  typedef PlaylistSerializer<MediaItem> Serializer;
 
-    const auto env = GlobalAppEnv::Instance();
+  const auto env = GlobalAppEnv::Instance();
 
-    // load context
-    stringstream stream;
-    fstream infile;
-    infile.open(env->contextFile.c_str(), ios::binary | ios::in);
-    stream << infile.rdbuf();
-    infile.close();
+  // load context
+  stringstream stream;
+  fstream infile;
+  infile.open(env->contextFile.c_str(), ios::binary | ios::in);
+  stream << infile.rdbuf();
+  infile.close();
 
-    BufObj buf(const_cast<char*>(stream.str().data()));
+  BufObj buf(const_cast<char*>(stream.str().data()));
 
-    int version;
-    buf >> version;
-    if (version != VERSION)
-        return;
+  int version;
+  buf >> version;
+  if (version != VERSION)
+    return;
 
-    char mode;
-    int used;
-    int selected;
-    buf >> mode >> used >> selected;
-    buf.TakeArray(selectedItem);
+  char mode;
+  int used;
+  int selected;
+  buf >> mode >> used >> selected;
+  buf.TakeArray(selectedItem);
 
-    playMode = (PlaylistMode)mode;
-    usedPlaylist = used;
-    selectedPlaylist = selected;
+  playMode = (PlaylistMode)mode;
+  usedPlaylist = used;
+  selectedPlaylist = selected;
 
-    // load playlists
-    vector<char> nameBuf(env->playlistFile.size() + 2);
-    for (size_t i = 0; i < playlists.size(); ++i) {
-        snprintf(nameBuf.data(), nameBuf.size(), env->playlistFile.c_str(), i);
-        Serializer::Load(playlists[i], nameBuf.data());
-    }
+  // load playlists
+  vector<char> nameBuf(env->playlistFile.size() + 2);
+  for (size_t i = 0; i < playlists.size(); ++i) {
+    snprintf(nameBuf.data(), nameBuf.size(), env->playlistFile.c_str(), i);
+    Serializer::Load(playlists[i], nameBuf.data());
+  }
 }
 
-void ServerContext::NextPlayMode()
-{
-    int mode = static_cast<int>(playMode) + 1;
-    if (mode >= static_cast<int>(PlaylistMode::Top))
-        mode = static_cast<int>(PlaylistMode::Normal);
-    SetPlayMode(static_cast<PlaylistMode>(mode));
+void ServerContext::NextPlayMode() {
+  int mode = static_cast<int>(playMode) + 1;
+  if (mode >= static_cast<int>(PlaylistMode::Top))
+    mode = static_cast<int>(PlaylistMode::Normal);
+  SetPlayMode(static_cast<PlaylistMode>(mode));
 }
 
-bool ServerContext::PlayAt(int iList, int iItem)
-{
-    usedPlaylist = iList;
-    ServerContext::playlist_t& list = playlists[iList];
+bool ServerContext::PlayAt(int iList, int iItem) {
+  usedPlaylist = iList;
+  ServerContext::playlist_t& list = playlists[iList];
 
-    list.JumpTo(iItem);
-    const MediaItem& item = list.NextItem(0, false);
-    return PlayItem(item);
+  list.JumpTo(iItem);
+  const MediaItem& item = list.NextItem(0, false);
+  return PlayItem(item);
 }
 
-bool ServerContext::PlayNext(char direct)
-{
-    playlist_t& list = playlists[usedPlaylist];
-    if (list.HasNext(direct)) {
-        const MediaItem& item = list.NextItem(direct, true);
-        PlayItem(item);
-        sigPlayNextItem(item);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void ServerContext::PausePlayer()
-{
-    switch (player.Status()) {
-        case PlayerStatus::Playing:
-            player.Pause();
-            break;
-            
-        case PlayerStatus::Paused:
-            player.Resume();
-            break;
-
-        default:
-            break;
-    }
-}
-
-const MediaItem* ServerContext::ItemInPlaying() const
-{
-    const playlist_t& list = playlists[usedPlaylist];
-    return list.HasNext(0) ? &list.NextItem(0, false) : nullptr;
-}
-
-bool ServerContext::PlayItem(const MediaItem& item)
-{
-    ClosePlayer();
-
-    if (player.Open(item.url) != mous::ErrorCode::Ok)
-        return false;
-
-    if (item.hasRange)
-        player.Play(item.msBeg, item.msEnd);
-    else
-        player.Play();
-
+bool ServerContext::PlayNext(char direct) {
+  playlist_t& list = playlists[usedPlaylist];
+  if (list.HasNext(direct)) {
+    const MediaItem& item = list.NextItem(direct, true);
+    PlayItem(item);
+    sigPlayNextItem(item);
     return true;
+  } else {
+    return false;
+  }
 }
 
-void ServerContext::SetPlayMode(PlaylistMode mode)
-{
-    playMode = mode;
-    for (auto& list: playlists) {
-        list.SetMode(playMode);
-    }
+void ServerContext::PausePlayer() {
+  switch (player.Status()) {
+    case PlayerStatus::Playing:
+      player.Pause();
+      break;
+
+    case PlayerStatus::Paused:
+      player.Resume();
+      break;
+
+    default:
+      break;
+  }
 }
 
-void ServerContext::ClosePlayer()
-{
-    if (player.Status() != PlayerStatus::Closed)
-        player.Close();
+const MediaItem* ServerContext::ItemInPlaying() const {
+  const playlist_t& list = playlists[usedPlaylist];
+  return list.HasNext(0) ? &list.NextItem(0, false) : nullptr;
 }
 
-void ServerContext::SlotFinished()
-{
-    lock_guard<mutex> locker(mtx);
+bool ServerContext::PlayItem(const MediaItem& item) {
+  ClosePlayer();
 
-    playlist_t& list = playlists[usedPlaylist];
-    if (list.HasNext(1)) {
-        const MediaItem& item = list.NextItem(1, true);
-        PlayItem(item);
-        sigPlayNextItem(item);
-    }
+  if (player.Open(item.url) != mous::ErrorCode::Ok)
+    return false;
+
+  if (item.hasRange)
+    player.Play(item.msBeg, item.msEnd);
+  else
+    player.Play();
+
+  return true;
+}
+
+void ServerContext::SetPlayMode(PlaylistMode mode) {
+  playMode = mode;
+  for (auto& list : playlists) {
+    list.SetMode(playMode);
+  }
+}
+
+void ServerContext::ClosePlayer() {
+  if (player.Status() != PlayerStatus::Closed)
+    player.Close();
+}
+
+void ServerContext::SlotFinished() {
+  lock_guard<mutex> locker(mtx);
+
+  playlist_t& list = playlists[usedPlaylist];
+  if (list.HasNext(1)) {
+    const MediaItem& item = list.NextItem(1, true);
+    PlayItem(item);
+    sigPlayNextItem(item);
+  }
 }

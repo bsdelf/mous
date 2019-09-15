@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <deque>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <util/ErrorCode.h>
 #include <util/MediaItem.h>
@@ -11,24 +11,23 @@
 
 namespace mous {
 
-class MediaLoader
-{
-    class Impl;
+class MediaLoader {
+  class Impl;
 
-public:
-    MediaLoader();
-    ~MediaLoader();
+ public:
+  MediaLoader();
+  ~MediaLoader();
 
-    void LoadSheetParserPlugin(const std::shared_ptr<Plugin>& plugin);
-    void LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin);
-    void UnloadPlugin(const std::string& path);
-    void UnloadPlugin();
+  void LoadSheetParserPlugin(const std::shared_ptr<Plugin>& plugin);
+  void LoadTagParserPlugin(const std::shared_ptr<Plugin>& plugin);
+  void UnloadPlugin(const std::string& path);
+  void UnloadPlugin();
 
-    std::vector<std::string> SupportedSuffixes() const;
-    ErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const;
+  std::vector<std::string> SupportedSuffixes() const;
+  ErrorCode LoadMedia(const std::string& path, std::deque<MediaItem>& list) const;
 
-private:
-    std::unique_ptr<Impl> impl;
+ private:
+  std::unique_ptr<Impl> impl;
 };
 
-}
+}  // namespace mous

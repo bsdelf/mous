@@ -6,22 +6,20 @@ namespace Ui {
 class FrmToolBar;
 }
 
-class FrmToolBar : public QWidget
-{
-    Q_OBJECT
-    
-public:
-    explicit FrmToolBar(QWidget *parent = 0);
-    ~FrmToolBar();
-    
-    QToolButton* BtnPlay();
-    QToolButton* BtnNext();
-    QToolButton* BtnPrev();
+class FrmToolBar : public QWidget {
+  Q_OBJECT
 
-    QSlider* SliderVolume();
-    QSlider* SliderPlaying();
+ public:
+  explicit FrmToolBar(QWidget* parent = 0);
+  ~FrmToolBar();
 
-private:
-    Ui::FrmToolBar *ui;
+  QToolButton* BtnPlay();
+  QToolButton* BtnNext();
+  QToolButton* BtnPrev();
+
+  QSlider* SliderVolume();
+  QSlider* SliderPlaying();
+
+ private:
+  Ui::FrmToolBar* ui;
 };
-

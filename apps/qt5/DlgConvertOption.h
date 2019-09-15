@@ -5,39 +5,37 @@
 #include <vector>
 
 namespace Ui {
-    class DlgConvertOption;
+class DlgConvertOption;
 }
 
 namespace mous {
-    struct BaseOption;
-    struct GroupedOption;
-}
+struct BaseOption;
+struct GroupedOption;
+}  // namespace mous
 
-class DlgConvertOption : public QDialog
-{
-    Q_OBJECT
-    
-public:
-    explicit DlgConvertOption(QWidget *parent = 0);
-    ~DlgConvertOption();
+class DlgConvertOption : public QDialog {
+  Q_OBJECT
 
-    QString Dir() const;
-    void SetDir(const QString& dir);
-    QString FileName() const;
-    void SetFileName(const QString& name);
+ public:
+  explicit DlgConvertOption(QWidget* parent = 0);
+  ~DlgConvertOption();
 
-    void BindWidgetAndOption(const std::vector<const mous::BaseOption*>& opts);
+  QString Dir() const;
+  void SetDir(const QString& dir);
+  QString FileName() const;
+  void SetFileName(const QString& name);
 
-private:
-    void BuildWidgetAndOption(QBoxLayout* layout, const mous::BaseOption* option);
+  void BindWidgetAndOption(const std::vector<const mous::BaseOption*>& opts);
 
-private slots:
-    void SlotGroupChanged(int index);
-    void SlotIntValChanged(int val);
+ private:
+  void BuildWidgetAndOption(QBoxLayout* layout, const mous::BaseOption* option);
 
-private:
-    Ui::DlgConvertOption *ui;
-    QHash<QObject*, QPair<QStackedWidget*, const mous::GroupedOption*> > m_ComboxWidgetHash;
-    QHash<QObject*, const mous::BaseOption*> m_WidgetOptionHash;
+ private slots:
+  void SlotGroupChanged(int index);
+  void SlotIntValChanged(int val);
+
+ private:
+  Ui::DlgConvertOption* ui;
+  QHash<QObject*, QPair<QStackedWidget*, const mous::GroupedOption*> > m_ComboxWidgetHash;
+  QHash<QObject*, const mous::BaseOption*> m_WidgetOptionHash;
 };
-

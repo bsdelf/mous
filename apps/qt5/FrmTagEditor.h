@@ -2,9 +2,9 @@
 
 #include <QtWidgets>
 
-#include <util/MediaItem.h>
 #include <core/Player.h>
 #include <core/TagParserFactory.h>
+#include <util/MediaItem.h>
 using namespace mous;
 
 #include <string>
@@ -14,62 +14,60 @@ namespace Ui {
 class FrmTagEditor;
 }
 
-class FrmTagEditor : public QWidget
-{
-    Q_OBJECT
-    
-public:
-    explicit FrmTagEditor(QWidget *parent = 0);
-    ~FrmTagEditor();
+class FrmTagEditor : public QWidget {
+  Q_OBJECT
 
-    void SaveUiStatus();
-    void RestoreUiStatus();
+ public:
+  explicit FrmTagEditor(QWidget* parent = 0);
+  ~FrmTagEditor();
 
-    void SetPlayer(mous::Player* player);
-    void SetTagParserFactory(const mous::TagParserFactory* factory);
-    void WaitForLoadFinished();
-    void LoadMediaItem(const mous::MediaItem& item);
+  void SaveUiStatus();
+  void RestoreUiStatus();
 
-signals:
-    void SigMediaItemChanged(const MediaItem& item);
+  void SetPlayer(mous::Player* player);
+  void SetTagParserFactory(const mous::TagParserFactory* factory);
+  void WaitForLoadFinished();
+  void LoadMediaItem(const mous::MediaItem& item);
 
-private:   
-    void DoLoadFileTag(const std::string& fileName);
-    void ShowBottomBtns(bool show);
-    void UpdateTag();
-    void UpdateCoverArt();
+ signals:
+  void SigMediaItemChanged(const MediaItem& item);
 
-private:
-    void resizeEvent(QResizeEvent * event);
+ private:
+  void DoLoadFileTag(const std::string& fileName);
+  void ShowBottomBtns(bool show);
+  void UpdateTag();
+  void UpdateCoverArt();
 
-private slots:
-    void SlotBtnSave();
-    void SlotBtnCancel();
-    void SlotSplitterMoved(int pos, int index);
-    void SlotCellChanged(int row, int column);
-    void SlotHideLabelFailed();
+ private:
+  void resizeEvent(QResizeEvent* event);
 
-    void SlotSaveImageAs();
-    void SlotChangeCoverArt();
+ private slots:
+  void SlotBtnSave();
+  void SlotBtnCancel();
+  void SlotSplitterMoved(int pos, int index);
+  void SlotCellChanged(int row, int column);
+  void SlotHideLabelFailed();
 
-private:
-    Ui::FrmTagEditor *ui;
+  void SlotSaveImageAs();
+  void SlotChangeCoverArt();
 
-    mous::Player* m_Player;
-    const mous::TagParserFactory* m_ParserFactory;    
-    std::shared_ptr<mous::TagParser> m_CurrentParser;
-    mous::MediaItem m_CurrentItem;
+ private:
+  Ui::FrmTagEditor* ui;
 
-    QPixmap m_CurrentImage;
-    QLabel* m_LabelImage;
-    CoverFormat m_CurrentImgFmt;
-    vector<char> m_CurrentImgData;
-    QString m_OldImagePath;
+  mous::Player* m_Player;
+  const mous::TagParserFactory* m_ParserFactory;
+  std::shared_ptr<mous::TagParser> m_CurrentParser;
+  mous::MediaItem m_CurrentItem;
 
-    QSemaphore m_SemLoadFinished;
+  QPixmap m_CurrentImage;
+  QLabel* m_LabelImage;
+  CoverFormat m_CurrentImgFmt;
+  vector<char> m_CurrentImgData;
+  QString m_OldImagePath;
 
-    QSet<QPair<int, int> > m_UnsavedFields;
+  QSemaphore m_SemLoadFinished;
 
-    QTimer m_DelayTimer;
+  QSet<QPair<int, int> > m_UnsavedFields;
+
+  QTimer m_DelayTimer;
 };
-

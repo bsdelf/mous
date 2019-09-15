@@ -4,10 +4,10 @@
 
 namespace mous {
 
-enum class CoverFormat: uint32_t {
-    None = 0,
-    JPEG,
-    PNG,
+enum class CoverFormat : uint32_t {
+  None = 0,
+  JPEG,
+  PNG,
 };
 
 }

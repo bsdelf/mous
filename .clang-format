@@ -1,0 +1,7 @@
+BasedOnStyle: Chromium
+IncludeBlocks: Preserve
+ColumnLimit: 0
+MaxEmptyLinesToKeep: 1
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
