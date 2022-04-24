@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <strings.h>
 #include <vector>
 
 #include <fdk-aac/aacdecoder_lib.h>
