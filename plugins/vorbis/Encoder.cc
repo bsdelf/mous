@@ -16,7 +16,7 @@ namespace {
         int sample_rate = 0;
         int bits_per_sample = 0;
 
-        vorbis_info vorbis_info;
+        ::vorbis_info vorbis_info;
 
         const MediaTag* media_tag = nullptr;
     };
